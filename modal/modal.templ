@@ -1,0 +1,92 @@
+// Package modal renders Tabler (Bootstrap) modals. Opening and closing is Tabler's own JS
+// (data-bs-toggle="modal"); the kit ships no script of its own.
+package modal
+
+import "github.com/mind-vm/tablerkit/kit"
+
+type Size string
+
+const (
+	SizeDefault    Size = ""
+	SizeSmall      Size = "sm"
+	SizeLarge      Size = "lg"
+	SizeFullscreen Size = "fullscreen"
+)
+
+type Props struct {
+	ID         string // required: the trigger targets it
+	Class      string // on .modal
+	Attributes templ.Attributes
+	Title      string
+	// Header replaces the default header content (title) but keeps the close button.
+	Header     templ.Component
+	Size       Size
+	Centered   bool
+	Scrollable bool
+	Fade       bool            // animate (Tabler's .fade)
+	Footer     templ.Component // optional .modal-footer content
+	CloseLabel string          // aria-label of the close button; default kit.T(ctx).Close
+	// DialogClass adds classes to .modal-dialog (e.g. "modal-fullscreen-lg-down").
+	DialogClass string
+	// Form makes .modal-content a <form> with these attributes (method, action, …), so header, body and
+	// footer buttons belong to one form.
+	Form templ.Attributes
+}
+
+func dialogClasses(p Props) string {
+	s := ""
+	if p.Size != SizeDefault {
+		s = "modal-" + string(p.Size)
+	}
+	return kit.Classes("modal-dialog", s,
+		kit.If(p.Centered && p.Size != SizeFullscreen, "modal-dialog-centered"),
+		kit.If(p.Scrollable && p.Size != SizeFullscreen, "modal-dialog-scrollable"), p.DialogClass)
+}
+
+// TitleID is the id of the title element, for aria-labelledby.
+func TitleID(id string) string { return id + "-title" }
+
+// Trigger returns the attributes that make any button open the modal: spread them with { modal.Trigger(id)... }.
+func Trigger(id string) templ.Attributes {
+	return templ.Attributes{"data-bs-toggle": "modal", "data-bs-target": "#" + id, "aria-controls": id}
+}
+
+templ Modal(p Props) {
+	{{ p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close) }}
+	<div class={ kit.Classes("modal", kit.If(p.Fade, "fade"), p.Class) } id={ p.ID } tabindex="-1" aria-labelledby={ TitleID(p.ID) } aria-hidden="true" { p.Attributes... }>
+		<div class={ dialogClasses(p) }>
+			if p.Form != nil {
+				<form class="modal-content" { p.Form... }>
+					@inner(p) {
+						{ children... }
+					}
+				</form>
+			} else {
+				<div class="modal-content">
+					@inner(p) {
+						{ children... }
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ inner(p Props) {
+	<div class="modal-header">
+		if p.Header != nil {
+			@p.Header
+		} else {
+			<h2 class="modal-title" id={ TitleID(p.ID) }>{ p.Title }</h2>
+		}
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={ p.CloseLabel }></button>
+	</div>
+	<div class="modal-body">
+		{ children... }
+	</div>
+	if p.Footer != nil {
+		<div class="modal-footer">
+			@p.Footer
+		</div>
+	}
+}

@@ -1,0 +1,68 @@
+// Package card renders Tabler cards: Card, Header with Title and Actions, Body, Footer.
+package card
+
+import "github.com/mind-vm/tablerkit/kit"
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// Section renders <section> instead of <div>, for cards that form a page region.
+	Section bool
+}
+
+func attrs(p Props) templ.Attributes {
+	if p.ID == "" {
+		return p.Attributes
+	}
+	return kit.Default(kit.Attrs(p.Attributes), "id", p.ID)
+}
+
+templ Card(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Section {
+		<section class={ kit.Classes("card", p.Class) } { attrs(p)... }>
+			{ children... }
+		</section>
+	} else {
+		<div class={ kit.Classes("card", p.Class) } { attrs(p)... }>
+			{ children... }
+		</div>
+	}
+}
+
+templ Header(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("card-header", p.Class) } { attrs(p)... }>
+		{ children... }
+	</div>
+}
+
+templ Title(props ...Props) {
+	{{ p := kit.First(props) }}
+	<h3 class={ kit.Classes("card-title", p.Class) } { attrs(p)... }>
+		{ children... }
+	</h3>
+}
+
+// Actions sits at the right end of a Header.
+templ Actions(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("card-actions", p.Class) } { attrs(p)... }>
+		{ children... }
+	</div>
+}
+
+templ Body(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("card-body", p.Class) } { attrs(p)... }>
+		{ children... }
+	</div>
+}
+
+templ Footer(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("card-footer", p.Class) } { attrs(p)... }>
+		{ children... }
+	</div>
+}

@@ -1,0 +1,107 @@
+// Package button renders Tabler buttons (.btn) as <button> or, with Href, as <a>.
+package button
+
+import (
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+// Variant picks the Tabler color class. The zero value is Tabler's neutral button.
+type Variant string
+
+const (
+	VariantDefault   Variant = ""
+	VariantPrimary   Variant = "primary"
+	VariantSecondary Variant = "secondary"
+	VariantSuccess   Variant = "success"
+	VariantWarning   Variant = "warning"
+	VariantDanger    Variant = "danger"
+	VariantInfo      Variant = "info"
+	VariantGhost     Variant = "ghost-secondary"
+	VariantLink      Variant = "link"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+)
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	Variant    Variant
+	Outline    bool // btn-outline-<variant>
+	Size       Size
+	Href       string // renders <a>
+	Type       string // button type, default "submit" like a plain <button>
+	Disabled   bool
+	Icon       string // leading icon, e.g. "ti-plus"
+	IconOnly   bool   // square icon button (btn-icon); give it a Label
+	Label      string // aria-label and title, for icon-only buttons
+}
+
+// Classes returns the class string of a button, for styling other elements as one.
+func Classes(p Props) string {
+	v := ""
+	if p.Variant != VariantDefault {
+		if p.Outline {
+			v = "btn-outline-" + string(p.Variant)
+		} else {
+			v = "btn-" + string(p.Variant)
+		}
+	}
+	s := ""
+	if p.Size != SizeDefault {
+		s = "btn-" + string(p.Size)
+	}
+	return kit.Classes("btn", v, s, kit.If(p.IconOnly, "btn-icon"), kit.If(p.Disabled && p.Href != "", "disabled"), p.Class)
+}
+
+func attrs(p Props) templ.Attributes {
+	a := kit.Attrs(p.Attributes)
+	if p.ID != "" {
+		a = kit.Default(a, "id", p.ID)
+	}
+	if p.Label != "" {
+		a = kit.Default(a, "aria-label", p.Label)
+		a = kit.Default(a, "title", p.Label)
+	}
+	return a
+}
+
+templ Button(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Href != "" {
+		<a
+			href={ templ.URL(p.Href) }
+			class={ Classes(p) }
+			if p.Disabled {
+				aria-disabled="true"
+			}
+			{ attrs(p)... }
+		>
+			if p.Icon != "" {
+				@icon.Icon(p.Icon)
+			}
+			{ children... }
+		</a>
+	} else {
+		<button
+			if p.Type != "" {
+				type={ p.Type }
+			}
+			class={ Classes(p) }
+			disabled?={ p.Disabled }
+			{ attrs(p)... }
+		>
+			if p.Icon != "" {
+				@icon.Icon(p.Icon)
+			}
+			{ children... }
+		</button>
+	}
+}

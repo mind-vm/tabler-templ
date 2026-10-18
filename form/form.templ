@@ -1,0 +1,183 @@
+// Package form renders Tabler form controls: a Field (label, control, hint, error) and the controls
+// Input, Select and Textarea. Labels and controls are linked by ID when one is given.
+package form
+
+import "github.com/mind-vm/tablerkit/kit"
+
+type FieldProps struct {
+	Class      string // wrapper, default "mb-3"; pass "-" for none
+	Attributes templ.Attributes
+	Label      string
+	For        string // id of the control
+	Required   bool   // marks the label (Tabler's .required)
+	Hint       string
+	Error      string // shown below the control; mark the control Invalid as well
+}
+
+templ Field(p FieldProps) {
+	<div
+		if wrapper(p.Class) != "" {
+			class={ wrapper(p.Class) }
+		}
+		{ p.Attributes... }
+	>
+		if p.Label != "" {
+			<label
+				class={ kit.Classes("form-label", kit.If(p.Required, "required")) }
+				if p.For != "" {
+					for={ p.For }
+				}
+			>{ p.Label }</label>
+		}
+		{ children... }
+		if p.Error != "" {
+			<div class="invalid-feedback d-block">{ p.Error }</div>
+		}
+		if p.Hint != "" {
+			<div class="form-hint">{ p.Hint }</div>
+		}
+	</div>
+}
+
+func wrapper(c string) string {
+	switch c {
+	case "":
+		return "mb-3"
+	case "-":
+		return ""
+	}
+	return c
+}
+
+type InputProps struct {
+	ID          string
+	AriaLabel   string // for controls without a visible label
+	Class       string
+	Attributes  templ.Attributes
+	Name        string
+	Type        string // default "text"
+	Value       string
+	Placeholder string
+	Required    bool
+	Readonly    bool
+	Disabled    bool
+	Invalid     bool
+}
+
+func controlAttrs(id, name, placeholder string, a templ.Attributes, ariaLabel ...string) templ.Attributes {
+	a = kit.Attrs(a)
+	if len(ariaLabel) > 0 && ariaLabel[0] != "" {
+		a = kit.Default(a, "aria-label", ariaLabel[0])
+	}
+	if id != "" {
+		a = kit.Default(a, "id", id)
+	}
+	if name != "" {
+		a = kit.Default(a, "name", name)
+	}
+	if placeholder != "" {
+		a = kit.Default(a, "placeholder", placeholder)
+	}
+	return a
+}
+
+templ Input(p InputProps) {
+	<input
+		if p.Type != "" && p.Type != "text" {
+			type={ p.Type }
+		}
+		class={ kit.Classes("form-control", kit.If(p.Invalid, "is-invalid"), p.Class) }
+		value={ p.Value }
+		required?={ p.Required }
+		readonly?={ p.Readonly }
+		disabled?={ p.Disabled }
+		{ controlAttrs(p.ID, p.Name, p.Placeholder, p.Attributes, p.AriaLabel)... }
+	/>
+}
+
+type Option struct {
+	Value, Label string
+}
+
+type SelectProps struct {
+	ID         string
+	AriaLabel  string // for controls without a visible label
+	Class      string
+	Attributes templ.Attributes
+	Name       string
+	Options    []Option
+	Selected   string
+	Empty      string // first option with value "", e.g. "All"; empty = none
+	Required   bool
+	Disabled   bool
+	Invalid    bool
+}
+
+templ Select(p SelectProps) {
+	<select class={ kit.Classes("form-select", kit.If(p.Invalid, "is-invalid"), p.Class) } required?={ p.Required } disabled?={ p.Disabled } { controlAttrs(p.ID, p.Name, "", p.Attributes, p.AriaLabel)... }>
+		if p.Empty != "" {
+			<option value="">{ p.Empty }</option>
+		}
+		for _, o := range p.Options {
+			<option value={ o.Value } selected?={ o.Value == p.Selected }>{ o.Label }</option>
+		}
+	</select>
+}
+
+type TextareaProps struct {
+	ID          string
+	AriaLabel   string // for controls without a visible label
+	Class       string
+	Attributes  templ.Attributes
+	Name        string
+	Value       string
+	Rows        int
+	Placeholder string
+	Required    bool
+	Invalid     bool
+}
+
+templ Textarea(p TextareaProps) {
+	<textarea
+		class={ kit.Classes("form-control", kit.If(p.Invalid, "is-invalid"), p.Class) }
+		if p.Rows > 0 {
+			rows={ p.Rows }
+		}
+		required?={ p.Required }
+		{ controlAttrs(p.ID, p.Name, p.Placeholder, p.Attributes, p.AriaLabel)... }
+	>{ p.Value }</textarea>
+}
+
+type CheckProps struct {
+	ID         string
+	Class      string           // on the label
+	Attributes templ.Attributes // on the input
+	Name       string
+	Value      string
+	Label      string
+	Checked    bool
+	Disabled   bool
+	Radio      bool
+	Switch     bool // Tabler's .form-switch
+}
+
+// Check is a checkbox (or radio) with its label, Tabler's .form-check.
+templ Check(p CheckProps) {
+	<label class={ kit.Classes("form-check", kit.If(p.Switch, "form-switch"), p.Class) }>
+		<input
+			class="form-check-input"
+			if p.Radio {
+				type="radio"
+			} else {
+				type="checkbox"
+			}
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			checked?={ p.Checked }
+			disabled?={ p.Disabled }
+			{ controlAttrs(p.ID, p.Name, "", p.Attributes)... }
+		/>
+		<span class="form-check-label">{ p.Label }</span>
+	</label>
+}

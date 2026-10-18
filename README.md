@@ -1,0 +1,104 @@
+# tablerkit
+
+Server-rendered UI components for [Tabler](https://tabler.io) in Go, written with [templ](https://templ.guide).
+The API follows [shadcn-templ](https://github.com/axadrn/shadcn-templ): one package per component, a `Props`
+struct, `Class` and `Attributes` on every component, children via `{ children... }`. Unlike shadcn-templ it
+needs no Tailwind, no Node and no JavaScript of its own: components emit Tabler's classes and
+`data-bs-*` attributes, and Tabler's bundled script does the rest (modals, dropdowns, dismissible alerts).
+
+> Status: early (v0.x). The API may still change between minor versions until v1.
+
+```sh
+go get github.com/mind-vm/tablerkit@latest
+```
+
+## Use
+
+```go
+import (
+	"github.com/mind-vm/tablerkit/button"
+	"github.com/mind-vm/tablerkit/card"
+	"github.com/mind-vm/tablerkit/modal"
+)
+
+templ Customer(c Customer) {
+	@card.Card(card.Props{Section: true}) {
+		@card.Header() {
+			@card.Title() { Customer }
+			@card.Actions() {
+				@button.Button(button.Props{Size: button.SizeSmall, Icon: "ti-pencil", Type: "button",
+					Attributes: modal.Trigger("edit-customer")}) { Edit }
+			}
+		}
+		@card.Body() { { c.Name } }
+	}
+	@modal.Modal(modal.Props{ID: "edit-customer", Title: "Customer", Centered: true, Fade: true}) {
+		…form…
+	}
+}
+```
+
+The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont. The kit
+does not ship or link them: serve them yourself (embedded in your binary or from a CDN, as you prefer).
+
+## Components
+
+| Package | Components |
+|---|---|
+| `button` | `Button` (`<button>` or `<a>` with `Href`), variants, outline, sizes, leading icon, icon-only; `Classes(p)` |
+| `card` | `Card`, `Header`, `Title`, `Actions`, `Body`, `Footer` |
+| `modal` | `Modal` (sizes, centered, scrollable, custom header, footer, `<form>` as content); `Trigger(id)` attributes for any button |
+| `form` | `Field` (label, hint, error), `Input`, `Select`, `Textarea`, `Check` (checkbox, radio, switch); `AriaLabel` for controls without a visible label |
+| `table` | `Table` (optionally responsive, wrapper classes), `Empty` row |
+| `pagination` | `Pagination` with first/last/neighbour pages; `Numbers(page, pages)` |
+| `alert` | `Alert` (variant, icon, dismissible) |
+| `badge` | `Badge` (Tabler color, light) |
+| `icon` | `Icon("ti-…")` – full class name, so icon-font subsetters can find it in the source |
+| `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
+
+Not yet: dropdown, nav/sidebar, tabs, avatar, toast, datagrid, steps, offcanvas.
+
+## Conventions
+
+- Every component takes `Class` (appended) and `Attributes` (spread last; an attribute you pass wins over a
+  default, e.g. `title`, `id`, `type`).
+- Components with only optional props take `...Props`, so `@card.Body()` works; components with a required
+  prop (`modal.Modal`, `pagination.Pagination`, form controls) take `Props`.
+- templ keeps one space where the source has a line break between text and an element or `if` (HTML
+  whitespace normalisation; there is no `{{- -}}`-style trim, see a-h/templ#1205). Where that matters
+  (punctuation), put the punctuation right after the element on the same line, build the sentence in
+  Go, or write an intended space as `{ " " }`.
+- Generated `*_templ.go` files are committed, so the module works with a plain `go get`.
+
+## Theming
+
+The kit never hardcodes colors, radii or fonts. All appearance comes from CSS:
+
+1. **Tabler's custom properties.** Override `--tblr-primary`, `--tblr-border-radius`, `--tblr-body-bg`,
+   `--tblr-font-sans-serif` … in your own stylesheet loaded after Tabler. This restyles every component.
+2. **Dark mode.** Tabler's `data-bs-theme="dark"` on `<html>` or any container.
+3. **Your own classes.** `Class` on any component (e.g. `card.Card(card.Props{Class: "island"})`) for app
+   specific looks, styled in your CSS.
+
+## Texts and languages
+
+The kit renders only a few texts itself (aria-labels such as "Close", "Previous page"). Set them once per
+request; props still override them per call:
+
+```go
+ctx = kit.WithMessages(r.Context(), kit.German) // or your own kit.Messages{…}
+```
+
+There are no translation files in the kit. An app with several languages picks the `Messages` for the
+request's language (and translates its own texts with whatever it uses, e.g. go-i18n).
+
+## Develop
+
+```sh
+go tool templ generate   # after editing .templ files (templ is a Go tool dependency)
+go test ./...
+```
+
+## License
+
+MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module.

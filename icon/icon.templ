@@ -1,0 +1,22 @@
+// Package icon renders a Tabler icon from the webfont (tabler-icons).
+package icon
+
+import "github.com/mind-vm/tablerkit/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	// Label makes the icon meaningful for screen readers; without it the icon is decorative (aria-hidden).
+	Label string
+}
+
+// Icon takes the full class name ("ti-pencil", not "pencil") so that build tools which subset the
+// icon font can find every icon by scanning for "ti-…" in the source.
+templ Icon(name string, props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Label != "" {
+		<i class={ kit.Classes("ti", name, p.Class) } role="img" aria-label={ p.Label } { p.Attributes... }></i>
+	} else {
+		<i class={ kit.Classes("ti", name, p.Class) } aria-hidden="true" { p.Attributes... }></i>
+	}
+}

@@ -1,0 +1,72 @@
+// Package pagination renders Tabler's .pagination with first, last and neighbouring pages.
+package pagination
+
+import (
+	"context"
+	"strconv"
+
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Page       int                   // current page, 1-based
+	Pages      int                   // total pages
+	Href       func(page int) string // link to a page
+	Label      string                // aria-labels; default kit.T(ctx)
+	PrevLabel  string
+	NextLabel  string
+}
+
+// Numbers lists the first, the last and the current page with its neighbours; 0 marks a gap ("…").
+func Numbers(page, pages int) []int {
+	var zs []int
+	for i := 1; i <= pages; i++ {
+		if i == 1 || i == pages || (i >= page-1 && i <= page+1) {
+			zs = append(zs, i)
+		} else if len(zs) > 0 && zs[len(zs)-1] != 0 {
+			zs = append(zs, 0)
+		}
+	}
+	return zs
+}
+
+func defaults(ctx context.Context, p Props) Props {
+	m := kit.T(ctx)
+	p.Label = kit.Or(p.Label, m.Pages)
+	p.PrevLabel = kit.Or(p.PrevLabel, m.PrevPage)
+	p.NextLabel = kit.Or(p.NextLabel, m.NextPage)
+	return p
+}
+
+// Pagination renders nothing for a single page.
+templ Pagination(p Props) {
+	{{ p = defaults(ctx, p) }}
+	if p.Pages > 1 {
+		<nav aria-label={ p.Label } { p.Attributes... }>
+			<ul class={ kit.Classes("pagination", p.Class) }>
+				<li class={ kit.Classes("page-item", kit.If(p.Page <= 1, "disabled")) }>
+					<a class="page-link" href={ templ.URL(p.Href(p.Page - 1)) } aria-label={ p.PrevLabel }>
+						@icon.Icon("ti-chevron-left")
+					</a>
+				</li>
+				for _, n := range Numbers(p.Page, p.Pages) {
+					if n == 0 {
+						<li class="page-item disabled"><span class="page-link">…</span></li>
+					} else if n == p.Page {
+						<li class="page-item active"><a class="page-link" href={ templ.URL(p.Href(n)) } aria-current="page">{ strconv.Itoa(n) }</a></li>
+					} else {
+						<li class="page-item"><a class="page-link" href={ templ.URL(p.Href(n)) }>{ strconv.Itoa(n) }</a></li>
+					}
+				}
+				<li class={ kit.Classes("page-item", kit.If(p.Page >= p.Pages, "disabled")) }>
+					<a class="page-link" href={ templ.URL(p.Href(p.Page + 1)) } aria-label={ p.NextLabel }>
+						@icon.Icon("ti-chevron-right")
+					</a>
+				</li>
+			</ul>
+		</nav>
+	}
+}

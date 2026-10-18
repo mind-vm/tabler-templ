@@ -1,0 +1,31 @@
+// Package badge renders Tabler badges.
+package badge
+
+import "github.com/mind-vm/tablerkit/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	// Color is a Tabler color name ("blue", "green", "red", …) or theme color ("primary", …).
+	Color string
+	// Light uses the soft "-lt" background with colored text.
+	Light bool
+}
+
+func Classes(p Props) string {
+	c := ""
+	if p.Color != "" {
+		c = "bg-" + p.Color + kit.If(p.Light, "-lt")
+		if !p.Light {
+			c += " text-" + p.Color + "-fg"
+		}
+	}
+	return kit.Classes("badge", c, p.Class)
+}
+
+templ Badge(props ...Props) {
+	{{ p := kit.First(props) }}
+	<span class={ Classes(p) } { p.Attributes... }>
+		{ children... }
+	</span>
+}

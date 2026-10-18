@@ -1,0 +1,52 @@
+// Package alert renders Tabler alerts.
+package alert
+
+import (
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+type Variant string
+
+const (
+	VariantInfo    Variant = "info"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
+	VariantDanger  Variant = "danger"
+)
+
+type Props struct {
+	Class       string
+	Attributes  templ.Attributes
+	Variant     Variant // default info
+	Icon        string  // e.g. "ti-alert-triangle"; empty = no icon
+	Dismissible bool
+	CloseLabel  string // aria-label of the close button; default kit.T(ctx).Close
+}
+
+templ Alert(props ...Props) {
+	{{ p := kit.First(props) }}
+	{{
+		if p.Variant == "" {
+			p.Variant = VariantInfo
+		}
+		p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close)
+	}}
+	<div class={ kit.Classes("alert", "alert-"+string(p.Variant), kit.If(p.Dismissible, "alert-dismissible"), p.Class) } role="alert" { p.Attributes... }>
+		if p.Icon != "" {
+			<div class="d-flex">
+				<div>
+					@icon.Icon(p.Icon, icon.Props{Class: "me-2"})
+				</div>
+				<div>
+					{ children... }
+				</div>
+			</div>
+		} else {
+			{ children... }
+		}
+		if p.Dismissible {
+			<a class="btn-close" data-bs-dismiss="alert" aria-label={ p.CloseLabel }></a>
+		}
+	</div>
+}

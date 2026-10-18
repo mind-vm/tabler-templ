@@ -1,0 +1,41 @@
+// Package table renders Tabler tables, optionally inside .table-responsive.
+package table
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+type Props struct {
+	Class      string // e.g. "card-table table-vcenter"
+	Attributes templ.Attributes
+	Responsive bool   // wrap in .table-responsive
+	Wrapper    string // classes on the .table-responsive wrapper, e.g. "mt-2"
+}
+
+templ Table(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Responsive {
+		<div class={ kit.Classes("table-responsive", p.Wrapper) }>
+			@table(p) {
+				{ children... }
+			}
+		</div>
+	} else {
+		@table(p) {
+			{ children... }
+		}
+	}
+}
+
+templ table(p Props) {
+	<table class={ kit.Classes("table", p.Class) } { p.Attributes... }>
+		{ children... }
+	</table>
+}
+
+// Empty is the single row of an empty table body.
+templ Empty(colspan int, text string) {
+	<tr><td colspan={ strconv.Itoa(colspan) } class="text-secondary">{ text }</td></tr>
+}
