@@ -61,7 +61,7 @@ const css = `:root{--kit-sidebar-width:15rem;--kit-sidebar-width-collapsed:3.75r
 .kit-sidebar[data-collapsed] .kit-sidebar-link{position:relative}
 .kit-sidebar[data-collapsed] .kit-sidebar-badge{position:absolute;top:.25rem;right:.25rem;min-width:0;width:.5rem;height:.5rem;padding:0;font-size:0;background:var(--tblr-red)!important}
 }
-@media (max-width:991.98px){.kit-sidebar{--tblr-offcanvas-width:17rem}.kit-sidebar-inner{border-right:0}}
+@media (max-width:991.98px){.kit-sidebar.offcanvas-lg{--tblr-offcanvas-width:17rem}.kit-sidebar-inner{border-right:0}}
 @media print{.kit-sidebar{display:none!important}.kit-sidebar~.page-wrapper{margin-left:0!important}}`
 
 // script toggles the desktop state, keeps the tooltips (title) of collapsed links and writes the cookie.

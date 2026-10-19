@@ -59,6 +59,38 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 
 Not yet: dropdown, tabs, avatar, toast, datagrid, steps.
 
+## Blocks
+
+Components are small and know nothing about the app. Blocks are bigger pieces built from them, the
+way [shadcn/ui](https://ui.shadcn.com/blocks) separates the two: a whole page frame or a whole list
+page, so a new app starts with the parts every app needs. Like components they are packages with
+props; what differs per app goes into slots (`templ.Component` props) or the children.
+
+| Package | Block |
+|---|---|
+| `blocks/shell` | `Page`: the HTML document with sidebar, sticky header (sidebar buttons, breadcrumbs, actions), page header (heading, extra, subtitle, actions), flash message and content; `Header`, `Breadcrumbs`, `PageHeader`, `Styles` for own frames |
+| `blocks/listpage` | `New(r, Config, filters…)` reads search, filters and page from the URL; `Paginate` cuts out a page (25 rows); `Card` = `Search` (search field, filter selects, Reset) + children + `Footer` ("1–25 of 80" and page numbers) |
+
+```go
+func customers(w http.ResponseWriter, r *http.Request) {
+	l := listpage.New(r, listpage.Config{Placeholder: "Name, city …"})
+	rows := listpage.Paginate(l, allCustomers(), func(c Customer) bool { return listpage.Contains(l.Query, c.Name, c.City) })
+	customersPage(r, l, rows).Render(r.Context(), w)
+}
+
+templ customersPage(r *http.Request, l *listpage.List, rows []Customer) {
+	@shell.Page(shell.Props{Title: "Customers", AppName: "Acme", Head: head(), Scripts: scripts(),
+		Sidebar: nav(r), Collapsed: sidebar.Collapsed(r), Breadcrumbs: []shell.Crumb{{Text: "Customers"}}}) {
+		@listpage.Card(l) {
+			@table.Table() { … rows … }
+		}
+	}
+}
+```
+
+`shell.Page` renders the kit's CSS before `Head`, so the app's theme overrides it, and the sidebar
+script after `Scripts`. Texts come from `kit.Messages` (Search, Reset, "of", Breadcrumbs …).
+
 ### Sidebar
 
 Tabler has no sidebar that collapses to icons, so `sidebar` is the one package with CSS and script of its

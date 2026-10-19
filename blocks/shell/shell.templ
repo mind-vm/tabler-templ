@@ -1,0 +1,201 @@
+// Package shell is the page frame of an app: the HTML document with the sidebar (tablerkit/sidebar),
+// a sticky header with the sidebar's buttons, breadcrumbs and actions, the page header (title, extra,
+// subtitle, actions), an optional flash message and the content (the children).
+//
+// The app brings Tabler itself: its stylesheets go into Head, its script into Scripts. The shell adds
+// the kit's own CSS before Head (so the app's theme can override it) and the sidebar script after Scripts.
+//
+//	@shell.Page(shell.Props{
+//		Lang: "en", Title: "Customers", AppName: "Acme",
+//		Head:    myHead(),    // <link rel="stylesheet" href="/static/tabler.min.css"> …
+//		Scripts: myScripts(), // <script src="/static/tabler.min.js"></script> …
+//		Sidebar: mySidebar(), Collapsed: sidebar.Collapsed(r),
+//		Breadcrumbs: []shell.Crumb{{Text: "Work"}, {Text: "Customers"}},
+//		Actions: newCustomerButton(),
+//	}) {
+//		@listpage.Card(l) { … }
+//	}
+package shell
+
+import (
+	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/blocks/listpage"
+	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tablerkit/sidebar"
+)
+
+// Crumb is one step of the breadcrumbs; the last one is the current page, a crumb without Href is text.
+type Crumb struct {
+	Text string
+	Href string
+}
+
+// Flash is a message after an action, shown above the content and dismissible.
+type Flash struct {
+	Variant alert.Variant
+	Icon    string // "ti-…"; empty = none
+	Text    string
+}
+
+type Props struct {
+	Lang    string // <html lang>, default "en"
+	Title   string // <title>Title · AppName</title> and, unless Heading is set, the page heading
+	AppName string
+	Head    templ.Component // stylesheets and meta tags of the app (Tabler, icons, theme …)
+	Scripts templ.Component // end of <body>: Tabler's script and the app's
+	// BodyAttributes are set on <body>, e.g. data-area for a section of the app.
+	BodyAttributes templ.Attributes
+
+	// Sidebar is usually a sidebar.Sidebar with ID SidebarID; nil renders the page without (e.g. sign-in).
+	Sidebar   templ.Component
+	SidebarID string // default "sidebar"
+	Collapsed bool   // the sidebar's desktop state, for its toggle button (sidebar.Collapsed(r))
+	// Brand stands in the header when there is no sidebar.
+	Brand templ.Component
+
+	Breadcrumbs   []Crumb
+	HeaderActions templ.Component // right side of the header
+
+	Heading      string          // page heading, default Title
+	HeadingExtra templ.Component // right after the heading, e.g. a status badge
+	Subtitle     templ.Component // below the heading
+	Actions      templ.Component // buttons on the right of the page header
+	Flash        *Flash
+}
+
+func title(p Props) string {
+	if p.AppName == "" {
+		return p.Title
+	}
+	if p.Title == "" {
+		return p.AppName
+	}
+	return p.Title + " · " + p.AppName
+}
+
+templ Page(p Props) {
+	{{ p.SidebarID = kit.Or(p.SidebarID, "sidebar") }}
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ title(p) }</title>
+			@Styles()
+			if p.Head != nil {
+				@p.Head
+			}
+		</head>
+		<body { p.BodyAttributes... }>
+			<div class="page">
+				if p.Sidebar != nil {
+					@p.Sidebar
+				}
+				<div class="page-wrapper">
+					@Header(p)
+					@PageHeader(p)
+					<div class="page-body">
+						<div class="container-xl">
+							if f := p.Flash; f != nil {
+								@alert.Alert(alert.Props{Variant: f.Variant, Icon: f.Icon, Dismissible: true}) {
+									{ f.Text }
+								}
+							}
+							{ children... }
+						</div>
+					</div>
+				</div>
+			</div>
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+			if p.Sidebar != nil {
+				@sidebar.Script()
+			}
+		</body>
+	</html>
+}
+
+// Header is the sticky bar at the top: sidebar buttons and breadcrumbs, or the brand without a sidebar.
+templ Header(p Props) {
+	<header class="kit-shell-header d-print-none">
+		if p.Sidebar != nil {
+			@sidebar.Trigger(sidebar.TriggerProps{Target: kit.Or(p.SidebarID, "sidebar"), Collapsed: p.Collapsed})
+		} else if p.Brand != nil {
+			@p.Brand
+		}
+		if len(p.Breadcrumbs) > 0 {
+			@Breadcrumbs(p.Breadcrumbs)
+		}
+		if p.HeaderActions != nil {
+			<div class="kit-shell-actions">
+				@p.HeaderActions
+			</div>
+		}
+	</header>
+}
+
+// Breadcrumbs renders Tabler's .breadcrumb; on small screens only the current page is left.
+templ Breadcrumbs(cs []Crumb) {
+	<nav class="kit-shell-breadcrumbs" aria-label={ kit.T(ctx).Breadcrumbs }>
+		<ol class="breadcrumb">
+			for i, c := range cs {
+				if i == len(cs)-1 {
+					<li class="breadcrumb-item active" aria-current="page">{ c.Text }</li>
+				} else if c.Href != "" {
+					<li class="breadcrumb-item"><a href={ templ.URL(c.Href) }>{ c.Text }</a></li>
+				} else {
+					<li class="breadcrumb-item">{ c.Text }</li>
+				}
+			}
+		</ol>
+	</nav>
+}
+
+// PageHeader is Tabler's .page-header: heading with extra, subtitle and actions.
+templ PageHeader(p Props) {
+	<div class="page-header d-print-none">
+		<div class="container-xl">
+			<div class="kit-shell-page-header">
+				<div class="min-w-0">
+					<div class="kit-shell-heading">
+						<h2 class="page-title">{ kit.Or(p.Heading, p.Title) }</h2>
+						if p.HeadingExtra != nil {
+							@p.HeadingExtra
+						}
+					</div>
+					if p.Subtitle != nil {
+						<div class="kit-shell-subtitle">
+							@p.Subtitle
+						</div>
+					}
+				</div>
+				if p.Actions != nil {
+					<div class="btn-list">
+						@p.Actions
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Styles is the CSS of the shell and of the blocks and components it builds on (sidebar, list page).
+// Page includes it; render it yourself only when you build your own frame.
+templ Styles() {
+	@sidebar.Styles()
+	@listpage.Styles()
+	@templ.Raw("<style>" + css + "</style>")
+}
+
+const css = `.kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
+.kit-shell-breadcrumbs{min-width:0}
+.kit-shell-header .breadcrumb{flex-wrap:nowrap;margin:0}
+.kit-shell-header .breadcrumb-item{white-space:nowrap}
+.kit-shell-header .breadcrumb-item.active{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:var(--tblr-body-color)}
+.kit-shell-actions{display:flex;align-items:center;gap:.5rem;margin-left:auto}
+.kit-shell-page-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:.75rem}
+.kit-shell-heading{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.kit-shell-subtitle{margin-top:.375rem;color:var(--tblr-secondary)}
+@media (max-width:767.98px){.kit-shell-header{padding:.5rem 1rem}.kit-shell-header .breadcrumb-item:not(.active){display:none}.kit-shell-header .breadcrumb-item.active::before{display:none}}
+@media print{.kit-shell-header{display:none!important}}`
