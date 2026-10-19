@@ -3,7 +3,7 @@
 Server-rendered UI components for [Tabler](https://tabler.io) in Go, written with [templ](https://templ.guide).
 The API follows [shadcn-templ](https://github.com/axadrn/shadcn-templ): one package per component, a `Props`
 struct, `Class` and `Attributes` on every component, children via `{ children... }`. Unlike shadcn-templ it
-needs no Tailwind, no Node and (except for the sidebar) no JavaScript of its own: components emit Tabler's classes and
+needs no Tailwind, no Node and (except for the sidebar and the detail dialogs) no JavaScript of its own: components emit Tabler's classes and
 `data-bs-*` attributes, and Tabler's bundled script does the rest (modals, dropdowns, dismissible alerts).
 
 > Status: early (v0.x). The API may still change between minor versions until v1.
@@ -70,6 +70,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 |---|---|
 | `blocks/shell` | `Page`: the HTML document with sidebar, sticky header (sidebar buttons, breadcrumbs, actions), page header (heading, extra, subtitle, actions), flash message and content; `Header`, `Breadcrumbs`, `PageHeader`, `Styles` for own frames |
 | `blocks/listpage` | `New(r, Config, filters…)` reads search, filters and page from the URL; `Paginate` cuts out a page (25 rows); `Card` = `Search` (search field, filter selects, Reset) + children + `Footer` ("1–25 of 80" and page numbers) |
+| `blocks/detail` | `Section` (card with title, extra and at most one action), `Actions`, `EditButton`, `Fields`/`Field`; `Dialog` (a section's edit dialog: context line, error, `Section` hint, `Large` for lists) and `Script(ScriptConfig)`: hidden fields in its forms, footer with Cancel, focus, reopening with error and values after a failed save, reopening a large dialog after saving a row, values from the opening button; `window.kitDialog.open/matchForm` |
 
 ```go
 func customers(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +90,12 @@ templ customersPage(r *http.Request, l *listpage.List, rows []Customer) {
 ```
 
 `shell.Page` renders the kit's CSS before `Head`, so the app's theme overrides it, and the sidebar
-script after `Scripts`. Texts come from `kit.Messages` (Search, Reset, "of", Breadcrumbs …).
+script after `Scripts`. Texts come from `kit.Messages` (Search, Reset, "of", Breadcrumbs, Edit, Cancel …).
+
+The detail script is the kit's second script (after the sidebar's). The server and the script exchange
+the dialog's state after a failed save: the page sets a global variable (default `kitDialogState`) to
+`{"id": …, "error": …, "values": {field: [values]}}`, and the forms carry hidden fields with the dialog's
+ID and the page to return to. `ScriptConfig` renames all of them for apps that already have their own.
 
 ### Sidebar
 

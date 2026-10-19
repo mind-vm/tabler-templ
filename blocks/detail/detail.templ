@@ -1,0 +1,160 @@
+// Package detail is a block for detail pages made of sections: each section shows its content read-only
+// and has at most one action at the top right, usually Edit. Edit opens a dialog with only that
+// section's fields. When saving fails, the server renders the page again with the dialog's state (error
+// and the values entered) and the script reopens the dialog with them.
+//
+//	@detail.Section(detail.SectionProps{Title: "Customer", Action: detail.EditButton(detail.EditButtonProps{Dialog: "dialog-customer"})}) {
+//		@card.Body() {
+//			@detail.Fields() {
+//				@detail.Field("Name", c.Name, "–")
+//			}
+//		}
+//	}
+//	@detail.Dialog(detail.DialogProps{ID: "dialog-customer", Title: "Customer", Section: true, Error: state.Error(…)}) {
+//		<form method="post" action="/customers/1"> … <div><button class="btn btn-primary">Save</button></div> </form>
+//	}
+//	…
+//	@detail.Script(detail.ScriptConfig{})   // after Tabler's script
+package detail
+
+import (
+	"github.com/mind-vm/tablerkit/button"
+	"github.com/mind-vm/tablerkit/card"
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tablerkit/modal"
+)
+
+type SectionProps struct {
+	Title      string
+	Extra      string          // small after the title, e.g. a count
+	Action     templ.Component // at most one action, usually EditButton; a group goes into Actions
+	Class      string          // on the card, e.g. "h-100"
+	HeadClass  string          // on the head, e.g. "flex-wrap"
+	Attributes templ.Attributes
+}
+
+// Section is a card with a head (title, extra, action) and the children as content. Without title and
+// action there is no head (a section used as a frame).
+templ Section(p SectionProps) {
+	@card.Card(card.Props{Section: true, Class: kit.Classes("kit-section", p.Class), Attributes: p.Attributes}) {
+		if p.Title != "" || p.Action != nil {
+			<div class={ kit.Classes("kit-section-head", p.HeadClass) }>
+				<h3 class="kit-section-title">
+					if p.Extra != "" {
+						{ p.Title } <small>{ p.Extra }</small>
+					} else {
+						{ p.Title }
+					}
+				</h3>
+				if p.Action != nil {
+					@p.Action
+				}
+			</div>
+		}
+		{ children... }
+	}
+}
+
+// Actions groups several actions in a section head.
+templ Actions() {
+	<div class="kit-section-actions">
+		{ children... }
+	</div>
+}
+
+type EditButtonProps struct {
+	Dialog string // the dialog's ID
+	Label  string // default kit.T(ctx).Edit
+	Icon   string // default "ti-pencil"
+	Class  string
+}
+
+// EditButton opens a section's dialog. In a narrow section only the icon is left; the label stays in
+// the tooltip and for screen readers.
+templ EditButton(p EditButtonProps) {
+	{{ label := kit.Or(p.Label, kit.T(ctx).Edit) }}
+	@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Class: kit.Classes("kit-section-action", p.Class), Icon: kit.Or(p.Icon, "ti-pencil"),
+		Attributes: kit.Attrs(modal.Trigger(p.Dialog), templ.Attributes{"title": label})}) {
+		<span class="kit-section-action-text">{ label }</span>
+	}
+}
+
+type FieldsProps struct {
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Fields is a definition list of label and value pairs.
+templ Fields(props ...FieldsProps) {
+	{{ p := kit.First(props) }}
+	<dl class={ kit.Classes("kit-fields", p.Class) } { p.Attributes... }>
+		{ children... }
+	</dl>
+}
+
+// Field is one pair of Fields; an empty value shows empty (e.g. "–") muted.
+templ Field(label, value, empty string) {
+	<dt>{ label }</dt>
+	if value != "" {
+		<dd>{ value }</dd>
+	} else {
+		<dd class="kit-field-empty">{ empty }</dd>
+	}
+}
+
+type DialogProps struct {
+	ID      string // required; the EditButton targets it
+	Title   string
+	Tooltip string // title attribute of the heading, e.g. the full title when Title is shortened
+	Context string // small line above the title, e.g. "C-1001 · Acme Ltd"
+	// Section: the dialog edits one section; the footer says that only this section is saved.
+	Section bool
+	// Large: over the whole page, for lists with one form per row; it opens again after saving a row.
+	Large bool
+	// Error from the last attempt to save, shown on top; ErrorVariant default "danger".
+	Error        string
+	ErrorVariant string
+	Class        string
+	Attributes   templ.Attributes
+}
+
+// Dialog is a section's edit dialog (a Tabler modal). The script turns the last row of buttons of its
+// only form into the footer with Cancel, and reopens it after a failed save.
+templ Dialog(p DialogProps) {
+	{{
+		mp := modal.Props{ID: p.ID, Fade: true, Class: kit.Classes("kit-dialog", kit.If(p.Large, "kit-dialog-large"), p.Class),
+			Header: dialogHeader(p), Centered: true, Scrollable: true,
+			Attributes: kit.Attrs(templ.Attributes{"data-kit-dialog": true}, p.Attributes)}
+		if p.Large {
+			mp.Size = modal.SizeFullscreen
+		}
+		if p.Section {
+			mp.Attributes = kit.Attrs(mp.Attributes, templ.Attributes{"data-kit-section": true})
+		}
+	}}
+	@modal.Modal(mp) {
+		if p.Error != "" {
+			<div class={ "alert kit-dialog-error alert-" + kit.Or(p.ErrorVariant, "danger") } role="alert">
+				@icon.Icon("ti-alert-triangle", icon.Props{Class: "me-2"})
+				{ p.Error }
+			</div>
+		}
+		{ children... }
+	}
+}
+
+templ dialogHeader(p DialogProps) {
+	<div class="min-w-0">
+		if p.Context != "" {
+			<div class="kit-dialog-context">{ p.Context }</div>
+		}
+		<h2
+			class="modal-title"
+			id={ modal.TitleID(p.ID) }
+			if p.Tooltip != "" {
+				title={ p.Tooltip }
+			}
+		>{ p.Title }</h2>
+	</div>
+}
