@@ -17,6 +17,7 @@ import (
 	"github.com/mind-vm/tablerkit/blocks/history"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/blocks/shell"
+	"github.com/mind-vm/tablerkit/blocks/signin"
 	"github.com/mind-vm/tablerkit/kit"
 )
 
@@ -208,4 +209,38 @@ func TestHistory(t *testing.T) {
 	assert.Contains(t, h, `<div>angelegt</div>`)
 	assert.Contains(t, render(t, ctx, history.Timeline(nil)), `<li class="kit-history-empty">Keine Einträge.</li>`)
 	assert.Contains(t, render(t, ctx, history.Timeline(nil, history.Props{Empty: "Noch nichts."})), "Noch nichts.")
+}
+
+func TestSignin(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, mit(signin.Page(signin.Props{Lang: "de", AppName: "Acme", Head: templ.Raw(`<link rel="stylesheet" href="/t.css">`),
+		Intro: "Wähle ein Konto.", Flash: &signin.Flash{Variant: alert.VariantInfo, Text: "Abgemeldet"}}), "<p>Formular</p>"))
+	assert.True(t, strings.HasPrefix(h, `<!doctype html><html lang="de">`))
+	assert.Contains(t, h, "<title>Anmelden · Acme</title>")
+	assert.Contains(t, h, `</style><link rel="stylesheet" href="/t.css">`, "kit CSS first, then the app's")
+	assert.Contains(t, h, `<span class="kit-signin-name">Acme</span>`, "app name as brand by default")
+	assert.Contains(t, h, `<h2 class="h2 text-center mb-2">Anmelden</h2>`)
+	assert.Contains(t, h, "Wähle ein Konto.")
+	assert.Contains(t, h, "Abgemeldet")
+	assert.Contains(t, h, "<p>Formular</p>")
+	assert.NotContains(t, h, "kit-sidebar", "no sidebar on the sign-in page")
+
+	h = render(t, ctx, signin.Password(signin.PasswordProps{Action: "/login", Username: "ann", Error: "Benutzername oder Passwort falsch",
+		RememberName: "remember", Hidden: []signin.HiddenField{{Name: "next", Value: "/orders"}}}))
+	assert.Contains(t, h, `<input type="hidden" name="next" value="/orders">`)
+	assert.Contains(t, h, "alert-danger")
+	assert.Contains(t, h, `<label class="form-label" for="signin-username">Benutzername</label>`)
+	assert.Contains(t, h, `value="ann"`)
+	assert.Contains(t, h, `autocomplete="current-password"`)
+	assert.Contains(t, h, "Angemeldet bleiben")
+	assert.Regexp(t, `id="signin-password"[^>]*autofocus|autofocus[^>]*id="signin-password"`, h, "with a user name, focus the password")
+
+	h = render(t, ctx, signin.Picker(signin.PickerProps{Action: "/anmelden"}, []signin.Choice{
+		{Value: "1", Name: "Birgit Büro", Detail: "Büro", Icon: "ti-building", Color: "blue"},
+		{Value: "2", Name: "Alt", Initials: "AL", Disabled: true}}))
+	assert.Contains(t, h, `<input type="hidden" name="id" value="1">`)
+	assert.Contains(t, h, `avatar bg-blue-lt`)
+	assert.Contains(t, h, `<span class="fw-bold text-truncate">Birgit Büro</span>`)
+	assert.Contains(t, h, "opacity-50")
+	assert.Contains(t, h, " disabled>")
 }

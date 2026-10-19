@@ -1,0 +1,190 @@
+// Package signin is a block for the sign-in page: a centered page without sidebar (Page) with either a
+// user name and password form (Password) or a choice of accounts (Picker, e.g. for demos and kiosks).
+// Checking credentials, sessions and cookies stay in the app.
+//
+//	@signin.Page(signin.Props{Lang: "en", AppName: "Acme", Head: head(), Brand: logo(), Flash: flash}) {
+//		@signin.Password(signin.PasswordProps{Action: "/login", Username: r.FormValue("username"), Error: msg})
+//	}
+package signin
+
+import (
+	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/button"
+	"github.com/mind-vm/tablerkit/form"
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+// Flash is a message above the card, e.g. after signing out.
+type Flash struct {
+	Variant alert.Variant
+	Text    string
+}
+
+type Props struct {
+	Lang    string // <html lang>, default "en"
+	Title   string // <title> and heading, default kit.T(ctx).SignIn
+	AppName string
+	Head    templ.Component // the app's stylesheets (Tabler, theme)
+	Scripts templ.Component // end of <body>
+	Brand   templ.Component // logo and name above the card; default AppName
+	Intro   string          // a sentence below the heading
+	Wide    bool            // wider card, e.g. for a picker with many accounts
+	Flash   *Flash
+	Footer  templ.Component // below the card, e.g. a link to the imprint
+}
+
+templ Page(p Props) {
+	{{ heading := kit.Or(p.Title, kit.T(ctx).SignIn) }}
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>
+				if p.AppName != "" {
+					{ heading } · { p.AppName }
+				} else {
+					{ heading }
+				}
+			</title>
+			@templ.Raw("<style>" + css + "</style>")
+			if p.Head != nil {
+				@p.Head
+			}
+		</head>
+		<body class="d-flex flex-column">
+			<div class="page page-center">
+				<div class={ kit.Classes("container py-4", kit.If(p.Wide, "kit-signin-wide"), kit.If(!p.Wide, "container-tight")) }>
+					<div class="kit-signin-brand">
+						if p.Brand != nil {
+							@p.Brand
+						} else {
+							<span class="kit-signin-name">{ p.AppName }</span>
+						}
+					</div>
+					if f := p.Flash; f != nil {
+						@alert.Alert(alert.Props{Variant: f.Variant, Dismissible: true}) {
+							{ f.Text }
+						}
+					}
+					<div class="card card-md">
+						<div class="card-body">
+							<h2 class="h2 text-center mb-2">{ heading }</h2>
+							if p.Intro != "" {
+								<p class="text-secondary text-center mb-4">{ p.Intro }</p>
+							}
+							{ children... }
+						</div>
+					</div>
+					if p.Footer != nil {
+						<div class="kit-signin-footer">
+							@p.Footer
+						</div>
+					}
+				</div>
+			</div>
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+type PasswordProps struct {
+	Action       string
+	Username     string        // value after a failed attempt
+	Error        string        // e.g. "User name or password wrong"
+	UsernameName string        // default "username"
+	PasswordName string        // default "password"
+	RememberName string        // a checkbox "stay signed in" with this name; empty = none
+	Submit       string        // default kit.T(ctx).SignIn
+	Hidden       []HiddenField // further hidden fields, e.g. where to go after signing in
+}
+
+type HiddenField struct{ Name, Value string }
+
+// Password is the classic form; the browser's password manager finds it through the autocomplete names.
+templ Password(p PasswordProps) {
+	{{ m := kit.T(ctx) }}
+	<form method="post" action={ templ.URL(p.Action) } autocomplete="on" class="kit-signin-form">
+		for _, h := range p.Hidden {
+			<input type="hidden" name={ h.Name } value={ h.Value }/>
+		}
+		if p.Error != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDanger, Icon: "ti-alert-triangle"}) {
+				{ p.Error }
+			}
+		}
+		@form.Field(form.FieldProps{Label: m.Username, For: "signin-username"}) {
+			@form.Input(form.InputProps{ID: "signin-username", Name: kit.Or(p.UsernameName, "username"), Value: p.Username, Required: true, Invalid: p.Error != "",
+				Attributes: templ.Attributes{"autocomplete": "username", "autofocus": p.Username == ""}})
+		}
+		@form.Field(form.FieldProps{Label: m.Password, For: "signin-password"}) {
+			@form.Input(form.InputProps{ID: "signin-password", Name: kit.Or(p.PasswordName, "password"), Type: "password", Required: true, Invalid: p.Error != "",
+				Attributes: templ.Attributes{"autocomplete": "current-password", "autofocus": p.Username != ""}})
+		}
+		if p.RememberName != "" {
+			<div class="mb-3">
+				@form.Check(form.CheckProps{Name: p.RememberName, Value: "1", Label: m.Remember})
+			</div>
+		}
+		@button.Button(button.Props{Variant: button.VariantPrimary, Class: "w-100"}) {
+			{ kit.Or(p.Submit, m.SignIn) }
+		}
+	</form>
+}
+
+// Choice is one account of a Picker.
+type Choice struct {
+	Value    string // posted in the Picker's field
+	Name     string
+	Detail   string // e.g. role and e-mail
+	Initials string // shown when there is no Icon
+	Icon     string // "ti-…"
+	Color    string // Tabler's light background of the avatar, e.g. "blue" → bg-blue-lt
+	Disabled bool
+}
+
+type PickerProps struct {
+	Action string
+	Field  string // name of the posted field, default "id"
+	Empty  string // text without choices
+}
+
+// Picker lists accounts as buttons; choosing one posts its Value.
+templ Picker(p PickerProps, choices []Choice) {
+	<div class="kit-signin-picker">
+		for _, c := range choices {
+			<form method="post" action={ templ.URL(p.Action) } class="m-0">
+				<input type="hidden" name={ kit.Or(p.Field, "id") } value={ c.Value }/>
+				<button type="submit" class={ kit.Classes("card card-link card-link-pop w-100 text-start kit-signin-choice", kit.If(c.Disabled, "opacity-50")) } disabled?={ c.Disabled }>
+					<span class="card-body d-flex align-items-center gap-3">
+						<span class={ kit.Classes("avatar", kit.If(c.Color != "", "bg-"+c.Color+"-lt")) }>
+							if c.Icon != "" {
+								@icon.Icon(c.Icon)
+							} else {
+								{ c.Initials }
+							}
+						</span>
+						<span class="d-flex flex-column min-w-0">
+							<span class="fw-bold text-truncate">{ c.Name }</span>
+							if c.Detail != "" {
+								<span class="text-secondary text-truncate">{ c.Detail }</span>
+							}
+						</span>
+					</span>
+				</button>
+			</form>
+		}
+		if len(choices) == 0 && p.Empty != "" {
+			<p class="text-secondary text-center m-0">{ p.Empty }</p>
+		}
+	</div>
+}
+
+const css = `.kit-signin-brand{display:flex;justify-content:center;align-items:center;gap:.625rem;margin-bottom:1.5rem;font-size:1.25rem;font-weight:600}
+.container.kit-signin-wide{max-width:48rem}
+.kit-signin-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.75rem}
+.kit-signin-choice{height:100%;margin:0}
+.kit-signin-footer{margin-top:1rem;text-align:center;color:var(--tblr-secondary)}`
