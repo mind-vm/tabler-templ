@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/blocks/detail"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/blocks/shell"
 	"github.com/mind-vm/tablerkit/kit"
@@ -125,4 +126,55 @@ func TestShellPage(t *testing.T) {
 	assert.Contains(t, h, `<a class="brand">Acme</a>`)
 	assert.NotContains(t, h, "data-kit-sidebar-toggle")
 	assert.NotContains(t, h, "kit_sidebar=")
+}
+
+func TestDetailSection(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	edit := detail.EditButton(detail.EditButtonProps{Dialog: "dialog-kunde"})
+	h := render(t, ctx, mit(detail.Section(detail.SectionProps{Title: "Kunde", Extra: "3", Action: edit, Class: "h-100"}), "<p>x</p>"))
+	assert.Contains(t, h, `<section class="card kit-section h-100">`)
+	assert.Contains(t, h, `<h3 class="kit-section-title">Kunde <small>3</small></h3>`)
+	assert.Contains(t, h, `data-bs-target="#dialog-kunde"`)
+	assert.Contains(t, h, `title="Bearbeiten"`)
+	assert.Contains(t, h, `<span class="kit-section-action-text">Bearbeiten</span>`)
+	assert.Contains(t, h, "<p>x</p>")
+	assert.NotContains(t, render(t, ctx, detail.Section(detail.SectionProps{})), "kit-section-head", "no head without title and action")
+
+	h = render(t, ctx, mit(detail.Fields(), render(t, ctx, detail.Field("Telefon", "", "–"))+render(t, ctx, detail.Field("Ort", "Bonn", "–"))))
+	assert.Equal(t, `<dl class="kit-fields"><dt>Telefon</dt><dd class="kit-field-empty">–</dd><dt>Ort</dt><dd>Bonn</dd></dl>`, h)
+}
+
+func TestDetailDialog(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, mit(detail.Dialog(detail.DialogProps{ID: "dialog-kunde", Title: "Kunde", Tooltip: "Kunde (E-32)", Context: "10001 · Stadt",
+		Section: true, Error: "Kundennummer ist fest"}), "<form></form>"))
+	assert.Contains(t, h, `class="modal fade kit-dialog" id="dialog-kunde"`)
+	assert.Contains(t, h, `data-kit-dialog`)
+	assert.Contains(t, h, `data-kit-section`)
+	assert.Contains(t, h, `<div class="kit-dialog-context">10001 · Stadt</div>`)
+	assert.Contains(t, h, `<h2 class="modal-title" id="dialog-kunde-title" title="Kunde (E-32)">Kunde</h2>`)
+	assert.Contains(t, h, `<div class="alert kit-dialog-error alert-danger" role="alert">`)
+	assert.Contains(t, h, "<form></form>")
+
+	h = render(t, ctx, detail.Dialog(detail.DialogProps{ID: "dialog-liste", Title: "Liste", Large: true}))
+	assert.Contains(t, h, "kit-dialog-large")
+	assert.Contains(t, h, "modal-fullscreen")
+	assert.NotContains(t, h, "data-kit-section")
+	assert.NotContains(t, h, "kit-dialog-error")
+}
+
+func TestDetailScript(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, detail.Script(detail.ScriptConfig{DialogField: "_drawer", StateVar: "drawerZustand"}))
+	assert.True(t, strings.HasPrefix(h, "<script>(function(cfg){"))
+	assert.Contains(t, h, `"dialogField":"_drawer"`)
+	assert.Contains(t, h, `"returnField":"_return"`, "defaults for what is not set")
+	assert.Contains(t, h, `"stateVar":"drawerZustand"`)
+	assert.Contains(t, h, `"cancel":"Abbrechen"`)
+	assert.Contains(t, h, `"sectionHint":"Gespeichert wird nur dieser Abschnitt."`)
+	assert.Equal(t, 1, strings.Count(h, "</script>"))
+
+	// A configured name cannot end the script.
+	h = render(t, ctx, detail.Script(detail.ScriptConfig{StateVar: "</script><script>alert(1)"}))
+	assert.Equal(t, 1, strings.Count(h, "</script>"))
 }
