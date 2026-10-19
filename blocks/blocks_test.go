@@ -15,6 +15,7 @@ import (
 	"github.com/mind-vm/tablerkit/blocks/create"
 	"github.com/mind-vm/tablerkit/blocks/detail"
 	"github.com/mind-vm/tablerkit/blocks/history"
+	"github.com/mind-vm/tablerkit/blocks/landing"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/blocks/shell"
 	"github.com/mind-vm/tablerkit/blocks/signin"
@@ -256,4 +257,40 @@ func TestStats(t *testing.T) {
 	assert.Regexp(t, `<div class="kit-stat-value"><span>4.595,00 €</span>\s*<small>26 %</small>`, h)
 	assert.Contains(t, h, `<div class="kit-stat-label"><span class="dot"></span><span>Rote Positionen</span></div>`)
 	assert.Contains(t, h, `<a href="/freigabe"><span>Prüfen</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>`)
+}
+
+func TestLanding(t *testing.T) {
+	ctx := context.Background()
+	h := render(t, ctx, mit(landing.Page(landing.Props{Lang: "de", AppName: "Acme", Description: "Aufträge ohne Papier",
+		Head: templ.Raw(`<link rel="stylesheet" href="/t.css">`), Links: []landing.Link{{Href: "#ablauf", Text: "Ablauf"}},
+		Actions: templ.Raw(`<a class="btn" href="/anmelden">Anmelden</a>`),
+		Footer:  landing.Footer(landing.FooterProps{Text: "© Acme", Links: []landing.Link{{Href: "/impressum", Text: "Impressum"}}})}), "<p>Inhalt</p>"))
+	assert.Contains(t, h, `<html lang="de">`)
+	assert.Contains(t, h, `<title>Acme</title>`, "app name as title by default")
+	assert.Contains(t, h, `<meta name="description" content="Aufträge ohne Papier">`)
+	assert.Less(t, strings.Index(h, ".kit-landing{"), strings.Index(h, `href="/t.css"`), "the app's stylesheets override the block's CSS")
+	assert.Contains(t, h, `<a class="kit-landing-brand" href="/">Acme</a>`)
+	assert.Contains(t, h, `<a href="#ablauf">Ablauf</a>`)
+	assert.Contains(t, h, `<main><p>Inhalt</p></main>`)
+	assert.Contains(t, h, `<a href="/impressum">Impressum</a>`)
+	assert.NotContains(t, h, "<script", "no script of its own")
+
+	h = render(t, ctx, landing.Hero(landing.HeroProps{Title: "Titel", Lead: "Text", Visual: templ.Raw(`<img src="/bild.png">`)}))
+	assert.Contains(t, h, `<h1 class="kit-landing-title">Titel</h1>`)
+	assert.Contains(t, h, `<div class="kit-landing-visual"><img src="/bild.png"></div>`)
+	assert.NotContains(t, h, "kit-landing-hero-text")
+	h = render(t, ctx, landing.Hero(landing.HeroProps{Title: "Titel"}))
+	assert.Contains(t, h, "kit-landing-hero-text", "without a visual the text is centered")
+	assert.NotContains(t, h, "kit-landing-visual")
+
+	h = render(t, ctx, mit(landing.Section(landing.SectionProps{ID: "funktionen", Title: "Funktionen", Muted: true}),
+		"<p>x</p>"))
+	assert.Contains(t, h, `<section id="funktionen" class="kit-landing-section kit-landing-muted">`)
+	h = render(t, ctx, landing.Features([]landing.Feature{{Icon: "ti-bolt", Title: "Schnell", Text: "In Sekunden"}}))
+	assert.Contains(t, h, `<i class="ti ti-bolt" aria-hidden="true"></i>`)
+	assert.Contains(t, h, `<h3>Schnell</h3>`)
+	h = render(t, ctx, landing.Steps([]landing.Step{{Title: "Angebot"}, {Title: "Auftrag"}}))
+	assert.Regexp(t, `>2</span><h3>Auftrag</h3>`, h)
+	h = render(t, ctx, mit(landing.CallToAction(landing.CallToActionProps{Title: "Ausprobieren"}), `<a class="btn">Los</a>`))
+	assert.Contains(t, h, `<div class="kit-landing-buttons"><a class="btn">Los</a></div>`)
 }

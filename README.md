@@ -74,6 +74,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
+| `blocks/landing` | `Page` (public start page without sidebar: top bar with brand, anchor links and actions, footer slot), `Hero` (title, lead, actions, optional visual), `Section` (full-width band with heading, `Muted` to set it apart), `Features` (icon, title, text in a grid), `Steps` (numbered), `CallToAction`, `Footer` (text and links); no script |
 | `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |
 
 ```go
