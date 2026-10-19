@@ -74,6 +74,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
+| `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |
 
 ```go
 func customers(w http.ResponseWriter, r *http.Request) {
@@ -99,6 +100,33 @@ The detail script is the kit's second script (after the sidebar's). The server a
 the dialog's state after a failed save: the page sets a global variable (default `kitDialogState`) to
 `{"id": …, "error": …, "values": {field: [values]}}`, and the forms carry hidden fields with the dialog's
 ID and the page to return to. `ScriptConfig` renames all of them for apps that already have their own.
+
+### A section with its own navigation
+
+An area like "Settings" or "Master data" with its own menu needs no block: render the sidebar with a
+back link and the area's group while one of its pages is open.
+
+```go
+templ nav(current string) {
+	@sidebar.Sidebar(sidebar.Props{ID: "sidebar"}) {
+		@sidebar.Content() {
+			if inSettings(current) {
+				@sidebar.Group(sidebar.GroupProps{}) {
+					@sidebar.Item(sidebar.ItemProps{Href: "/", Icon: "ti-arrow-left", Label: "Back"})
+				}
+				@sidebar.Group(sidebar.GroupProps{Label: "Settings"}) {
+					@sidebar.Item(sidebar.ItemProps{Href: "/settings/users", Icon: "ti-users", Label: "Users", Active: current == "users"})
+				}
+			} else {
+				@sidebar.Group(sidebar.GroupProps{Label: "Work"}) { … }
+				@sidebar.Group(sidebar.GroupProps{End: true}) {
+					@sidebar.Item(sidebar.ItemProps{Href: "/settings/users", Icon: "ti-settings", Label: "Settings", Trailing: "ti-chevron-right"})
+				}
+			}
+		}
+	}
+}
+```
 
 ### Sidebar
 
