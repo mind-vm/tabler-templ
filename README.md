@@ -73,6 +73,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/detail` | `Section` (card with title, extra and at most one action), `Actions`, `EditButton`, `Fields`/`Field`; `Dialog` (a section's edit dialog: context line, error, `Section` hint, `Large` for lists) and `Script(ScriptConfig)`: hidden fields in its forms, footer with Cancel, focus, reopening with error and values after a failed save, reopening a large dialog after saving a row, values from the opening button; `window.kitDialog.open/matchForm` |
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
+| `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
 
 ```go
 func customers(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +93,7 @@ templ customersPage(r *http.Request, l *listpage.List, rows []Customer) {
 ```
 
 `shell.Page` renders the kit's CSS before `Head`, so the app's theme overrides it, and the sidebar
-script after `Scripts`. Texts come from `kit.Messages` (Search, Reset, "of", Breadcrumbs, Edit, Cancel, Create, NoEntries …).
+script after `Scripts`. Texts come from `kit.Messages` (Search, Reset, "of", Breadcrumbs, Edit, Cancel, Create, NoEntries, SignIn, Username, Password …).
 
 The detail script is the kit's second script (after the sidebar's). The server and the script exchange
 the dialog's state after a failed save: the page sets a global variable (default `kitDialogState`) to

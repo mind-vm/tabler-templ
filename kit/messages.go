@@ -27,6 +27,11 @@ type Messages struct {
 	// Create page and history.
 	Create    string
 	NoEntries string
+	// Sign-in page.
+	SignIn   string
+	Username string
+	Password string
+	Remember string
 }
 
 var (
@@ -34,12 +39,14 @@ var (
 		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu",
 		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
-		Create: "Create", NoEntries: "No entries."}
+		Create: "Create", NoEntries: "No entries.",
+		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in"}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
 		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
-		Create: "Anlegen", NoEntries: "Keine Einträge."}
+		Create: "Anlegen", NoEntries: "Keine Einträge.",
+		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben"}
 )
 
 type messagesKey struct{}
