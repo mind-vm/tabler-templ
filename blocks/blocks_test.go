@@ -30,7 +30,7 @@ func mit(c templ.Component, kinder string) templ.Component {
 	})
 }
 
-var status = listpage.Filter{Name: "status", Label: "All states", Options: []listpage.Option{{"open", "Open"}, {"done", "Done"}}}
+var status = listpage.Filter{Name: "status", Label: "All states", Options: []listpage.Option{{Value: "open", Label: "Open"}, {Value: "done", Label: "Done"}}}
 
 func TestListFromRequest(t *testing.T) {
 	l := listpage.New(httptest.NewRequest("GET", "/customers?q=+berlin+&status=done&page=2", nil), listpage.Config{}, status)
