@@ -1,0 +1,77 @@
+package listpage
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tablerkit/button"
+	"github.com/mind-vm/tablerkit/card"
+	"github.com/mind-vm/tablerkit/form"
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tablerkit/pagination"
+)
+
+// Card is the whole block: search and filters, the children (usually a table) and the footer.
+templ Card(l *List) {
+	@card.Card(card.Props{Class: "kit-list"}) {
+		@Search(l)
+		{ children... }
+		@Footer(l)
+	}
+}
+
+// Search is the bar above the list: search field, one select per filter (submits on change),
+// Search and, while something narrows the list, Reset.
+templ Search(l *List) {
+	{{ m := kit.T(ctx) }}
+	<form method="get" action={ templ.URL(l.Path) } class="kit-list-search" role="search">
+		<div class="input-icon kit-list-query">
+			<span class="input-icon-addon">
+				@icon.Icon("ti-search")
+			</span>
+			@form.Input(form.InputProps{Type: "search", Name: l.QueryParam, Value: l.Query, Placeholder: l.Placeholder,
+				Attributes: templ.Attributes{"aria-label": m.SearchLabel}})
+		</div>
+		for _, f := range l.Filters {
+			@form.Select(form.SelectProps{Name: f.Name, Empty: f.Label, Options: options(f.Options), Selected: f.Value,
+				Attributes: templ.Attributes{"aria-label": f.Label, "onchange": "this.form.requestSubmit()"}})
+		}
+		@button.Button() {
+			{ m.Search }
+		}
+		if l.Active() {
+			@button.Button(button.Props{Href: l.Path, Variant: button.VariantGhost}) {
+				{ m.Reset }
+			}
+		}
+	</form>
+}
+
+func options(os []Option) []form.Option {
+	fs := make([]form.Option, len(os))
+	for i, o := range os {
+		fs[i] = form.Option{Value: o.Value, Label: o.Label}
+	}
+	return fs
+}
+
+// Footer shows "1–25 of 80" and, with more than one page, the page numbers; nothing for an empty list.
+templ Footer(l *List) {
+	if l.Total > 0 {
+		<div class="kit-list-footer">
+			<span class="text-secondary">{ strconv.Itoa(l.From) }–{ strconv.Itoa(l.To) } { kit.T(ctx).Of } { strconv.Itoa(l.Total) }</span>
+			@pagination.Pagination(pagination.Props{Page: l.Page, Pages: l.Pages, Href: l.Link, Class: "m-0"})
+		</div>
+	}
+}
+
+// Styles is the block's small layout CSS (Tabler variables only); put it in <head>. The shell block
+// includes it.
+templ Styles() {
+	@templ.Raw("<style>" + css + "</style>")
+}
+
+const css = `.kit-list-search{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
+.kit-list-search .kit-list-query{flex:1 1 16rem;min-width:12rem}
+.kit-list-search .form-select{width:auto;max-width:100%}
+.kit-list-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem 1rem;border-top:var(--tblr-border-width) solid var(--tblr-border-color)}`

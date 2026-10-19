@@ -13,13 +13,22 @@ type Messages struct {
 	// Sidebar: the button that collapses it to icons (desktop) and the one that opens it (mobile).
 	ToggleSidebar string
 	OpenMenu      string
+	// Blocks: list page (search, reset, "1–25 of 80", empty result) and page shell (breadcrumb label).
+	Search      string
+	SearchLabel string
+	Reset       string
+	Of          string
+	NoResults   string
+	Breadcrumbs string
 }
 
 var (
 	English = Messages{Close: "Close", Pages: "Pages", PrevPage: "Previous page", NextPage: "Next page",
-		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu"}
+		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu",
+		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs"}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
-		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen"}
+		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
+		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen"}
 )
 
 type messagesKey struct{}
