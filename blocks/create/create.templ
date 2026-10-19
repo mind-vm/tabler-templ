@@ -1,0 +1,63 @@
+// Package create is a block for create pages: creating a record is a page of its own (not a dialog),
+// with the sections of the record as cards in a form and a footer with Cancel and Create. After a failed
+// save the app renders the page again with the message and the values entered.
+//
+//	@create.Form(create.FormProps{Action: "/customers"}) {
+//		<div class="row row-cards">
+//			<div class="col-lg-6">@detail.Section(detail.SectionProps{Title: "Customer"}) { … fields … }</div>
+//			<div class="col-12">@create.Footer(create.FooterProps{Cancel: "/customers", Submit: "Create customer"})</div>
+//		</div>
+//	}
+package create
+
+import (
+	"github.com/mind-vm/tablerkit/button"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+type FormProps struct {
+	Action     string
+	Class      string
+	Attributes templ.Attributes // e.g. data-form for the dialog script, enctype for files
+}
+
+// Form is the page's form (method post).
+templ Form(p FormProps) {
+	<form method="post" action={ templ.URL(p.Action) } class={ kit.Classes("kit-create", p.Class) } { p.Attributes... }>
+		{ children... }
+	</form>
+}
+
+type FooterProps struct {
+	Cancel      string // where Cancel leads, usually the list
+	CancelLabel string // default kit.T(ctx).Cancel
+	Submit      string // text of the primary button, default kit.T(ctx).Create
+	Icon        string // icon of the primary button, default "ti-plus"
+	Hint        string // short text on the left, e.g. what happens next
+}
+
+// Footer is the bar at the end of the form: hint, Cancel and the primary submit button.
+templ Footer(p FooterProps) {
+	{{ m := kit.T(ctx) }}
+	<div class="kit-create-footer">
+		if p.Hint != "" {
+			<span class="kit-create-hint">{ p.Hint }</span>
+		}
+		if p.Cancel != "" {
+			@button.Button(button.Props{Href: p.Cancel}) {
+				{ kit.Or(p.CancelLabel, m.Cancel) }
+			}
+		}
+		@button.Button(button.Props{Variant: button.VariantPrimary, Icon: kit.Or(p.Icon, "ti-plus")}) {
+			{ kit.Or(p.Submit, m.Create) }
+		}
+	</div>
+}
+
+// Styles renders the block's CSS; the shell block includes it.
+templ Styles() {
+	@templ.Raw("<style>" + css + "</style>")
+}
+
+const css = `.kit-create-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.5rem;padding:1rem 1.25rem;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}
+.kit-create-hint{margin-right:auto;font-size:.875rem;color:var(--tblr-secondary)}`

@@ -44,7 +44,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/blocks/create"
 	"github.com/mind-vm/tablerkit/blocks/detail"
+	"github.com/mind-vm/tablerkit/blocks/history"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/kit"
 	"github.com/mind-vm/tablerkit/sidebar"
@@ -128,7 +130,7 @@ func Page(p Props) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Lang, "en"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 80, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 82, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -141,7 +143,7 @@ func Page(p Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 84, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 86, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +213,7 @@ func Page(p Props) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(f.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 102, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 104, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -346,7 +348,7 @@ func Breadcrumbs(cs []Crumb) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.T(ctx).Breadcrumbs)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 141, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 143, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -365,7 +367,7 @@ func Breadcrumbs(cs []Crumb) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(c.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 145, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 147, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -383,7 +385,7 @@ func Breadcrumbs(cs []Crumb) templ.Component {
 				var templ_7745c5c3_Var10 templ.SafeURL
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(c.Href))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 147, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 149, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -396,7 +398,7 @@ func Breadcrumbs(cs []Crumb) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(c.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 147, Col: 71}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 149, Col: 71}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -414,7 +416,7 @@ func Breadcrumbs(cs []Crumb) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(c.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 149, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 151, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -463,7 +465,7 @@ func PageHeader(p Props) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Heading, p.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 163, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 165, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -523,7 +525,7 @@ func PageHeader(p Props) templ.Component {
 	})
 }
 
-// Styles is the CSS of the shell, of the sidebar and of the other blocks (list page, detail).
+// Styles is the CSS of the shell, of the sidebar and of the other blocks (list page, detail, create, history).
 // Page includes it; render it yourself only when you build your own frame.
 func Styles() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -555,6 +557,14 @@ func Styles() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = detail.Styles().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = create.Styles().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = history.Styles().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

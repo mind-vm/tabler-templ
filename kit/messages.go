@@ -24,17 +24,22 @@ type Messages struct {
 	Edit        string
 	Cancel      string
 	SectionHint string
+	// Create page and history.
+	Create    string
+	NoEntries string
 }
 
 var (
 	English = Messages{Close: "Close", Pages: "Pages", PrevPage: "Previous page", NextPage: "Next page",
 		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu",
 		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
-		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved."}
+		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
+		Create: "Create", NoEntries: "No entries."}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
 		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
-		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt."}
+		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
+		Create: "Anlegen", NoEntries: "Keine Einträge."}
 )
 
 type messagesKey struct{}

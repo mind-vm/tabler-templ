@@ -12,7 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/blocks/create"
 	"github.com/mind-vm/tablerkit/blocks/detail"
+	"github.com/mind-vm/tablerkit/blocks/history"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/blocks/shell"
 	"github.com/mind-vm/tablerkit/kit"
@@ -177,4 +179,33 @@ func TestDetailScript(t *testing.T) {
 	// A configured name cannot end the script.
 	h = render(t, ctx, detail.Script(detail.ScriptConfig{StateVar: "</script><script>alert(1)"}))
 	assert.Equal(t, 1, strings.Count(h, "</script>"))
+}
+
+func TestCreate(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, mit(create.Form(create.FormProps{Action: "/kunden", Attributes: templ.Attributes{"data-formular": "kunde-anlegen"}}), "<input name=x>"))
+	assert.Equal(t, `<form method="post" action="/kunden" class="kit-create" data-formular="kunde-anlegen"><input name=x></form>`, h)
+
+	h = render(t, ctx, create.Footer(create.FooterProps{Cancel: "/kunden", Submit: "Kunde anlegen", Hint: "Danach öffnet sich die Akte."}))
+	assert.Contains(t, h, `<span class="kit-create-hint">Danach öffnet sich die Akte.</span>`)
+	assert.Contains(t, h, `<a href="/kunden" class="btn">Abbrechen</a>`)
+	assert.Contains(t, h, `<button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i>Kunde anlegen</button>`)
+
+	h = render(t, ctx, create.Footer(create.FooterProps{}))
+	assert.Contains(t, h, ">Anlegen</button>", "default label")
+	assert.NotContains(t, h, "Abbrechen", "no cancel without a target")
+}
+
+func TestHistory(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, history.Timeline([]history.Entry{
+		{Time: "19.10.2026 14:03", Who: "Birgit Büro", Text: "hat Felder geändert", Kind: history.Changed, Details: []string{"ort: Bonn → Köln", "plz: 1 → 2"}},
+		{Time: "18.10.2026 09:00", Text: "angelegt", Kind: history.Created},
+	}))
+	assert.Contains(t, h, `<li class="kit-history-changed"><span class="kit-history-time">19.10.2026 14:03</span>`)
+	assert.Contains(t, h, `<strong>Birgit Büro</strong> hat Felder geändert`)
+	assert.Contains(t, h, `<div class="kit-history-details">ort: Bonn → Köln · plz: 1 → 2</div>`)
+	assert.Contains(t, h, `<div>angelegt</div>`)
+	assert.Contains(t, render(t, ctx, history.Timeline(nil)), `<li class="kit-history-empty">Keine Einträge.</li>`)
+	assert.Contains(t, render(t, ctx, history.Timeline(nil, history.Props{Empty: "Noch nichts."})), "Noch nichts.")
 }

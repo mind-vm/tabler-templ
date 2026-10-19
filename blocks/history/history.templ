@@ -1,0 +1,76 @@
+// Package history is a block for a record's history as a timeline: when, who, what, and the changed
+// fields. The app phrases the text ("changed the address"); the block only lays it out.
+//
+//	@history.Timeline([]history.Entry{{Time: "19.10.2026 14:03", Who: "Ann", Text: "changed fields", Kind: history.Changed,
+//		Details: []string{"city: Bonn → Köln"}}})
+package history
+
+import (
+	"strings"
+
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+type Kind string
+
+const (
+	Created Kind = "created"
+	Changed Kind = "changed"
+	Deleted Kind = "deleted"
+)
+
+// Entry is one event; the newest comes first and gets the highlighted dot.
+type Entry struct {
+	Time    string // already formatted
+	Who     string // shown bold before Text; empty = only Text
+	Text    string
+	Kind    Kind
+	Details []string // e.g. "field: before → after", joined by " · "
+}
+
+type Props struct {
+	Empty string // text without entries, default kit.T(ctx).NoEntries
+	Class string
+}
+
+templ Timeline(entries []Entry, props ...Props) {
+	{{ p := kit.First(props) }}
+	<ol class={ kit.Classes("kit-history", p.Class) }>
+		for _, e := range entries {
+			<li class={ "kit-history-" + string(e.Kind) }>
+				<span class="kit-history-time">{ e.Time }</span>
+				<span class="kit-history-dot" aria-hidden="true"></span>
+				<div class="kit-history-text">
+					<div>
+						if e.Who != "" {
+							<strong>{ e.Who }</strong> { e.Text }
+						} else {
+							{ e.Text }
+						}
+					</div>
+					if len(e.Details) > 0 {
+						<div class="kit-history-details">{ strings.Join(e.Details, " · ") }</div>
+					}
+				</div>
+			</li>
+		}
+		if len(entries) == 0 {
+			<li class="kit-history-empty">{ kit.Or(p.Empty, kit.T(ctx).NoEntries) }</li>
+		}
+	</ol>
+}
+
+// Styles renders the block's CSS; the shell block includes it.
+templ Styles() {
+	@templ.Raw("<style>" + css + "</style>")
+}
+
+const css = `.kit-history{margin:0;padding:.5rem 1.25rem .75rem;list-style:none}
+.kit-history>li{display:grid;grid-template-columns:9.5rem .875rem 1fr;gap:.75rem;padding:.625rem 0;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color-translucent,var(--tblr-border-color))}
+.kit-history>li:last-child{border-bottom:0}
+.kit-history>li.kit-history-empty{display:block;color:var(--tblr-secondary)}
+.kit-history-time{font-size:.8125rem;color:var(--tblr-secondary);white-space:nowrap}
+.kit-history-dot{width:.4375rem;height:.4375rem;margin-top:.4375rem;border-radius:50%;background:var(--tblr-border-color-dark,#c4c4c4)}
+.kit-history>li:first-child .kit-history-dot{background:var(--tblr-primary)}
+.kit-history-details{margin-top:.125rem;font-size:.8125rem;color:var(--tblr-secondary)}
+@media (max-width:575.98px){.kit-history>li{grid-template-columns:1fr;gap:.125rem}.kit-history-dot{display:none}}`
