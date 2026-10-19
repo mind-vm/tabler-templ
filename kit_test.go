@@ -3,6 +3,8 @@ package tablerkit_test
 import (
 	"context"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -19,6 +21,7 @@ import (
 	"github.com/mind-vm/tablerkit/kit"
 	"github.com/mind-vm/tablerkit/modal"
 	"github.com/mind-vm/tablerkit/pagination"
+	"github.com/mind-vm/tablerkit/sidebar"
 	"github.com/mind-vm/tablerkit/table"
 )
 
@@ -139,4 +142,46 @@ func TestTable(t *testing.T) {
 
 func TestClasses(t *testing.T) {
 	assert.Equal(t, "btn btn-sm x", kit.Classes("btn", "", "btn-sm btn", " x "))
+}
+
+func TestSidebar(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	item := sidebar.Item(sidebar.ItemProps{Href: "/kunden", Icon: "ti-building", Label: "Kunden", Active: true, Count: 3, CountTitle: "offen"})
+	nav := mit(sidebar.Sidebar(sidebar.Props{ID: "leiste", Label: "Navigation"}), render(t, ctx, item))
+	h := render(t, ctx, nav)
+	assert.Contains(t, h, `<aside id="leiste" class="kit-sidebar offcanvas-lg offcanvas-start d-print-none" tabindex="-1" aria-label="Navigation">`)
+	assert.Contains(t, h, `class="kit-sidebar-link active" aria-current="page" data-kit-tooltip="Kunden">`)
+	assert.Contains(t, h, `<span class="badge bg-red-lt kit-sidebar-badge" title="offen">3</span>`)
+	assert.NotContains(t, h, "data-collapsed")
+
+	// Collapsed: attribute on the sidebar, tooltips on the items (they read the state from the context).
+	collapsed := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		inner := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error { return item.Render(ctx, w) })
+		return sidebar.Sidebar(sidebar.Props{ID: "leiste", Collapsed: true}).Render(templ.WithChildren(ctx, inner), w)
+	})
+	h = render(t, ctx, collapsed)
+	assert.Contains(t, h, `data-collapsed`)
+	assert.Contains(t, h, `title="Kunden"`)
+
+	// Trigger: offcanvas on small screens, the script's toggle on large ones; German labels.
+	h = render(t, ctx, sidebar.Trigger(sidebar.TriggerProps{Target: "leiste"}))
+	assert.Contains(t, h, `data-bs-toggle="offcanvas" data-bs-target="#leiste"`)
+	assert.Contains(t, h, `aria-label="Menü öffnen"`)
+	assert.Contains(t, h, `data-kit-sidebar-toggle="leiste"`)
+	assert.Contains(t, h, `aria-expanded="true"`)
+
+	// User: the children become the dropdown's items.
+	h = render(t, ctx, mit(sidebar.User(sidebar.UserProps{Initials: "BB", Name: "Birgit Büro", Detail: "Büro"}), `<a class="dropdown-item" href="/x">Abmelden</a>`))
+	assert.Contains(t, h, `data-bs-toggle="dropdown"`)
+	assert.Contains(t, h, `<div class="dropdown-menu"><a class="dropdown-item" href="/x">Abmelden</a></div>`)
+
+	assert.Contains(t, render(t, ctx, sidebar.Styles()), ".kit-sidebar[data-collapsed]")
+	assert.Contains(t, render(t, ctx, sidebar.Script()), sidebar.CookieName)
+}
+
+func TestSidebarCollapsedCookie(t *testing.T) {
+	r := httptest.NewRequest("GET", "/", nil)
+	assert.False(t, sidebar.Collapsed(r))
+	r.AddCookie(&http.Cookie{Name: sidebar.CookieName, Value: "collapsed"})
+	assert.True(t, sidebar.Collapsed(r))
 }

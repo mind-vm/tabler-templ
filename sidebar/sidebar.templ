@@ -1,0 +1,287 @@
+// Package sidebar renders the app's side navigation: fixed on the left on large screens, collapsible to
+// icons there, and a sheet (Tabler's offcanvas) on small screens. Unlike the other packages it brings a
+// little CSS and script of its own (Styles, Script), because Tabler has no collapsible sidebar.
+//
+//	<head> … @sidebar.Styles() </head>
+//	<div class="page">
+//		@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Collapsed: sidebar.Collapsed(r)}) {
+//			@sidebar.Header() { @sidebar.Brand(sidebar.BrandProps{Href: "/", Title: "Acme"}) }
+//			@sidebar.Content() {
+//				@sidebar.Group(sidebar.GroupProps{Label: "Work"}) {
+//					@sidebar.Item(sidebar.ItemProps{Href: "/customers", Icon: "ti-building", Label: "Customers", Active: true})
+//				}
+//			}
+//			@sidebar.Footer() { @sidebar.User(sidebar.UserProps{Initials: "AA", Name: "Ann"}) { …dropdown items… } }
+//		}
+//		<div class="page-wrapper"> <header> @sidebar.Trigger(sidebar.TriggerProps{Target: "sidebar"}) … </header> … </div>
+//	</div>
+//	@sidebar.Script()   // after Tabler's script
+package sidebar
+
+import (
+	"context"
+	"io"
+	"strconv"
+
+	"github.com/mind-vm/tablerkit/icon"
+	"github.com/mind-vm/tablerkit/kit"
+)
+
+// sidebarState passes Collapsed down to the items, so they render a tooltip only when collapsed.
+type sidebarState struct{ collapsed bool }
+
+type stateKey struct{}
+
+func collapsed(ctx context.Context) bool {
+	s, _ := ctx.Value(stateKey{}).(sidebarState)
+	return s.collapsed
+}
+
+// Styles renders the sidebar's CSS; put it in <head>.
+templ Styles() {
+	@templ.Raw("<style>" + css + "</style>")
+}
+
+// Script renders the toggle script; put it at the end of <body>. It carries templ's nonce, if set.
+func Script() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		open := "<script>"
+		if n := templ.GetNonce(ctx); n != "" {
+			open = `<script nonce="` + templ.EscapeString(n) + `">`
+		}
+		_, err := io.WriteString(w, open+script+"</script>")
+		return err
+	})
+}
+
+type Props struct {
+	ID         string // required: Trigger targets it
+	Class      string
+	Attributes templ.Attributes
+	// Collapsed renders the desktop sidebar as icons (see Collapsed(r) for the user's last choice).
+	Collapsed bool
+	Label     string // aria-label of the navigation, e.g. "Main navigation"
+}
+
+templ Sidebar(p Props) {
+	{{ ctx = context.WithValue(ctx, stateKey{}, sidebarState{collapsed: p.Collapsed}) }}
+	<aside
+		id={ p.ID }
+		class={ kit.Classes("kit-sidebar offcanvas-lg offcanvas-start d-print-none", p.Class) }
+		tabindex="-1"
+		data-collapsed?={ p.Collapsed }
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	>
+		<div class="kit-sidebar-inner">
+			{ children... }
+		</div>
+	</aside>
+}
+
+type SectionProps struct {
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Header is the top of the sidebar (brand); on small screens it also holds the sheet's close button.
+templ Header(props ...SectionProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("kit-sidebar-header", p.Class) } { p.Attributes... }>
+		{ children... }
+		<button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" aria-label={ kit.T(ctx).Close }></button>
+	</div>
+}
+
+type BrandProps struct {
+	Href     string
+	Logo     templ.Component // e.g. an <img> or an icon in a square; stays visible when collapsed
+	Title    string
+	Subtitle string
+}
+
+templ Brand(p BrandProps) {
+	<a
+		href={ templ.URL(kit.Or(p.Href, "/")) }
+		class="kit-sidebar-brand"
+		data-kit-tooltip={ p.Title }
+		if t := tooltip(ctx, p.Title); t != "" {
+			title={ t }
+		}
+	>
+		if p.Logo != nil {
+			@p.Logo
+		}
+		<span class="kit-sidebar-brand-text">
+			<span class="kit-sidebar-brand-title">{ p.Title }</span>
+			if p.Subtitle != "" {
+				<span class="kit-sidebar-brand-subtitle">{ p.Subtitle }</span>
+			}
+		</span>
+	</a>
+}
+
+// tooltip: the title an element shows only while the sidebar is collapsed (the script swaps it on toggle).
+func tooltip(ctx context.Context, s string) string {
+	if collapsed(ctx) {
+		return s
+	}
+	return ""
+}
+
+// Content is the scrolling middle: groups of items.
+templ Content(props ...SectionProps) {
+	{{ p := kit.First(props) }}
+	<nav class={ kit.Classes("kit-sidebar-content", p.Class) } { p.Attributes... }>
+		{ children... }
+	</nav>
+}
+
+type GroupProps struct {
+	Label      string // small heading; hidden when collapsed
+	End        bool   // push the group to the bottom of the content
+	Class      string
+	Attributes templ.Attributes
+}
+
+templ Group(p GroupProps) {
+	<div class={ kit.Classes("kit-sidebar-group", kit.If(p.End, "kit-sidebar-group-end"), p.Class) } { p.Attributes... }>
+		if p.Label != "" {
+			<div class="kit-sidebar-label">{ p.Label }</div>
+		}
+		<ul class="kit-sidebar-menu">
+			{ children... }
+		</ul>
+	</div>
+}
+
+type ItemProps struct {
+	Href       string
+	Icon       string // "ti-…"; the only thing left when collapsed
+	Label      string
+	Active     bool // the current page: aria-current="page"
+	Count      int  // > 0 shows a badge (a dot when collapsed)
+	CountTitle string
+	Trailing   string // icon after the label, e.g. "ti-chevron-right"; hidden when collapsed
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+templ Item(p ItemProps) {
+	<li>
+		<a
+			href={ templ.URL(p.Href) }
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			class={ kit.Classes("kit-sidebar-link", kit.If(p.Active, "active"), p.Class) }
+			if p.Active {
+				aria-current="page"
+			}
+			data-kit-tooltip={ p.Label }
+			if t := tooltip(ctx, p.Label); t != "" {
+				title={ t }
+			}
+			{ p.Attributes... }
+		>
+			if p.Icon != "" {
+				@icon.Icon(p.Icon)
+			}
+			<span class="kit-sidebar-text">{ p.Label }</span>
+			if p.Count > 0 {
+				<span class="badge bg-red-lt kit-sidebar-badge" title={ p.CountTitle }>{ strconv.Itoa(p.Count) }</span>
+			}
+			if p.Trailing != "" {
+				@icon.Icon(p.Trailing, icon.Props{Class: "kit-sidebar-hide-collapsed text-secondary ms-auto"})
+			}
+		</a>
+	</li>
+}
+
+templ Separator() {
+	<li class="kit-sidebar-separator" role="separator"></li>
+}
+
+// Footer is the bottom of the sidebar, usually the User menu.
+templ Footer(props ...SectionProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("kit-sidebar-footer", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+type UserProps struct {
+	Initials string
+	Name     string
+	Detail   string // e.g. role or e-mail
+	Label    string // aria-label of the button, e.g. "Switch user"
+}
+
+// User is the signed-in user with a dropdown (Tabler's): the children are its items
+// (.dropdown-item, .dropdown-header, forms …). It opens upwards and is never clipped by the sidebar.
+templ User(p UserProps) {
+	<div class="dropup">
+		<button
+			type="button"
+			class="kit-sidebar-user"
+			data-bs-toggle="dropdown"
+			data-bs-popper-config='{"strategy":"fixed"}'
+			aria-expanded="false"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			data-kit-tooltip={ p.Name }
+			if t := tooltip(ctx, p.Name); t != "" {
+				title={ t }
+			}
+		>
+			<span class="kit-sidebar-avatar">{ p.Initials }</span>
+			<span class="kit-sidebar-user-text">
+				<span class="kit-sidebar-user-name">{ p.Name }</span>
+				if p.Detail != "" {
+					<span class="kit-sidebar-user-detail">{ p.Detail }</span>
+				}
+			</span>
+			@icon.Icon("ti-selector", icon.Props{Class: "kit-sidebar-hide-collapsed text-secondary"})
+		</button>
+		<div class="dropdown-menu">
+			{ children... }
+		</div>
+	</div>
+}
+
+type TriggerProps struct {
+	Target    string // the Sidebar's ID
+	Collapsed bool   // the current desktop state, for aria-expanded
+	Label     string // default kit.T(ctx).ToggleSidebar
+	MenuLabel string // default kit.T(ctx).OpenMenu
+}
+
+// Trigger renders two buttons for the page header: on small screens it opens the sheet, on large
+// screens it collapses the sidebar to icons and back.
+templ Trigger(p TriggerProps) {
+	<button
+		type="button"
+		class="btn btn-ghost-secondary btn-icon d-lg-none"
+		data-bs-toggle="offcanvas"
+		data-bs-target={ "#" + p.Target }
+		aria-controls={ p.Target }
+		aria-label={ kit.Or(p.MenuLabel, kit.T(ctx).OpenMenu) }
+	>
+		@icon.Icon("ti-menu-2")
+	</button>
+	<button
+		type="button"
+		class="btn btn-ghost-secondary btn-icon d-none d-lg-inline-flex"
+		data-kit-sidebar-toggle={ p.Target }
+		aria-controls={ p.Target }
+		aria-expanded={ strconv.FormatBool(!p.Collapsed) }
+		aria-label={ kit.Or(p.Label, kit.T(ctx).ToggleSidebar) }
+		title={ kit.Or(p.Label, kit.T(ctx).ToggleSidebar) }
+	>
+		@icon.Icon("ti-layout-sidebar")
+	</button>
+}
