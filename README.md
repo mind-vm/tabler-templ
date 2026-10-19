@@ -3,7 +3,7 @@
 Server-rendered UI components for [Tabler](https://tabler.io) in Go, written with [templ](https://templ.guide).
 The API follows [shadcn-templ](https://github.com/axadrn/shadcn-templ): one package per component, a `Props`
 struct, `Class` and `Attributes` on every component, children via `{ children... }`. Unlike shadcn-templ it
-needs no Tailwind, no Node and no JavaScript of its own: components emit Tabler's classes and
+needs no Tailwind, no Node and (except for the sidebar) no JavaScript of its own: components emit Tabler's classes and
 `data-bs-*` attributes, and Tabler's bundled script does the rest (modals, dropdowns, dismissible alerts).
 
 > Status: early (v0.x). The API may still change between minor versions until v1.
@@ -53,10 +53,48 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `pagination` | `Pagination` with first/last/neighbour pages; `Numbers(page, pages)` |
 | `alert` | `Alert` (variant, icon, dismissible) |
 | `badge` | `Badge` (Tabler color, light) |
+| `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` – full class name, so icon-font subsetters can find it in the source |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
-Not yet: dropdown, nav/sidebar, tabs, avatar, toast, datagrid, steps, offcanvas.
+Not yet: dropdown, tabs, avatar, toast, datagrid, steps.
+
+### Sidebar
+
+Tabler has no sidebar that collapses to icons, so `sidebar` is the one package with CSS and script of its
+own: render `@sidebar.Styles()` in `<head>` and `@sidebar.Script()` after Tabler's script. On large screens
+the sidebar is fixed on the left and the `Trigger` collapses it to icons (items show their label as a
+tooltip then); the script remembers the choice in the cookie `kit_sidebar`, and `sidebar.Collapsed(r)`
+reads it so the server renders the same state. On small screens the sidebar is Tabler's offcanvas
+(`offcanvas-lg`), opened by the menu button of the `Trigger`. Theme it with the CSS variables listed in
+`sidebar/sidebar.go` (`--kit-sidebar-width`, `--kit-sidebar-bg`, …). The page's `.page-wrapper` must be the
+sidebar's next sibling:
+
+```go
+templ Layout(r *http.Request) {
+	<div class="page">
+		@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Collapsed: sidebar.Collapsed(r)}) {
+			@sidebar.Header() {
+				@sidebar.Brand(sidebar.BrandProps{Href: "/", Title: "Acme"})
+			}
+			@sidebar.Content() {
+				@sidebar.Group(sidebar.GroupProps{Label: "Work"}) {
+					@sidebar.Item(sidebar.ItemProps{Href: "/customers", Icon: "ti-building", Label: "Customers", Active: true})
+				}
+			}
+			@sidebar.Footer() {
+				@sidebar.User(sidebar.UserProps{Initials: "AA", Name: "Ann Example"}) {
+					<a class="dropdown-item" href="/logout">Log out</a>
+				}
+			}
+		}
+		<div class="page-wrapper">
+			<header>@sidebar.Trigger(sidebar.TriggerProps{Target: "sidebar", Collapsed: sidebar.Collapsed(r)})</header>
+			…
+		</div>
+	</div>
+}
+```
 
 ## Conventions
 

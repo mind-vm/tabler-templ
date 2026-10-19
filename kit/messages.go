@@ -10,11 +10,16 @@ type Messages struct {
 	Pages    string
 	PrevPage string
 	NextPage string
+	// Sidebar: the button that collapses it to icons (desktop) and the one that opens it (mobile).
+	ToggleSidebar string
+	OpenMenu      string
 }
 
 var (
-	English = Messages{Close: "Close", Pages: "Pages", PrevPage: "Previous page", NextPage: "Next page"}
-	German  = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite"}
+	English = Messages{Close: "Close", Pages: "Pages", PrevPage: "Previous page", NextPage: "Next page",
+		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu"}
+	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
+		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen"}
 )
 
 type messagesKey struct{}
