@@ -18,6 +18,7 @@ import (
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/blocks/shell"
 	"github.com/mind-vm/tablerkit/blocks/signin"
+	"github.com/mind-vm/tablerkit/blocks/stats"
 	"github.com/mind-vm/tablerkit/kit"
 )
 
@@ -243,4 +244,16 @@ func TestSignin(t *testing.T) {
 	assert.Contains(t, h, `<span class="fw-bold text-truncate">Birgit Büro</span>`)
 	assert.Contains(t, h, "opacity-50")
 	assert.Contains(t, h, " disabled>")
+}
+
+func TestStats(t *testing.T) {
+	ctx := context.Background()
+	h := render(t, ctx, stats.Row([]stats.Stat{
+		{Label: "Ist gesamt", Value: "4.595,00 €", Extra: "26 %"},
+		{Label: "Rote Positionen", Marker: templ.Raw(`<span class="dot"></span>`), Value: "2", Link: "/freigabe", LinkText: "Prüfen"},
+	}, stats.Props{Class: "mb-4"}))
+	assert.Contains(t, h, `<div class="kit-stats mb-4">`)
+	assert.Regexp(t, `<div class="kit-stat-value"><span>4.595,00 €</span>\s*<small>26 %</small>`, h)
+	assert.Contains(t, h, `<div class="kit-stat-label"><span class="dot"></span><span>Rote Positionen</span></div>`)
+	assert.Contains(t, h, `<a href="/freigabe"><span>Prüfen</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>`)
 }
