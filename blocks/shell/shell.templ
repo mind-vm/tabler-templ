@@ -19,6 +19,7 @@ package shell
 
 import (
 	"github.com/mind-vm/tablerkit/alert"
+	"github.com/mind-vm/tablerkit/blocks/detail"
 	"github.com/mind-vm/tablerkit/blocks/listpage"
 	"github.com/mind-vm/tablerkit/kit"
 	"github.com/mind-vm/tablerkit/sidebar"
@@ -180,11 +181,12 @@ templ PageHeader(p Props) {
 	</div>
 }
 
-// Styles is the CSS of the shell and of the blocks and components it builds on (sidebar, list page).
+// Styles is the CSS of the shell, of the sidebar and of the other blocks (list page, detail).
 // Page includes it; render it yourself only when you build your own frame.
 templ Styles() {
 	@sidebar.Styles()
 	@listpage.Styles()
+	@detail.Styles()
 	@templ.Raw("<style>" + css + "</style>")
 }
 
