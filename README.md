@@ -138,6 +138,7 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `iconlist` | `List` (inline, marker color, size, row gap), `Item` (icon, color) |
 | `accordion` | `Accordion(Props, []Item)`: chevron or plus toggle, icons, flush, inverted, tabs, several open |
 | `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
+| `chart` | ApexCharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ApexCharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
 | `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
@@ -191,6 +192,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/pricing` | `Table`: plan comparison with groups of features |
 | `blocks/invoice` | `Invoice` (from, to, lines, totals, note), `PrintButton` |
 | `blocks/billing` | `Card`, `Plan` (usage), `Invoices`, `Methods`, `Cancel`, `CheckoutPage`, `CardForm` |
+| `blocks/metric` | Dashboard cards: `Card` (label, time `Range`, value, trend, note, chart, progress), `Overview` (total with a multi-series chart and legend), `ChartCard` (titled chart, side `Values`) |
 | `blocks/legal` | `Card` and `Page` around prose (license, terms), `LicenseSummary` |
 | `blocks/faq` | `FAQ`: sections of questions in accordions |
 | `blocks/profile` | `Header` (avatar, name, bio, facts, actions), `Info` |

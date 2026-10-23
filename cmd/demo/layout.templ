@@ -7,6 +7,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/internal/catalog"
 )
@@ -16,7 +17,9 @@ templ assets() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+	@chart.Library()
 	// Rules of the preview's own demo.scss (not part of Tabler's CSS), e.g. menus shown open in the page.
 	<style>.dropdown-menu-demo{display:inline-block;width:100%;position:relative;top:0;margin-bottom:1rem!important}</style>
 }

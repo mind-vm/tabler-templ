@@ -9,8 +9,8 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 | | Status |
 |---|---|
 | Components | 63 done, 1 partial, 3 open (of 67) |
-| Blocks | 61 done, 5 partial, 112 open (of 178) |
-| Preview pages | 84 done, 21 partial, 41 open (of 146) |
+| Blocks | 75 done, 5 partial, 98 open (of 178) |
+| Preview pages | 87 done, 20 partial, 39 open (of 146) |
 
 ## Plan
 
@@ -177,20 +177,20 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/Weather](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Weather.astro)
 - [ ] [cards/Welcome](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Welcome.astro)
 - [ ] [cards/YouWin](https://github.com/tabler/tabler/blob/dev/shared/components/cards/YouWin.astro)
-- [ ] [cards/charts/ActiveUsers](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers.astro)
-- [ ] [cards/charts/ActiveUsers2](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers2.astro)
-- [ ] [cards/charts/ConversionRate](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ConversionRate.astro)
-- [ ] [cards/charts/CryptoPrice](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/CryptoPrice.astro)
-- [ ] [cards/charts/MrrOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/MrrOverview.astro)
-- [ ] [cards/charts/NewClients](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/NewClients.astro)
+- [x] [cards/charts/ActiveUsers](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers.astro) — `blocks/metric`
+- [x] [cards/charts/ActiveUsers2](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers2.astro) — `blocks/metric`
+- [x] [cards/charts/ConversionRate](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ConversionRate.astro) — `blocks/metric`
+- [x] [cards/charts/CryptoPrice](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/CryptoPrice.astro) — `blocks/metric`
+- [x] [cards/charts/MrrOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/MrrOverview.astro) — `blocks/metric`
+- [x] [cards/charts/NewClients](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/NewClients.astro) — `blocks/metric`
 - [ ] [cards/charts/PipelineFunnel](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/PipelineFunnel.astro)
-- [ ] [cards/charts/Revenue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Revenue.astro)
-- [ ] [cards/charts/Sales](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Sales.astro)
-- [ ] [cards/charts/SalesOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/SalesOverview.astro)
-- [ ] [cards/charts/SocialReferrals](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/SocialReferrals.astro)
-- [ ] [cards/charts/TotalUsers](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/TotalUsers.astro)
-- [ ] [cards/charts/TrafficSources](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/TrafficSources.astro)
-- [ ] [cards/charts/WeeklyActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/WeeklyActivity.astro)
+- [x] [cards/charts/Revenue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Revenue.astro) — `blocks/metric`
+- [x] [cards/charts/Sales](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Sales.astro) — `blocks/metric`
+- [x] [cards/charts/SalesOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/SalesOverview.astro) — `blocks/metric`
+- [x] [cards/charts/SocialReferrals](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/SocialReferrals.astro) — `blocks/metric`
+- [x] [cards/charts/TotalUsers](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/TotalUsers.astro) — `blocks/metric`
+- [x] [cards/charts/TrafficSources](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/TrafficSources.astro) — `blocks/metric`
+- [x] [cards/charts/WeeklyActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/WeeklyActivity.astro) — `blocks/metric`
 - [x] [cards/form/Layout](https://github.com/tabler/tabler/blob/dev/shared/components/cards/form/Layout.astro) — `form`
 - [x] [cards/form/Payment](https://github.com/tabler/tabler/blob/dev/shared/components/cards/form/Payment.astro) — `blocks/billing`
 - [ ] [cards/music/TrackInfo](https://github.com/tabler/tabler/blob/dev/shared/components/cards/music/TrackInfo.astro)
@@ -299,7 +299,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [parts/Datagrid](https://github.com/tabler/tabler/blob/dev/shared/components/parts/Datagrid.astro)
 - [ ] [parts/NavAside](https://github.com/tabler/tabler/blob/dev/shared/components/parts/NavAside.astro)
 - [ ] [parts/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/parts/Tasks.astro)
-- [ ] [parts/charts/Activity](https://github.com/tabler/tabler/blob/dev/shared/components/parts/charts/Activity.astro)
+- [x] [parts/charts/Activity](https://github.com/tabler/tabler/blob/dev/shared/components/parts/charts/Activity.astro) — `blocks/metric`
 - [ ] [parts/form/InputColor](https://github.com/tabler/tabler/blob/dev/shared/components/parts/form/InputColor.astro)
 
 ### Own blocks
@@ -404,8 +404,8 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 
 ### Plugins
 
-- [ ] [charts-advanced](https://preview.tabler.io/charts-advanced.html) Charts advanced
-- [ ] [charts](https://preview.tabler.io/charts.html) Charts
+- [x] [charts-advanced](https://preview.tabler.io/charts-advanced.html) Charts advanced
+- [x] [charts](https://preview.tabler.io/charts.html) Charts
 - [ ] [colorpicker](https://preview.tabler.io/colorpicker.html) Color picker
 - [ ] [datatables](https://preview.tabler.io/datatables.html) Datatables
 - [ ] [datepicker](https://preview.tabler.io/datepicker.html) Date picker
@@ -447,7 +447,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [x] [icons](https://preview.tabler.io/icons.html) Icons
 - [ ] [illustrations](https://preview.tabler.io/illustrations.html) SVG Illustrations — partial, 139 of 144 illustrations as PNG (the preview inlines SVG)
 - [x] [image-labels](https://preview.tabler.io/image-labels.html) Image labels
-- [ ] [legend](https://preview.tabler.io/legend.html) Legend — partial, the three charts need the ApexCharts plugin
+- [x] [legend](https://preview.tabler.io/legend.html) Legend
 - [x] [lists](https://preview.tabler.io/lists.html) Lists
 - [x] [markdown](https://preview.tabler.io/markdown.html) markdown
 - [x] [mockup-browser](https://preview.tabler.io/mockup-browser.html) Mockup browser

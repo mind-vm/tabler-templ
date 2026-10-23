@@ -1,0 +1,310 @@
+// Package chart renders Tabler's charts: ApexCharts set up the way the Tabler preview does it (series in
+// Tabler's colors, no chrome around a card's plot, sparklines, legends, annotations). The options are
+// built in Go; a small script, rendered once per page, starts every chart. Load ApexCharts with Library.
+//
+//	@chart.Chart(chart.Props{
+//		ID: "revenue", Label: "Revenue", Type: chart.Area, Size: chart.SizeSmall, Sparkline: true,
+//		Series: []chart.Serie{{Name: "Revenue", Color: "primary", Data: revenue}},
+//	})
+//
+// Charts in content swapped in later (e.g. by htmx) start on htmx:afterSettle, or call
+// window.tablerCharts.init(element).
+package chart
+
+import (
+	"encoding/json"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the ApexCharts version Library loads; Tabler 1.7 is built against it.
+const Version = "7.0.0"
+
+// LibraryURL is ApexCharts on jsDelivr.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/apexcharts@" + Version + "/dist/apexcharts.min.js"
+
+// Type is the kind of chart, ApexCharts' chart.type.
+type Type string
+
+const (
+	Bar         Type = "bar"
+	Line        Type = "line"
+	Area        Type = "area"
+	Pie         Type = "pie"
+	Donut       Type = "donut"
+	RadialBar   Type = "radialBar"
+	PolarArea   Type = "polarArea"
+	Radar       Type = "radar"
+	Scatter     Type = "scatter"
+	Heatmap     Type = "heatmap"
+	Treemap     Type = "treemap"
+	RangeBar    Type = "rangeBar" // a timeline
+	BoxPlot     Type = "boxPlot"
+	Bubble      Type = "bubble"
+	Candlestick Type = "candlestick"
+)
+
+// Size is a preset height.
+type Size int
+
+const (
+	SizeDefault Size = iota // Height, or 10rem
+	SizeSmall               // 2.5rem, a sparkline at the bottom of a card (chart-sm)
+	SizeLarge               // 15rem (chart-lg)
+)
+
+// Formatter names an axis label format.
+type Formatter string
+
+const (
+	Thousands Formatter = "thousands" // 12,400
+	SuffixK   Formatter = "suffix-k"  // 12K
+	Percent   Formatter = "percent"   // 58%
+)
+
+// Point is one point of a serie that needs more than a number: x and y for a heatmap or treemap cell,
+// y = [start, end] for a timeline row, [open, high, low, close] for a candlestick, [min, q1, median, q3,
+// max] for a box plot, and z, the size, for a bubble.
+type Point struct {
+	X any `json:"x"`
+	Y any `json:"y"`
+	Z any `json:"z,omitempty"`
+}
+
+// Serie is one serie of a chart; in a pie, donut, radial bar or polar area chart it is one slice with
+// its value in Data[0].
+type Serie struct {
+	Name string
+	// Type overrides the chart's type for this serie, e.g. "column" in a line chart: a combination chart.
+	Type   string
+	Data   []float64
+	Points []Point // instead of Data
+	// Color is a Tabler color ("primary", "green") or any CSS color; default the chart's Color, or the
+	// next color of Tabler's chart palette.
+	Color        string
+	ColorOpacity string // e.g. "80%"
+}
+
+// Annotation is a line across the plot: a target or limit on the y axis, a release on the x axis.
+type Annotation struct {
+	Value any // a number, or a category on the x axis
+	Label string
+	Color string // default "red"
+	Dash  *int   // dash length, default 4
+}
+
+// YAxis is one of several y axes; the second one usually sits on the right (Opposite).
+type YAxis struct {
+	SeriesName string // the serie it scales
+	Title      string
+	Opposite   bool
+	Min, Max   *float64
+}
+
+type Props struct {
+	// ID names the chart; the element is chart-<ID>, and other charts reach it by this name
+	// (BrushTarget, ApexCharts.exec).
+	ID         string
+	Label      string // what the chart shows, for screen readers
+	Class      string
+	Attributes templ.Attributes
+	Type       Type    // default Bar
+	Height     float64 // in rem, default 10
+	Size       Size
+	Series     []Serie
+	Categories []string
+	// Datetime makes the x axis a time axis; the points are days from StartDate (default 2020-06-20).
+	Datetime  bool
+	StartDate string
+	// Sparkline draws only the plot: no axes, grid or padding.
+	Sparkline  bool
+	Stacked    bool
+	Animations bool
+	Toolbar    bool // ApexCharts' zoom and download toolbar
+	Horizontal bool // horizontal bars
+	Funnel     bool // a bar chart as a funnel; give each stage a color in Colors
+	Legend     bool
+	// DataLabels writes the values on the bars, slices or points.
+	DataLabels bool
+	Title      string
+	Color      string   // the color of every serie without its own
+	Colors     []string // CSS colors, one per serie or per point (Funnel)
+	RadarSize  float64  // the radar's radius in px
+	// StrokeWidth, StrokeDash and StrokeCurve ("smooth", "straight", "stepline") style lines and areas;
+	// StrokeLinecap ("round") the bar of a radial bar chart.
+	StrokeWidth   []float64
+	StrokeDash    []float64
+	StrokeCurve   string
+	StrokeLinecap string
+	HideGrid      bool
+	ShowX         bool // vertical grid lines
+	XFormatter    Formatter
+	YFormatter    Formatter
+	YMax          *float64
+	YTitle        string
+	YTooltip      bool
+	YAxes         []YAxis
+	HideTooltip   bool
+	HidePoints    bool // no dot on hover
+	ShowMarkers   bool // a dot on every point
+	AnnotationsX  []Annotation
+	AnnotationsY  []Annotation
+	// Group syncs the tooltip and zoom of charts with the same group.
+	Group string
+	// BrushTarget makes this chart the range selector of the chart with that ID, selecting
+	// SelectionFrom to SelectionTo (Unix milliseconds) at first.
+	BrushTarget                string
+	SelectionFrom, SelectionTo float64
+	// Options are ApexCharts options merged over the built ones, e.g. a gradient fill.
+	Options map[string]any
+
+	raw        map[string]any // a complete config instead of the built one
+	formatters map[string]string
+}
+
+func (p Props) json() string {
+	b, _ := json.Marshal(p.build())
+	return string(b)
+}
+
+// Chart is a chart.
+templ Chart(p Props) {
+	<div
+		id={ "chart-" + p.ID }
+		class={ kit.Classes("position-relative", kit.If(p.Size == SizeSmall, "chart-sm"), kit.If(p.Size == SizeLarge, "chart-lg"), p.Class) }
+		role="img"
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		if s := p.style(); s != "" {
+			style={ templ.SafeCSS(s) }
+		}
+		data-tabler-chart={ p.json() }
+		{ p.Attributes... }
+	></div>
+	@Script()
+}
+
+type RadialProps struct {
+	ID     string
+	Class  string
+	Title  string // shown above the value, in capitals
+	Value  float64
+	Height int // in px, default 350
+	Color  string
+}
+
+// Radial is a single percentage as a radial bar with its title, e.g. the share of active users.
+templ Radial(p RadialProps) {
+	@Chart(radial(p))
+}
+
+func radial(p RadialProps) Props {
+	h := p.Height
+	if h == 0 {
+		h = 350
+	}
+	return Props{ID: p.ID, Label: p.Title, Class: p.Class, formatters: map[string]string{"plotOptions.radialBar.dataLabels.value.formatter": string(Percent)},
+		raw: map[string]any{
+			"series": []float64{p.Value},
+			"chart":  map[string]any{"height": h, "type": "radialBar"},
+			"plotOptions": map[string]any{"radialBar": map[string]any{
+				"startAngle": -120, "endAngle": 120,
+				"hollow": map[string]any{"margin": 15, "size": "70%"},
+				"dataLabels": map[string]any{
+					"name":  map[string]any{"show": true, "offsetY": -20, "fontSize": "14px", "fontFamily": "inherit", "fontWeight": 400, "color": "var(--tblr-secondary)"},
+					"value": map[string]any{"show": true, "fontSize": "30px", "fontWeight": 700, "fontFamily": "inherit", "offsetY": 0, "color": "var(--tblr-body-color)"},
+				},
+			}},
+			"colors": []string{colorVar(kit.Or(p.Color, "primary"))},
+			"stroke": map[string]any{"lineCap": "round"},
+			"labels": []string{strings.ToUpper(p.Title)},
+		}}
+}
+
+// Toggle makes an element, e.g. a legend.Legend with Button, show and hide a serie of the chart with
+// that ID; it also toggles legend-off on the element.
+func Toggle(id, serie string) templ.Attributes {
+	return templ.Attributes{"data-chart-toggle": id, "data-series": serie}
+}
+
+// Library loads ApexCharts; put it in the page's head.
+templ Library() {
+	<script src={ LibraryURL } defer></script>
+}
+
+var once = templ.NewOnceHandle()
+
+// Script starts every chart on the page. Chart renders it (once per page), so it is only needed for
+// charts rendered without this package.
+templ Script() {
+	@once.Once() {
+		<script>
+			(function () {
+				if (window.tablerCharts) return;
+				var formatters = {
+					thousands: function (v) { return v.toLocaleString('en-US'); },
+					'suffix-k': function (v) { return v + 'K'; },
+					percent: function (v) { return v + '%'; },
+				};
+				// Heatmap and treemap shade each cell from a literal color, which ApexCharts can only read as hex:
+				// resolve var()/color-mix() on a probe inside the chart, then go through a 1x1 canvas.
+				function resolve(el, value) {
+					if (typeof value !== 'string' || value.indexOf('var(') < 0) return value;
+					var probe = document.createElement('span');
+					probe.style.cssText = 'position:absolute;visibility:hidden';
+					probe.style.color = value;
+					el.appendChild(probe);
+					var color = getComputedStyle(probe).color;
+					probe.remove();
+					if (!color) return value;
+					var ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
+					ctx.fillStyle = color;
+					ctx.fillRect(0, 0, 1, 1);
+					var d = ctx.getImageData(0, 0, 1, 1).data;
+					return '#' + [d[0], d[1], d[2]].map(function (c) { return c.toString(16).padStart(2, '0'); }).join('');
+				}
+				function set(obj, path, value) {
+					var keys = path.split('.');
+					for (var i = 0; i < keys.length - 1; i++) {
+						if (obj[keys[i]] == null || typeof obj[keys[i]] !== 'object') return;
+						obj = obj[keys[i]];
+					}
+					obj[keys[keys.length - 1]] = value;
+				}
+				function init(root) {
+					if (!window.ApexCharts) return;
+					window.tabler_chart = window.tabler_chart || {};
+					(root || document).querySelectorAll('[data-tabler-chart]').forEach(function (el) {
+						if (el.tablerChart) return;
+						var data = JSON.parse(el.getAttribute('data-tabler-chart'));
+						var config = data.config;
+						Object.keys(data.formatters || {}).forEach(function (path) {
+							var f = formatters[data.formatters[path]];
+							if (f) set(config, path, f);
+						});
+						if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+							config.chart.animations = { enabled: false };
+						}
+						if (data.resolveColors && Array.isArray(config.colors)) {
+							config.colors = config.colors.map(function (c) { return resolve(el, c); });
+						}
+						el.tablerChart = window.tabler_chart[el.id] = new ApexCharts(el, config);
+						el.tablerChart.render();
+					});
+				}
+				window.tablerCharts = { init: init, formatters: formatters };
+				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
+				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
+				document.addEventListener('click', function (e) {
+					var t = e.target.closest && e.target.closest('[data-chart-toggle]');
+					var el = t && document.getElementById('chart-' + t.getAttribute('data-chart-toggle'));
+					if (!el || !el.tablerChart) return;
+					el.tablerChart.toggleSeries(t.getAttribute('data-series'));
+					t.classList.toggle('legend-off');
+				});
+			})();
+		</script>
+	}
+}
