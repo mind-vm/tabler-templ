@@ -29,6 +29,11 @@ type Props struct {
 	CardList    bool // the list inside a card (card-list-group)
 	// Numbered renders an <ol> with numbers; give its Items ListItem.
 	Numbered bool
+	// Unordered renders a <ul>; give its Items ListItem.
+	Unordered bool
+	// Nav renders a <nav> named Label, for a list of links that is a navigation (e.g. settings).
+	Nav   bool
+	Label string
 }
 
 func classes(p Props) string {
@@ -43,6 +48,20 @@ templ List(props ...Props) {
 		<ol class={ classes(p) } { p.Attributes... }>
 			{ children... }
 		</ol>
+	} else if p.Unordered {
+		<ul class={ classes(p) } { p.Attributes... }>
+			{ children... }
+		</ul>
+	} else if p.Nav {
+		<nav
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			class={ classes(p) }
+			{ p.Attributes... }
+		>
+			{ children... }
+		</nav>
 	} else {
 		<div class={ classes(p) } { p.Attributes... }>
 			{ children... }

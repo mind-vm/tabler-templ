@@ -1,0 +1,64 @@
+// Package chat renders Tabler's chat: bubbles with author, time and body, the own messages on the other
+// side, with avatars.
+package chat
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Chat holds the Messages (chat, chat-bubbles).
+templ Chat(class ...string) {
+	<div class={ kit.Classes(append([]string{"chat"}, class...)...) }>
+		<div class="chat-bubbles">
+			{ children... }
+		</div>
+	</div>
+}
+
+type MessageProps struct {
+	Author string
+	Time   string
+	Avatar string // URL of the author's photo; empty = no avatar
+	Me     bool   // the own message: on the end side, colored
+}
+
+// Message is one bubble; the children are its body (paragraphs, images).
+templ Message(p MessageProps) {
+	<div>
+		<div class={ kit.Classes("row align-items-end", kit.If(p.Me, "justify-content-end")) }>
+			if p.Avatar != "" && !p.Me {
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Src: p.Avatar})
+				</div>
+			}
+			<div class="col-auto">
+				@Bubble(p) {
+					{ children... }
+				}
+			</div>
+			if p.Avatar != "" && p.Me {
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Src: p.Avatar})
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Bubble is the bubble alone, e.g. "Alice is typing…".
+templ Bubble(p MessageProps) {
+	<div class={ kit.Classes("chat-bubble", kit.If(p.Me, "chat-bubble-me")) }>
+		if p.Author != "" || p.Time != "" {
+			<div class="chat-bubble-title">
+				<div class="row">
+					<div class="col chat-bubble-author">{ p.Author }</div>
+					<div class="col-auto chat-bubble-date">{ p.Time }</div>
+				</div>
+			</div>
+		}
+		<div class="chat-bubble-body">
+			{ children... }
+		</div>
+	</div>
+}

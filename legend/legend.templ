@@ -1,0 +1,88 @@
+// Package legend renders Tabler legends: a colored dot with a label and an optional value, as text, a
+// link or a toggle button, in lists that wrap, stack or are divided.
+package legend
+
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Text       string
+	Value      string
+	// ValueContent replaces Value with markup, e.g. a placeholder while loading.
+	ValueContent templ.Component
+	Unit         string // after the value, e.g. "ms"
+	Large      bool   // label on top, big value below (legend-lg)
+	Color      string // legend-{color}
+	Href       string // a link
+	Button     bool   // a toggle button
+	Active     bool
+	Off        bool // dimmed, e.g. a hidden series
+}
+
+func classes(p Props) string {
+	return kit.Classes("legend", kit.If(p.Large, "legend-lg"), kit.If(p.Color != "", "legend-"+p.Color), kit.If(p.Active, "active"), kit.If(p.Off, "legend-off"), p.Class)
+}
+
+templ inner(p Props) {
+	<span class="legend-dot"></span>
+	{ p.Text }
+	{ children... }
+	if p.Value != "" || p.ValueContent != nil {
+		<span class="legend-value">
+			if p.ValueContent != nil {
+				@p.ValueContent
+			} else {
+				{ p.Value }
+			}
+			if p.Unit != "" {
+				<span class="legend-unit">{ p.Unit }</span>
+			}
+		</span>
+	}
+}
+
+templ Legend(p Props) {
+	switch {
+		case p.Href != "":
+			<a class={ classes(p) } href={ templ.URL(p.Href) } { p.Attributes... }>
+				@inner(p) {
+					{ children... }
+				}
+			</a>
+		case p.Button:
+			<button class={ classes(p) } type="button" { p.Attributes... }>
+				@inner(p) {
+					{ children... }
+				}
+			</button>
+		default:
+			<span class={ classes(p) } { p.Attributes... }>
+				@inner(p) {
+					{ children... }
+				}
+			</span>
+	}
+}
+
+type ListProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Vertical bool
+	Divided  bool
+}
+
+templ List(p ListProps) {
+	<div class={ kit.Classes("legend-list", kit.If(p.Vertical, "legend-list-vertical"), kit.If(p.Divided, "legend-list-divided"), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// Dot is the bare colored dot (legend-dot legend-{color}), e.g. in a chart's own legend.
+templ Dot(color string, class ...string) {
+	<span class={ kit.Classes("legend-dot", kit.If(color != "", "legend-"+color), strings.Join(class, " ")) }></span>
+}

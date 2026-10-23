@@ -47,6 +47,8 @@ type Props struct {
 	StatusLabel string // accessible name of the status, e.g. "Online"
 	Brand       string // URL of a small brand mark at the corner (avatar-brand)
 	Cover       bool   // ring for an avatar overlapping a cover image (avatar-cover)
+	// Empty shows nothing inside, e.g. as a loading placeholder.
+	Empty bool
 }
 
 // Classes returns the class string of an avatar.
@@ -82,7 +84,7 @@ templ inner(p Props) {
 	if p.Brand != "" {
 		<span class="avatar-brand" style={ "background-image: url(" + p.Brand + ")" }></span>
 	}
-	if p.Src == "" {
+	if p.Src == "" && !p.Empty {
 		if p.Initials != "" {
 			{ p.Initials }
 		} else if p.Icon != "" {

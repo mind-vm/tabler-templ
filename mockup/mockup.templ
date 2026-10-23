@@ -1,0 +1,37 @@
+// Package mockup renders Tabler's browser mockup: a window frame with controls and an address bar around
+// a screenshot or any content.
+package mockup
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	URL        string // the address bar; empty = no address bar
+	Secure     bool   // a lock before the URL
+	Small      bool   // a slim toolbar for thumbnails (mockup-browser-sm)
+	BodyClass  string
+}
+
+// Browser frames its children.
+templ Browser(p Props) {
+	<div class={ kit.Classes("mockup-browser", kit.If(p.Small, "mockup-browser-sm"), p.Class) } { p.Attributes... }>
+		<div class="mockup-browser-toolbar">
+			<span class="mockup-browser-controls"></span>
+			if p.URL != "" {
+				<div class="mockup-browser-url">
+					if p.Secure {
+						@icon.Icon("ti-lock")
+					}
+					<span>{ p.URL }</span>
+				</div>
+			}
+		</div>
+		<div class={ kit.Classes("mockup-browser-body", p.BodyClass) }>
+			{ children... }
+		</div>
+	</div>
+}

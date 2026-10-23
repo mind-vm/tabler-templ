@@ -1,0 +1,52 @@
+// Package trending renders a change as a colored value with an arrow: green and up, red and down, muted
+// for no change.
+package trending
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class string
+	Value float64
+	// Text is the value as shown, e.g. "+9.5"; default the formatted Value.
+	Text string
+	Unit string // default "%"; "-" for none
+	// Read-out texts, default "Increased by", "Decreased by", "No change,".
+	Up, Down, Same string
+}
+
+func parts(p Props) (color, ic, said string) {
+	switch {
+	case p.Value > 0:
+		return "green", "ti-arrow-up", kit.Or(p.Up, "Increased by")
+	case p.Value < 0:
+		return "red", "ti-arrow-down", kit.Or(p.Down, "Decreased by")
+	}
+	return "muted", "ti-minus", kit.Or(p.Same, "No change,")
+}
+
+func text(p Props) string {
+	if p.Text != "" {
+		return p.Text
+	}
+	return strconv.FormatFloat(p.Value, 'f', -1, 64)
+}
+
+func unit(p Props) string {
+	if p.Unit == "-" {
+		return ""
+	}
+	return kit.Or(p.Unit, "%")
+}
+
+templ Trending(p Props) {
+	{{ color, ic, said := parts(p) }}
+	<span class={ kit.Classes("text-"+color+" d-inline-flex align-items-center lh-1", p.Class) }>
+		<span class="visually-hidden">{ said + " " }</span>{ text(p) }{ unit(p) }
+		@icon.Icon(ic, icon.Props{Class: "ms-0", Size: icon.SizeSmall})
+	</span>
+}

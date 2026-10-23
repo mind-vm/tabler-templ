@@ -1,0 +1,37 @@
+// Package placeholder renders Tabler (Bootstrap) placeholders: grey blocks standing in for content while
+// it loads, with glow or wave animation.
+package placeholder
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class string // the width, e.g. "col-9"
+	Size  string // xs, sm, lg
+	Color string // e.g. "primary" (bg-primary)
+	// Span renders an inline <span> (in text) instead of a block <div>.
+	Span bool
+}
+
+templ Placeholder(props ...Props) {
+	{{ p := kit.First(props) }}
+	{{ c := kit.Classes("placeholder", p.Class, kit.If(p.Size != "", "placeholder-"+p.Size), kit.If(p.Color != "", "bg-"+p.Color)) }}
+	if p.Span {
+		<span class={ c }></span>
+	} else {
+		<div class={ c }></div>
+	}
+}
+
+// Glow animates the placeholders inside (placeholder-glow).
+templ Glow(class ...string) {
+	<div class={ kit.Classes(append([]string{"placeholder-glow"}, class...)...) }>
+		{ children... }
+	</div>
+}
+
+// Wave animates the placeholders inside with a wave (placeholder-wave).
+templ Wave(class ...string) {
+	<div class={ kit.Classes(append([]string{"placeholder-wave"}, class...)...) }>
+		{ children... }
+	</div>
+}

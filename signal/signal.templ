@@ -1,0 +1,38 @@
+// Package signal renders Tabler's signal: a row of stepped bars showing a level, e.g. priority or
+// strength.
+package signal
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Value      int    // lit bars
+	Max        int    // all bars, default 3 (Tabler styles up to 5)
+	Color      string // signal-{color}
+	Label      string // accessible name; without it the signal is decorative
+}
+
+func bars(p Props) int {
+	if p.Max <= 0 {
+		return 3
+	}
+	return p.Max
+}
+
+templ Signal(p Props) {
+	<span
+		class={ kit.Classes("signal", kit.If(p.Color != "", "signal-"+p.Color), p.Class) }
+		if p.Label != "" {
+			role="img"
+			aria-label={ p.Label }
+		} else {
+			aria-hidden="true"
+		}
+		{ p.Attributes... }
+	>
+		for i := range bars(p) {
+			<span class={ kit.Classes("signal-bar", kit.If(i < p.Value, "active")) }></span>
+		}
+	</span>
+}

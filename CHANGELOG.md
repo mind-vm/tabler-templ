@@ -38,6 +38,12 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
 - `modal`: sizes xl and full-width, blur, status line, no header/close, sections, inline display, native
   `Dialog`; the modal gets `role="dialog"` and `aria-modal`. `blocks/modals`: Status, Confirm, ConfirmDelete,
   ChangePassword. `form.SelectItem` boxes with title and description.
+- `icon`: filled icons next to outline ones (`Filled`, or names ending in `-filled`): the glyph comes from
+  the filled webfont, which `icon.Styles()` loads (`icon.FilledFontURL`).
+- New packages: `accordion`, `carousel`, `chat`, `hovergallery`, `imagelabel`, `legend`, `mention`, `mockup`,
+  `placeholder`, `pricing`, `shape`, `shimmer`, `signal`, `sparkline`, `spinner`, `switchicon`, `tag`, `trending`,
+  `typography`. `avatar.Props.Empty`, `listgroup` as `<ul>` or `<nav>`. `card`:
+  gradients, rotation, image places, overlay, cover, card buttons, meta, code, dropdown; `tabscard.Tabs`.
 - `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
   `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
   default is `ShapeDefault`.

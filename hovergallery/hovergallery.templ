@@ -1,0 +1,28 @@
+// Package hovergallery renders Tabler's hover gallery: several images of one thing; moving the pointer
+// across shows the next one, optionally with indicators.
+package hovergallery
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Image struct{ Src, Alt string }
+
+type Props struct {
+	Class       string // e.g. "rounded"
+	Attributes  templ.Attributes
+	Indicators  bool
+	AspectRatio string // e.g. "16 / 9"
+}
+
+templ Gallery(p Props, images []Image) {
+	<div
+		class={ kit.Classes("hover-gallery", kit.If(p.Indicators, "hover-gallery-indicators"), p.Class) }
+		if p.AspectRatio != "" {
+			style={ "--tblr-hover-gallery-aspect-ratio: " + p.AspectRatio }
+		}
+		{ p.Attributes... }
+	>
+		for _, im := range images {
+			<div class="hover-gallery-item"><img src={ im.Src } alt={ im.Alt }/></div>
+		}
+	</div>
+}

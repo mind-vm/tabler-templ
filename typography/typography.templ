@@ -1,0 +1,34 @@
+// Package typography holds Tabler's text elements that are more than a class: the subheader (a small
+// uppercase heading) and the keyboard keys.
+package typography
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type SubheaderProps struct {
+	Class string
+	// Level renders an <h2>…<h6>; default a <div>.
+	Level int
+}
+
+// Subheader is a small uppercase heading (subheader), e.g. above a group of links.
+templ Subheader(props ...SubheaderProps) {
+	{{ p := kit.First(props) }}
+	if p.Level >= 2 && p.Level <= 6 {
+		@templ.Raw("<h" + string(rune('0'+p.Level)) + ` class="` + templ.EscapeString(kit.Classes("subheader", p.Class)) + `">`)
+		{ children... }
+		@templ.Raw("</h" + string(rune('0'+p.Level)) + ">")
+	} else {
+		<div class={ kit.Classes("subheader", p.Class) }>
+			{ children... }
+		</div>
+	}
+}
+
+// Keys renders a keyboard shortcut, e.g. Keys("⌘", "K") (kbd-group).
+templ Keys(keys ...string) {
+	<kbd class="kbd-group">
+		for _, k := range keys {
+			<kbd>{ k }</kbd>
+		}
+	</kbd>
+}

@@ -1,0 +1,120 @@
+// Package carousel renders Tabler (Bootstrap) carousels: slides with images and captions, controls,
+// line, dot, thumbnail or vertical indicators, fade.
+package carousel
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Indicators string
+
+const (
+	NoIndicators Indicators = "-"
+	Lines        Indicators = ""
+	Dots         Indicators = "dot"
+	Thumbs       Indicators = "thumb"
+)
+
+type Slide struct {
+	Src, Alt string
+	// Caption over the slide, with a scrim behind it.
+	Title, Text string
+}
+
+type Props struct {
+	ID         string // required: controls and indicators target it
+	Class      string
+	Attributes templ.Attributes
+	Fade       bool
+	Indicators Indicators
+	Vertical   bool // indicators stacked on the end side
+	NoControls bool
+	Interval   int // milliseconds between slides; 0 = Bootstrap's default, -1 = no autoplay
+	// ThumbRatio is the thumbnails' ratio class, default "ratio-4x3".
+	ThumbRatio string
+	// Label names the carousel for screen readers (aria-roledescription="carousel", a live region).
+	Label string
+	// Labels of the controls and indicators, default "Previous", "Next", "Slide".
+	PrevLabel, NextLabel, SlideLabel string
+}
+
+func interval(p Props) string {
+	if p.Interval < 0 {
+		return "false"
+	}
+	return strconv.Itoa(p.Interval)
+}
+
+templ Carousel(p Props, slides []Slide) {
+	<div
+		id={ p.ID }
+		class={ kit.Classes("carousel slide", kit.If(p.Fade, "carousel-fade"), p.Class) }
+		data-bs-ride="carousel"
+		if p.Label != "" {
+			aria-roledescription="carousel"
+			aria-label={ p.Label }
+		}
+		if p.Interval != 0 {
+			data-bs-interval={ interval(p) }
+		}
+		{ p.Attributes... }
+	>
+		if p.Indicators != NoIndicators {
+			<div class={ kit.Classes("carousel-indicators", kit.If(p.Vertical, "carousel-indicators-vertical"), kit.If(p.Indicators != Lines, "carousel-indicators-"+string(p.Indicators))) }>
+				for i, s := range slides {
+					<button
+						type="button"
+						data-bs-target={ "#" + p.ID }
+						data-bs-slide-to={ strconv.Itoa(i) }
+						aria-label={ kit.Or(p.SlideLabel, "Slide") + " " + strconv.Itoa(i+1) }
+						if i == 0 {
+							aria-current="true"
+						}
+						if p.Indicators == Thumbs {
+							class={ kit.Classes("ratio", kit.Or(p.ThumbRatio, "ratio-4x3"), kit.If(i == 0, "active")) }
+							style={ "background-image: url(" + s.Src + ")" }
+						} else if i == 0 {
+							class="active"
+						}
+					></button>
+				}
+			</div>
+		}
+		<div
+			class="carousel-inner"
+			if p.Label != "" {
+				aria-live="polite"
+				aria-atomic="true"
+			}
+		>
+			for i, s := range slides {
+				<div class={ kit.Classes("carousel-item", kit.If(i == 0, "active")) }>
+					<img class="d-block w-100" alt={ s.Alt } src={ s.Src }/>
+					if s.Title != "" || s.Text != "" {
+						<div class="carousel-caption-background d-none d-md-block"></div>
+						<div class="carousel-caption d-none d-md-block">
+							if s.Title != "" {
+								<h3>{ s.Title }</h3>
+							}
+							if s.Text != "" {
+								<p>{ s.Text }</p>
+							}
+						</div>
+					}
+				</div>
+			}
+		</div>
+		if !p.NoControls {
+			<button class="carousel-control-prev" type="button" data-bs-target={ "#" + p.ID } data-bs-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">{ kit.Or(p.PrevLabel, "Previous") }</span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target={ "#" + p.ID } data-bs-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">{ kit.Or(p.NextLabel, "Next") }</span>
+			</button>
+		}
+	</div>
+}

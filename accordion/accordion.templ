@@ -1,0 +1,102 @@
+// Package accordion renders Tabler accordions: collapsible items with a header button, optional icons,
+// a chevron or plus toggle; flush, inverted and tabs styles.
+package accordion
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Style string
+
+const (
+	Default  Style = ""
+	Flush    Style = "flush"    // no outer borders
+	Inverted Style = "inverted" // the toggle at the start
+	Tabs     Style = "tabs"     // items as separated tabs
+)
+
+type Props struct {
+	ID         string // required: the items name it as their parent
+	Class      string
+	Attributes templ.Attributes
+	Style      Style
+	// Multiple lets several items stay open; by default opening one closes the others.
+	Multiple bool
+	// HeadingLevel of the item headers (2–6), default 3; the button takes the heading's size.
+	HeadingLevel int
+}
+
+func level(p Props) string {
+	if p.HeadingLevel >= 2 && p.HeadingLevel <= 6 {
+		return string(rune('0' + p.HeadingLevel))
+	}
+	return "3"
+}
+
+// Item is one entry of an Accordion.
+type Item struct {
+	Key      string // unique within the accordion; the collapse's id is "<accordion ID>-<Key>"
+	Title    string
+	Icon     string // before the title (accordion-button-icon)
+	Open     bool
+	Plus     bool // a plus toggle instead of the chevron
+	ItemClass string // e.g. "bg-surface"
+	Content  templ.Component
+}
+
+templ Accordion(p Props, items []Item) {
+	<div class={ kit.Classes("accordion", kit.If(p.Style != Default, "accordion-"+string(p.Style)), p.Class) } id={ p.ID } { p.Attributes... }>
+		for _, it := range items {
+			{{ id := p.ID + "-" + it.Key }}
+			<div class={ kit.Classes("accordion-item", it.ItemClass) }>
+				@templ.Raw("<h" + level(p) + ` class="accordion-header">`)
+					<button
+						id={ id + "-button" }
+						class={ kit.Classes("accordion-button", kit.If(!it.Open, "collapsed")) }
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target={ "#" + id }
+						if it.Open {
+							aria-expanded="true"
+						} else {
+							aria-expanded="false"
+						}
+						aria-controls={ id }
+					>
+						if it.Icon != "" {
+							<span class="accordion-button-icon">
+								@icon.Icon(it.Icon)
+							</span>
+						}
+						{ it.Title }
+						if it.Plus {
+							<span class="accordion-button-toggle accordion-button-toggle-plus">
+								@icon.Icon("ti-plus")
+							</span>
+						} else {
+							<span class="accordion-button-toggle">
+								@icon.Icon("ti-chevron-down")
+							</span>
+						}
+					</button>
+				@templ.Raw("</h" + level(p) + ">")
+				<div
+					id={ id }
+					class={ kit.Classes("accordion-collapse collapse", kit.If(it.Open, "show")) }
+					if !p.Multiple {
+						data-bs-parent={ "#" + p.ID }
+					}
+					role="region"
+					aria-labelledby={ id + "-button" }
+				>
+					<div class="accordion-body">
+						if it.Content != nil {
+							@it.Content
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
