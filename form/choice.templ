@@ -80,7 +80,10 @@ templ SelectItem(p SelectItemProps) {
 		} else {
 			<span class="form-selectgroup-label">
 				if p.Icon != "" {
-					@icon.Icon(p.Icon)
+					@icon.Icon(p.Icon, icon.Props{Class: kit.If(p.Label != "", "me-1")})
+					if p.Label != "" {
+						{ " " }
+					}
 				}
 				{ p.Label }
 				{ children... }
@@ -127,6 +130,9 @@ type ColorCheckProps struct {
 	Radio      bool
 	// Light uses a dark check mark for light colors (form-colorinput-light).
 	Light bool
+	Round bool // a round swatch (rounded-circle)
+	// CSSColor is any CSS color for the swatch instead of a Tabler color, e.g. "#ffcb9d".
+	CSSColor string
 }
 
 // ColorCheck is a color swatch that can be checked like a checkbox or radio.
@@ -143,6 +149,11 @@ templ ColorCheck(p ColorCheckProps) {
 			checked?={ p.Checked }
 			{ p.Attributes... }
 		/>
-		<span class={ kit.Classes("form-colorinput-color", kit.If(p.Color != "", "bg-"+p.Color)) }></span>
+		<span
+			class={ kit.Classes("form-colorinput-color", kit.If(p.Color != "", "bg-"+p.Color), kit.If(p.Round, "rounded-circle")) }
+			if p.CSSColor != "" {
+				style={ "background-color: " + p.CSSColor }
+			}
+		></span>
 	</label>
 }

@@ -1,0 +1,27 @@
+// Package social renders the brand marks of Tabler's social icons plugin (social social-app-*): a
+// fixed-size colored square per network. Load the plugin's stylesheet (tabler-socials.css) next to
+// Tabler's CSS.
+package social
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string // e.g. "icon" to size it like an icon inside a button
+	Attributes templ.Attributes
+	Size       string // xxs, xs, sm, md, lg, xl, 2xl
+	Gray       bool   // a gray mark instead of the brand colors (social-gray)
+	Label      string // accessible name, e.g. "GitHub"; without it the mark is decorative
+}
+
+// Social renders the mark of an app, e.g. Social("github").
+templ Social(app string, props ...Props) {
+	{{ p := kit.First(props) }}
+	<span
+		class={ kit.Classes(p.Class, "social", kit.If(p.Size != "", "social-"+p.Size), kit.If(p.Gray, "social-gray"), "social-app-"+app) }
+		if p.Label != "" {
+			role="img"
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	></span>
+}

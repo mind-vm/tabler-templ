@@ -1,0 +1,400 @@
+// Package tables holds the data tables of Tabler's preview: a ranking with background bars, a list of
+// invoices with selectable rows, and an advanced table with search, sortable columns, row actions and
+// paging (sorted, searched and paged in the browser by List.js).
+//
+//	@tables.Advanced(tables.AdvancedProps{ID: "employees", Title: "Employee", Columns: cols, Rows: rows})
+//	@tables.AdvancedScript("employees", cols, 20) // after List.js
+package tables
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/pagination"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// RankingRow is a row of a Ranking.
+type RankingRow struct {
+	Text    string // e.g. a page's path
+	Percent float64 // width of the bar behind the text, e.g. 82.54
+	Value   string // e.g. the number of visitors
+}
+
+type RankingProps struct {
+	Title      string
+	Label      string // header of the text column, e.g. "Page"
+	ValueLabel string // header of the value column, e.g. "Visitors"
+	Color      string // of the bars, default "primary"
+}
+
+// Ranking is a card with a compact table whose rows have a bar behind the text (progressbg), e.g. the
+// most visited pages.
+templ Ranking(p RankingProps, rows []RankingRow) {
+	@card.Card() {
+		@card.Body() {
+			@card.Title() {
+				{ p.Title }
+			}
+			@table.Table(table.Props{Small: true, Borderless: true}) {
+				<thead>
+					<tr>
+						<th>{ p.Label }</th>
+						<th class="text-end">{ p.ValueLabel }</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, r := range rows {
+						<tr>
+							<td>
+								@progress.Background(progress.BackgroundProps{Value: r.Percent, Color: p.Color, Text: r.Text})
+							</td>
+							<td class="w-1 fw-medium text-end">{ r.Value }</td>
+						</tr>
+					}
+				</tbody>
+			}
+		}
+	}
+}
+
+// Invoice is a row of Invoices.
+type Invoice struct {
+	No          string
+	Subject     string
+	Href        string // the invoice's page
+	Country     string // country code of the client's flag, e.g. "us"
+	CountryName string
+	Client      string
+	VAT         string
+	Created     string
+	Status      string
+	StatusColor string // of the dot before the status, e.g. "success"
+	Price       string
+}
+
+type InvoicesProps struct {
+	ID      string // id of the table, default "invoices-table"
+	Title   string // default "Invoices"
+	Count   int    // entries shown per page
+	Total   int    // entries in all
+	From    int    // number of the first entry shown, default 1
+	Page    int
+	Pages   int
+	Href    func(page int) string // link to a page, default "#"
+	Actions templ.Component       // the menu items of each row's "Actions" dropdown
+}
+
+// Invoices is a card with a table of invoices: entries per page and search above, selectable rows with
+// a menu each, and the number of entries and pages below.
+templ Invoices(p InvoicesProps, rows []Invoice) {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				{ kit.Or(p.Title, "Invoices") }
+			}
+		}
+		@card.Body(card.Props{Class: "border-bottom py-3"}) {
+			<div class="d-flex">
+				<div class="text-secondary">
+					Show
+					<div class="mx-2 d-inline-block">
+						@form.Input(form.InputProps{Size: form.SizeSmall, Value: strconv.Itoa(p.Count), AriaLabel: "Invoices count", Attributes: templ.Attributes{"size": "3"}})
+					</div>
+					entries
+				</div>
+				<div class="ms-auto text-secondary">
+					Search:
+					<div class="ms-2 d-inline-block">
+						@form.Input(form.InputProps{Size: form.SizeSmall, AriaLabel: "Search invoice"})
+					</div>
+				</div>
+			</div>
+		}
+		@table.Table(table.Props{Responsive: true, Selectable: true, Card: true, VCenter: true, Class: "text-nowrap datatable", Attributes: templ.Attributes{"id": kit.Or(p.ID, "invoices-table")}}) {
+			<thead>
+				<tr>
+					<th class="w-1">
+						@table.SelectCheck(table.CheckProps{Label: "Select all", All: true})
+					</th>
+					<th class="w-1">
+						No.{ " " }
+						@icon.Icon("ti-chevron-up", icon.Props{Size: icon.SizeSmall, Inline: true})
+					</th>
+					<th>Invoice Subject</th>
+					<th>Client</th>
+					<th>VAT No.</th>
+					<th>Created</th>
+					<th>Status</th>
+					<th>Price</th>
+					<th><span class="visually-hidden">Actions</span></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, r := range rows {
+					<tr>
+						<td>
+							@table.SelectCheck(table.CheckProps{Label: "Select invoice " + r.No})
+						</td>
+						<td><span class="text-secondary">{ r.No }</span></td>
+						<td><a href={ templ.URL(kit.Or(r.Href, "#")) } class="text-reset">{ r.Subject }</a></td>
+						<td>
+							@flag.Flag(r.Country, flag.Props{Size: flag.SizeXS, Class: "me-2", Label: r.CountryName})
+							{ r.Client }
+						</td>
+						<td>{ r.VAT }</td>
+						<td>{ r.Created }</td>
+						<td>
+							@badge.Badge(badge.Props{Color: r.StatusColor, Class: "me-1"})
+							{ r.Status }
+						</td>
+						<td>{ r.Price }</td>
+						<td class="text-end">
+							@RowActions(p.Actions)
+						</td>
+					</tr>
+				}
+			</tbody>
+		}
+		@card.Footer() {
+			<div class="row g-2 justify-content-center justify-content-sm-between">
+				<div class="col-auto d-flex align-items-center">
+					<p class="m-0 text-secondary">
+						Showing <strong>{ strconv.Itoa(max(p.From, 1)) } to { strconv.Itoa(max(p.From, 1) + len(rows) - 1) }</strong> of <strong>{ strconv.Itoa(p.Total) } entries</strong>
+					</p>
+				</div>
+				<div class="col-auto">
+					@pagination.Pagination(pagination.Props{Page: p.Page, Pages: p.Pages, Href: href(p.Href), Class: "m-0 ms-auto", Label: "Invoices pagination"})
+				</div>
+			</div>
+		}
+	}
+}
+
+func href(f func(int) string) func(int) string {
+	if f != nil {
+		return f
+	}
+	return func(int) string { return "#" }
+}
+
+// RowActions is the "Actions" dropdown of a table row; the children are its dropdown.Item entries.
+templ RowActions(items templ.Component) {
+	@dropdown.Dropdown() {
+		@dropdown.Toggle(button.Props{Class: "align-text-top", Attributes: templ.Attributes{"data-bs-popper-config": `{"strategy":"fixed"}`}}) {
+			Actions
+		}
+		@dropdown.Menu(dropdown.MenuProps{End: true}) {
+			if items != nil {
+				@items
+			}
+		}
+	}
+}
+
+// Column is a sortable column of an Advanced table.
+type Column struct {
+	Field string // the sort key; also the class of the column's cells, for List.js
+	Label string
+	Class string // more classes on the column's cells, e.g. "py-0"
+}
+
+// Row is a row of an Advanced table: the name read out by its check and a cell per Column.
+type Row struct {
+	Name  string
+	Cells []templ.Component
+}
+
+type AdvancedProps struct {
+	ID          string // of the table's container; the search input is "<ID>-search"
+	Title       string
+	Description string
+	// Search adds a search field to the header (the script filters the rows as you type).
+	Search  bool
+	Actions templ.Component // more controls in the header, e.g. buttons and a dropdown
+	Columns []Column
+	Rows    []Row
+	PerPage []int // choices of rows per page, default 10, 20, 50, 100
+	Count   int   // rows per page, default 20
+	Page    int
+	Pages   int
+	Href    func(page int) string // link to a page, default "#"
+}
+
+func perPage(p AdvancedProps) []int {
+	if len(p.PerPage) == 0 {
+		return []int{10, 20, 50, 100}
+	}
+	return p.PerPage
+}
+
+func count(p AdvancedProps) int {
+	if p.Count <= 0 {
+		return 20
+	}
+	return p.Count
+}
+
+// Advanced is a card with a table of selectable rows and sortable columns, a search field and actions
+// in the header, and a choice of rows per page and pages below. Load List.js and AdvancedScript to sort,
+// search and page it in the browser.
+templ Advanced(p AdvancedProps) {
+	@card.Card() {
+		<div class="card-table">
+			@card.Header() {
+				<div class="row w-full">
+					<div class="col">
+						@card.Title(card.Props{Class: "mb-0"}) {
+							{ p.Title }
+						}
+						if p.Description != "" {
+							<p class="text-secondary m-0">{ p.Description }</p>
+						}
+					</div>
+					<div class="col-md-auto col-sm-12">
+						<div class="btn-list ms-auto d-flex flex-wrap">
+							if p.Search {
+								@form.Group(form.GroupProps{Flat: true, Class: "w-auto"}) {
+									<span class="input-group-text">
+										@icon.Icon("ti-search")
+									</span>
+									@form.Input(form.InputProps{ID: p.ID + "-search", AriaLabel: "Search", Autocomplete: "off"})
+									<span class="input-group-text">
+										<kbd>ctrl + K</kbd>
+									</span>
+								}
+							}
+							if p.Actions != nil {
+								@p.Actions
+							}
+						</div>
+					</div>
+				</div>
+			}
+			<div id={ p.ID }>
+				@table.Table(table.Props{Responsive: true, VCenter: true, Selectable: true}) {
+					<thead>
+						<tr>
+							<th class="w-1"><span class="visually-hidden">Select</span></th>
+							for _, c := range p.Columns {
+								<th>
+									@table.SortHeader(table.SortProps{Field: c.Field, Class: "d-flex justify-content-between"}) {
+										{ c.Label }
+									}
+								</th>
+							}
+						</tr>
+					</thead>
+					<tbody class="table-tbody">
+						for _, r := range p.Rows {
+							<tr>
+								<td>
+									@table.SelectCheck(table.CheckProps{Label: "Select " + r.Name, Value: "true"})
+								</td>
+								for i, c := range p.Columns {
+									<td class={ kit.Classes(c.Field, c.Class) }>
+										if i < len(r.Cells) && r.Cells[i] != nil {
+											@r.Cells[i]
+										}
+									</td>
+								}
+							</tr>
+						}
+					</tbody>
+				}
+				@card.Footer(card.Props{Class: "d-flex align-items-center"}) {
+					@dropdown.Dropdown(dropdown.Props{Attributes: templ.Attributes{"data-table-id": p.ID}}) {
+						@dropdown.Toggle(button.Props{}) {
+							<span id={ p.ID + "-page-count" } class="me-1">{ strconv.Itoa(count(p)) }</span>
+							<span>records</span>
+						}
+						@dropdown.Menu() {
+							for _, n := range perPage(p) {
+								@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onclick": "setPageListItems(this)", "data-value": strconv.Itoa(n)}}) {
+									{ strconv.Itoa(n) } records
+								}
+							}
+						}
+					}
+					@pagination.Pagination(pagination.Props{Page: p.Page, Pages: p.Pages, Href: href(p.Href), Class: "m-0 ms-auto", Label: "Table pagination"})
+				}
+			</div>
+		</div>
+	}
+}
+
+// OnChecked shows text in a cell, and the actions instead while its row is checked.
+templ OnChecked(text string, actions templ.Component) {
+	<span class="on-unchecked">{ text }</span>
+	<div class="on-checked">
+		<div class="d-flex justify-content-end">
+			if actions != nil {
+				@actions
+			}
+		</div>
+	</div>
+}
+
+type scriptData struct {
+	ID      string   `json:"id"`
+	Keys    []string `json:"keys"`
+	PerPage int      `json:"perPage"`
+}
+
+func scriptArgs(p AdvancedProps) scriptData {
+	keys := make([]string, len(p.Columns))
+	for i, c := range p.Columns {
+		keys[i] = c.Field
+	}
+	return scriptData{ID: p.ID, Keys: keys, PerPage: count(p)}
+}
+
+// AdvancedScript sorts, searches and pages an Advanced table with List.js (load List.js before it), like
+// Tabler's demo.
+templ AdvancedScript(p AdvancedProps) {
+	@templ.JSONScript(p.ID+"-list-config", scriptArgs(p))
+	<script>
+		(function () {
+			const scripts = document.querySelectorAll('script[type="application/json"][id$="-list-config"]');
+			const cfg = JSON.parse(scripts[scripts.length - 1].textContent);
+			window.setPageListItems = function (el) {
+				const id = el.closest('[data-table-id]')?.dataset.tableId;
+				if (!id || !window.tabler_list?.[id]) return;
+				window.tabler_list[id].page = parseInt(el.dataset.value);
+				window.tabler_list[id].update();
+				document.querySelector('#' + id + '-page-count').innerHTML = el.dataset.value;
+			};
+			function init() {
+				window.tabler_list ??= {};
+				const list = (window.tabler_list[cfg.id] = new List(cfg.id, {
+					sortClass: 'table-sort',
+					listClass: 'table-tbody',
+					page: cfg.perPage,
+					pagination: {
+						item: (value) => `<li class="page-item"><a class="page-link cursor-pointer">${value.page}</a></li>`,
+						innerWindow: 1,
+						outerWindow: 1,
+						left: 0,
+						right: 0,
+					},
+					valueNames: cfg.keys,
+				}));
+				const search = document.querySelector('#' + cfg.id + '-search');
+				search?.addEventListener('input', () => list.search(search.value));
+			}
+			if (document.readyState !== 'loading') {
+				init();
+			} else {
+				document.addEventListener('DOMContentLoaded', init, { once: true });
+			}
+		})();
+	</script>
+}

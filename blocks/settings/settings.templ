@@ -1,0 +1,90 @@
+// Package settings is the account settings frame of the Tabler preview: a card with the settings
+// navigation in a column on the start side and the open page beside it, with sections and a footer.
+//
+//	@settings.Frame(settings.FrameProps{Groups: groups}) {
+//		@settings.Content("My Account") {
+//			@settings.Section(settings.SectionProps{Title: "Email", Subtitle: "…", First: true}) { … }
+//		}
+//		@settings.Footer() { …buttons… }
+//	}
+package settings
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/listgroup"
+)
+
+// Link is an entry of the settings navigation.
+type Link struct {
+	Text   string
+	Href   string
+	Active bool
+}
+
+// Group is a titled part of the settings navigation.
+type Group struct {
+	Title string
+	Links []Link
+}
+
+type FrameProps struct {
+	Class  string
+	Groups []Group
+}
+
+// Frame is the settings card; the children are the page (Content and Footer).
+templ Frame(p FrameProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="row g-0">
+			<div class="col-12 col-md-3 border-end">
+				<div class="card-body">
+					for i, g := range p.Groups {
+						<h2 class={ kit.Classes("subheader", kit.If(i > 0, "mt-4")) }>{ g.Title }</h2>
+						@listgroup.List(listgroup.Props{Nav: true, Label: g.Title, Transparent: true}) {
+							for _, l := range g.Links {
+								@listgroup.Item(listgroup.ItemProps{Href: l.Href, Active: l.Active, Class: kit.If(i == 0, "d-flex align-items-center")}) {
+									{ l.Text }
+								}
+							}
+						}
+					}
+				</div>
+			</div>
+			<div class="col-12 col-md-9 d-flex flex-column">
+				{ children... }
+			</div>
+		</div>
+	</div>
+}
+
+// Content is the body of a settings page with its heading.
+templ Content(title string) {
+	<div class="card-body">
+		<h2 class="mb-4">{ title }</h2>
+		{ children... }
+	</div>
+}
+
+type SectionProps struct {
+	Title    string
+	Subtitle string
+	First    bool // no space above (the first section)
+}
+
+// Section is a titled part of a settings page.
+templ Section(p SectionProps) {
+	<h2 class={ kit.Classes("card-title", kit.If(!p.First, "mt-4")) }>{ p.Title }</h2>
+	if p.Subtitle != "" {
+		<p class="card-subtitle">{ p.Subtitle }</p>
+	}
+	{ children... }
+}
+
+// Footer holds the page's buttons at the bottom, at the end side.
+templ Footer() {
+	<div class="card-footer bg-transparent mt-auto">
+		<div class="btn-list justify-content-end">
+			{ children... }
+		</div>
+	</div>
+}

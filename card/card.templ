@@ -4,6 +4,7 @@ package card
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
@@ -68,6 +69,15 @@ type Props struct {
 	Light bool
 	// Scrollable keeps a long Body inside the card (card-body-scrollable); give it a height.
 	Scrollable bool
+	// Level is the heading level of a Title (2–6), default 3.
+	Level int
+}
+
+func level(n int) string {
+	if n >= 2 && n <= 6 {
+		return string(rune('0' + n))
+	}
+	return "3"
 }
 
 func attrs(p Props) templ.Attributes {
@@ -131,9 +141,29 @@ templ Header(props ...Props) {
 
 templ Title(props ...Props) {
 	{{ p := kit.First(props) }}
-	<h3 class={ kit.Classes("card-title", p.Class) } { attrs(p)... }>
-		{ children... }
-	</h3>
+	{{ c := kit.Classes("card-title", p.Class) }}
+	switch level(p.Level) {
+		case "2":
+			<h2 class={ c } { attrs(p)... }>
+				{ children... }
+			</h2>
+		case "4":
+			<h4 class={ c } { attrs(p)... }>
+				{ children... }
+			</h4>
+		case "5":
+			<h5 class={ c } { attrs(p)... }>
+				{ children... }
+			</h5>
+		case "6":
+			<h6 class={ c } { attrs(p)... }>
+				{ children... }
+			</h6>
+		default:
+			<h3 class={ c } { attrs(p)... }>
+				{ children... }
+			</h3>
+	}
 }
 
 // Subtitle is a muted line below the Title (card-subtitle).
@@ -272,11 +302,11 @@ templ Cover(p CoverProps) {
 }
 
 // Button is a full-width action at the bottom of a card (card-btn); several side by side form a bar,
-// put them in a <div class="d-flex">.
-templ Button(href, ic string) {
+// put them in a <div class="d-flex">. An icon color is optional, e.g. "muted".
+templ Button(href, ic string, iconColor ...string) {
 	<a href={ templ.URL(href) } class="card-btn">
 		if ic != "" {
-			@icon.Icon(ic, icon.Props{Class: "me-2"})
+			@icon.Icon(ic, icon.Props{Class: "me-2", Color: strings.Join(iconColor, "")})
 		}
 		{ children... }
 	</a>

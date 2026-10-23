@@ -116,7 +116,7 @@ func TestForm(t *testing.T) {
 	ctx := context.Background()
 	h := render(t, ctx, mit(form.Field(form.FieldProps{Label: "Name", For: "n", Required: true, Hint: "h", Error: "e"}),
 		"<input>"))
-	assert.Equal(t, `<div class="mb-3"><label class="form-label required" for="n">Name</label><input><div class="invalid-feedback d-block">e</div><div class="form-hint">h</div></div>`, h)
+	assert.Equal(t, `<div class="mb-3"><label class="form-label required" for="n">Name</label> <input> <div class="invalid-feedback d-block">e</div><div class="form-hint">h</div></div>`, h)
 	assert.Equal(t, `<input class="form-control is-invalid" value="a&amp;b" required aria-invalid="true" id="n" name="name">`,
 		render(t, ctx, form.Input(form.InputProps{ID: "n", Name: "name", Value: "a&b", Required: true, Invalid: true})))
 	h = render(t, ctx, form.Select(form.SelectProps{Name: "s", Empty: "All", Selected: "b",
@@ -127,17 +127,18 @@ func TestForm(t *testing.T) {
 
 func TestFieldOhneWrapperKlasse(t *testing.T) {
 	h := render(t, context.Background(), mit(form.Field(form.FieldProps{Class: "-", Label: "L"}), "<input>"))
-	assert.Equal(t, `<div><label class="form-label">L</label><input></div>`, h)
+	// Without For the label is a <div class="form-label">, like Tabler's labels of groups.
+	assert.Equal(t, `<div><div class="form-label">L</div> <input> </div>`, h)
 }
 
 func TestCheck(t *testing.T) {
 	h := render(t, context.Background(), form.Check(form.CheckProps{Name: "q", Value: "1", Label: "Q", Checked: true}))
-	assert.Equal(t, `<label class="form-check"><input class="form-check-input" type="checkbox" value="1" checked name="q"> <span class="form-check-label">Q</span></label>`, h)
+	assert.Equal(t, `<label class="form-check"><input class="form-check-input" type="checkbox" value="1" checked name="q"><span class="form-check-label">Q</span> </label>`, h)
 }
 
 func TestTable(t *testing.T) {
 	h := render(t, context.Background(), mit(table.Table(table.Props{Responsive: true, Class: "card-table"}), "<tbody></tbody>"))
-	assert.Equal(t, `<div class="table-responsive"><table class="table card-table"><tbody></tbody></table></div>`, h)
+	assert.Equal(t, `<div class="table-responsive" tabindex="0"><table class="table card-table"><tbody></tbody></table></div>`, h)
 }
 
 func TestClasses(t *testing.T) {

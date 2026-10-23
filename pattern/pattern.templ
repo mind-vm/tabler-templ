@@ -1,0 +1,50 @@
+// Package pattern renders Tabler's background patterns (bg-pattern-*): a repeating pattern in a theme
+// color, size and strength, on its own element or, through Classes, on any element such as a card.
+package pattern
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Type string
+
+const (
+	Diagonal          Type = "diagonal"
+	Diagonal2         Type = "diagonal-2"
+	Dots              Type = "dots"
+	Rectangles        Type = "rectangles"
+	Lines             Type = "lines"
+	LinesVertical     Type = "lines-vertical"
+	Grid              Type = "grid"
+	GridDiagonal      Type = "grid-diagonal"
+	Blueprint         Type = "blueprint"
+	CrossDots         Type = "cross-dots"
+	Circles           Type = "circles"
+	DiagonalStripes   Type = "diagonal-stripes"
+	DiagonalStripes2  Type = "diagonal-stripes-2"
+	Zigzag            Type = "zigzag"
+	VerticalStripes   Type = "vertical-stripes"
+	HorizontalStripes Type = "horizontal-stripes"
+	Transparent       Type = "transparent" // the checkerboard behind transparent content
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Type       Type
+	Color      string // a theme color, e.g. "primary", "red"
+	Size       string // sm, md, lg, xl
+	// Opacity is lighter, light, dark or darker (bg-pattern-opacity-*).
+	Opacity string
+}
+
+// Classes returns the classes of a pattern, to put it on another element (e.g. card.Props.Class).
+func Classes(p Props) string {
+	return kit.Classes(kit.If(p.Type != "", "bg-pattern-"+string(p.Type)), kit.If(p.Color != "", "bg-pattern-"+p.Color),
+		kit.If(p.Size != "", "bg-pattern-"+p.Size), p.Class, kit.If(p.Opacity != "", "bg-pattern-opacity-"+p.Opacity))
+}
+
+// Pattern is a <div> with the pattern; the children go on top of it.
+templ Pattern(p Props) {
+	<div class={ Classes(p) } { p.Attributes... }>
+		{ children... }
+	</div>
+}

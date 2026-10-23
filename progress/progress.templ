@@ -21,7 +21,7 @@ const (
 type Props struct {
 	Class      string
 	Attributes templ.Attributes
-	Value      int    // percent, 0–100
+	Value      float64 // percent, 0–100; decimals are kept (82.54)
 	Color      string // bar color, e.g. "red", "primary"
 	Size       Size
 	Width      string // width of the track, e.g. "8rem"
@@ -35,7 +35,9 @@ type Props struct {
 	Separated bool
 }
 
-func pct(v int) string { return strconv.Itoa(v) + "%" }
+func num(v float64) string { return strconv.FormatFloat(v, 'f', -1, 64) }
+
+func pct(v float64) string { return num(v) + "%" }
 
 func track(p Props) string {
 	return kit.Classes("progress", kit.If(p.Size != SizeDefault, "progress-"+string(p.Size)), kit.If(p.Separated, "progress-separated"), p.Class)
@@ -64,7 +66,7 @@ templ Progress(props ...Props) {
 				class={ kit.Classes("progress-bar", kit.If(p.Color != "", "bg-"+p.Color), kit.If(p.Striped, "progress-bar-striped"), kit.If(p.Striped && p.Animated, "progress-bar-animated")) }
 				style={ "width: " + pct(p.Value) }
 				role="progressbar"
-				aria-valuenow={ strconv.Itoa(p.Value) }
+				aria-valuenow={ num(p.Value) }
 				aria-valuemin="0"
 				aria-valuemax="100"
 				aria-label={ kit.Or(p.Label, pct(p.Value)+" Complete") }
@@ -81,7 +83,7 @@ templ Progress(props ...Props) {
 
 // Bar is one part of a Multi or Stacked progress.
 type Bar struct {
-	Value int
+	Value float64
 	Color string
 	Label string // aria-label, default "<value>%"
 }
@@ -94,7 +96,7 @@ templ Multi(p Props, bars []Bar) {
 				class={ kit.Classes("progress-bar", kit.If(b.Color != "", "bg-"+b.Color)) }
 				style={ "width: " + pct(b.Value) }
 				role="progressbar"
-				aria-valuenow={ strconv.Itoa(b.Value) }
+				aria-valuenow={ num(b.Value) }
 				aria-valuemin="0"
 				aria-valuemax="100"
 				aria-label={ kit.Or(b.Label, pct(b.Value)) }
@@ -111,7 +113,7 @@ templ Stacked(p Props, bars []Bar) {
 				class="progress progress-separated"
 				style={ "width: " + pct(b.Value) }
 				role="progressbar"
-				aria-valuenow={ strconv.Itoa(b.Value) }
+				aria-valuenow={ num(b.Value) }
 				aria-valuemin="0"
 				aria-valuemax="100"
 				aria-label={ kit.Or(b.Label, pct(b.Value)+" of total") }
@@ -124,7 +126,7 @@ templ Stacked(p Props, bars []Bar) {
 
 type BackgroundProps struct {
 	Class     string
-	Value     int
+	Value     float64
 	Color     string // default "primary"
 	Strong    bool   // the full color instead of the light (-lt) one
 	Text      string
@@ -149,7 +151,7 @@ type DescriptionProps struct {
 	Class       string
 	Label       string
 	Description string
-	Value       int
+	Value       float64
 	Color       string
 	Size        Size
 }

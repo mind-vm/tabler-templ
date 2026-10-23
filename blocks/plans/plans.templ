@@ -1,0 +1,151 @@
+// Package plans holds the plan cards of the Tabler preview (shared/components/cards/PricingCard,
+// PricingCardEnterprise, PricingPlan): a centered plan with features, a call to a custom quote, and a
+// featured plan on a gradient.
+package plans
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/ribbon"
+)
+
+// Feature is a line of a plan; Missing marks what the plan lacks. Text can hold markup through
+// Content instead (e.g. "<strong>10</strong> Users").
+type Feature struct {
+	Text    string
+	Content templ.Component
+	Icon    string // default a check, or an x when Missing
+	Missing bool
+}
+
+type PlanProps struct {
+	Class    string
+	Name     string // e.g. "Premium"
+	Price    string // e.g. "$49"
+	Features []Feature
+	// Featured marks the plan with a star ribbon and colors its button, e.g. "green".
+	Featured string
+	Href     string // default "#"
+	Button   string // default "Choose plan"
+}
+
+// featureItem is the icon list entry of a feature: a check in okColor, or an x in missingColor; a
+// missing feature in a secondary list is muted as a whole.
+func featureItem(f Feature, okColor, missingColor string) iconlist.ItemProps {
+	it := iconlist.ItemProps{Icon: f.Icon, Color: okColor}
+	if f.Missing {
+		it.Icon, it.Color = kit.Or(f.Icon, "ti-x"), missingColor
+		if missingColor == "secondary" {
+			it.Class = "text-secondary"
+		}
+	}
+	if f.Icon != "" && !f.Missing {
+		it.Color = ""
+	}
+	return it
+}
+
+templ feature(f Feature, okColor, missingColor string) {
+	@iconlist.Item(featureItem(f, okColor, missingColor)) {
+		if f.Content != nil {
+			@f.Content
+		} else {
+			{ f.Text }
+		}
+	}
+}
+
+// Plan is a centered plan card: name, price, features, button.
+templ Plan(p PlanProps) {
+	@card.Card(card.Props{Size: card.SizeMedium, Class: p.Class}) {
+		if p.Featured != "" {
+			@ribbon.Ribbon(ribbon.Props{Top: true, Bookmark: true, Color: p.Featured})
+		}
+		@card.Body(card.Props{Class: "text-center"}) {
+			<div class="text-uppercase text-secondary fw-medium">{ p.Name }</div>
+			<div class="display-5 fw-bold my-3">{ p.Price }</div>
+			@iconlist.List(iconlist.Props{Class: "align-items-center"}) {
+				for _, f := range p.Features {
+					@feature(f, "success", "danger")
+				}
+			}
+			<div class="text-center mt-4">
+				@button.Button(button.Props{Href: kit.Or(p.Href, "#"), Variant: button.Variant(p.Featured), Block: true}) {
+					{ kit.Or(p.Button, "Choose plan") }
+				}
+			</div>
+		}
+	}
+}
+
+type QuoteProps struct {
+	Title  string // default "Enterprise-ready. Reach out for a custom quote."
+	Text   string
+	Action templ.Component // e.g. a "Book a demo" button
+}
+
+// Quote is the wide card that invites to ask for a custom offer.
+templ Quote(p QuoteProps) {
+	@card.Card(card.Props{Size: card.SizeMedium}) {
+		@card.Body() {
+			<div class="row align-items-center">
+				<div class="col">
+					<h2 class="h3">{ kit.Or(p.Title, "Enterprise-ready. Reach out for a custom quote.") }</h2>
+					if p.Text != "" {
+						<p class="m-0 text-secondary">{ p.Text }</p>
+					}
+				</div>
+				if p.Action != nil {
+					<div class="col-auto">
+						@p.Action
+					</div>
+				}
+			</div>
+		}
+	}
+}
+
+type FeaturedProps struct {
+	Gradient string // card gradient, default "love"
+	Color    string // ribbon, name and button color, default "pink"
+	Ribbon   string // default "Featured"
+	Name     string
+	Price    string // e.g. "$199"
+	Period   string // e.g. "/ month"
+	Features []Feature
+	Text     string
+	Href     string
+	Button   string // default "Purchase Now"
+}
+
+// Featured is a highlighted plan on a gradient card.
+templ Featured(p FeaturedProps) {
+	{{ color := kit.Or(p.Color, "pink") }}
+	@card.Card(card.Props{Gradient: kit.Or(p.Gradient, "love")}) {
+		@ribbon.Ribbon(ribbon.Props{Color: color, Text: kit.Or(p.Ribbon, "Featured")})
+		@card.Body() {
+			<div class={ "subheader text-" + color }>{ p.Name }</div>
+			<div class="d-flex align-items-baseline mt-5">
+				<div class="display-5">{ p.Price }</div>
+				if p.Period != "" {
+					<div class="fs-1 text-secondary">{ p.Period }</div>
+				}
+			</div>
+			@iconlist.List(iconlist.Props{Color: "success", Class: "mt-6"}) {
+				for _, f := range p.Features {
+					@feature(f, "", "secondary")
+				}
+			}
+			if p.Text != "" {
+				<p class="mt-4 text-muted">{ p.Text }</p>
+			}
+			<div class="mt-6">
+				@button.Button(button.Props{Href: kit.Or(p.Href, "#"), Variant: button.Variant(color), Block: true}) {
+					{ kit.Or(p.Button, "Purchase Now") }
+				}
+			</div>
+		}
+	}
+}

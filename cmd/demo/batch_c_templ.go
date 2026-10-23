@@ -1000,14 +1000,14 @@ func placeholderPage() templ.Component {
 							}
 							return nil
 						})
-						templ_7745c5c3_Err = listgroup.Item(listgroup.ItemProps{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = listgroup.Item(listgroup.ItemProps{ListItem: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
 					return nil
 				})
-				templ_7745c5c3_Err = listgroup.List(listgroup.Props{Flush: true, Class: "placeholder-glow"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var34), templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = listgroup.List(listgroup.Props{Unordered: true, Flush: true, Class: "placeholder-glow"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var34), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1034,7 +1034,7 @@ func placeholderPage() templ.Component {
 // Card gradients page.
 
 // welcomeFigure is a key figure of the welcome card: label, value with trend and a bar.
-func welcomeFigure(label, value string, change float64, changeText string, bar int, color string) templ.Component {
+func welcomeFigure(label, value string, change float64, changeText string, bar float64, color string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -1124,7 +1124,7 @@ func welcomeFigure(label, value string, change float64, changeText string, bar i
 }
 
 // orderStat is a small figure card with an avatar icon and a bar.
-func orderStat(color, label, value, ic string, bar int) templ.Component {
+func orderStat(color, label, value, ic string, bar float64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

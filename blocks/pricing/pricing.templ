@@ -1,0 +1,106 @@
+// Package pricing is the pricing table of the Tabler preview (pricing-table): plans as columns with price
+// and button, features grouped under subheaders with a check or a cross per plan.
+package pricing
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// Plan is a column of the table.
+type Plan struct {
+	Name     string
+	Price    string // e.g. "$9"
+	Featured string // colors the plan's buttons, e.g. "green"
+	Href     string // default "#"
+	Button   string // default "Choose plan"
+}
+
+// Row is a feature and whether each plan (in the order of the plans) includes it.
+type Row struct {
+	Feature  string
+	Included []bool
+}
+
+// Group is a titled set of rows (a subheader row).
+type Group struct {
+	Title string
+	Rows  []Row
+}
+
+type TableProps struct {
+	Class string
+	Title string // the heading in the first header cell
+	Text  string // the text below it
+	// NoFooter drops the row of buttons below the table.
+	NoFooter bool
+}
+
+templ choose(p Plan) {
+	@button.Button(button.Props{Href: kit.Or(p.Href, "#"), Variant: button.Variant(p.Featured), Block: true}) {
+		{ kit.Or(p.Button, "Choose plan") }
+	}
+}
+
+// Table is the comparison table in a card.
+templ Table(p TableProps, plans []Plan, groups []Group) {
+	@card.Card(card.Props{Class: p.Class}) {
+		@table.Table(table.Props{Responsive: true, Class: "table-vcenter table-bordered table-nowrap card-table"}) {
+			<thead>
+				<tr>
+					<td class="w-50">
+						<h2>{ p.Title }</h2>
+						if p.Text != "" {
+							<div class="text-secondary text-wrap">{ p.Text }</div>
+						}
+					</td>
+					for _, pl := range plans {
+						<td class="text-center">
+							<div class="text-uppercase text-secondary fw-medium">{ pl.Name }</div>
+							<div class="display-6 fw-bold my-3">{ pl.Price }</div>
+							@choose(pl)
+						</td>
+					}
+				</tr>
+			</thead>
+			<tbody>
+				for _, g := range groups {
+					<tr class="bg-surface-tertiary">
+						<th colspan={ strconv.Itoa(len(plans) + 1) } class="subheader">{ g.Title }</th>
+					</tr>
+					for _, r := range g.Rows {
+						<tr>
+							<td>{ r.Feature }</td>
+							for i := range plans {
+								<td class="text-center">
+									if i < len(r.Included) && r.Included[i] {
+										@icon.Icon("ti-check", icon.Props{Color: "green"})
+									} else {
+										@icon.Icon("ti-x", icon.Props{Color: "red"})
+									}
+								</td>
+							}
+						</tr>
+					}
+				}
+			</tbody>
+			if !p.NoFooter {
+				<tfoot>
+					<tr>
+						<td></td>
+						for _, pl := range plans {
+							<td>
+								@choose(pl)
+							</td>
+						}
+					</tr>
+				</tfoot>
+			}
+		}
+	}
+}

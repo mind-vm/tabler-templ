@@ -1,0 +1,668 @@
+package main
+
+import (
+	"strconv"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/colorswatch"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/prose"
+	socialicon "github.com/mind-vm/tabler-templ/social"
+	"github.com/mind-vm/tabler-templ/tooltip"
+	"github.com/mind-vm/tabler-templ/trending"
+)
+
+type previewFlag struct{ Name, Flag, Category string }
+
+type freeIllustration struct{ Key, SVG string }
+
+// demoIconsCSS are the rules of the preview's demo.css for its grids of icons and flags.
+const demoIconsCSS = `.demo-icons-list{display:flex;flex-wrap:wrap;padding:0;margin:0 -2px -1px 0;list-style:none}` +
+	`.demo-icons-list>*{flex:1 0 4rem}.demo-icons-list-wrap{overflow:hidden}` +
+	`.demo-icons-list-item{display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:1;text-align:center;padding:.5rem;border-right:var(--tblr-border-width) var(--tblr-border-style) var(--tblr-border-color);border-bottom:var(--tblr-border-width) var(--tblr-border-style) var(--tblr-border-color);color:inherit;cursor:pointer}` +
+	`.demo-icons-list-item .icon{width:1.5rem;height:1.5rem;font-size:1.5rem}.demo-icons-list-item:hover{text-decoration:none}`
+
+// socialsCSS is the stylesheet of Tabler's social icons plugin.
+templ socialsCSS() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-socials.min.css" }/>
+}
+
+// marketingCSS is Tabler's marketing stylesheet, which also has the larger spacing utilities (px-12, mb-7).
+templ marketingCSS() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-marketing.min.css" }/>
+}
+
+// iconGrid is the preview's grid of icons or flags: square cells, filled up with empty cells so the
+// last row lines up.
+templ iconGrid() {
+	@templ.Raw("<style>" + demoIconsCSS + "</style>")
+	<div class="demo-icons-list-wrap">
+		<div class="demo-icons-list">
+			{ children... }
+			for range 21 {
+				<div></div>
+			}
+		</div>
+	</div>
+}
+
+templ iconCell(title string) {
+	<span class="demo-icons-list-item" { tooltip.Attrs(title, tooltip.Top)... }>
+		{ children... }
+	</span>
+}
+
+templ iconLinkCell(name string) {
+	<a href={ templ.SafeURL("https://tabler.io/icons/icon/" + name) } target="_blank" rel="noopener" class="demo-icons-list-item" { tooltip.Attrs(name, tooltip.Top)... }>
+		{ children... }
+	</a>
+}
+
+// gridCard is a card with a title (and a count) above a grid.
+templ gridCard(title, count string) {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				{ title }
+			}
+			if count != "" {
+				<span class="card-subtitle ms-2">{ count }</span>
+			}
+		}
+		@card.Body(card.Props{Class: "p-0"}) {
+			@iconGrid() {
+				{ children... }
+			}
+		}
+	}
+}
+
+var flagCategories = []string{"Countries", "Territories", "Unions", "Other"}
+
+func flagsIn(category string) []previewFlag {
+	var fs []previewFlag
+	for _, f := range previewFlags {
+		if f.Category == category {
+			fs = append(fs, f)
+		}
+	}
+	return fs
+}
+
+templ flagsPage() {
+	@preview("flags") {
+		<div class="row row-cards">
+			for _, c := range flagCategories {
+				{{ fs := flagsIn(c) }}
+				<div class="col-12">
+					@gridCard(c, strconv.Itoa(len(fs))+" flags") {
+						for _, f := range fs {
+							@iconCell(f.Name) {
+								@flag.Flag(f.Flag)
+							}
+						}
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+// stampCard is the large card with a stamp the icons and illustrations pages open with.
+templ stampCard(stamp string, class string) {
+	@card.Card(card.Props{Size: card.SizeMedium, Class: class}) {
+		@card.Stamp(card.StampProps{Icon: stamp, Large: true, Color: "primary"})
+		@card.Body() {
+			<div class="row align-items-center">
+				<div class="col-10">
+					{ children... }
+				</div>
+			</div>
+		}
+	}
+}
+
+templ iconsPage() {
+	@preview("icons") {
+		<div class="row row-cards">
+			<div class="col-lg-4">
+				@stampCard("ti-ghost", "") {
+					<h2 class="h1">Tabler Icons</h2>
+					@prose.Prose() {
+						All icons come from the Tabler Icons set and are MIT-licensed. Visit
+						<a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons Website</a>, download any of the { strconv.Itoa(len(outlineIcons)) } icons in SVG, PNG or&nbsp;React and use them in your favourite design tools.
+					}
+					<div class="mt-3">
+						@button.Button(button.Props{Href: "https://tabler.io/icons", Variant: button.VariantPrimary, Icon: "ti-download", Attributes: templ.Attributes{"target": "_blank", "rel": "noopener"}}) {
+							Download icons
+						}
+					</div>
+				}
+			</div>
+			<div class="col">
+				<div class="row row-cards">
+					<div class="col-12">
+						@gridCard("Interface icons", "") {
+							for _, n := range outlineIcons {
+								@iconLinkCell(n) {
+									@icon.Icon("ti-" + n)
+								}
+							}
+						}
+					</div>
+					<div class="col-12">
+						@gridCard("Filled icons", "") {
+							for _, n := range filledIcons {
+								@iconLinkCell(n) {
+									@icon.Icon("ti-"+n, icon.Props{Filled: true})
+								}
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// listCard is a card of the icon-lists page.
+templ listCard(col, title, subtitle string) {
+	<div class={ col }>
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ items(texts ...string) {
+	for _, t := range texts {
+		@iconlist.Item() {
+			{ t }
+		}
+	}
+}
+
+templ iconItem(ic, color, text string) {
+	@iconlist.Item(iconlist.ItemProps{Icon: ic, Color: color}) {
+		{ text }
+	}
+}
+
+templ mutedItem(ic, text string) {
+	@iconlist.Item(iconlist.ItemProps{Icon: ic, Class: "text-secondary"}) {
+		{ text }
+	}
+}
+
+var listFeatures = []string{"Unlimited projects", "Priority support", "Custom domains", "Advanced analytics"}
+
+const listCol = "col-md-6 col-lg-4"
+
+templ planCard(name, price string, all bool) {
+	<div class={ listCol }>
+		@section(name, "") {
+			<div class="display-6 fw-bold mb-3">
+				{ price }
+				<span class="fs-4 fw-normal text-secondary">/mo</span>
+			</div>
+			@iconlist.List(iconlist.Props{Class: "mb-3"}) {
+				@iconItem("ti-check", "green", "Unlimited projects")
+				@iconItem("ti-check", "green", "Priority support")
+				if all {
+					@iconItem("ti-check", "green", "Custom domains")
+					@iconItem("ti-check", "green", "Advanced analytics")
+				} else {
+					@mutedItem("ti-x", "Custom domains")
+					@mutedItem("ti-x", "Advanced analytics")
+				}
+			}
+			if all {
+				@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary, Class: "w-100"}) {
+					Choose { name }
+				}
+			} else {
+				@button.Button(button.Props{Href: "#", Class: "w-100"}) {
+					Choose { name }
+				}
+			}
+		}
+	</div>
+}
+
+templ describedItem(title, text string) {
+	@iconlist.Item() {
+		<div>
+			<div class="fw-medium">{ title }</div>
+			<div class="text-secondary small">{ text }</div>
+		</div>
+	}
+}
+
+templ iconListsPage() {
+	@preview("icon-lists") {
+		<div class="row row-cards">
+			@listCard(listCol, "Basic", "Add `.list-icon` to a list. The first icon in each entry is the marker.") {
+				@iconlist.List() {
+					@items(listFeatures...)
+				}
+			}
+			@listCard(listCol, "Color", "Color all markers with the `--tblr-list-icon-color` variable, or one marker with a `text-*` utility.") {
+				@iconlist.List(iconlist.Props{Color: "green"}) {
+					@items(listFeatures...)
+				}
+			}
+			@listCard(listCol, "Different icons", "Each entry can use its own icon and color, for example a status.") {
+				@iconlist.List() {
+					@iconItem("ti-circle-check", "green", "Account created")
+					@iconItem("ti-circle-check", "green", "Email confirmed")
+					@iconItem("ti-progress", "blue", "Profile in progress")
+					@iconItem("ti-circle-dashed", "secondary", "Add a payment method")
+				}
+			}
+			@listCard(listCol, "Included and excluded", "A check for what the plan has and a muted cross for what it lacks.") {
+				@iconlist.List() {
+					@iconItem("ti-check", "green", "Unlimited projects")
+					@iconItem("ti-check", "green", "Priority support")
+					@mutedItem("ti-x", "Custom domains")
+					@mutedItem("ti-x", "Advanced analytics")
+				}
+			}
+			@listCard(listCol, "Inline", "Add `.list-icon-inline` to show short entries in a row that wraps.") {
+				@iconlist.List(iconlist.Props{Inline: true, Color: "green"}) {
+					@items("Boxed", "Combined", "Condensed", "Fluid", "Horizontal", "Vertical", "RTL mode", "Dark mode")
+				}
+			}
+			@listCard(listCol, "Long entries", "The marker stays on the first line when an entry wraps.") {
+				@iconlist.List() {
+					@iconItem("ti-shield-check", "green", "Two-factor authentication keeps the account safe even when the password leaks.")
+					@iconItem("ti-cloud-upload", "blue", "Backups run every night and are kept for thirty days in a separate region.")
+					@iconItem("ti-headset", "purple", "Support answers within one business day, in English and Polish.")
+				}
+			}
+			@listCard(listCol, "Small text", "The marker follows the line height of the list, so it also fits small or large text.") {
+				@iconlist.List(iconlist.Props{Class: "small", Color: "green"}) {
+					@items(listFeatures...)
+				}
+			}
+			@listCard(listCol, "Pros and cons", "Two lists side by side, green checks against red crosses.") {
+				<div class="row g-3">
+					<div class="col-6">
+						@iconlist.List(iconlist.Props{Color: "green"}) {
+							@items("Fast to set up", "No vendor lock-in", "Great documentation")
+						}
+					</div>
+					<div class="col-6">
+						@iconlist.List(iconlist.Props{Color: "red"}) {
+							@iconItem("ti-x", "", "No built-in auth")
+							@iconItem("ti-x", "", "Smaller community")
+						}
+					</div>
+				</div>
+			}
+			@listCard(listCol, "Password requirements", "A checklist under a form field, each rule marked as met or not.") {
+				@form.Field(form.FieldProps{Label: "Password", For: "icon-list-password"}) {
+					@form.Input(form.InputProps{Type: "password", ID: "icon-list-password", Value: "Tabler2026", Attributes: templ.Attributes{"autocomplete": "new-password"}})
+				}
+				@iconlist.List(iconlist.Props{Class: "small"}) {
+					@iconItem("ti-circle-check", "green", "At least 8 characters")
+					@iconItem("ti-circle-check", "green", "One upper case letter")
+					@mutedItem("ti-circle", "One number")
+					@mutedItem("ti-circle", "One special character")
+				}
+			}
+			@listCard(listCol, "Release notes", "An icon per kind of change: added, improved, fixed, removed.") {
+				@iconlist.List() {
+					@iconItem("ti-plus", "green", "Added the icon list component")
+					@iconItem("ti-arrow-up", "blue", "Faster rendering of large tables")
+					@iconItem("ti-bug", "red", "Fixed the dropdown position in RTL mode")
+					@iconItem("ti-trash", "secondary", "Removed the old inline list dots")
+				}
+			}
+			@listCard(listCol, "Contact details", "Icons as markers for a list of links.") {
+				@iconlist.List() {
+					@iconlist.Item(iconlist.ItemProps{Icon: "ti-mail"}) {
+						<a href="mailto:hello@tabler.io">{ "hello@tabler.io" }</a>
+					}
+					@iconlist.Item(iconlist.ItemProps{Icon: "ti-phone"}) {
+						<a href="tel:+15551234567">+1 (555) 123-4567</a>
+					}
+					@iconItem("ti-map-pin", "", "1 Market Street, San Francisco")
+					@iconlist.Item(iconlist.ItemProps{Icon: "ti-world"}) {
+						<a href="https://tabler.io">tabler.io</a>
+					}
+				}
+			}
+			@listCard(listCol, "Entries with a description", "A title and a muted second line in each entry; the marker stays on the title.") {
+				@iconlist.List(iconlist.Props{Color: "green", RowGap: "1rem"}) {
+					@describedItem("Unlimited projects", "Create as many projects as you need, with no extra charge.")
+					@describedItem("Priority support", "Your questions go to the top of the queue.")
+					@describedItem("Custom domains", "Serve every project from your own domain with a free certificate.")
+				}
+			}
+			@listCard(listCol, "Large text", "Raise the font size and the marker size together for a landing page.") {
+				@iconlist.List(iconlist.Props{Class: "fs-3", Color: "primary", Size: "1.5rem", RowGap: "0.75rem"}) {
+					@items("Unlimited projects", "Priority support", "Custom domains")
+				}
+			}
+			@listCard("col-lg-8", "Feature overview", "A long list split into columns, as on a comparison or a landing page.") {
+				<div class="row g-3">
+					<div class="col-sm-6">
+						@iconlist.List(iconlist.Props{Color: "green"}) {
+							@items("Boxed", "Combined", "Condensed", "Fluid", "Horizontal", "Vertical")
+						}
+					</div>
+					<div class="col-sm-6">
+						@iconlist.List(iconlist.Props{Color: "green"}) {
+							@items("Dark mode", "RTL mode", "Navbar sticky", "Navbar overlap", "Folded sidebar", "Auto color mode")
+						}
+					</div>
+				</div>
+			}
+			@planCard("Free", "$0", false)
+			@planCard("Pro", "$29", true)
+		</div>
+	}
+}
+
+type socialStat struct {
+	App, Count, Today string
+	Change            float64
+}
+
+var socialStats = []socialStat{{"dribbble", "328 likes", "45 today", 8}, {"facebook", "542 shares", "67 today", 0}, {"instagram", "894 followers", "120 today", 10},
+	{"x", "221 retweets", "34 today", -2}, {"youtube", "765 views", "98 today", 0}, {"pinterest", "432 pins", "53 today", -4}, {"tiktok", "612 likes", "76 today", 9},
+	{"linkedin", "305 connections", "29 today", -1}}
+
+type socialApp struct{ App, Name string }
+
+var socialApps = []socialApp{{"apple", "Apple"}, {"discord", "Discord"}, {"dribbble", "Dribbble"}, {"facebook", "Facebook"}, {"figma", "Figma"},
+	{"github", "GitHub"}, {"google", "Google"}, {"instagram", "Instagram"}, {"linkedin", "LinkedIn"}, {"medium", "Medium"}, {"meta", "Meta"},
+	{"metamask", "MetaMask"}, {"pinterest", "Pinterest"}, {"reddit", "Reddit"}, {"signal", "Signal"}, {"skype", "Skype"}, {"snapchat", "Snapchat"},
+	{"spotify", "Spotify"}, {"telegram", "Telegram"}, {"tiktok", "TikTok"}, {"tumblr", "Tumblr"}, {"twitch", "Twitch"}, {"vk", "VK"},
+	{"x", "X (Twitter)"}, {"youtube", "YouTube"}}
+
+templ socialIconsPage() {
+	@preview("social-icons") {
+		@socialsCSS()
+		<div class="row row-cards">
+			<div class="col-12">
+				<div class="row g-3">
+					for _, s := range socialStats {
+						<div class="col-6 col-md-4 col-lg-3">
+							@card.Card() {
+								@card.Body() {
+									<div class="row align-items-center">
+										<div class="col-auto">
+											@socialicon.Social(s.App, socialicon.Props{Size: "md"})
+										</div>
+										<div class="col">
+											<div>{ s.Count }</div>
+											<div class="text-secondary">{ s.Today }</div>
+										</div>
+										<div class="col-auto">
+											@trending.Trending(trending.Props{Value: s.Change})
+										</div>
+									</div>
+								}
+							}
+						</div>
+					}
+				</div>
+			</div>
+			<div class="col-12">
+				@section("Sign in with social media", "A button per provider, for a social sign-in screen.") {
+					@button.List() {
+						for _, a := range socialApps {
+							@button.Button() {
+								@socialicon.Social(a.App, socialicon.Props{Class: "icon"})
+								Sign in with { a.Name }
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@card.Body() {
+						@card.Title() {
+							List of all social media icons
+						}
+						@card.Subtitle() {
+							Every brand icon shipped with the social icons plugin.
+						}
+					}
+					@card.Body(card.Props{Class: "p-0"}) {
+						@iconGrid() {
+							for _, a := range socialApps {
+								@iconCell(a.Name) {
+									@socialicon.Social(a.App)
+								}
+							}
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+type illustrationColor struct{ Value, Color string }
+
+var illustrationPrimaries = []illustrationColor{{"var(--tblr-color-primary)", "primary"}, {"var(--tblr-bg-surface-inverted)", "inverted"},
+	{"#066fd1", "blue"}, {"#4299e1", "azure"}, {"#4263eb", "indigo"}, {"#ae3ec9", "purple"}, {"#d6336c", "pink"}, {"#d63939", "red"},
+	{"#f76707", "orange"}, {"#f59f00", "yellow"}, {"#74b816", "lime"}, {"#2fb344", "green"}, {"#0ca678", "teal"}, {"#17a2b8", "cyan"}}
+
+var skinColors = []string{"#FFCB9D", "#F0BA60", "#e2c6a7", "#c7a786", "#a68063", "#926241", "#654c45", "#d5d7dd"}
+
+// illustrationOrder is the order of the free illustrations in the preview's picker.
+var illustrationOrder = []string{"500", "not-found", "computer-fix", "boy-with-key", "boy-girl"}
+
+const selectedIllustration = "boy-girl"
+
+// illustrationSVG is a free illustration, sized to its container as on the preview.
+func illustrationSVG(key string) string {
+	for _, f := range freeIllustrations {
+		if f.Key == key {
+			return strings.Replace(f.SVG, "<svg ", `<svg class="w-100 h-auto" `, 1)
+		}
+	}
+	return ""
+}
+
+
+templ illustrationsPage() {
+	@preview("illustrations") {
+		@marketingCSS()
+		<div class="mb-7" style="--tblr-illustrations-primary: var(--tblr-color-primary); --tblr-illustrations-skin: #ffcb9d" id="current-illustration-style">
+			<div class="row row-cards">
+				<div class="col-12">
+					<div class="row row-cards row-deck g-4">
+						<div class="col-md-7">
+							@card.Card() {
+								@card.Body(card.Props{Class: "d-flex align-items-center"}) {
+									<div id="current-illustration">
+										@templ.Raw(illustrationSVG(selectedIllustration))
+									</div>
+								}
+							}
+						</div>
+						<div class="col-md-5">
+							<div class="row">
+								<div class="col-12">
+									@card.Card() {
+										@card.Body() {
+											<div>
+												<div class="form-label">Primary color</div>
+												<div class="row g-2">
+													for i, c := range illustrationPrimaries {
+														<div class="col-auto">
+															@form.ColorCheck(form.ColorCheckProps{Name: "color", Value: c.Value, Color: c.Color, Radio: true, Checked: i == 0})
+														</div>
+													}
+												</div>
+												<div class="form-label mt-4">Skin color</div>
+												<div class="row g-2">
+													for i, c := range skinColors {
+														<div class="col-auto">
+															@form.ColorCheck(form.ColorCheckProps{Name: "skin-color", Value: c, CSSColor: strings.ToLower(c), Radio: true, Checked: i == 0})
+														</div>
+													}
+												</div>
+												<div class="form-label mt-4">Select SVG illustration</div>
+												<div class="row">
+													for _, k := range illustrationOrder {
+														<div class="col-3">
+															@form.ImageCheck(form.ImageCheckProps{Class: "mb-2", Name: "form-imagecheck", Value: k, Radio: true, Checked: k == selectedIllustration}) {
+																@templ.Raw(illustrationSVG(k))
+															}
+														</div>
+													}
+												</div>
+											</div>
+										}
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<h2 class="page-title my-5">135 more SVG Illustrations</h2>
+		<div class="row row-cards">
+			<div class="col-lg-4">
+				@stampCard("ti-brand-figma", "sticky-top") {
+					<h3 class="h1">Tabler Illustrations</h3>
+					@prose.Prose(prose.Props{Class: "text-secondary"}) {
+						Access a wide range of SVG illustrations for various projects. Effortlessly customize any illustration to align perfectly with your chosen color scheme!
+					}
+					<div class="mt-3">
+						@button.Button(button.Props{Href: "https://r.tabler.io/buy-illustrations", Variant: button.VariantPrimary, Icon: "ti-download", Attributes: templ.Attributes{"target": "_blank", "rel": "noopener"}}) {
+							Get lifetime access
+						}
+					</div>
+				}
+			</div>
+			<div class="col-lg-8">
+				<div class="row row-cards">
+					for _, n := range moreIllustrations {
+						<div class="col-6 col-md-3">
+							@card.Card() {
+								@card.Body() {
+									<a href="https://r.tabler.io/buy-illustrations" target="_blank">
+										<img src={ photo("illustrations/light/" + n + ".png") } alt={ n } class="img-light"/>
+										<img src={ photo("illustrations/dark/" + n + ".png") } alt={ n } class="img-dark"/>
+									</a>
+								}
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		@illustrationsScript(illustrationScriptData())
+	}
+}
+
+func illustrationScriptData() map[string]string {
+	m := map[string]string{}
+	for _, f := range freeIllustrations {
+		m[f.Key] = illustrationSVG(f.Key)
+	}
+	return m
+}
+
+// illustrationsScript swaps the illustration and its colors, as on the preview.
+templ illustrationsScript(svgs map[string]string) {
+	@templ.JSONScript("illustrations-data", svgs)
+	<script>
+		;(function () {
+			const illustrations = JSON.parse(document.getElementById('illustrations-data').textContent)
+			const currentIllustration = document.getElementById('current-illustration')
+			const style = document.getElementById('current-illustration-style')
+			document.querySelectorAll('input[name="form-imagecheck"]').forEach((elem) => {
+				elem.addEventListener('change', (e) => {
+					currentIllustration.innerHTML = illustrations[e.target.value]
+				})
+			})
+			document.querySelectorAll('input[name="color"]').forEach((elem) => {
+				elem.addEventListener('change', (e) => {
+					style.style.setProperty('--tblr-illustrations-primary', e.target.value)
+				})
+			})
+			document.querySelectorAll('input[name="skin-color"]').forEach((elem) => {
+				elem.addEventListener('change', (e) => {
+					style.style.setProperty('--tblr-illustrations-skin', e.target.value)
+				})
+			})
+		})()
+	</script>
+}
+
+// screenshotCSS are the page's own rules: a 1024×768 frame for screenshots of Tabler.
+const screenshotCSS = `.screenshot{width:1024px;height:768px;background:var(--tblr-bg-surface-tertiary) linear-gradient(to top left,rgba(0,0,0,.04),rgba(0,0,0,0));position:relative}` +
+	`.screenshot-card{padding:64px;border-radius:16px;box-shadow:0 1px 1px 0 rgba(0,0,0,.02),0 8px 24px -4px rgba(0,0,0,.04),0 24px 40px -8px rgba(0,0,0,.1)}` +
+	`.screenshot-logo{display:flex;align-items:center;justify-content:center;padding:0 5rem;flex:1}`
+
+var screenshotColors = []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan"}
+
+// screenshotPage is the preview's frame for marketing screenshots: a standalone page without navigation.
+templ screenshotPage() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>Screenshot · tabler-templ</title>
+			@assets()
+			@marketingCSS()
+			@icon.Styles()
+			@templ.Raw("<style>" + screenshotCSS + "</style>")
+		</head>
+		<body>
+			<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler-theme.min.js" }></script>
+			<main id="content" class="page page-center align-items-center">
+				<h1 class="visually-hidden">Screenshot</h1>
+				<div class="screenshot d-flex flex-column justify-content-center align-items-center px-12">
+					<div class="screenshot-logo">
+						@layout.Brand(layout.BrandProps{Label: "Tabler", Class: "navbar-brand-gray"}) {
+							@logoSVG()
+						}
+					</div>
+					@card.Card(card.Props{Class: "screenshot-card p-6"}) {
+						<div class="row g-4">
+							for _, c := range screenshotColors {
+								<div class="col-2">
+									@colorswatch.Gradient(colorswatch.GradientProps{From: c, To: "transparent", Direction: colorswatch.ToTopStart, Class: "p-5 rounded ratio ratio-1x1 border"})
+								</div>
+							}
+						</div>
+					}
+					<div class="screenshot-logo"></div>
+				</div>
+				@nav.Segmented(nav.SegmentedProps{Class: "mt-4"}) {
+					@nav.Segment(nav.SegmentProps{Href: "?theme=light", Class: "hide-theme-light"}) {
+						Light
+					}
+					@nav.Segment(nav.SegmentProps{Href: "?theme=light", Active: true, Class: "hide-theme-dark"}) {
+						Light
+					}
+					@nav.Segment(nav.SegmentProps{Href: "?theme=dark", Class: "hide-theme-dark"}) {
+						Dark
+					}
+					@nav.Segment(nav.SegmentProps{Href: "?theme=dark", Active: true, Class: "hide-theme-light"}) {
+						Dark
+					}
+				}
+			</main>
+			@scripts()
+		</body>
+	</html>
+}

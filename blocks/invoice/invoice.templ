@@ -1,0 +1,121 @@
+// Package invoice is the invoice of the Tabler preview (cards/InvoiceCard): sender and recipient, the
+// invoice title, the lines, totals and a closing note, printable; and the print button for the page
+// header.
+package invoice
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Party is the sender or the recipient: a heading and the address lines.
+type Party struct {
+	Title string
+	Lines []string
+}
+
+// Line is an item of the invoice.
+type Line struct {
+	Product     string
+	Description string
+	Quantity    string
+	Unit        string // unit price, formatted
+	Amount      string // formatted
+}
+
+// Total is a row below the lines; the Final one (the amount due) is set apart.
+type Total struct {
+	Label string
+	Value string
+	Final bool
+}
+
+type Props struct {
+	Class string
+	From  Party
+	To    Party
+	Title string // e.g. "Invoice INV/001/15"
+	Lines []Line
+	Totals []Total
+	Note  string // below the table, e.g. a thank you
+	// Column headings, default "Product", "Qnt", "Unit", "Amount".
+	ProductLabel, QuantityLabel, UnitLabel, AmountLabel string
+}
+
+templ party(p Party, class string) {
+	<div class={ kit.Classes("col-6", class) }>
+		<p class="h3">{ p.Title }</p>
+		<address>
+			for i, l := range p.Lines {
+				if i > 0 {
+					<br/>
+				}
+				{ l }
+			}
+		</address>
+	</div>
+}
+
+// Invoice is the invoice in a large card.
+templ Invoice(p Props) {
+	<div class={ kit.Classes("card card-lg", p.Class) }>
+		<div class="card-body">
+			<div class="row">
+				@party(p.From, "")
+				@party(p.To, "text-end")
+				<div class="col-12 my-5">
+					<h2 class="h1">{ p.Title }</h2>
+				</div>
+			</div>
+			<table class="table table-transparent table-responsive">
+				<thead>
+					<tr>
+						<th class="text-center" style="width: 1%"></th>
+						<th>{ kit.Or(p.ProductLabel, "Product") }</th>
+						<th class="text-center" style="width: 1%">{ kit.Or(p.QuantityLabel, "Qnt") }</th>
+						<th class="text-end" style="width: 1%">{ kit.Or(p.UnitLabel, "Unit") }</th>
+						<th class="text-end" style="width: 1%">{ kit.Or(p.AmountLabel, "Amount") }</th>
+					</tr>
+				</thead>
+				for i, l := range p.Lines {
+					<tr>
+						<td class="text-center">{ strconv.Itoa(i + 1) }</td>
+						<td>
+							<p class="strong mb-1">{ l.Product }</p>
+							if l.Description != "" {
+								<div class="text-secondary">{ l.Description }</div>
+							}
+						</td>
+						<td class="text-center">{ l.Quantity }</td>
+						<td class="text-end">{ l.Unit }</td>
+						<td class="text-end">{ l.Amount }</td>
+					</tr>
+				}
+				for _, t := range p.Totals {
+					<tr>
+						if t.Final {
+							<td colspan="4" class="fw-semibold text-uppercase text-end">{ t.Label }</td>
+							<td class="fw-semibold text-end">{ t.Value }</td>
+						} else {
+							<td colspan="4" class="strong text-end">{ t.Label }</td>
+							<td class="text-end">{ t.Value }</td>
+						}
+					</tr>
+				}
+			</table>
+			if p.Note != "" {
+				<p class="text-secondary text-center mt-5">{ p.Note }</p>
+			}
+		</div>
+	</div>
+}
+
+// PrintButton prints the page (window.print), for the page header; the children are its text.
+templ PrintButton() {
+	<button type="button" class="btn btn-primary" onclick="window.print()">
+		@icon.Icon("ti-printer")
+		{ children... }
+	</button>
+}

@@ -1,4 +1,6 @@
-// Package table renders Tabler tables, optionally inside .table-responsive.
+// Package table renders Tabler tables: inside a card or a .table-responsive wrapper, vertically centered,
+// striped, hoverable, borderless, without wrapping, stacked on small screens, with selectable rows and
+// sortable headers.
 package table
 
 import (
@@ -11,13 +13,31 @@ type Props struct {
 	Class      string // e.g. "card-table table-vcenter"
 	Attributes templ.Attributes
 	Responsive bool   // wrap in .table-responsive
-	Wrapper    string // classes on the .table-responsive wrapper, e.g. "mt-2"
+	Wrapper    string // classes on the .table-responsive wrapper, e.g. "mt-2"; it is focusable for keyboard scrolling
+	// Variants.
+	Card       bool   // flush with the card edges (card-table)
+	VCenter    bool   // cells vertically centered (table-vcenter)
+	Nowrap     bool   // no line breaks in cells (table-nowrap)
+	Striped    bool   // table-striped
+	Hover      bool   // table-hover
+	Borderless bool   // table-borderless
+	Center     bool   // cells centered (table-center)
+	Small      bool   // table-sm
+	Selectable bool   // rows with a SelectCheck get the active look when checked (table-selectable)
+	Mobile     string // stacks below this breakpoint, e.g. "md" (table-mobile-md); give cells data-label
+}
+
+// Classes returns the class string of a table.
+func Classes(p Props) string {
+	return kit.Classes("table", kit.If(p.Card, "card-table"), kit.If(p.VCenter, "table-vcenter"), kit.If(p.Nowrap, "table-nowrap"),
+		kit.If(p.Striped, "table-striped"), kit.If(p.Hover, "table-hover"), kit.If(p.Borderless, "table-borderless"), kit.If(p.Center, "table-center"),
+		kit.If(p.Small, "table-sm"), kit.If(p.Selectable, "table-selectable"), kit.If(p.Mobile != "", "table-mobile-"+p.Mobile), p.Class)
 }
 
 templ Table(props ...Props) {
 	{{ p := kit.First(props) }}
 	if p.Responsive {
-		<div class={ kit.Classes("table-responsive", p.Wrapper) }>
+		<div class={ kit.Classes("table-responsive", p.Wrapper) } tabindex="0">
 			@table(p) {
 				{ children... }
 			}
@@ -30,7 +50,7 @@ templ Table(props ...Props) {
 }
 
 templ table(p Props) {
-	<table class={ kit.Classes("table", p.Class) } { p.Attributes... }>
+	<table class={ Classes(p) } { p.Attributes... }>
 		{ children... }
 	</table>
 }
@@ -38,4 +58,50 @@ templ table(p Props) {
 // Empty is the single row of an empty table body.
 templ Empty(colspan int, text string) {
 	<tr><td colspan={ strconv.Itoa(colspan) } class="text-secondary">{ text }</td></tr>
+}
+
+// Sort direction of a SortHeader.
+type Sort string
+
+const (
+	Unsorted Sort = ""
+	Asc      Sort = "asc"
+	Desc     Sort = "desc"
+)
+
+type SortProps struct {
+	Field string // passed as data-sort to the sorting script (Tabler's demo uses List.js)
+	Dir   Sort
+	Class string // e.g. "d-flex justify-content-between"
+}
+
+// SortHeader is the button of a sortable column header (table-sort).
+templ SortHeader(p SortProps) {
+	<button type="button" class={ kit.Classes("table-sort", p.Class, string(p.Dir)) } data-sort={ p.Field }>
+		{ children... }
+	</button>
+}
+
+type CheckProps struct {
+	Label   string // aria-label, e.g. "Select invoice 001401"
+	Checked bool
+	Value   string
+	// All is the check in the header that selects every row (data-select-all).
+	All bool
+}
+
+// SelectCheck is the checkbox of a selectable row (or of the header, to select all).
+templ SelectCheck(p CheckProps) {
+	<input
+		class={ kit.Classes("form-check-input m-0 align-middle", kit.If(!p.All, "table-selectable-check")) }
+		type="checkbox"
+		aria-label={ p.Label }
+		if p.All {
+			data-select-all
+		}
+		if p.Value != "" {
+			value={ p.Value }
+		}
+		checked?={ p.Checked }
+	/>
 }

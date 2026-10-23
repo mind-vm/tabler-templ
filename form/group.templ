@@ -27,6 +27,31 @@ templ Addon() {
 	</span>
 }
 
+type AddonButtonProps struct {
+	Class      string // e.g. "ms-2" between buttons
+	Attributes templ.Attributes
+	Icon       string
+	Label      string // aria-label and tooltip
+	Disabled   bool
+}
+
+// AddonButton is an icon button in an Addon, e.g. "Clear search", with its Label as a tooltip.
+templ AddonButton(p AddonButtonProps) {
+	<button
+		type="button"
+		class={ kit.Classes("link-secondary", p.Class, "border-0 bg-transparent p-0") }
+		if p.Label != "" {
+			title={ p.Label }
+			aria-label={ p.Label }
+			data-bs-toggle="tooltip"
+		}
+		disabled?={ p.Disabled }
+		{ p.Attributes... }
+	>
+		@icon.Icon(p.Icon)
+	</button>
+}
+
 // AddonLink is a link in an Addon, e.g. "Show password" (input-group-link).
 templ AddonLink(href string) {
 	<a href={ templ.URL(href) } class="input-group-link">

@@ -46,11 +46,26 @@ type SegmentProps struct {
 	Label    string // aria-label for icon-only segments
 	Active   bool
 	Disabled bool
+	// Href makes the segment a link, e.g. to switch the theme with "?theme=dark".
+	Href  string
+	Class string // on the link, e.g. "hide-theme-dark"
 }
 
 // Segment is one option of a Segmented control; the children are its text.
 templ Segment(p SegmentProps) {
-	if p.Name != "" {
+	if p.Href != "" {
+		<a
+			href={ templ.URL(p.Href) }
+			class={ kit.Classes("nav-link", kit.If(p.Active, "active"), kit.If(p.Disabled, "disabled"), p.Class) }
+			if p.Active {
+				aria-current="page"
+			}
+		>
+			@segmentInner(p) {
+				{ children... }
+			}
+		</a>
+	} else if p.Name != "" {
 		<input
 			type="radio"
 			class="nav-link-input"

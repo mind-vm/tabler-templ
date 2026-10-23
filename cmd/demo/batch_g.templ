@@ -1,0 +1,644 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/colorswatch"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/mention"
+	"github.com/mind-vm/tabler-templ/pattern"
+	"github.com/mind-vm/tabler-templ/prose"
+	"github.com/mind-vm/tabler-templ/steps"
+	"github.com/mind-vm/tabler-templ/tooltip"
+)
+
+// batchGPages are the base pages: typography, colors, icons, flags, prose, patterns and friends.
+func batchGPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"typography":    typographyPage(),
+		"text-features": textFeaturesPage(),
+		"prose":         prosePage(),
+		"markdown":      markdownPage(),
+		"patterns":      patternsPage(),
+		"colors":        colorsPage(),
+		"flags":         flagsPage(),
+		"icons":         iconsPage(),
+		"icon-lists":    iconListsPage(),
+		"social-icons":  socialIconsPage(),
+		"illustrations": illustrationsPage(),
+		"screenshot":    screenshotPage(),
+	}
+}
+
+// article is the centered large card the preview's prose pages use.
+templ article() {
+	<div class="row justify-content-center">
+		<div class="col-lg-9 col-xl-8">
+			@card.Card(card.Props{Size: card.SizeLarge}) {
+				@card.Body() {
+					@prose.Prose() {
+						{ children... }
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+templ typographyPage() {
+	@preview("typography") {
+		@article() {
+			<div class="h1">Brewing better coffee at home</div>
+			<p class="lead">Good coffee isn't about expensive gear — it's about <mark>consistency</mark>. Get the ratio, the grind, and the water temperature right, and almost any method will taste better.</p>
+			<figure>
+				<img src={ photo("photos/cup-of-coffee-and-an-open-book.jpg") } alt="A cup of coffee next to an open book"/>
+				<figcaption class="text-secondary small mt-2">Ten minutes of prep, and the rest of the morning is yours.</figcaption>
+			</figure>
+			<p>As <cite>The Professional Barista's Handbook</cite> puts it, most bad coffee isn't a bad bean — it's an inconsistent process.</p>
+			<blockquote class="blockquote">
+				<p>Coffee is a language in itself.</p>
+				<footer class="blockquote-footer">Jackie Chan</footer>
+			</blockquote>
+			<h2>What you'll need</h2>
+			<ul>
+				<li>Freshly roasted beans, ground just before brewing</li>
+				<li>
+					A scale accurate to <sup>1</sup>&frasl;<sub>10</sub> of a gram
+					<ul>
+						<li>Kitchen scales work, but a coffee scale is easier to read</li>
+						<li>Weigh both the coffee and the water</li>
+					</ul>
+				</li>
+				<li>Water just off the boil, around 96&deg;C</li>
+			</ul>
+			<h2>Steps</h2>
+			<ol>
+				<li>Heat the water and warm your brewing vessel.</li>
+				<li>Weigh <strong>18g of coffee</strong>{ " for every 300g of water — a 1:16 ratio." }</li>
+				<li>Grind just before brewing; <del>pre-ground coffee</del> <ins>fresh-ground coffee</ins> makes the biggest difference of all.</li>
+				<li>Pour in stages, stirring <em>gently</em> after the first pour so every ground gets wet.</li>
+				<li>Set a timer — <kbd>⌘</kbd> + <kbd>T</kbd> in most timer apps — and aim for a total brew time of 3&ndash;4 minutes.</li>
+			</ol>
+			<h3>Why the ratio matters</h3>
+			<p>
+				A cup that's too weak usually means too little coffee, not too little time. Coffee contains caffeine (<abbr title="Chemical formula">C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub></abbr>), and how much of it — and everything else — ends up in your cup comes down to the <code>coffee:water</code> ratio above almost anything else.
+			</p>
+			<hr/>
+			<h3>A few terms worth knowing</h3>
+			<dl>
+				<dt>Bloom</dt>
+				<dd>The first splash of water, which releases trapped CO&#8322; and lets the rest of the pour extract evenly.</dd>
+				<dt>Extraction</dt>
+				<dd>How much flavor the water pulls from the grounds — too little tastes sour, too much tastes bitter.</dd>
+				<dt>TDS</dt>
+				<dd>Total dissolved solids: a measure of strength, independent of how much water you used.</dd>
+			</dl>
+			<h4>A quick note on freshness</h4>
+			<p>Beans are at their best one to four weeks after roasting. <u>Buy smaller bags more often</u> rather than stockpiling — coffee doesn't go bad, it just goes flat.</p>
+			<h5>Grind size by method</h5>
+			<table>
+				<thead>
+					<tr>
+						<th>Method</th>
+						<th>Grind</th>
+						<th>Brew time</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td>French press</td><td>Coarse</td><td>4 min</td></tr>
+					<tr><td>Pour over</td><td>Medium</td><td>3 min</td></tr>
+					<tr><td>Espresso</td><td>Fine</td><td>25&ndash;30 sec</td></tr>
+				</tbody>
+			</table>
+			<h5>Roast levels at a glance</h5>
+			<ul class="list-unstyled">
+				<li class="text-warning">Light — bright, acidic, tastes like the origin</li>
+				<li class="text-primary">Medium — balanced, the everyday default</li>
+				<li class="text-secondary">Medium-dark — fuller body, less acidity</li>
+				<li class="text-danger">Dark — bold and smoky, roast flavor dominates</li>
+			</ul>
+			<h5>Reading your cup</h5>
+			<p>Taste it before you change anything else — the cup itself tells you what to adjust:</p>
+			<ul class="list-unstyled">
+				<li class="text-success">Balanced — this is the one to repeat next time.</li>
+				<li class="text-info">Thin or sour — grind a little finer, or pour more slowly.</li>
+				<li class="text-pink">A standout — jot down the bag and roast date while you remember.</li>
+				<li class="text-body">Still figuring out your taste — that's normal, brew a few more before settling on a ratio.</li>
+			</ul>
+			<h5>A minimal brew config</h5>
+			<p>If you're automating a scale or a smart kettle, the whole recipe above reduces to a few numbers:</p>
+			<pre><code>{ "coffee: 18g\nwater: 300g\ntemperature: 96C\nbloom: 30s\ntotal_time: 3m30s" }</code></pre>
+			<h6>Fine print</h6>
+			<p><small class="text-secondary">Ratios are a starting point, not a rule — adjust to taste once you've got the basics down.</small></p>
+			<address>
+				<strong>Written by the Tabler team <br/></strong>
+				<a href="mailto:#">{ "hello@example.com" }</a>
+			</address>
+		}
+	}
+}
+
+// johnDoe is the mention of the text-features page.
+templ johnDoe() {
+	@mention.Mention(mention.Props{Avatar: avatarURL("035f"), At: true}) {
+		JohnDoe
+	}
+}
+
+templ textFeaturesPage() {
+	@preview("text-features") {
+		<div class="row">
+			<div class="col-7">
+				@card.Card(card.Props{Size: card.SizeLarge}) {
+					@card.Body() {
+						@prose.Prose() {
+							<h2 class="h3">Text features</h2>
+							<p>HTML provides various tags to format text and add meaning. For example, <strong>important words</strong> can be highlighted, and <em>emphasized text</em> can be italicized.</p>
+							<p>If you want to visit an interesting website, check out <a href="https://tabler.io" target="_blank">this page</a>.</p>
+							<p>The term <abbr { tooltip.Attrs("Hypertext Markup Language", tooltip.Top)... }>HTML</abbr> is widely used in web development.</p>
+							<p>Previously, the instruction said <del>"Do not include images."</del> However, <ins>"You may now add images."</ins></p>
+							<blockquote cite="https://tabler.io">"The best way to predict the future is to create it." – Peter Drucker</blockquote>
+							<p>Sometimes, <mark>highlighting important text</mark> can improve readability.</p>
+							<p>In JavaScript, you can log messages using the following code: <code>console.log('Hello, world!');</code></p>
+							<p>To copy text on Windows, use <kbd>Ctrl + C</kbd>. On macOS, use <kbd>Cmd + C</kbd>.</p>
+							<p>Water is written chemically as H<sub>2</sub>O, while Einstein’s famous equation is E = mc<sup>2</sup>.</p>
+							<p>Many people mistakenly spell <span class="text-incorrect">"recieve"</span> instead of <span class="text-correct">"receive"</span>.</p>
+							<p>The correct way to write the date format is <span class="text-correct">"February 12, 2026"</span>, not <span class="text-incorrect">"12th February, 2026"</span> in American English.</p>
+							<p>If you need select text, you can use your mouse or keyboard. To select text using your mouse, click and drag the cursor over the text <span class="text-selected">you want to highlight</span>.</p>
+							<p><small>Disclaimer: This text is for demonstration purposes only.</small></p>
+						}
+					}
+				}
+			</div>
+			<div class="col">
+				@card.Card(card.Props{Size: card.SizeLarge}) {
+					@card.Body() {
+						@prose.Prose() {
+							<h1>
+								Heading 1 by
+								@johnDoe()
+							</h1>
+							<h2>
+								Heading 2 by
+								@johnDoe()
+							</h2>
+							<h3>
+								Heading 3 by
+								@johnDoe()
+							</h3>
+							<h4>
+								Heading 4 by
+								@johnDoe()
+							</h4>
+							<h5>
+								Heading 5 by
+								@johnDoe()
+							</h5>
+							<h6>
+								Heading 6 by
+								@johnDoe()
+							</h6>
+							<p>
+								Tabler is a modern UI framework which <span class="text-incorrect" { tooltip.Attrs("Tooltip on top", tooltip.Top)... }>provide</span> developers with a lot of <span class="text-incorrect">pre-build</span> components and customizable options. It is
+								<span class="text-incorrect">build</span> on Bootstrap, making it easy to integrate into existing projects. The design is clean, responsive, and accessible, ensuring that <span class="text-incorrect">user</span> can navigate through <span class="text-incorrect">interface</span> easily. Tabler
+								also <span class="text-incorrect">support</span> all modern browsers, but some features may not work properly on Internet Explorer. With <span class="text-incorrect">it's</span> lightweight structure and optimized performance, Tabler helps developers create stunning web applications faster.
+							</p>
+							<p>
+								Hey
+								@mention.Mention(mention.Props{Avatar: avatarURL("035f"), At: true}) {
+									JohnDoe
+								}, have you seen the latest updates on
+								@mention.Mention(mention.Props{Count: "16"}) {
+									#WebDevelopment
+								}? 
+								@mention.Mention(mention.Props{Avatar: avatarURL("035f"), At: true}) {
+									JaneSmith
+								}
+								just shared an interesting article about
+								@mention.Mention(mention.Props{App: photo("brands/messenger.svg")}) {
+									Messenger
+								}
+								and
+								@mention.Mention(mention.Props{App: photo("brands/netflix.svg")}) {
+									Netflix
+								}!
+							</p>
+							<p>
+								The sky is
+								@mention.Mention(mention.Props{Color: "blue"}) {
+									#066fd1
+								}, the grass is
+								@mention.Mention(mention.Props{Color: "green"}) {
+									rgb(47, 179, 68)
+								}, fire trucks are often
+								@mention.Mention(mention.Props{Color: "red"}) {
+									red
+								},
+								oranges are
+								@mention.Mention(mention.Props{Color: "orange"}) {
+									hsl(24deg, 94.49%, 49.8%)
+								}. Some flowers are
+								@mention.Mention(mention.Props{Color: "purple"}) {
+									hwb(288.35deg, 24.31%, 21.18%)
+								}.
+							</p>
+							<hr/>
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+templ prosePage() {
+	@preview("prose") {
+		@article() {
+			<h2>
+				Getting started with documentation
+				@badge.Badge() {
+					New
+				}
+			</h2>
+			<div class="d-flex align-items-center text-secondary mb-4">
+				@avatar.Avatar(avatar.Props{Initials: "PK", Size: avatar.SizeSmall, Class: "me-2"})
+				Written by Paweł Kuna · 6 min read
+			</div>
+			<p class="lead">Writing clear and effective documentation is essential for any project. When you create content that others will read and use, proper formatting makes all the difference. <em>Good documentation</em> helps users understand complex concepts quickly and efficiently.</p>
+			<blockquote>
+				<p>Documentation is a love letter that you write to your future self.</p>
+			</blockquote>
+			<p>
+				The foundation of great documentation starts with <strong>understanding your audience</strong> and their needs. Along the way you'll reach for a handful of inline elements: <mark>highlights</mark> to draw the eye, an <abbr title="HyperText Markup Language">HTML</abbr> tag for terms that
+				deserve a definition, and <del>outdated advice</del> replaced with <ins>the current recommendation</ins>. Formulas read naturally too, like H<sub>2</sub>O or 2<sup>10</sup>.
+			</p>
+			<p>As <cite>The Elements of Style</cite> puts it, omit needless words — the same rule applies to interfaces and to the docs that explain them.</p>
+			@prose.Callout() {
+				<p><strong>Tip.</strong> Keep a glossary of terms your readers might not know. It saves you from re-explaining the same concept in every article.</p>
+			}
+			<h3>A quick glossary</h3>
+			<dl>
+				<dt>Prose</dt>
+				<dd>Long-form, readable content — articles, changelogs, help center entries.</dd>
+				<dt>Markdown</dt>
+				<dd>A plain-text format that compiles down to the same HTML this page uses.</dd>
+				<dt>Style guide</dt>
+				<dd>A shared reference so every writer on the team formats things the same way.</dd>
+			</dl>
+			<h3>Adding code examples</h3>
+			<p>Inline code looks like <code>console.log("Hello")</code> and uses monospace styling. For anything longer, drop it into a code block, and mention shortcuts with <kbd>Ctrl</kbd> + <kbd>C</kbd> style keys:</p>
+			<pre><code>{ "function add(a, b) {\n  return a + b;\n}" }</code></pre>
+			<h3>Structuring steps and points</h3>
+			<p>Use an ordered list to walk through a process:</p>
+			<ol>
+				<li>Start with the most important information.</li>
+				<li>Provide context before technical details.</li>
+				<li>Include practical examples.</li>
+			</ol>
+			<p>And an unordered list for related points that don't have a specific order:</p>
+			<ul>
+				<li>Write clear, concise list items.</li>
+				<li>Keep the structure consistent.</li>
+				<li>Avoid overly long items.</li>
+			</ul>
+			<h4>Nesting related items</h4>
+			<p>Lists can nest, with indentation and spacing handled automatically:</p>
+			<ul>
+				<li>
+					Editing
+					<ul>
+						<li>Undo and redo</li>
+						<li>Cut, copy, and paste</li>
+					</ul>
+				</li>
+				<li>
+					Formatting
+					<ul>
+						<li>Bold and italic</li>
+						<li>Headings and lists</li>
+					</ul>
+				</li>
+				<li>Sharing</li>
+			</ul>
+			<h4>A visual checklist</h4>
+			<p>For a status readers can scan at a glance, drop in the steps component instead of a plain list:</p>
+			@steps.Steps(steps.Props{Vertical: true, Counter: true, Active: 3, Class: "my-4"}, []steps.Step{{Title: "Draft"}, {Title: "Review"}, {Title: "Publish"}, {Title: "Announce"}})
+			<hr/>
+			<h3>Supporting images</h3>
+			<p>Images should support the text and provide useful context, not just decorate the page.</p>
+			<figure>
+				<img src={ photo("photos/cup-of-coffee-and-an-open-book.jpg") } alt="Open book and coffee"/>
+				<figcaption class="text-secondary small mt-2">A quiet spot makes for better writing sessions.</figcaption>
+			</figure>
+			<h3>Comparing data in tables</h3>
+			<p>Tables work best for comparing related data points, like votes on a proposal:</p>
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Up-votes</th>
+						<th>Down-votes</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td>Alice</td><td>10</td><td>11</td></tr>
+					<tr><td>Bob</td><td>4</td><td>3</td></tr>
+					<tr><td>Charlie</td><td>7</td><td>9</td></tr>
+					<tr><td>Totals</td><td>21</td><td>23</td></tr>
+				</tbody>
+			</table>
+		}
+	}
+}
+
+// markdownPage is the preview's old address of the prose page: a redirect, like the original.
+templ markdownPage() {
+	<!DOCTYPE html>
+	<html lang="en-US">
+		<meta charset="utf-8"/>
+		<title>Redirecting…</title>
+		<link rel="canonical" href="/prose"/>
+		<meta http-equiv="refresh" content="0; url=/prose"/>
+		<meta name="robots" content="noindex"/>
+		<noscript><a href="/prose">Click here if you are not redirected.</a></noscript>
+	</html>
+}
+
+type patternSample struct {
+	Props pattern.Props
+	Code  string
+}
+
+// patternBox is a pattern sample with its classes below, as on the preview.
+templ patternBox(s patternSample) {
+	{{ p := s.Props }}
+	{{ p.Class = "border rounded mb-3" }}
+	{{ p.Attributes = templ.Attributes{"style": "height: 8rem"} }}
+	@pattern.Pattern(p)
+	<code>{ s.Code }</code>
+}
+
+templ patternGrid(samples []patternSample) {
+	<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-6 g-3">
+		for _, s := range samples {
+			<div class="col">
+				@patternBox(s)
+			</div>
+		}
+	</div>
+}
+
+func patternTypes() []patternSample {
+	var ss []patternSample
+	for _, t := range []pattern.Type{pattern.Diagonal, pattern.Diagonal2, pattern.Dots, pattern.Rectangles, pattern.Lines, pattern.LinesVertical, pattern.Grid,
+		pattern.GridDiagonal, pattern.Blueprint, pattern.Circles, pattern.DiagonalStripes, pattern.DiagonalStripes2, pattern.Zigzag, pattern.VerticalStripes, pattern.HorizontalStripes} {
+		ss = append(ss, patternSample{pattern.Props{Type: t}, ".bg-pattern-" + string(t)})
+	}
+	return ss
+}
+
+func patternColors() []patternSample {
+	var ss []patternSample
+	for _, c := range []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan"} {
+		ss = append(ss, patternSample{pattern.Props{Type: pattern.Rectangles, Color: c}, ".bg-pattern-" + c})
+	}
+	return ss
+}
+
+func patternSizes() []patternSample {
+	var ss []patternSample
+	for _, s := range []string{"sm", "md", "lg", "xl"} {
+		ss = append(ss, patternSample{pattern.Props{Type: pattern.Diagonal, Size: s}, ".bg-pattern-" + s})
+	}
+	return ss
+}
+
+func patternOpacities() []patternSample {
+	var ss []patternSample
+	for _, o := range []string{"lighter", "light", "dark", "darker"} {
+		ss = append(ss, patternSample{pattern.Props{Type: pattern.Transparent, Color: "primary", Opacity: o}, ".bg-pattern-opacity-" + o})
+	}
+	return ss
+}
+
+var patternUsage = []patternSample{
+	{pattern.Props{Type: pattern.Transparent}, ".bg-pattern-transparent"},
+	{pattern.Props{Type: pattern.Grid, Color: "primary", Size: "lg", Opacity: "light"}, ".bg-pattern-grid.bg-pattern-primary.bg-pattern-lg.bg-pattern-opacity-light"},
+	{pattern.Props{Type: pattern.DiagonalStripes2, Color: "azure", Opacity: "dark"}, ".bg-pattern-diagonal-stripes-2.bg-pattern-azure.bg-pattern-opacity-dark"},
+	{pattern.Props{Type: pattern.Dots, Color: "red", Size: "sm", Opacity: "darker"}, ".bg-pattern-dots.bg-pattern-red.bg-pattern-sm.bg-pattern-opacity-darker"},
+}
+
+templ patternsPage() {
+	@preview("patterns") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Pattern types", "Apply a repeating background pattern to any element with a single utility class.") {
+					@patternGrid(patternTypes())
+				}
+			</div>
+			<div class="col-12">
+				@section("Pattern colors", "Tint the pattern with any theme color from the palette.") {
+					@patternGrid(patternColors())
+				}
+			</div>
+			<div class="col-12">
+				@section("Pattern sizes", "Scale the pattern from `bg-pattern-sm` to `bg-pattern-xl`.") {
+					@patternGrid(patternSizes())
+				}
+			</div>
+			<div class="col-12">
+				@section("Pattern opacity", "Scale the pattern strength with the `bg-pattern-opacity-*` utilities.") {
+					@patternGrid(patternOpacities())
+				}
+			</div>
+			<div class="col-12">
+				@section("Usage", "Combine pattern type, color, size, and opacity on real layouts.") {
+					<div class="row g-3">
+						for _, s := range patternUsage {
+							<div class="col-12 col-md-6 col-xl-3">
+								@patternBox(s)
+							</div>
+						}
+						<div class="col-12 col-lg-6">
+							@card.Card(card.Props{Class: pattern.Classes(pattern.Props{Type: pattern.Diagonal})}) {
+								@card.Body() {
+									Card with <code>.bg-pattern-diagonal</code>.
+								}
+							}
+						</div>
+						<div class="col-12 col-lg-6">
+							@card.Card(card.Props{Class: pattern.Classes(pattern.Props{Type: pattern.Grid, Color: "primary", Opacity: "light"})}) {
+								@card.Body() {
+									Card with a primary grid and <code>.bg-pattern-opacity-light</code>.
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+type paletteColor struct{ Color, Abbr, Name, Hex string }
+
+var palette = []paletteColor{{"blue", "bl", "Blue", "#066fd1"}, {"azure", "az", "Azure", "#4299e1"}, {"indigo", "id", "Indigo", "#4263eb"},
+	{"purple", "pu", "Purple", "#ae3ec9"}, {"pink", "pk", "Pink", "#d6336c"}, {"red", "rd", "Red", "#d63939"}, {"orange", "or", "Orange", "#f76707"},
+	{"yellow", "yl", "Yellow", "#f59f00"}, {"lime", "lm", "Lime", "#74b816"}, {"green", "gn", "Green", "#2fb344"}, {"teal", "tl", "Teal", "#0ca678"},
+	{"cyan", "cy", "Cyan", "#17a2b8"}}
+
+var grays = []string{"50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"}
+
+var socialPalette = []social{{"facebook", "ti-brand-facebook", "Facebook"}, {"twitter", "ti-brand-twitter", "Twitter"}, {"x", "ti-brand-x", "X"},
+	{"linkedin", "ti-brand-linkedin", "Linkedin"}, {"google", "ti-brand-google", "Google"}, {"youtube", "ti-brand-youtube", "Youtube"},
+	{"vimeo", "ti-brand-vimeo", "Vimeo"}, {"dribbble", "ti-brand-dribbble", "Dribbble"}, {"github", "ti-brand-github", "Github"},
+	{"instagram", "ti-brand-instagram", "Instagram"}, {"pinterest", "ti-brand-pinterest", "Pinterest"}, {"vk", "ti-brand-vk", "VK"},
+	{"rss", "ti-rss", "RSS"}, {"flickr", "ti-brand-flickr", "Flickr"}, {"bitbucket", "ti-brand-bitbucket", "Bitbucket"}, {"tabler", "ti-brand-tabler", "Tabler"}}
+
+var gradientColors = []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan", "inverted", "white", "transparent"}
+
+func gradientOptions() []form.Option {
+	os := make([]form.Option, len(gradientColors))
+	for i, c := range gradientColors {
+		os[i] = form.Option{Value: c, Label: c}
+	}
+	return os
+}
+
+var gradientDirections = []form.Option{{Value: "to-t", Label: "to top"}, {Value: "to-te", Label: "to top right"}, {Value: "to-r", Label: "to right"},
+	{Value: "to-be", Label: "to bottom right"}, {Value: "to-b", Label: "to bottom"}, {Value: "to-bs", Label: "to bottom left"}, {Value: "to-s", Label: "to left"},
+	{Value: "to-ts", Label: "to top left"}}
+
+templ swatches(title, subtitle string) {
+	@section(title, subtitle) {
+		<div class="row g-3">
+			{ children... }
+		</div>
+	}
+}
+
+templ colorsPage() {
+	@preview("colors") {
+		<div class="row row-cards">
+			<div class="col-6 col-lg-3">
+				@swatches("Colors", "The extended color palette, with hex values.") {
+					for _, c := range palette {
+						<div class="col-12">
+							@colorswatch.Swatch(colorswatch.Props{Color: c.Color, Name: c.Name, Value: c.Hex, Initials: c.Abbr})
+						</div>
+					}
+				}
+			</div>
+			<div class="col-6 col-lg-3">
+				@swatches("Light colors", "A tinted, low-contrast version of each color.") {
+					for _, c := range palette {
+						<div class="col-12">
+							@colorswatch.Swatch(colorswatch.Props{Color: c.Color, Light: true, Name: c.Name + " Light", Value: c.Hex, Initials: c.Abbr})
+						</div>
+					}
+				}
+			</div>
+			<div class="col-6 col-lg-3">
+				@swatches("Gray colors", "The neutral gray scale used for text, borders, and backgrounds.") {
+					for _, g := range grays {
+						<div class="col-12">
+							@colorswatch.Swatch(colorswatch.Props{Color: "gray-" + g, Name: "Gray " + g, Value: "var(--tblr-gray-" + g + ")", Initials: g})
+						</div>
+					}
+				}
+			</div>
+			<div class="col-6 col-lg-3">
+				@swatches("Social colors", "Brand colors for social networks.") {
+					for _, s := range socialPalette {
+						<div class="col-12">
+							@colorswatch.Swatch(colorswatch.Props{Color: s.Variant, Name: s.Text, Value: "var(--tblr-" + s.Variant + ")", Icon: s.Icon})
+						</div>
+					}
+				}
+			</div>
+			<div class="col-12">
+				<div class="row">
+					<div class="col-12 col-lg-6">
+						@section("Gradient", "Build a gradient from any two colors and preview it live.") {
+							<form>
+								<div class="row g-4">
+									<div class="col">
+										@form.Field(form.FieldProps{Label: "From", For: "colors-gradient-from", Class: "-"}) {
+											@form.Select(form.SelectProps{ID: "colors-gradient-from", Name: "color-from", Options: gradientOptions()})
+										}
+										@form.Field(form.FieldProps{Label: "To", For: "colors-gradient-to", Class: "mt-3"}) {
+											@form.Select(form.SelectProps{ID: "colors-gradient-to", Name: "color-to", Options: gradientOptions(), Selected: "transparent"})
+										}
+									</div>
+									<div class="col">
+										@form.Field(form.FieldProps{Label: "Via", For: "colors-gradient-via", Class: "-"}) {
+											@form.Select(form.SelectProps{ID: "colors-gradient-via", Name: "color-via", Empty: " ", Options: gradientOptions()})
+										}
+										@form.Field(form.FieldProps{Label: "Direction", For: "colors-gradient-direction", Class: "mt-3"}) {
+											@form.Select(form.SelectProps{ID: "colors-gradient-direction", Name: "color-direction", Options: gradientDirections, Selected: "to-r"})
+										}
+									</div>
+									<div class="col-12">
+										@pattern.Pattern(pattern.Props{Type: pattern.Transparent, Class: "border rounded overflow-hidden"}) {
+											@colorswatch.Gradient(colorswatch.GradientProps{From: "primary", To: "transparent", Class: "border rounded", Attributes: templ.Attributes{"id": "gradient-preview"}}) {
+												<div class="px-4 py-5"></div>
+											}
+										}
+									</div>
+								</div>
+							</form>
+							@gradientScript()
+						}
+					</div>
+					<div class="col-12 col-lg-6">
+						@section("Gradient colors", "Every color faded to transparent, fading in from the left or the right.") {
+							<div class="row">
+								<div class="col">
+									<div class="space-y">
+										for _, c := range gradientColors {
+											@colorswatch.Gradient(colorswatch.GradientProps{From: c, To: "transparent", Class: "border rounded px-4 py-2"})
+										}
+									</div>
+								</div>
+								<div class="col">
+									<div class="space-y">
+										for _, c := range gradientColors {
+											@colorswatch.Gradient(colorswatch.GradientProps{From: "transparent", To: c, Class: "border rounded px-4 py-2"})
+										}
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// gradientScript is the preview's live gradient builder.
+templ gradientScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var gradientPreview = document.getElementById('gradient-preview')
+			var colorFrom = document.querySelector('[name="color-from"]')
+			var colorTo = document.querySelector('[name="color-to"]')
+			var colorVia = document.querySelector('[name="color-via"]')
+			var colorDirection = document.querySelector('[name="color-direction"]')
+			function updateGradient() {
+				var gradient = 'bg-gradient bg-gradient-from-' + colorFrom.value + ' bg-gradient-to-' + colorTo.value
+				if (colorVia.value.trim()) {
+					gradient += ' bg-gradient-via-' + colorVia.value
+				}
+				gradient += ' bg-gradient-' + colorDirection.value
+				gradientPreview.className = gradient
+			}
+			colorFrom.addEventListener('change', updateGradient)
+			colorTo.addEventListener('change', updateGradient)
+			colorVia.addEventListener('change', updateGradient)
+			colorDirection.addEventListener('change', updateGradient)
+			updateGradient()
+		})
+	</script>
+}

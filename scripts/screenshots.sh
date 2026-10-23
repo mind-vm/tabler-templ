@@ -1,5 +1,6 @@
 #!/bin/sh
-# Starts the demo server, screenshots every rebuilt page into docs/screenshots/ and stops the server.
+# Starts the demo server, screenshots the pages of docs/screenshots/pages.txt (or every rebuilt page with
+# --all) into docs/screenshots/ and stops the server.
 # Needs Go, Node and a Chromium for Playwright (set CHROMIUM=/path/to/chrome to use an installed one).
 set -eu
 cd "$(dirname "$0")/.."
@@ -11,4 +12,4 @@ trap 'kill $pid' EXIT
 until curl -fs "http://127.0.0.1:$port/pages.json" >/dev/null; do sleep 0.2; done
 cd scripts/screenshots
 [ -d node_modules ] || npm install --no-audit --no-fund
-node shoot.mjs "http://127.0.0.1:$port" ../../docs/screenshots
+node shoot.mjs "http://127.0.0.1:$port" ../../docs/screenshots "$@"

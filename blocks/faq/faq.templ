@@ -1,0 +1,53 @@
+// Package faq is the FAQ page of the Tabler preview as a block: numbered sections of questions, each an
+// accordion in the tabs style, in one large card.
+//
+//	@faq.FAQ(faq.Props{}, []faq.Section{{Title: "1. Introduction", Questions: []faq.Question{{Q: "Who are we?", Answer: about()}}}})
+package faq
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/accordion"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Question is an entry of a Section; the first of each section is open.
+type Question struct {
+	Q      string
+	Answer templ.Component
+}
+
+// Section is a titled group of questions, e.g. "2. Functionality".
+type Section struct {
+	Title     string
+	Questions []Question
+}
+
+type Props struct {
+	ID    string // prefix of the accordions' ids, default "faq"
+	Class string
+}
+
+func items(qs []Question) []accordion.Item {
+	its := make([]accordion.Item, len(qs))
+	for i, q := range qs {
+		its[i] = accordion.Item{Key: strconv.Itoa(i + 1), Title: q.Q, Open: i == 0, Content: q.Answer}
+	}
+	return its
+}
+
+templ FAQ(p Props, sections []Section) {
+	@card.Card(card.Props{Size: card.SizeLarge, Class: p.Class}) {
+		@card.Body() {
+			<div class="space-y-4">
+				for i, s := range sections {
+					<div>
+						<h2 class="mb-3">{ s.Title }</h2>
+						@accordion.Accordion(accordion.Props{ID: kit.Or(p.ID, "faq") + "-" + strconv.Itoa(i+1), Style: accordion.Tabs}, items(s.Questions))
+					</div>
+				}
+			</div>
+		}
+	}
+}

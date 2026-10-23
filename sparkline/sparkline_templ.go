@@ -47,6 +47,26 @@ type Props struct {
 	Animation *int // tween length of updates in ms; 0 turns it off
 	Disabled  bool
 	AriaLabel string
+	// StrokeWidth and SpotSize set the line width and the spot radius in SVG units, e.g. "1" and "1.5"
+	// (--tblr-sparkline-stroke-width, --tblr-sparkline-spot-size).
+	StrokeWidth, SpotSize string
+	// NegativeColor colors negative bars and those below the threshold, e.g. "orange"; default red
+	// (--tblr-sparkline-negative).
+	NegativeColor string
+}
+
+func style(p Props) string {
+	var s []string
+	if p.NegativeColor != "" {
+		s = append(s, "--tblr-sparkline-negative: var(--tblr-"+p.NegativeColor+")")
+	}
+	if p.StrokeWidth != "" {
+		s = append(s, "--tblr-sparkline-stroke-width: "+p.StrokeWidth)
+	}
+	if p.SpotSize != "" {
+		s = append(s, "--tblr-sparkline-spot-size: "+p.SpotSize)
+	}
+	return strings.Join(s, "; ")
 }
 
 func num(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) }
@@ -91,6 +111,9 @@ func attrs(p Props) templ.Attributes {
 	}
 	if p.AriaLabel != "" {
 		a["role"], a["aria-label"] = "img", p.AriaLabel
+	}
+	if st := style(p); st != "" {
+		a["style"] = st
 	}
 	return kit.Attrs(a, p.Attributes)
 }

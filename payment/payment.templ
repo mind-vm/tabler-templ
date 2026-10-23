@@ -1,0 +1,46 @@
+// Package payment renders the logos of payment providers from Tabler's payment stylesheet
+// (tabler-payments.css; load it next to Tabler's CSS), e.g. on a checkout or billing page.
+package payment
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+// Provider is a payment provider: its code (the class suffix) and its name.
+type Provider struct {
+	Code string // e.g. "visa", "mastercard", "paypal"
+	Name string
+}
+
+// Size shares the avatar sizes: xxs, xs, sm, md, lg, xl, 2xl; the zero value is the default.
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeXXS     Size = "xxs"
+	SizeXS      Size = "xs"
+	SizeSmall   Size = "sm"
+	SizeMedium  Size = "md"
+	SizeLarge   Size = "lg"
+	SizeXL      Size = "xl"
+	Size2XL     Size = "2xl"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Size       Size
+	Dark       bool   // the logo for dark backgrounds
+	Label      string // accessible name, e.g. "Visa"; without it the logo is decorative
+}
+
+// Payment renders the logo of the provider with this code.
+templ Payment(code string, props ...Props) {
+	{{ p := kit.First(props) }}
+	<span
+		class={ kit.Classes("payment", kit.If(p.Size != SizeDefault, "payment-"+string(p.Size)), "payment-provider-"+code+kit.If(p.Dark, "-dark"), p.Class) }
+		if p.Label != "" {
+			role="img"
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	></span>
+}

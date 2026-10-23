@@ -1,11 +1,16 @@
-// Takes a screenshot of every rebuilt page of a running demo server (go run ./cmd/demo) and writes
-// docs/screenshots/<name>.png. Usage: node shoot.mjs http://localhost:8080 ../../docs/screenshots
+// Takes screenshots of a running demo server (go run ./cmd/demo) and writes docs/screenshots/<name>.png:
+// the pages listed in docs/screenshots/pages.txt (the README's gallery), or every rebuilt page with --all.
+// Usage: node shoot.mjs http://localhost:8080 ../../docs/screenshots [--all]
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const [base = "http://localhost:8080", out = "../../docs/screenshots"] = process.argv.slice(2);
-const names = await (await fetch(`${base}/pages.json`)).json();
+import { readFile } from "node:fs/promises";
+const all = process.argv.includes("--all");
+const names = all
+  ? await (await fetch(`${base}/pages.json`)).json()
+  : (await readFile(join(out, "pages.txt"), "utf8")).split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#") && l !== "index");
 await mkdir(out, { recursive: true });
 
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});

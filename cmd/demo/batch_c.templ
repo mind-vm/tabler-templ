@@ -275,7 +275,7 @@ templ placeholderPage() {
 // Card gradients page.
 
 // welcomeFigure is a key figure of the welcome card: label, value with trend and a bar.
-templ welcomeFigure(label, value string, change float64, changeText string, bar int, color string) {
+templ welcomeFigure(label, value string, change float64, changeText string, bar float64, color string) {
 	<div class="col-auto">
 		@typography.Subheader() {
 			{ label }
@@ -291,7 +291,7 @@ templ welcomeFigure(label, value string, change float64, changeText string, bar 
 }
 
 // orderStat is a small figure card with an avatar icon and a bar.
-templ orderStat(color, label, value, ic string, bar int) {
+templ orderStat(color, label, value, ic string, bar float64) {
 	@card.Card(card.Props{Gradient: color, GradientEdge: "start"}) {
 		@card.Body() {
 			<div class="row g-3">

@@ -90,12 +90,14 @@ func Timeline(props ...Props) templ.Component {
 
 type EventProps struct {
 	Class     string
-	Icon      string          // marker icon, e.g. "ti-check"
-	IconColor string          // tints the marker, e.g. "green" → bg-green-lt
-	Marker    templ.Component // replaces the icon, e.g. an avatar
-	Time      string          // e.g. "2 hrs ago", at the top right of the card
-	Title     string
-	// TitleLevel 3 renders the title as <h3 class="h4"> for a timeline under an h2; default <h4>.
+	Icon      string // marker icon, e.g. "ti-check"
+	IconColor string // tints the marker, e.g. "green" → bg-green-lt
+	// Strong colors the marker fully, e.g. "facebook" → bg-facebook text-facebook-fg (instead of IconColor).
+	Strong string
+	Marker templ.Component // replaces the icon, e.g. an avatar
+	Time   string          // e.g. "2 hrs ago", at the top right of the card
+	Title  string
+	// TitleLevel 2 or 3 renders the title as <h2 class="h4"> or <h3 class="h4">; default <h4>.
 	TitleLevel int
 	// NoBody puts the children into the event's card directly, without the card body (e.g. a list).
 	NoBody bool
@@ -146,7 +148,7 @@ func Event(p EventProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if p.Marker != nil || p.Icon != "" {
-			var templ_7745c5c3_Var7 = []any{kit.Classes("timeline-event-icon", kit.If(p.IconColor != "", "bg-"+p.IconColor+"-lt"))}
+			var templ_7745c5c3_Var7 = []any{kit.Classes("timeline-event-icon", kit.If(p.IconColor != "", "bg-"+p.IconColor+"-lt"), kit.If(p.Strong != "", "bg-"+p.Strong+" text-"+p.Strong+"-fg"))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -206,7 +208,7 @@ func Event(p EventProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.Time)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 55, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 57, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -218,39 +220,57 @@ func Event(p EventProps) templ.Component {
 				}
 			}
 			if p.Title != "" {
-				if p.TitleLevel == 3 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<h3 class=\"h4\">")
+				if p.TitleLevel == 2 {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<h2 class=\"h4\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 59, Col: 31}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 61, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</h3>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</h2>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<h4>")
+				} else if p.TitleLevel == 3 {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<h3 class=\"h4\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 61, Col: 20}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 63, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</h4>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</h3>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<h4>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var12 string
+					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `timeline/timeline.templ`, Line: 65, Col: 20}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</h4>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -260,12 +280,12 @@ func Event(p EventProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

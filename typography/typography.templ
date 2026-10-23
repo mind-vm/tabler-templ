@@ -8,12 +8,18 @@ type SubheaderProps struct {
 	Class string
 	// Level renders an <h2>…<h6>; default a <div>.
 	Level int
+	// Legend renders a <legend>, e.g. above a group of check boxes in a fieldset.
+	Legend bool
 }
 
 // Subheader is a small uppercase heading (subheader), e.g. above a group of links.
 templ Subheader(props ...SubheaderProps) {
 	{{ p := kit.First(props) }}
-	if p.Level >= 2 && p.Level <= 6 {
+	if p.Legend {
+		<legend class={ kit.Classes("subheader", p.Class) }>
+			{ children... }
+		</legend>
+	} else if p.Level >= 2 && p.Level <= 6 {
 		@templ.Raw("<h" + string(rune('0'+p.Level)) + ` class="` + templ.EscapeString(kit.Classes("subheader", p.Class)) + `">`)
 		{ children... }
 		@templ.Raw("</h" + string(rune('0'+p.Level)) + ">")

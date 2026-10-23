@@ -1,0 +1,90 @@
+// Package gallery holds the photo blocks of the Tabler preview: a photo card with author, time, views
+// and likes (shared/components/cards/GalleryPhoto), and a photo tile for photo grids that opens in a
+// lightbox.
+package gallery
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type PhotoProps struct {
+	Src  string
+	Alt  string
+	Href string // default "#"
+	// The author: photo (or Initials), name and when.
+	Avatar   string
+	Initials string
+	Name     string
+	Time     string
+	// Views and Likes are shown when set; Liked fills the heart.
+	Views     string
+	Likes     string
+	Liked     bool
+	ViewsHref string // default "#"
+	LikesHref string // default "#"
+}
+
+// Photo is a small card with a photo and its author.
+templ Photo(p PhotoProps) {
+	@card.Card(card.Props{Size: card.SizeSmall}) {
+		<a href={ templ.URL(kit.Or(p.Href, "#")) } class="d-block">
+			@card.Image(card.ImageProps{Src: p.Src, Alt: p.Alt})
+		</a>
+		@card.Body() {
+			<div class="d-flex align-items-center">
+				@avatar.Avatar(avatar.Props{Src: p.Avatar, Initials: p.Initials, Class: "me-3 rounded"})
+				<div>
+					<div>{ p.Name }</div>
+					<div class="text-secondary">{ p.Time }</div>
+				</div>
+				if p.Views != "" || p.Likes != "" {
+					<div class="ms-auto">
+						if p.Views != "" {
+							<a href={ templ.URL(kit.Or(p.ViewsHref, "#")) } class="text-secondary">
+								@icon.Icon("ti-eye", icon.Props{Inline: true})
+								{ p.Views }
+							</a>
+						}
+						if p.Likes != "" {
+							<a href={ templ.URL(kit.Or(p.LikesHref, "#")) } class="ms-3 text-secondary">
+								if p.Liked {
+									@icon.Icon("ti-heart", icon.Props{Inline: true, Filled: true, Color: "red"})
+								} else {
+									@icon.Icon("ti-heart", icon.Props{Inline: true})
+								}
+								{ p.Likes }
+							</a>
+						}
+					</div>
+				}
+			</div>
+		}
+	}
+}
+
+type TileProps struct {
+	Src   string
+	Title string // read out, e.g. the photo's description
+	// Ratio of the tile: "1x1", "3x1", "4x1", "4x3", "16x9" … (img-responsive-{ratio}).
+	Ratio string
+	Class string // e.g. "rounded-3 border"
+	// Lightbox groups tiles for a lightbox script (data-fslightbox); empty = a plain link.
+	Lightbox string
+	Href     string // default Src
+}
+
+// Tile is a photo filling a box of a fixed ratio, linked to the full photo.
+templ Tile(p TileProps) {
+	<a
+		if p.Lightbox != "" {
+			data-fslightbox={ p.Lightbox }
+		}
+		href={ templ.URL(kit.Or(p.Href, p.Src)) }
+		aria-label={ p.Title }
+	>
+		<div class={ kit.Classes("img-responsive", kit.If(p.Ratio != "", "img-responsive-"+p.Ratio), p.Class) } style={ "background-image: url(" + p.Src + ")" }></div>
+	</a>
+}

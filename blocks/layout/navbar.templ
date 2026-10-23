@@ -24,6 +24,8 @@ type NavbarProps struct {
 	Menu      MenuProps
 	// ToggleLabel is the menu button's aria-label on small screens.
 	ToggleLabel string
+	// Attributes go on the <header>, e.g. a style with a brand color.
+	Attributes templ.Attributes
 }
 
 templ toggler(target, label string) {
@@ -41,6 +43,7 @@ templ Navbar(p NavbarProps, entries []Entry) {
 		if p.Dark {
 			data-bs-theme="dark"
 		}
+		{ p.Attributes... }
 	>
 		<div class="container-xl">
 			if len(entries) > 0 || p.Search != nil {
@@ -169,11 +172,31 @@ type BrandProps struct {
 	Label string          // aria-label, e.g. the app's name
 	Class string          // e.g. "pe-0 pe-md-3" in a Navbar
 	After templ.Component // after the link, e.g. FoldToggle in a Sidebar
+	// Link renders the brand as one <a class="navbar-brand"> (without After), e.g. on a single page.
+	Link bool
 }
 
 // Brand is the logo at the start of a Navbar or Sidebar; the children are the logo (an <img> with
 // class "navbar-brand-image" or inline SVG) and, optionally, the app's name.
 templ Brand(p BrandProps) {
+	if p.Link {
+		<a
+			href={ templ.URL(kit.Or(p.Href, ".")) }
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			class={ kit.Classes("navbar-brand navbar-brand-autodark", p.Class) }
+		>
+			{ children... }
+		</a>
+	} else {
+		@brandBlock(p) {
+			{ children... }
+		}
+	}
+}
+
+templ brandBlock(p BrandProps) {
 	<div class={ kit.Classes("navbar-brand navbar-brand-autodark", p.Class) }>
 		<a
 			href={ templ.URL(kit.Or(p.Href, ".")) }

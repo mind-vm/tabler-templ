@@ -1,0 +1,59 @@
+// Package cookie holds the cookie banner of the Tabler preview: an offcanvas at the bottom edge with a
+// message and the buttons to choose.
+package cookie
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/offcanvas"
+)
+
+type BannerProps struct {
+	ID string // default "cookie-banner"
+	// Show opens it on load (until the user chooses).
+	Show bool
+	// Text is the message, e.g. "<strong>Do you like cookies?</strong> 🍪 We use cookies …".
+	Text      templ.Component
+	LearnHref string // a "Learn more" link after the text; empty = none
+	LearnText string // default "Learn more"
+	// Buttons; each closes the banner.
+	Buttons []Button
+}
+
+type Button struct {
+	Text    string
+	Variant button.Variant // default primary
+}
+
+templ Banner(p BannerProps) {
+	@offcanvas.Offcanvas(offcanvas.Props{ID: kit.Or(p.ID, "cookie-banner"), Placement: offcanvas.Bottom, Show: p.Show, Class: "h-auto",
+		Attributes: templ.Attributes{"aria-modal": "true"}}) {
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col">
+					if p.Text != nil {
+						@p.Text
+					}
+					if p.LearnHref != "" {
+						{ " " }
+						<a href={ templ.URL(p.LearnHref) } target="_blank">{ kit.Or(p.LearnText, "Learn more") }</a>
+					}
+				</div>
+				for _, b := range p.Buttons {
+					<div class="col-auto">
+						@button.Button(button.Props{Type: "button", Variant: variant(b), Attributes: offcanvas.Dismiss()}) {
+							{ b.Text }
+						}
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+func variant(b Button) button.Variant {
+	if b.Variant == "" {
+		return button.VariantPrimary
+	}
+	return b.Variant
+}

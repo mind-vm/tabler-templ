@@ -1,0 +1,128 @@
+// Package legal holds the text pages of the Tabler preview such as the license and the terms of service:
+// a card or a narrow page around prose, and a summary of what a license permits.
+package legal
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/prose"
+)
+
+type CardProps struct {
+	Class string
+	Title string // a heading above the text (card-title, h1)
+	Large bool   // more padding (card-lg); otherwise card-md
+}
+
+// Card is a text in a card, e.g. a license or terms of service; the children are the text.
+templ Card(p CardProps) {
+	<div class={ kit.Classes("card", kit.If(p.Large, "card-lg"), kit.If(!p.Large, "card-md"), p.Class) }>
+		<div class="card-body">
+			if p.Title != "" {
+				<h1 class="card-title">{ p.Title }</h1>
+			}
+			@prose.Prose() {
+				{ children... }
+			}
+		</div>
+	</div>
+}
+
+type PageProps struct {
+	Lang    string // default "en"
+	Title   string
+	Head    templ.Component
+	Scripts templ.Component
+	Brand   templ.Component // above the text, e.g. the app's logo
+}
+
+// Page is a centered page without navigation for a text (container-narrow), e.g. terms of service; the
+// children are usually a Card.
+templ Page(p PageProps) {
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body>
+			<main class="page page-center" id="content">
+				<div class="container container-narrow py-4">
+					if p.Brand != nil {
+						<div class="text-center mb-4">
+							@p.Brand
+						</div>
+					}
+					{ children... }
+				</div>
+			</main>
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+// Term is a line of a LicenseSummary.
+type Term struct {
+	Text string
+}
+
+type LicenseProps struct {
+	Lead        string // small line above the name, e.g. "tabler/tabler is licensed under the"
+	Name        string // e.g. "MIT License"
+	Text        string // the license in a sentence
+	Permissions []Term
+	Limitations []Term
+	Conditions  []Term
+	// Headings, default "Permissions", "Limitations", "Conditions".
+	PermissionsTitle, LimitationsTitle, ConditionsTitle string
+	Footer                                              templ.Component // e.g. "This is not legal advice."
+}
+
+templ terms(title string, ts []Term, color, ic string) {
+	if len(ts) > 0 {
+		<h4>{ title }</h4>
+		@iconlist.List(iconlist.Props{Color: color}) {
+			for _, t := range ts {
+				@iconlist.Item(iconlist.ItemProps{Icon: ic}) {
+					{ t.Text }
+				}
+			}
+		}
+	}
+}
+
+// LicenseSummary is the card that sums up a license like GitHub does.
+templ LicenseSummary(p LicenseProps) {
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-3">
+				<div class="me-3">
+					@icon.Icon("ti-scale", icon.Props{Size: icon.SizeMedium})
+				</div>
+				<div>
+					<small class="text-secondary">{ p.Lead }</small>
+					<h3 class="lh-1">{ p.Name }</h3>
+				</div>
+			</div>
+			if p.Text != "" {
+				<div class="text-secondary mb-3">{ p.Text }</div>
+			}
+			@terms(kit.Or(p.PermissionsTitle, "Permissions"), p.Permissions, "green", "ti-check")
+			@terms(kit.Or(p.LimitationsTitle, "Limitations"), p.Limitations, "red", "ti-x")
+			@terms(kit.Or(p.ConditionsTitle, "Conditions"), p.Conditions, "blue", "ti-info-circle")
+		</div>
+		if p.Footer != nil {
+			<div class="card-footer">
+				@p.Footer
+			</div>
+		}
+	</div>
+}
