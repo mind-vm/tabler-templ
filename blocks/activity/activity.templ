@@ -1,0 +1,72 @@
+// Package activity renders Tabler's activity feed: who did what and when, one entry per row with an
+// avatar and a mark for unread entries; Card puts it in a card of fixed height that scrolls.
+//
+//	@activity.Card(activity.CardProps{}, []activity.Item{
+//		{Avatar: avatar.Props{Src: "/a/jeffie.jpg"}, Text: templ.Raw("<strong>Jeffie</strong> commented on your post"), Time: "1 day ago", Unread: true},
+//	})
+package activity
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Item is an entry of the feed.
+type Item struct {
+	Avatar avatar.Props
+	// Text is what happened, with names and titles in <strong>; it is cut off at the end of the row.
+	Text   templ.Component
+	Time   string // e.g. "1 day ago"
+	Unread bool   // a dot at the right
+}
+
+// Feed is the list of entries, divided by lines.
+templ Feed(items []Item) {
+	<div class="divide-y">
+		for _, it := range items {
+			<div>
+				<div class="row">
+					<div class="col-auto">
+						@avatar.Avatar(it.Avatar)
+					</div>
+					<div class="col">
+						<div class="text-truncate">
+							if it.Text != nil {
+								@it.Text
+							}
+						</div>
+						<div class="text-secondary">{ it.Time }</div>
+					</div>
+					if it.Unread {
+						<div class="col-auto align-self-center">
+							<div class="badge bg-primary"></div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+type CardProps struct {
+	Class string
+	// Height of the card, default "28rem"; the feed scrolls inside it. "none" lets the card grow.
+	Height string
+}
+
+// Card is the feed in a card whose body scrolls (Tabler's ActivityCard).
+templ Card(p CardProps, items []Item) {
+	if p.Height == "none" {
+		<div class={ kit.Classes("card", p.Class) }>
+			<div class="card-body">
+				@Feed(items)
+			</div>
+		</div>
+	} else {
+		<div class={ kit.Classes("card", p.Class) } style={ templ.SafeCSS("height: " + kit.Or(p.Height, "28rem")) }>
+			<div class="card-body card-body-scrollable" tabindex="0">
+				@Feed(items)
+			</div>
+		</div>
+	}
+}

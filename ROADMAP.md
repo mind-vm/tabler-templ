@@ -9,8 +9,8 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 | | Status |
 |---|---|
 | Components | 63 done, 1 partial, 3 open (of 67) |
-| Blocks | 75 done, 5 partial, 98 open (of 178) |
-| Preview pages | 87 done, 20 partial, 39 open (of 146) |
+| Blocks | 109 done, 4 partial, 65 open (of 178) |
+| Preview pages | 115 done, 6 partial, 25 open (of 146) |
 
 ## Plan
 
@@ -105,7 +105,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 
 ### cards
 
-- [ ] [cards/ActivityCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ActivityCard.astro)
+- [x] [cards/ActivityCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ActivityCard.astro) — `blocks/activity`
 - [x] [cards/AuthLockCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthLockCard.astro) — `blocks/auth`
 - [x] [cards/AuthenticateAccount](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthenticateAccount.astro) — `blocks/auth`
 - [x] [cards/BodyPlaceholder](https://github.com/tabler/tabler/blob/dev/shared/components/cards/BodyPlaceholder.astro) — `blocks/cards`
@@ -116,20 +116,20 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/CardRibbonTop](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CardRibbonTop.astro)
 - [ ] [cards/CardTabs](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CardTabs.astro)
 - [ ] [cards/CarouselCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CarouselCard.astro)
-- [ ] [cards/ChurnRisk](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ChurnRisk.astro)
-- [ ] [cards/Code](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Code.astro)
-- [ ] [cards/Configuration](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Configuration.astro)
+- [x] [cards/ChurnRisk](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ChurnRisk.astro) — `blocks/crm`
+- [x] [cards/Code](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Code.astro) — `blocks/cards`
+- [x] [cards/Configuration](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Configuration.astro) — `blocks/cards`
 - [x] [cards/CreditCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CreditCard.astro) — `blocks/cards`
-- [ ] [cards/CrmStats](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CrmStats.astro)
+- [x] [cards/CrmStats](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CrmStats.astro) — `blocks/metric`
 - [ ] [cards/DeleteConfirm](https://github.com/tabler/tabler/blob/dev/shared/components/cards/DeleteConfirm.astro)
-- [ ] [cards/DevelopmentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/DevelopmentActivity.astro)
+- [x] [cards/DevelopmentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/DevelopmentActivity.astro) — `blocks/dashboard`
 - [x] [cards/EmptyTeam](https://github.com/tabler/tabler/blob/dev/shared/components/cards/EmptyTeam.astro) — `blocks/cards`
 - [x] [cards/ForgotPasswordCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ForgotPasswordCard.astro) — `blocks/auth`
 - [x] [cards/GalleryPhoto](https://github.com/tabler/tabler/blob/dev/shared/components/cards/GalleryPhoto.astro) — `blocks/gallery`
-- [ ] [cards/Gauge](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Gauge.astro)
+- [x] [cards/Gauge](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Gauge.astro) — `blocks/metric`
 - [ ] [cards/HappyBirthday](https://github.com/tabler/tabler/blob/dev/shared/components/cards/HappyBirthday.astro)
 - [ ] [cards/Icons](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Icons.astro)
-- [ ] [cards/IconsBanner](https://github.com/tabler/tabler/blob/dev/shared/components/cards/IconsBanner.astro)
+- [x] [cards/IconsBanner](https://github.com/tabler/tabler/blob/dev/shared/components/cards/IconsBanner.astro) — `blocks/dashboard`
 - [x] [cards/InvoiceCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/InvoiceCard.astro) — `blocks/invoice`
 - [x] [cards/Invoices](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Invoices.astro) — `blocks/tables`
 - [ ] [cards/MapAddressPicker](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapAddressPicker.astro)
@@ -139,43 +139,43 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/MapServerStatus](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapServerStatus.astro)
 - [ ] [cards/MapStoreLocator](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapStoreLocator.astro)
 - [ ] [cards/MapUsersByCountry](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapUsersByCountry.astro)
-- [ ] [cards/MapVectorCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapVectorCard.astro)
-- [ ] [cards/MostVisitedPages](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MostVisitedPages.astro)
+- [x] [cards/MapVectorCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MapVectorCard.astro) — `vectormap`
+- [x] [cards/MostVisitedPages](https://github.com/tabler/tabler/blob/dev/shared/components/cards/MostVisitedPages.astro) — `blocks/dashboard`
 - [x] [cards/PricingCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/PricingCard.astro) — `blocks/plans`
 - [x] [cards/PricingCardEnterprise](https://github.com/tabler/tabler/blob/dev/shared/components/cards/PricingCardEnterprise.astro) — `blocks/plans`
 - [x] [cards/PricingPlan](https://github.com/tabler/tabler/blob/dev/shared/components/cards/PricingPlan.astro) — `blocks/plans`
 - [x] [cards/ProfileContact](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProfileContact.astro) — `blocks/profile`
-- [ ] [cards/ProjectKanban](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectKanban.astro)
-- [ ] [cards/ProjectProgress](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectProgress.astro)
-- [ ] [cards/ProjectSummary](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectSummary.astro)
-- [ ] [cards/RecentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/RecentActivity.astro)
+- [x] [cards/ProjectKanban](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectKanban.astro) — `blocks/projects`
+- [x] [cards/ProjectProgress](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectProgress.astro) — `blocks/projects`
+- [x] [cards/ProjectSummary](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectSummary.astro) — `blocks/projects`
+- [x] [cards/RecentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/RecentActivity.astro) — `blocks/crm`
 - [x] [cards/SignInCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInCard.astro) — `blocks/auth`
 - [x] [cards/SignInForm](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInForm.astro) — `blocks/auth`
 - [x] [cards/SignUpCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignUpCard.astro) — `blocks/auth`
-- [ ] [cards/SmallStats](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SmallStats.astro)
-- [ ] [cards/SocialTraffic](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SocialTraffic.astro)
-- [ ] [cards/Sponsor](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Sponsor.astro)
-- [ ] [cards/StatCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StatCard.astro) — `blocks/stats`, partial, key figure tiles
+- [x] [cards/SmallStats](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SmallStats.astro) — `blocks/metric`
+- [x] [cards/SocialTraffic](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SocialTraffic.astro) — `blocks/dashboard`
+- [x] [cards/Sponsor](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Sponsor.astro) — `blocks/dashboard`
+- [x] [cards/StatCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StatCard.astro) — `blocks/metric`
 - [ ] [cards/StatGradient](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StatGradient.astro)
-- [ ] [cards/StatusMonitoring](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StatusMonitoring.astro)
-- [ ] [cards/StorageUsage](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StorageUsage.astro)
-- [ ] [cards/Subscribe](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Subscribe.astro)
+- [x] [cards/StatusMonitoring](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StatusMonitoring.astro) — `blocks/metric`
+- [x] [cards/StorageUsage](https://github.com/tabler/tabler/blob/dev/shared/components/cards/StorageUsage.astro) — `blocks/dashboard`
+- [x] [cards/Subscribe](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Subscribe.astro) — `blocks/users`
 - [ ] [cards/SuccessMessage](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SuccessMessage.astro)
-- [ ] [cards/SystemStatus](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SystemStatus.astro)
+- [x] [cards/SystemStatus](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SystemStatus.astro) — `blocks/uptime`
 - [x] [cards/TabsCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TabsCard.astro) — `blocks/tabscard`
-- [ ] [cards/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Tasks.astro)
-- [ ] [cards/TasksDue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TasksDue.astro)
-- [ ] [cards/TeamLeaderboard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TeamLeaderboard.astro)
-- [ ] [cards/TopDeals](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TopDeals.astro)
+- [x] [cards/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Tasks.astro) — `blocks/dashboard`
+- [x] [cards/TasksDue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TasksDue.astro) — `blocks/dashboard`
+- [x] [cards/TeamLeaderboard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TeamLeaderboard.astro) — `blocks/dashboard`
+- [x] [cards/TopDeals](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TopDeals.astro) — `blocks/crm`
 - [x] [cards/UserCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserCard.astro) — `blocks/users`
-- [ ] [cards/UserCardBg](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserCardBg.astro)
-- [ ] [cards/UserCardBig](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserCardBig.astro)
-- [ ] [cards/UserInfo](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserInfo.astro)
+- [x] [cards/UserCardBg](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserCardBg.astro) — `blocks/users`
+- [x] [cards/UserCardBig](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserCardBig.astro) — `blocks/users`
+- [x] [cards/UserInfo](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UserInfo.astro) — `blocks/profile`
 - [x] [cards/UsersList](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UsersList.astro) — `blocks/cards`
 - [x] [cards/UsersList2](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UsersList2.astro) — `blocks/cards`
 - [x] [cards/UsersListHeaders](https://github.com/tabler/tabler/blob/dev/shared/components/cards/UsersListHeaders.astro) — `blocks/cards`
 - [ ] [cards/Weather](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Weather.astro)
-- [ ] [cards/Welcome](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Welcome.astro)
+- [x] [cards/Welcome](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Welcome.astro) — `blocks/dashboard`
 - [ ] [cards/YouWin](https://github.com/tabler/tabler/blob/dev/shared/components/cards/YouWin.astro)
 - [x] [cards/charts/ActiveUsers](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers.astro) — `blocks/metric`
 - [x] [cards/charts/ActiveUsers2](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/ActiveUsers2.astro) — `blocks/metric`
@@ -183,7 +183,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [x] [cards/charts/CryptoPrice](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/CryptoPrice.astro) — `blocks/metric`
 - [x] [cards/charts/MrrOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/MrrOverview.astro) — `blocks/metric`
 - [x] [cards/charts/NewClients](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/NewClients.astro) — `blocks/metric`
-- [ ] [cards/charts/PipelineFunnel](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/PipelineFunnel.astro)
+- [x] [cards/charts/PipelineFunnel](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/PipelineFunnel.astro) — `blocks/crm`
 - [x] [cards/charts/Revenue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Revenue.astro) — `blocks/metric`
 - [x] [cards/charts/Sales](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/Sales.astro) — `blocks/metric`
 - [x] [cards/charts/SalesOverview](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/SalesOverview.astro) — `blocks/metric`
@@ -193,8 +193,8 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [x] [cards/charts/WeeklyActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/charts/WeeklyActivity.astro) — `blocks/metric`
 - [x] [cards/form/Layout](https://github.com/tabler/tabler/blob/dev/shared/components/cards/form/Layout.astro) — `form`
 - [x] [cards/form/Payment](https://github.com/tabler/tabler/blob/dev/shared/components/cards/form/Payment.astro) — `blocks/billing`
-- [ ] [cards/music/TrackInfo](https://github.com/tabler/tabler/blob/dev/shared/components/cards/music/TrackInfo.astro)
-- [ ] [cards/music/TracksList](https://github.com/tabler/tabler/blob/dev/shared/components/cards/music/TracksList.astro)
+- [x] [cards/music/TrackInfo](https://github.com/tabler/tabler/blob/dev/shared/components/cards/music/TrackInfo.astro) — `blocks/music`
+- [x] [cards/music/TracksList](https://github.com/tabler/tabler/blob/dev/shared/components/cards/music/TracksList.astro) — `blocks/music`
 - [ ] [cards/placeholder/Card1](https://github.com/tabler/tabler/blob/dev/shared/components/cards/placeholder/Card1.astro)
 - [ ] [cards/placeholder/Card2](https://github.com/tabler/tabler/blob/dev/shared/components/cards/placeholder/Card2.astro)
 - [ ] [cards/placeholder/Card3](https://github.com/tabler/tabler/blob/dev/shared/components/cards/placeholder/Card3.astro)
@@ -217,7 +217,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [x] [modals/ModalFooter](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalFooter.astro) — `modal`
 - [x] [modals/ModalHeader](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalHeader.astro) — `modal`
 - [x] [modals/ModalInline](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalInline.astro) — `modal`, Show and Class
-- [ ] [modals/NewEmailModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEmailModalContent.astro) — `modal`, partial, the WYSIWYG editor plugin is not loaded
+- [ ] [modals/NewEmailModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEmailModalContent.astro) — `blocks/mail`, partial, the WYSIWYG editor plugin is not loaded (a textarea; mail.ComposeProps.Message takes an editor)
 - [x] [modals/NewEventModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEventModalContent.astro) — `modal`, modal with form components; the date picker plugin is not loaded
 - [x] [modals/NewTaskModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewTaskModalContent.astro) — `modal`, modal with form components; date picker and select plugins are not loaded
 - [x] [modals/ReportModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ReportModalContent.astro) — `modal`, modal with form components, no block of its own
@@ -298,7 +298,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 
 - [ ] [parts/Datagrid](https://github.com/tabler/tabler/blob/dev/shared/components/parts/Datagrid.astro)
 - [ ] [parts/NavAside](https://github.com/tabler/tabler/blob/dev/shared/components/parts/NavAside.astro)
-- [ ] [parts/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/parts/Tasks.astro)
+- [x] [parts/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/parts/Tasks.astro) — `blocks/tasks`
 - [x] [parts/charts/Activity](https://github.com/tabler/tabler/blob/dev/shared/components/parts/charts/Activity.astro) — `blocks/metric`
 - [ ] [parts/form/InputColor](https://github.com/tabler/tabler/blob/dev/shared/components/parts/form/InputColor.astro)
 
@@ -345,35 +345,35 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 ### Layouts
 
 - [x] [blank](https://preview.tabler.io/blank.html) Blank page
-- [ ] [layout-boxed](https://preview.tabler.io/layout-boxed.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-condensed](https://preview.tabler.io/layout-condensed.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-fluid-vertical](https://preview.tabler.io/layout-fluid-vertical.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-fluid](https://preview.tabler.io/layout-fluid.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-folded-hover](https://preview.tabler.io/layout-folded-hover.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-folded](https://preview.tabler.io/layout-folded.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-horizontal](https://preview.tabler.io/layout-horizontal.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-navbar-dark](https://preview.tabler.io/layout-navbar-dark.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-navbar-floating](https://preview.tabler.io/layout-navbar-floating.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-navbar-sticky](https://preview.tabler.io/layout-navbar-sticky.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-rtl](https://preview.tabler.io/layout-rtl.html) RTL mode — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-vertical-floating](https://preview.tabler.io/layout-vertical-floating.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-vertical-right](https://preview.tabler.io/layout-vertical-right.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-vertical-transparent](https://preview.tabler.io/layout-vertical-transparent.html) Dashboard — partial, frame done; the dashboard inside follows with index
-- [ ] [layout-vertical](https://preview.tabler.io/layout-vertical.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [x] [layout-boxed](https://preview.tabler.io/layout-boxed.html) Dashboard
+- [x] [layout-condensed](https://preview.tabler.io/layout-condensed.html) Dashboard
+- [x] [layout-fluid-vertical](https://preview.tabler.io/layout-fluid-vertical.html) Dashboard
+- [x] [layout-fluid](https://preview.tabler.io/layout-fluid.html) Dashboard
+- [x] [layout-folded-hover](https://preview.tabler.io/layout-folded-hover.html) Dashboard
+- [x] [layout-folded](https://preview.tabler.io/layout-folded.html) Dashboard
+- [x] [layout-horizontal](https://preview.tabler.io/layout-horizontal.html) Dashboard
+- [x] [layout-navbar-dark](https://preview.tabler.io/layout-navbar-dark.html) Dashboard
+- [x] [layout-navbar-floating](https://preview.tabler.io/layout-navbar-floating.html) Dashboard
+- [x] [layout-navbar-sticky](https://preview.tabler.io/layout-navbar-sticky.html) Dashboard
+- [x] [layout-rtl](https://preview.tabler.io/layout-rtl.html) RTL mode
+- [x] [layout-vertical-floating](https://preview.tabler.io/layout-vertical-floating.html) Dashboard
+- [x] [layout-vertical-right](https://preview.tabler.io/layout-vertical-right.html) Dashboard
+- [x] [layout-vertical-transparent](https://preview.tabler.io/layout-vertical-transparent.html) Dashboard
+- [x] [layout-vertical](https://preview.tabler.io/layout-vertical.html) Dashboard
 
 ### App pages
 
-- [ ] [activity](https://preview.tabler.io/activity.html) Activity
+- [x] [activity](https://preview.tabler.io/activity.html) Activity
 - [x] [billing](https://preview.tabler.io/billing.html) Billing
 - [x] [changelog](https://preview.tabler.io/changelog.html) changelog
-- [ ] [chat](https://preview.tabler.io/chat.html) Chat
-- [ ] [dashboard-crm](https://preview.tabler.io/dashboard-crm.html) CRM Dashboard
-- [ ] [dashboard-crypto](https://preview.tabler.io/dashboard-crypto.html) Crypto Dashboard
-- [ ] [email-inbox](https://preview.tabler.io/email-inbox.html) Email inbox
-- [ ] [emails](https://preview.tabler.io/emails.html) emails
+- [x] [chat](https://preview.tabler.io/chat.html) Chat
+- [x] [dashboard-crm](https://preview.tabler.io/dashboard-crm.html) CRM Dashboard
+- [x] [dashboard-crypto](https://preview.tabler.io/dashboard-crypto.html) Crypto Dashboard
+- [ ] [email-inbox](https://preview.tabler.io/email-inbox.html) Email inbox — partial, the compose dialog has a textarea instead of the WYSIWYG editor plugin
+- [x] [emails](https://preview.tabler.io/emails.html) emails
 - [x] [faq](https://preview.tabler.io/faq.html) Frequently Asked Questions
 - [x] [gallery](https://preview.tabler.io/gallery.html) Gallery
-- [ ] [index](https://preview.tabler.io/index.html) Dashboard
+- [x] [index](https://preview.tabler.io/index.html) Dashboard
 - [x] [invoice](https://preview.tabler.io/invoice.html) Invoice
 - [x] [job-listing](https://preview.tabler.io/job-listing.html) Search for Jobs
 - [x] [logs](https://preview.tabler.io/logs.html) Logs
@@ -384,7 +384,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [marketing/real-estate](https://preview.tabler.io/marketing/real-estate.html) marketing/real-estate
 - [ ] [marketing/testimonials](https://preview.tabler.io/marketing/testimonials.html) Testimonials
 - [ ] [marketing/text](https://preview.tabler.io/marketing/text.html) Text
-- [ ] [music](https://preview.tabler.io/music.html) Music components
+- [x] [music](https://preview.tabler.io/music.html) Music components
 - [x] [pay](https://preview.tabler.io/pay.html) Pay
 - [x] [payment-providers](https://preview.tabler.io/payment-providers.html) Payment Providers
 - [x] [photogrid](https://preview.tabler.io/photogrid.html) Photogrid
@@ -394,13 +394,13 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [x] [search-results](https://preview.tabler.io/search-results.html) Search results
 - [x] [settings-plan](https://preview.tabler.io/settings-plan.html) Plans
 - [x] [settings](https://preview.tabler.io/settings.html) settings
-- [ ] [tasks-list](https://preview.tabler.io/tasks-list.html) Task List
-- [ ] [tasks](https://preview.tabler.io/tasks.html) Tasks
-- [ ] [tracking](https://preview.tabler.io/tracking.html) Tracking
-- [ ] [uptime](https://preview.tabler.io/uptime.html) Uptime
+- [x] [tasks-list](https://preview.tabler.io/tasks-list.html) Task List
+- [x] [tasks](https://preview.tabler.io/tasks.html) Tasks
+- [x] [tracking](https://preview.tabler.io/tracking.html) Tracking
+- [x] [uptime](https://preview.tabler.io/uptime.html) Uptime
 - [x] [users](https://preview.tabler.io/users.html) Users list
-- [ ] [widgets](https://preview.tabler.io/widgets.html) Widgets
-- [ ] [wizard](https://preview.tabler.io/wizard.html) Wizard
+- [x] [widgets](https://preview.tabler.io/widgets.html) Widgets
+- [x] [wizard](https://preview.tabler.io/wizard.html) Wizard
 
 ### Plugins
 

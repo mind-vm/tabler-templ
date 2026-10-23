@@ -10,8 +10,8 @@
 package metric
 
 import (
-	"github.com/mind-vm/tabler-templ/legend"
 	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/legend"
 	"github.com/mind-vm/tabler-templ/progress"
 	"github.com/mind-vm/tabler-templ/trending"
 	"github.com/mind-vm/tabler-templ/typography"
@@ -36,6 +36,8 @@ type Props struct {
 	ProgressLabel string
 	// Bottom is shown below the body across the whole card, e.g. a chart with Class "rounded-bottom-3".
 	Bottom templ.Component
+	// Tight leaves a small gap below the value instead of a large one, e.g. above a chart.Radial.
+	Tight bool
 }
 
 // Card is a metric card: Tabler's Revenue, Active subscriptions, Conversion rate, Sales and Total users.
@@ -67,8 +69,8 @@ templ Card(p Props) {
 					}
 				</div>
 			} else if p.Value != "" {
-				<div class="d-flex align-items-baseline">
-					<div class={ "h1 me-2", kit.If(p.Chart != nil || p.Progress != nil, "mb-3"), kit.If(p.Chart == nil && p.Progress == nil, "mb-0") }>{ p.Value }</div>
+				<div class={ "d-flex align-items-baseline", kit.If(p.Tight, "mb-2") }>
+					<div class={ "h1 me-2", kit.If(!p.Tight && (p.Chart != nil || p.Progress != nil), "mb-3"), kit.If(p.Tight || p.Chart == nil && p.Progress == nil, "mb-0") }>{ p.Value }</div>
 					if p.Trend != nil {
 						<div class="me-auto">
 							@trending.Trending(*p.Trend)
@@ -219,6 +221,8 @@ type RangeProps struct {
 	// Options default to "Last 7 days", "Last 30 days", "Last 3 months"; Active is the selected one.
 	Options []string
 	Active  int
+	// Links renders the toggle and the ranges as links to "#" instead of buttons (Status monitoring).
+	Links bool
 }
 
 // Range is the time range picker of a metric card: the selected range as a muted text that opens a menu
@@ -234,35 +238,50 @@ templ Range(p RangeProps) {
 			id = p.ID + "-dropdown"
 		}
 	}}
-	<div class="dropdown">
-		<button
-			type="button"
-			class="dropdown-toggle text-secondary border-0 bg-transparent p-0"
-			if id != "" {
-				id={ id }
-			}
-			data-bs-toggle="dropdown"
-			aria-haspopup="true"
-			aria-expanded="false"
-			title={ kit.Or(p.Label, "Select time range") }
-		>
-			if p.Active < len(opts) {
-				{ opts[p.Active] }
-			}
-		</button>
-		<div
-			class="dropdown-menu dropdown-menu-end"
-			if id != "" {
-				aria-labelledby={ id }
-			}
-		>
-			for i, o := range opts {
-				if i == p.Active {
-					<button type="button" class="dropdown-item active" aria-current="true">{ o }</button>
-				} else {
-					<button type="button" class="dropdown-item">{ o }</button>
+	if p.Links {
+		<div class="dropdown">
+			<a class="dropdown-toggle text-secondary" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				if p.Active < len(opts) {
+					{ opts[p.Active] }
 				}
-			}
+			</a>
+			<div class="dropdown-menu dropdown-menu-end">
+				for i, o := range opts {
+					<a class={ kit.Classes("dropdown-item", kit.If(i == p.Active, "active")) } href="#">{ o }</a>
+				}
+			</div>
 		</div>
-	</div>
+	} else {
+		<div class="dropdown">
+			<button
+				type="button"
+				class="dropdown-toggle text-secondary border-0 bg-transparent p-0"
+				if id != "" {
+					id={ id }
+				}
+				data-bs-toggle="dropdown"
+				aria-haspopup="true"
+				aria-expanded="false"
+				title={ kit.Or(p.Label, "Select time range") }
+			>
+				if p.Active < len(opts) {
+					{ opts[p.Active] }
+				}
+			</button>
+			<div
+				class="dropdown-menu dropdown-menu-end"
+				if id != "" {
+					aria-labelledby={ id }
+				}
+			>
+				for i, o := range opts {
+					if i == p.Active {
+						<button type="button" class="dropdown-item active" aria-current="true">{ o }</button>
+					} else {
+						<button type="button" class="dropdown-item">{ o }</button>
+					}
+				}
+			</div>
+		</div>
+	}
 }

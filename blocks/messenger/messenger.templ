@@ -1,0 +1,175 @@
+// Package messenger is Tabler's chat app (the preview's chat page): a card with the conversations at the
+// start, searchable, and the open conversation with a message field below it. The messages are
+// package chat's.
+//
+//	@messenger.App(messenger.Props{Contacts: contacts}) {
+//		@chat.Chat() {
+//			@chat.Message(chat.MessageProps{Author: "Paweł Kuna", Time: "09:32", Avatar: url, Col: "col col-lg-6"}) {
+//				<p>Hey guys …</p>
+//			}
+//		}
+//	}
+//
+// For a page that fills the screen, give the page's container "flex-fill d-flex flex-column" (Tabler's
+// chat page) and Props.Class "flex-fill".
+package messenger
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Contact is a conversation in the list.
+type Contact struct {
+	Name   string
+	Avatar avatar.Props
+	Href   string // default "#"
+	// Preview is the last message as text; PreviewContent replaces it with markup.
+	Preview        string
+	PreviewContent templ.Component
+	Extra          string // at the end of the row, e.g. a status emoji
+	Active         bool   // the open conversation
+}
+
+type Props struct {
+	Class    string // on the card, e.g. "flex-fill"
+	Contacts []Contact
+	// Search is the field above the contacts, default SearchField with Tabler's placeholder; NoSearch
+	// leaves it out.
+	Search   templ.Component
+	NoSearch bool
+	// Composer is the footer below the messages, default Composer().
+	Composer templ.Component
+}
+
+// App is the chat card; the children are the open conversation, usually a chat.Chat.
+templ App(p Props) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="row g-0 flex-fill">
+			<div class="col-12 col-lg-5 col-xl-3 border-end d-flex flex-column">
+				if !p.NoSearch {
+					<div class="card-header d-none d-md-block">
+						if p.Search != nil {
+							@p.Search
+						} else {
+							@SearchField(SearchProps{})
+						}
+					</div>
+				}
+				<div class="card-body p-0 scrollable flex-fill">
+					@Contacts(p.Contacts)
+				</div>
+			</div>
+			<div class="col-12 col-lg-7 col-xl-9 d-flex flex-column">
+				<div class="card-body scrollable">
+					{ children... }
+				</div>
+				<div class="card-footer">
+					if p.Composer != nil {
+						@p.Composer
+					} else {
+						@Composer(ComposerProps{})
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// Contacts is the list of conversations (nav-pills, one below the other).
+templ Contacts(cs []Contact) {
+	<div class="nav flex-column nav-pills">
+		for _, c := range cs {
+			<a
+				href={ templ.SafeURL(kit.Or(c.Href, "#")) }
+				class={ kit.Classes("nav-link text-start mw-100 p-3", kit.If(c.Active, "active")) }
+				if c.Active {
+					aria-current="page"
+				}
+			>
+				<div class="row align-items-center flex-fill">
+					<div class="col-auto">
+						@avatar.Avatar(c.Avatar)
+					</div>
+					<div class="col text-body">
+						<div>{ c.Name }</div>
+						<div class="text-secondary text-truncate w-100">
+							if c.PreviewContent != nil {
+								@c.PreviewContent
+							} else {
+								{ c.Preview }
+							}
+						</div>
+					</div>
+					if c.Extra != "" {
+						<div class="col-auto">{ c.Extra }</div>
+					}
+				</div>
+			</a>
+		}
+	</div>
+}
+
+type SearchProps struct {
+	Name        string
+	Value       string
+	Placeholder string // default "Search…"
+}
+
+// SearchField is the search input above the contacts.
+templ SearchField(p SearchProps) {
+	<div class="input-icon">
+		<span class="input-icon-addon">
+			@icon.Icon("ti-search")
+		</span>
+		<input
+			type="text"
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			value={ p.Value }
+			class="form-control"
+			placeholder={ kit.Or(p.Placeholder, "Search…") }
+			aria-label={ kit.Or(p.Placeholder, "Search") }
+		/>
+	</div>
+}
+
+type ComposerProps struct {
+	Name        string // of the message input
+	Placeholder string // default "Type message"
+	// The buttons at the end of the field: default an emoji and an attach link (Tabler's); set Actions to
+	// replace them.
+	EmojiLabel  string // default "Insert emoji"
+	AttachLabel string // default "Attach file"
+	Actions     templ.Component
+}
+
+// Composer is the message field below a conversation.
+templ Composer(p ComposerProps) {
+	<div class="input-group input-group-flat">
+		<input
+			type="text"
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			class="form-control"
+			autocomplete="off"
+			placeholder={ kit.Or(p.Placeholder, "Type message") }
+			aria-label={ kit.Or(p.Placeholder, "Type message") }
+		/>
+		<span class="input-group-text">
+			if p.Actions != nil {
+				@p.Actions
+			} else {
+				<a href="#" class="link-secondary" data-bs-toggle="tooltip" aria-label={ kit.Or(p.EmojiLabel, "Insert emoji") } title={ kit.Or(p.EmojiLabel, "Insert emoji") }>
+					@icon.Icon("ti-mood-smile")
+				</a>
+				<a href="#" class="link-secondary ms-2" data-bs-toggle="tooltip" aria-label={ kit.Or(p.AttachLabel, "Attach file") } title={ kit.Or(p.AttachLabel, "Attach file") }>
+					@icon.Icon("ti-paperclip")
+				</a>
+			}
+		</span>
+	</div>
+}

@@ -1,0 +1,91 @@
+// Package music holds Tabler's music cards (the preview's music page): a numbered list of tracks with
+// cover, artists, length, a like button and a menu, and a track card with a large cover.
+package music
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Track is a song.
+type Track struct {
+	Name     string
+	Artists  string // e.g. "Daft Punk"
+	Cover    string // URL of the cover image
+	Duration string // e.g. "3:42"
+	Liked    bool
+	// Menu is the content of the track's menu (dropdown items); without it the menu is left out.
+	Menu templ.Component
+}
+
+type TracksProps struct {
+	Class     string
+	LikeLabel string // default "Like"
+	MenuLabel string // default "Track options"
+}
+
+// Tracks is a card with a numbered list of tracks.
+templ Tracks(ts []Track, props ...TracksProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="list-group card-list-group">
+			for i, t := range ts {
+				<div class="list-group-item">
+					<div class="row g-2 align-items-center">
+						<div class="col-auto fs-3">{ strconv.Itoa(i + 1) }</div>
+						<div class="col-auto">
+							<img src={ t.Cover } class="rounded" alt={ t.Name } width="40" height="40"/>
+						</div>
+						<div class="col">
+							{ t.Name }
+							<div class="text-secondary">{ t.Artists }</div>
+						</div>
+						<div class="col-auto text-secondary">{ t.Duration }</div>
+						<div class="col-auto">
+							<button class={ kit.Classes("switch-icon", kit.If(t.Liked, "active")) } data-bs-toggle="switch-icon" aria-label={ kit.Or(p.LikeLabel, "Like") }>
+								<span class="switch-icon-a text-muted">
+									@icon.Icon("ti-heart")
+								</span>
+								<span class="switch-icon-b text-red">
+									@icon.Icon("ti-heart", icon.Props{Filled: true})
+								</span>
+							</button>
+						</div>
+						if t.Menu != nil {
+							<div class="col-auto lh-1">
+								<div class="dropdown">
+									<a href="#" class="link-secondary" data-bs-toggle="dropdown" aria-label={ kit.Or(p.MenuLabel, "Track options") }>
+										@icon.Icon("ti-dots")
+									</a>
+									<div class="dropdown-menu dropdown-menu-end">
+										@t.Menu
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Info is a card with a track's cover at the start, its name and artists.
+templ Info(t Track) {
+	<div class="card">
+		<div class="row row-0">
+			<div class="col-auto">
+				<img src={ t.Cover } class="rounded-start" alt={ t.Name } width="80" height="80"/>
+			</div>
+			<div class="col">
+				<div class="card-body">
+					{ t.Name }
+					<div class="text-secondary">{ t.Artists }</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+

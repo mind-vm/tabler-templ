@@ -1,0 +1,153 @@
+package metric
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+type IconCardProps struct {
+	Class string
+	Label string // the subheader
+	Value string
+	Icon  string // in a large avatar at the right
+	// Countup animates the value from zero when it scrolls into view: Tabler's data-countup options as
+	// JSON, e.g. `{"prefix":"$"}`; "{}" for the defaults.
+	Countup string
+}
+
+// IconCard is a key figure with an icon at the right (Tabler's StatCard).
+templ IconCard(p IconCardProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			<div class="row align-items-center">
+				<div class="col">
+					@typography.Subheader(typography.SubheaderProps{Level: 2, Class: "mb-1"}) {
+						{ p.Label }
+					}
+					<div
+						class="h3 m-0"
+						if p.Countup != "" {
+							data-countup={ p.Countup }
+						}
+					>{ p.Value }</div>
+				</div>
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Icon: p.Icon, Size: avatar.SizeLarge})
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+type GaugeProps struct {
+	ID          string // the chart is chart-gauge-<ID>
+	Title       string
+	Description string
+	Value       float64 // percent
+	Label       string  // under the percentage, e.g. "delivered"
+	// Count of Total is shown in the footer with what remains, e.g. "48,210 of 50,219 · 2,009 remaining".
+	Count, Total int
+	CountLabel   string // between count and total, default "of"
+	Remaining    string // after the remainder, default "remaining"
+	Color        string // a Tabler color; default the body color
+}
+
+func thousands(n int) string {
+	s := strconv.Itoa(n)
+	neg := n < 0
+	if neg {
+		s = s[1:]
+	}
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	if neg {
+		return "-" + s
+	}
+	return s
+}
+
+func gaugeChart(p GaugeProps) chart.Props {
+	color := "var(--tblr-body-color)"
+	if p.Color != "" {
+		color = "var(--tblr-" + p.Color + ")"
+	}
+	return chart.RawProps(chart.Props{
+		ID: "gauge-" + p.ID, Label: p.Title + ": " + strconv.FormatFloat(p.Value, 'f', -1, 64) + "%", Class: "mx-auto",
+		Attributes: templ.Attributes{"style": "width: 10rem; max-width: 100%"},
+	}, map[string]any{
+		"series": []float64{p.Value},
+		"chart":  map[string]any{"type": "radialBar", "height": 160, "sparkline": map[string]any{"enabled": true}},
+		"plotOptions": map[string]any{"radialBar": map[string]any{
+			"hollow": map[string]any{"size": "64%"},
+			"track":  map[string]any{"background": "var(--tblr-border-color)"},
+			"dataLabels": map[string]any{
+				"name":  map[string]any{"show": true, "offsetY": 18, "fontSize": "12px", "fontFamily": "inherit", "fontWeight": 400, "color": "var(--tblr-secondary)"},
+				"value": map[string]any{"show": true, "offsetY": -12, "fontSize": "24px", "fontFamily": "inherit", "fontWeight": 500, "color": "var(--tblr-body-color)"},
+			},
+		}},
+		"colors": []string{color},
+		"stroke": map[string]any{"lineCap": "round"},
+		"labels": []string{p.Label},
+	}, map[string]string{"plotOptions.radialBar.dataLabels.value.formatter": string(chart.Percent)})
+}
+
+// Gauge is a card with a percentage as a radial gauge, a description, and the count behind it in the
+// footer (Tabler's Gauge).
+templ Gauge(p GaugeProps) {
+	<div class="card">
+		<div class="card-body">
+			<h3 class="card-title">{ p.Title }</h3>
+			@chart.Chart(gaugeChart(p))
+			<p class="text-secondary mt-3 mb-0" style="min-height: 2lh">{ p.Description }</p>
+		</div>
+		<div class="card-footer d-flex text-secondary">
+			<div><span class="fw-medium text-body">{ thousands(p.Count) }</span> { kit.Or(p.CountLabel, "of") } { thousands(p.Total) }</div>
+			<div class="ms-auto">{ thousands(p.Total-p.Count) } { kit.Or(p.Remaining, "remaining") }</div>
+		</div>
+	</div>
+}
+
+type TickerProps struct {
+	Class string
+	Title string
+	Icon  string // in an avatar at the right
+	Value string // large
+	Extra string // muted after the value, e.g. the price in dollars
+	Trend *trending.Props
+	// Note is a muted line below, after the trend, e.g. "Since last week" or "Volume: 2.1B".
+	Note string
+}
+
+// Ticker is a card with a title and icon, a value with a muted addition and a trend line: the balance
+// and exchange rate cards of Tabler's crypto dashboard.
+templ Ticker(p TickerProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			<div class="row">
+				<div class="col mt-0">
+					<h2 class="card-title">{ p.Title }</h2>
+				</div>
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Icon: p.Icon})
+				</div>
+			</div>
+			<div class="mb-1">
+				<span class="h3">{ p.Value }</span>
+				<span class="text-muted">{ p.Extra }</span>
+			</div>
+			<div class="mb-0">
+				if p.Trend != nil {
+					@trending.Trending(*p.Trend)
+					{ " " }
+				}
+				<span class="text-muted">{ p.Note }</span>
+			</div>
+		</div>
+	</div>
+}

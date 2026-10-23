@@ -1,0 +1,257 @@
+// Package uptime holds the parts of Tabler's uptime monitor page: the monitor's page header, the system
+// status card with a day-by-day history per service, the list of recent incidents and the availability
+// table.
+//
+//	@uptime.SystemStatus(uptime.SystemStatusProps{ID: "services", From: "60 days ago"}, []uptime.Service{
+//		{Name: "API", Uptime: "99.98%", Days: days},
+//	})
+package uptime
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/status"
+	"github.com/mind-vm/tabler-templ/tracking"
+)
+
+type HeaderProps struct {
+	Class    string
+	Title    string // the monitored address, e.g. "tabler.io/icons"
+	Color    string // of the status indicator and State, default "green"
+	State    string // e.g. "Up"
+	Details  []string // further facts after the state, e.g. "Checked every 3 minutes"
+	Actions  templ.Component
+	Animated bool // a pulsing status indicator
+}
+
+// Header is the page header of a monitor: a status indicator, the address, its state and the actions.
+// Put it in layout.PageProps.Header.
+templ Header(p HeaderProps) {
+	{{ color := kit.Or(p.Color, "green") }}
+	<div class={ kit.Classes("page-header", p.Class, "d-print-none") }>
+		<div class="container-xl">
+			<div class="row g-3 align-items-center">
+				<div class="col-auto">
+					@status.Indicator(status.DotProps{Color: color, Animated: p.Animated})
+				</div>
+				<div class="col">
+					<h1 class="page-title">{ p.Title }</h1>
+					<div class="text-secondary">
+						<ul class="list-inline list-inline-dots mb-0">
+							if p.State != "" {
+								<li class="list-inline-item"><span class={ "text-" + color }>{ p.State }</span></li>
+							}
+							for _, d := range p.Details {
+								<li class="list-inline-item">{ d }</li>
+							}
+						</ul>
+					</div>
+				</div>
+				if p.Actions != nil {
+					<div class="col-md-auto ms-auto d-print-none">
+						@p.Actions
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Service is a row of SystemStatus: its name, its uptime as shown, and one block per day.
+type Service struct {
+	Name   string
+	Uptime string // e.g. "99.98%"
+	Days   []tracking.Block
+}
+
+// Level is a state of the legend of SystemStatus.
+type Level struct {
+	Text  string
+	Color string
+}
+
+type SystemStatusProps struct {
+	ID    string // the card's id is system-status-<ID>
+	Class string
+	Title string // default "System status"
+	// Operational shows the green "All systems operational"; otherwise Affected in yellow.
+	Operational bool
+	// Status texts, default "All systems operational" and "Some systems affected".
+	OperationalText, AffectedText string
+	UptimeText                    string // after each service's uptime, default "uptime"
+	From, To                      string // below the history, default "60 days ago" and "Today"
+	// Legend defaults to Operational (green), Degraded (yellow), Outage (red).
+	Legend []Level
+}
+
+// DefaultLegend is the legend of SystemStatus.
+var DefaultLegend = []Level{{"Operational", "green"}, {"Degraded", "yellow"}, {"Outage", "red"}}
+
+// SystemStatus is a card with the state of all services and the history of each one, day by day.
+templ SystemStatus(p SystemStatusProps, services []Service) {
+	{{
+		color, text := "green", kit.Or(p.OperationalText, "All systems operational")
+		if !p.Operational {
+			color, text = "yellow", kit.Or(p.AffectedText, "Some systems affected")
+		}
+		legend := p.Legend
+		if legend == nil {
+			legend = DefaultLegend
+		}
+	}}
+	<div
+		class={ kit.Classes("card", p.Class) }
+		if p.ID != "" {
+			id={ "system-status-" + p.ID }
+		}
+	>
+		<div class="card-header">
+			<h3 class="card-title">{ kit.Or(p.Title, "System status") }</h3>
+			<div class="card-actions">
+				<span class={ "status status-" + color }>
+					<span class="status-dot status-dot-animated"></span>
+					<span>{ text }</span>
+				</span>
+			</div>
+		</div>
+		<div class="list-group list-group-flush">
+			for _, s := range services {
+				<div class="list-group-item">
+					<div class="d-flex align-items-baseline mb-2">
+						<div class="fw-medium">{ s.Name }</div>
+						<div class="ms-auto text-secondary">
+							<span>{ kit.Or(s.Uptime, "–") }</span> { kit.Or(p.UptimeText, "uptime") }
+						</div>
+					</div>
+					<div class="tracking">
+						for _, d := range s.Days {
+							<div
+								class={ kit.Classes("tracking-block", kit.If(d.Color != "", "bg-"+d.Color)) }
+								if d.Title != "" {
+									title={ d.Title }
+								}
+							></div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+		<div class="card-footer">
+			<div class="d-flex align-items-center text-secondary">
+				<div>{ kit.Or(p.From, "60 days ago") }</div>
+				<div class="legend-list mx-auto">
+					for _, l := range legend {
+						<span class={ "legend legend-" + l.Color }><span class="legend-dot"></span>{ l.Text }</span>
+					}
+				</div>
+				<div>{ kit.Or(p.To, "Today") }</div>
+			</div>
+		</div>
+	</div>
+}
+
+// Incident is an entry of Incidents.
+type Incident struct {
+	Color    string // of the status dot, e.g. "red" for an outage, "yellow" for degraded service
+	Title    string
+	Date     string
+	Duration string
+	Resolved bool
+}
+
+type IncidentsProps struct {
+	Class        string // e.g. "h-100"
+	Title        string // default "Recent incidents"
+	ResolvedText string // default "Resolved"
+	MoreHref     string // a link in the footer, e.g. to all incidents
+	MoreText     string // default "View all incidents"
+}
+
+// Incidents is a card listing recent incidents with their date, duration and whether they are resolved.
+templ Incidents(p IncidentsProps, items []Incident) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Recent incidents") }</h2>
+		</div>
+		<div class="list-group list-group-flush">
+			for _, it := range items {
+				<div class="list-group-item">
+					<div class="row align-items-center">
+						<div class="col-auto">
+							@status.Dot(status.DotProps{Color: it.Color})
+						</div>
+						<div class="col text-truncate">
+							<div class="fw-medium text-truncate">{ it.Title }</div>
+							<div class="text-secondary text-truncate">
+								{ it.Date } · { it.Duration }
+							</div>
+						</div>
+						if it.Resolved {
+							<div class="col-auto">
+								<span class="badge bg-green-lt">{ kit.Or(p.ResolvedText, "Resolved") }</span>
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+		if p.MoreHref != "" {
+			<div class="card-footer mt-auto">
+				<a href={ templ.SafeURL(p.MoreHref) }>{ kit.Or(p.MoreText, "View all incidents") }</a>
+			</div>
+		}
+	</div>
+}
+
+// Period is a row of Availability.
+type Period struct {
+	Period       string
+	Availability string
+	Downtime     string
+	Incidents    string
+	Longest      string
+	Average      string
+}
+
+type AvailabilityProps struct {
+	Class string
+	Title string // default "Availability"
+	// Column headings, default "Time period", "Availability", "Downtime", "Incidents", "Longest incident",
+	// "Avg. incident".
+	Headings []string
+}
+
+// Availability is a card with a table of the availability, downtime and incidents per time period.
+templ Availability(p AvailabilityProps, periods []Period) {
+	{{
+		h := []string{"Time period", "Availability", "Downtime", "Incidents", "Longest incident", "Avg. incident"}
+		copy(h, p.Headings)
+	}}
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Availability") }</h2>
+		</div>
+		<div class="card-table table-responsive">
+			<table class="table table-vcenter">
+				<thead>
+					<tr>
+						for _, t := range h {
+							<th>{ t }</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _, r := range periods {
+						<tr>
+							<td>{ r.Period }</td>
+							<td class="fw-medium">{ r.Availability }</td>
+							<td class="text-secondary">{ r.Downtime }</td>
+							<td class="text-secondary">{ r.Incidents }</td>
+							<td class="text-secondary">{ r.Longest }</td>
+							<td class="text-secondary">{ r.Average }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}

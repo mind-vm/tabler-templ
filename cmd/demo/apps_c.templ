@@ -1,0 +1,183 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/activity"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/blocks/tasks"
+	"github.com/mind-vm/tabler-templ/blocks/uptime"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/tracking"
+)
+
+// Uptime
+
+templ uptimeActions() {
+	@button.List() {
+		@button.Button(button.Props{Type: "button", Icon: "ti-settings"}) {
+			Configure
+		}
+		@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-player-pause"}) {
+			Pause this monitor
+		}
+	}
+}
+
+func uptimeFrame() layout.PageProps {
+	fp := frameProps("uptime", "Uptime")
+	fp.Header = uptime.Header(uptime.HeaderProps{Title: "tabler.io/icons", State: "Up", Details: []string{"Checked every 3 minutes"},
+		Animated: true, Actions: eWithOriginal("uptime", uptimeActions())})
+	return fp
+}
+
+templ uptimePage() {
+	{{ services, up := cServices([]string{"API", "Dashboard", "Webhooks", "Email delivery"}, 60, 18) }}
+	@layout.Page(uptimeFrame()) {
+		<div class="row row-cards">
+			for _, s := range []metric.IconCardProps{{Label: "30-day uptime", Value: "99.9%", Icon: "ti-activity"},
+				{Label: "Currently up for", Value: "14d 2h 54m", Icon: "ti-clock"}, {Label: "Avg. response time", Value: "142 ms", Icon: "ti-bolt"},
+				{Label: "30-day incidents", Value: "1", Icon: "ti-alert-triangle"}} {
+				<div class="col-sm-6 col-lg-3">
+					@metric.IconCard(s)
+				</div>
+			}
+			<div class="col-lg-8">
+				@uptime.SystemStatus(uptime.SystemStatusProps{ID: "services", Class: "h-100", Operational: up}, services)
+			</div>
+			<div class="col-lg-4">
+				@uptime.Incidents(uptime.IncidentsProps{Class: "h-100", MoreHref: "#"}, cIncidents)
+			</div>
+			<div class="col-lg-8">
+				@section("Response time in the last 4 months (ms)", "") {
+					@chart.Chart(tc("uptime", "Response time in the last 4 months", 15))
+				}
+			</div>
+			<div class="col-lg-4">
+				@section("Incidents per day", "") {
+					@chart.Chart(tc("uptime-incidents", "Incidents per day", 15))
+				}
+			</div>
+			<div class="col-12">
+				@uptime.Availability(uptime.AvailabilityProps{}, cPeriods)
+			</div>
+		</div>
+	}
+}
+
+// Activity
+
+templ activityPage() {
+	@preview("activity") {
+		<div class="row">
+			<div class="col-8">
+				@activity.Card(activity.CardProps{Height: "none"}, cActivity)
+			</div>
+		</div>
+	}
+}
+
+// Tracking
+
+templ statusMonitoring() {
+	<div class="mt-2">
+		@tracking.Tracking(tracking.Props{}, cUptime)
+	</div>
+}
+
+templ trackingPage() {
+	@preview("tracking") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Basic example", "Hover a block to see its status.") {
+					@tracking.Tracking(tracking.Props{}, cUptime)
+				}
+			</div>
+			<div class="col-md-6">
+				@metric.Card(metric.Props{
+					Label:  "Status monitoring",
+					Action: metric.Range(metric.RangeProps{Links: true, Options: []string{"Current month", "Last month", "Last 3 months"}}),
+					Value:  "99.5%",
+					Trend:  metric.Trend(2),
+					Chart:  statusMonitoring(),
+				})
+			</div>
+			<div class="col-md-6">
+				@section("Squares variant", "Add `.tracking-squares` for square, evenly spaced blocks.") {
+					@tracking.Tracking(tracking.Props{Squares: true}, cUptime)
+				}
+			</div>
+		</div>
+	}
+}
+
+// Tasks
+
+templ addBoard() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		Add board
+	}
+}
+
+templ tasksPage() {
+	@layout.Page(eFramed("tasks", "Tabler Inc. Tasks", addBoard())) {
+		<ul class="nav nav-bordered mb-4">
+			<li class="nav-item">
+				<a class="nav-link active" aria-current="page" href="#">View all</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#">Marketing</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#">Development</a>
+			</li>
+		</ul>
+		@tasks.Board(cColumns)
+	}
+}
+
+templ newTaskButton() {
+	@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Icon: "ti-plus", Attributes: modal.Trigger("modal-add-task")}) {
+		New Task
+	}
+}
+
+templ addTaskFooter() {
+	@button.Button(button.Props{Type: "button", Attributes: modal.Dismiss()}) {
+		Cancel
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Class: "ms-auto", Attributes: modal.Dismiss()}) {
+		Save
+	}
+}
+
+templ tasksListPage() {
+	@preview("tasks-list") {
+		<div class="row">
+			<div class="col-12">
+				for _, c := range cColumns {
+					@tasks.Table(tasks.TableProps{Title: c.Name, Action: newTaskButton()}, c.Tasks)
+				}
+			</div>
+		</div>
+		@modal.Modal(modal.Props{ID: "modal-add-task", Title: "Add task", Fade: true, Blur: true, Centered: true, Footer: addTaskFooter()}) {
+			<form>
+				@form.Field(form.FieldProps{Label: "Name", For: "tasks-list-add-task-name"}) {
+					@form.Input(form.InputProps{ID: "tasks-list-add-task-name", Placeholder: "Task name"})
+				}
+				@form.Field(form.FieldProps{Label: "Assigned To", For: "tasks-list-add-task-assigned"}) {
+					@form.Select(form.SelectProps{ID: "tasks-list-add-task-assigned", Options: []form.Option{{Value: "", Label: "Select person"},
+						{Value: "5", Label: cPeople[4].Name}, {Value: "6", Label: cPeople[5].Name}, {Value: "2", Label: cPeople[1].Name}, {Value: "3", Label: cPeople[2].Name}}})
+				}
+				@form.Field(form.FieldProps{Label: "Priority", For: "tasks-list-add-task-priority"}) {
+					@form.Select(form.SelectProps{ID: "tasks-list-add-task-priority", Options: []form.Option{{Value: "Low", Label: "Low"}, {Value: "Medium", Label: "Medium"}, {Value: "High", Label: "High"}}})
+				}
+				@form.Field(form.FieldProps{Label: "Description", For: "tasks-list-add-task-description"}) {
+					@form.Textarea(form.TextareaProps{ID: "tasks-list-add-task-description", Rows: 3, Placeholder: "Task description"})
+				}
+			</form>
+		}
+	}
+}

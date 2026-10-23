@@ -1,0 +1,59 @@
+package cards
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+// Code is a card with a title and a block of code (card-code).
+templ Code(title, code string) {
+	<div class="card">
+		<div class="card-header">
+			<h2 class="card-title">{ title }</h2>
+		</div>
+		<div class="card-code">
+			<pre><code>{ code }</code></pre>
+		</div>
+	</div>
+}
+
+// Term is a line of Definitions; Content replaces Value, e.g. a flag and a country.
+type Term struct {
+	Term    string
+	Value   string
+	Content templ.Component
+}
+
+type DefinitionsProps struct {
+	Class   string
+	Title   string
+	Actions templ.Component // in the header, e.g. an edit link
+	// TermCol and ValueCol are the column classes, default "col-5" and "col-7".
+	TermCol, ValueCol string
+}
+
+// Definitions is a card with terms and values in two columns, e.g. the details of a session (Tabler's
+// Configuration card).
+templ Definitions(p DefinitionsProps, terms []Term) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ p.Title }</h2>
+			if p.Actions != nil {
+				<div class="card-actions">
+					@p.Actions
+				</div>
+			}
+		</div>
+		<div class="card-body">
+			<dl class="row">
+				for _, t := range terms {
+					<dt class={ kit.Or(p.TermCol, "col-5") }>{ t.Term }</dt>
+					<dd class={ kit.Or(p.ValueCol, "col-7") }>
+						if t.Content != nil {
+							@t.Content
+						} else {
+							{ t.Value }
+						}
+					</dd>
+				}
+			</dl>
+		</div>
+	</div>
+}

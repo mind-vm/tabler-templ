@@ -1,0 +1,567 @@
+// Package dashboard holds the cards of Tabler's dashboard (shared/components/cards): a welcome card,
+// storage usage, a chart above a table of commits, a banner, tables of most visited pages,
+// of shares and of tasks, a to-do list, a leaderboard and the sponsor card. Every text and value is a
+// field, so the cards show an app's own data.
+package dashboard
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/legend"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/sparkline"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+// WelcomeStat is a figure of a Welcome card with its trend and a progress bar.
+type WelcomeStat struct {
+	Label    string
+	Value    string
+	Trend    float64
+	Progress float64 // percent
+	Color    string  // of the progress bar, e.g. "success"
+}
+
+type WelcomeProps struct {
+	Class string
+	Title string // e.g. "Welcome back, Paweł"
+	Text  string
+	Stats []WelcomeStat
+	// Image is shown at the right, e.g. an illustration; Href makes it a link.
+	Image     templ.Component
+	Href      string
+	ImageText string // the link's accessible name
+}
+
+// Welcome greets the user on a gradient card with a few figures and an illustration.
+templ Welcome(p WelcomeProps) {
+	<div class={ kit.Classes("card card-gradient", p.Class) }>
+		<div class="card-body">
+			<div class="row gy-3">
+				<div class="col-12 col-sm-6 d-flex flex-column">
+					<h2 class="h2">{ p.Title }</h2>
+					if p.Text != "" {
+						<p class="text-secondary">{ p.Text }</p>
+					}
+					if len(p.Stats) > 0 {
+						<div class="row g-5 mt-auto">
+							for _, s := range p.Stats {
+								<div class="col-auto">
+									@typography.Subheader() {
+										{ s.Label }
+									}
+									<div class="d-flex align-items-baseline">
+										<div class="h3 me-2">{ s.Value }</div>
+										<div class="me-auto">
+											@trending.Trending(trending.Props{Value: s.Trend})
+										</div>
+									</div>
+									@progress.Progress(progress.Props{Value: s.Progress, Color: s.Color, Size: progress.SizeSmall})
+								</div>
+							}
+						</div>
+					}
+				</div>
+				if p.Image != nil {
+					<div class="col-12 col-sm-6 d-flex justify-content-center">
+						if p.Href != "" {
+							<a href={ templ.URL(p.Href) } aria-label={ p.ImageText }>
+								@p.Image
+							</a>
+						} else {
+							@p.Image
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// UsagePart is a share of a Usage bar.
+type UsagePart struct {
+	Label   string
+	Color   string // empty for the free part, which has no bar
+	Percent float64
+	Value   string // e.g. "3520MB"
+}
+
+type UsageProps struct {
+	Class string
+	// Text is the line above the bar, e.g. "Using Storage <strong>5760 MB</strong> of 8 GB".
+	Text  templ.Component
+	Parts []UsagePart
+}
+
+// Usage shows how a quota is split, e.g. storage: a line of text, a separated progress bar and a legend.
+templ Usage(p UsageProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			<p class="mb-3">
+				@p.Text
+			</p>
+			<div class="progress progress-separated mb-3">
+				for _, part := range p.Parts {
+					if part.Color != "" {
+						<div class={ "progress-bar bg-" + part.Color } role="progressbar" style={ "width: " + num(part.Percent) + "%" } aria-label={ part.Label }></div>
+					}
+				}
+			</div>
+			@legend.List(legend.ListProps{}) {
+				for _, part := range p.Parts {
+					@legend.Legend(legend.Props{Color: part.Color, Text: part.Label, Value: part.Value})
+				}
+			}
+		</div>
+	</div>
+}
+
+func num(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) }
+
+// Commit is a row of a Commits table.
+type Commit struct {
+	Avatar avatar.Props
+	Text   string
+	Date   string
+}
+
+type ChartTableProps struct {
+	Class   string
+	Title   string
+	Summary templ.Component // laid over the top left of the chart, e.g. a Goal
+	Chart   templ.Component
+}
+
+// ChartTable is a card with a title, a chart across its width and a table below (the children, e.g.
+// Commits): Tabler's development activity.
+templ ChartTable(p ChartTableProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header border-0">
+			<h2 class="card-title">{ p.Title }</h2>
+		</div>
+		<div class="position-relative">
+			if p.Summary != nil {
+				<div class="position-absolute top-0 start-0 px-3 mt-1 w-75">
+					@p.Summary
+				</div>
+			}
+			if p.Chart != nil {
+				@p.Chart
+			}
+		</div>
+		{ children... }
+	</div>
+}
+
+type GoalProps struct {
+	Percent float64 // done of the goal, shown as a ring
+	Label   string  // accessible name of the ring, e.g. "35% of today's goal"
+	Title   string  // e.g. "Today's Earning: $4,262.40"
+	Note    string  // e.g. "+5% more than yesterday"
+	Icon    string  // before the note, default "ti-trending-up"
+	Color   string  // of the icon, default "green"
+}
+
+// Goal is a ring with the share of a goal reached and two lines of text, e.g. a ChartTable's Summary.
+templ Goal(p GoalProps) {
+	<div class="row g-2">
+		<div class="col-auto">
+			@sparkline.Sparkline(sparkline.Props{Type: sparkline.Circle, Values: []float64{p.Percent}, Size: "lg", Square: true, Color: "primary", Label: "auto", AriaLabel: p.Label})
+		</div>
+		<div class="col">
+			<div>{ p.Title }</div>
+			<div class="text-secondary">
+				@icon.Icon(kit.Or(p.Icon, "ti-trending-up"), icon.Props{Color: kit.Or(p.Color, "green"), Inline: true})
+				{ p.Note }
+			</div>
+		</div>
+	</div>
+}
+
+type CommitsProps struct {
+	// Column headers, default "User", "Commit", "Date".
+	User, Commit, Date string
+}
+
+// Commits is a table of commits (author, message, date) as a card table.
+templ Commits(rows []Commit, props ...CommitsProps) {
+	{{ p := kit.First(props) }}
+	<div class="card-table table-responsive" tabindex="0">
+		<table class="table table-vcenter">
+			<thead>
+				<tr>
+					<th>{ kit.Or(p.User, "User") }</th>
+					<th>{ kit.Or(p.Commit, "Commit") }</th>
+					<th>{ kit.Or(p.Date, "Date") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, r := range rows {
+					<tr>
+						<td class="w-1">
+							@avatar.Avatar(small(r.Avatar))
+						</td>
+						<td class="td-truncate">
+							<div class="text-truncate">{ r.Text }</div>
+						</td>
+						<td class="text-nowrap text-secondary">{ r.Date }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+func small(a avatar.Props) avatar.Props {
+	if a.Size == "" {
+		a.Size = avatar.SizeSmall
+	}
+	return a
+}
+
+type BannerProps struct {
+	Class  string
+	Icon   string // of the large stamp in the corner, e.g. "ti-ghost"
+	Color  string // of the stamp, default "primary"
+	Title  string
+	Action templ.Component // below the text, e.g. a button
+}
+
+// Banner is a large card with a stamp icon, a title, a text (the children) and an action: Tabler's icons
+// banner.
+templ Banner(p BannerProps) {
+	<div class={ kit.Classes("card card-md", p.Class) }>
+		if p.Icon != "" {
+			<div class="card-stamp card-stamp-lg">
+				<div class={ "card-stamp-icon bg-" + kit.Or(p.Color, "primary") }>
+					@icon.Icon(p.Icon)
+				</div>
+			</div>
+		}
+		<div class="card-body">
+			<div class="row align-items-center">
+				<div class="col-10">
+					<h2 class="h1">{ p.Title }</h2>
+					<div class="prose">
+						{ children... }
+					</div>
+					if p.Action != nil {
+						<div class="mt-3">
+							@p.Action
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// PageVisit is a row of Visits.
+type PageVisit struct {
+	Path     string
+	Href     string // the page's link, default "#"
+	Visitors string
+	Unique   string
+	Bounce   string
+	Trend    []float64 // drawn as a small line
+}
+
+type VisitsProps struct {
+	Class string
+	Title string // default "Most Visited Pages"
+	// Column headers, default "Page name", "Visitors", "Unique", "Bounce rate".
+	Page, Visitors, Unique, Bounce string
+	LinkLabel                      string // accessible name of each row's link, default "Open website"
+}
+
+// Visits is a card with a table of the most visited pages and a trend line per page.
+templ Visits(p VisitsProps, rows []PageVisit) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Most Visited Pages") }</h2>
+		</div>
+		<div class="card-table table-responsive" tabindex="0">
+			<table class="table table-vcenter">
+				<thead>
+					<tr>
+						<th>{ kit.Or(p.Page, "Page name") }</th>
+						<th>{ kit.Or(p.Visitors, "Visitors") }</th>
+						<th>{ kit.Or(p.Unique, "Unique") }</th>
+						<th colspan="2">{ kit.Or(p.Bounce, "Bounce rate") }</th>
+					</tr>
+				</thead>
+				for i, r := range rows {
+					<tr>
+						<td>
+							{ r.Path }
+							<a href={ templ.URL(kit.Or(r.Href, "#")) } class="ms-1" aria-label={ kit.Or(p.LinkLabel, "Open website") }>
+								@icon.Icon("ti-link", icon.Props{Inline: true})
+							</a>
+						</td>
+						<td class="text-secondary">{ r.Visitors }</td>
+						<td class="text-secondary">{ r.Unique }</td>
+						<td class="text-secondary">{ r.Bounce }</td>
+						<td class="text-end w-1">
+							@sparkline.Sparkline(sparkline.Props{Values: r.Trend, Size: "sm", Color: "primary", AriaLabel: "Bounce rate trend for " + r.Path,
+								Attributes: templ.Attributes{"id": "bounce-rate-" + strconv.Itoa(i+1)}})
+						</td>
+					</tr>
+				}
+			</table>
+		</div>
+	</div>
+}
+
+// BarRow is a row of a Bars table.
+type BarRow struct {
+	Text    string
+	Value   string
+	Percent float64 // width of the bar
+}
+
+type BarsProps struct {
+	Class      string
+	Title      string
+	Label      string // header of the text column, e.g. "Network"
+	ValueLabel string // header of the value and bar columns, e.g. "Visitors"
+	Color      string // of the bars, default "primary"
+}
+
+// Bars is a card with a table of values and a bar per row, e.g. visitors per social network.
+templ Bars(p BarsProps, rows []BarRow) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ p.Title }</h2>
+		</div>
+		<table class="table card-table table-vcenter">
+			<thead>
+				<tr>
+					<th>{ p.Label }</th>
+					<th colspan="2">{ p.ValueLabel }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, r := range rows {
+					<tr>
+						<td>{ r.Text }</td>
+						<td>{ r.Value }</td>
+						<td class="w-50">
+							<div class="progress progress-sm">
+								<div class={ "progress-bar bg-" + kit.Or(p.Color, "primary") } style={ "width: " + num(r.Percent) + "%" }></div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+// Task is a row of Tasks.
+type Task struct {
+	Name     string
+	Href     string // default "#"
+	Checked  bool
+	Due      string
+	Done     int // checklist items done
+	Total    int
+	Comments int
+	Avatar   avatar.Props
+}
+
+type TasksProps struct {
+	Class string
+	Title string // default "Tasks"
+}
+
+// Tasks is a card with a table of tasks: a check, the name, the due date, the checklist and comments,
+// and who it is assigned to.
+templ Tasks(p TasksProps, tasks []Task) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Tasks") }</h2>
+		</div>
+		<div class="table-responsive" tabindex="0">
+			<table class="table table-selectable card-table table-vcenter">
+				for _, t := range tasks {
+					<tr>
+						<td class="w-1 pe-0">
+							<input type="checkbox" class="form-check-input m-0 align-middle table-selectable-check" aria-label={ "Select task " + t.Name } checked?={ t.Checked }/>
+						</td>
+						<td class="w-100">
+							<a href={ templ.URL(kit.Or(t.Href, "#")) } class="text-reset">{ t.Name }</a>
+						</td>
+						<td class="text-nowrap text-secondary">
+							@icon.Icon("ti-calendar", icon.Props{Inline: true})
+							{ t.Due }
+						</td>
+						<td class="text-nowrap">
+							<a href="#" class="text-secondary">
+								@icon.Icon("ti-check")
+								{ strconv.Itoa(t.Done) }/{ strconv.Itoa(t.Total) }
+							</a>
+						</td>
+						<td class="text-nowrap">
+							<a href="#" class="text-secondary">
+								@icon.Icon("ti-message", icon.Props{Inline: true})
+								{ strconv.Itoa(t.Comments) }
+							</a>
+						</td>
+						<td>
+							@avatar.Avatar(small(t.Avatar))
+						</td>
+					</tr>
+				}
+			</table>
+		</div>
+	</div>
+}
+
+type SponsorProps struct {
+	Class  string
+	Href   string
+	Label  string          // accessible name of the card link, e.g. "Sponsor Tabler!"
+	Image  templ.Component // drawn behind the text
+	Title  string
+	Text   string
+	Action string // the button's text, e.g. "Become a Sponsor"
+	Icon   string // before the action, default a filled pink heart
+	// IconEnd puts the icon after the text (icon-end), for right-to-left pages.
+	IconEnd bool
+}
+
+// Sponsor is a call to support a project: a whole card as a link with a drawing, a title, a text and a
+// button.
+templ Sponsor(p SponsorProps) {
+	<a href={ templ.URL(p.Href) } class={ kit.Classes("card border-primary", p.Class) } target="_blank" rel="noopener" aria-label={ p.Label } style="background: color-mix(in srgb, var(--tblr-primary) 4%, var(--tblr-bg-surface))">
+		if p.Image != nil {
+			@p.Image
+		}
+		<div class="card-body d-flex flex-column justify-content-center p-5">
+			<div class="row justify-content-end" dir="ltr">
+				<div class="col-7 text-primary">
+					<div class="h1 text-uppercase">{ p.Title }</div>
+					<p class="h3 fw-normal">{ p.Text }</p>
+					<div class="mt-4">
+						<span class="btn w-100 pe-none" dir="ltr">
+							if p.Icon != "" {
+								@icon.Icon(p.Icon, icon.Props{Class: kit.If(p.IconEnd, "icon-end")})
+							} else {
+								@icon.Icon("ti-heart", icon.Props{Filled: true, Color: "pink", Class: kit.If(p.IconEnd, "icon-end")})
+							}
+							{ p.Action }
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</a>
+}
+
+// Todo is an entry of a Checklist.
+type Todo struct {
+	ID    string // of the check box
+	Text  string
+	Done  bool
+	Color string // of the dot before When, e.g. "red" for overdue
+	When  string // e.g. "Today"
+}
+
+type ChecklistProps struct {
+	Class  string
+	Title  string
+	Count  string          // a red badge after the title, e.g. "3"
+	Action templ.Component // in the header, e.g. an "Add task" button
+}
+
+// Checklist is a card with a list of to-dos to tick off, each with a colored dot and when it is due:
+// Tabler's tasks due.
+templ Checklist(p ChecklistProps, todos []Todo) {
+	<div class={ kit.Classes("card h-100", p.Class) }>
+		<div class="card-header">
+			<div class="d-flex align-items-center gap-2">
+				<h2 class="card-title mb-0">{ p.Title }</h2>
+				if p.Count != "" {
+					<span class="badge bg-red text-white">{ p.Count }</span>
+				}
+			</div>
+			if p.Action != nil {
+				<div class="card-actions">
+					@p.Action
+				</div>
+			}
+		</div>
+		<div class="list-group list-group-flush list-group-hoverable">
+			for _, t := range todos {
+				<div class="list-group-item">
+					<div class="row align-items-center g-2">
+						<div class="col-auto">
+							<input type="checkbox" class="form-check-input m-0" id={ t.ID } checked?={ t.Done }/>
+						</div>
+						<div class="col">
+							<label for={ t.ID }>{ t.Text }</label>
+						</div>
+						<div class="col-auto d-flex align-items-center gap-2">
+							<span class={ "legend-dot bg-" + kit.Or(t.Color, "secondary") }></span>
+							<span class="small text-secondary">{ t.When }</span>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Leader is a row of a Leaderboard.
+type Leader struct {
+	Avatar  avatar.Props
+	Name    string
+	Percent float64 // of the target, shown as a bar
+	Color   string  // of the bar
+	Value   string  // e.g. "$148K"
+	Detail  string  // e.g. "18 deals - 92%"
+}
+
+type LeaderboardProps struct {
+	Class    string
+	Title    string
+	Subtitle string
+}
+
+// Leaderboard is a card ranking people: place, avatar, name with a progress bar, and their result.
+templ Leaderboard(p LeaderboardProps, leaders []Leader) {
+	<div class={ kit.Classes("card h-100", p.Class) }>
+		<div class="card-header">
+			<div>
+				<h2 class="card-title mb-0">{ p.Title }</h2>
+				if p.Subtitle != "" {
+					<div class="card-subtitle">{ p.Subtitle }</div>
+				}
+			</div>
+		</div>
+		<div class="list-group list-group-flush">
+			for i, l := range leaders {
+				<div class="list-group-item">
+					<div class="row align-items-center g-3">
+						<div class="col-auto fw-bold me-3">{ strconv.Itoa(i + 1) }</div>
+						<div class="col-auto">
+							@avatar.Avatar(small(l.Avatar))
+						</div>
+						<div class="col">
+							<div class="fw-medium">{ l.Name }</div>
+							@progress.Progress(progress.Props{Value: l.Percent, Color: l.Color, Size: progress.SizeSmall, Class: "mt-2"})
+						</div>
+						<div class="col-auto text-end">
+							<div class="fw-semibold">{ l.Value }</div>
+							<div class="text-secondary">{ l.Detail }</div>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}

@@ -1,0 +1,66 @@
+// Package wizard is a step of Tabler's setup wizard (the preview's wizard page): a card with a picture,
+// a welcome title and text, the step's fields below a divider, and the progress with the buttons under
+// the card. Put it in a centered single page, e.g. auth.Page.
+//
+//	@wizard.Step(wizard.Props{Media: picture, Title: "Welcome to Tabler!", Text: intro, Divider: "your data",
+//		Progress: 25, Actions: buttons}) {
+//		@form.Field(…) { … }
+//	}
+package wizard
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+)
+
+type Props struct {
+	Class   string // on the card
+	Media   templ.Component // above the title, e.g. an illustration
+	Title   string
+	Text    string
+	Divider string // the label of the line between the introduction and the fields, e.g. "your data"
+	// Progress is how far the wizard is, in percent; 0 leaves the bar out.
+	Progress float64
+	Actions  templ.Component // at the end of the row below the card, e.g. "Set up later" and "Continue"
+}
+
+// Step is one step of the wizard; the children are its fields.
+templ Step(p Props) {
+	<div class={ kit.Classes("card card-md", p.Class) }>
+		if p.Media != nil || p.Title != "" || p.Text != "" {
+			<div class="card-body text-center py-4 p-sm-5">
+				if p.Media != nil {
+					@p.Media
+				}
+				if p.Title != "" {
+					<h1 class="mt-5">{ p.Title }</h1>
+				}
+				if p.Text != "" {
+					<p class="text-secondary">{ p.Text }</p>
+				}
+			</div>
+		}
+		if p.Divider != "" {
+			<div class="hr-text hr-text-spaceless">{ p.Divider }</div>
+		}
+		<div class="card-body">
+			{ children... }
+		</div>
+	</div>
+	if p.Progress > 0 || p.Actions != nil {
+		<div class="row align-items-center mt-3">
+			<div class="col-4">
+				if p.Progress > 0 {
+					@progress.Progress(progress.Props{Value: p.Progress})
+				}
+			</div>
+			<div class="col">
+				<div class="btn-list justify-content-end">
+					if p.Actions != nil {
+						@p.Actions
+					}
+				</div>
+			</div>
+		</div>
+	}
+}

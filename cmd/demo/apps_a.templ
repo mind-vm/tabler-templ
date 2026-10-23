@@ -1,0 +1,269 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/activity"
+	"github.com/mind-vm/tabler-templ/blocks/crm"
+	"github.com/mind-vm/tabler-templ/blocks/dashboard"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/blocks/tables"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/legend"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/vectormap"
+)
+
+// headerButtons are the dashboard's page header actions, with the link to the original.
+templ headerButtons(name string) {
+	<div class="btn-list">
+		<span class="d-none d-sm-inline">
+			<button type="button" class="btn">New view</button>
+		</span>
+		<a href="#" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-report">
+			@icon.Icon("ti-plus")
+			Create new report
+		</a>
+		<a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="Create new report">
+			@icon.Icon("ti-plus")
+		</a>
+		@originalLink(name)
+	</div>
+}
+
+templ indexPage() {
+	{{ fp := frameProps("index", "Dashboard") }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Pretitle: "Overview", Title: "Dashboard", Actions: headerButtons("index")}) }}
+	@layout.Page(fp) {
+		@dashboardContent(false)
+	}
+}
+
+templ goodInfo() {
+	@templ.Raw(goodInfoSVG)
+}
+
+templ sponsorDrawing() {
+	@templ.Raw(sponsorSVG)
+}
+
+templ storageText() {
+	Using Storage <strong>5760 MB </strong>of 8 GB
+}
+
+templ iconsText() {
+	All icons come from the Tabler Icons set and are MIT-licensed. Visit
+	<a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons Website</a>, download any of the 5184 icons in SVG, PNG or&nbsp;React and use them in your favourite design tools.
+}
+
+templ iconsAction() {
+	<a href="https://tabler.io/icons" class="btn btn-primary" target="_blank" rel="noopener">
+		@icon.Icon("ti-download")
+		Download icons
+	</a>
+}
+
+func dateRange(id, label string) templ.Component {
+	return metric.Range(metric.RangeProps{ID: id, Label: label})
+}
+
+func trend(v float64) *trending.Props { return metric.Trend(v) }
+
+// dashboardContent is the preview's dashboard (shared/components/HomepageContent), shown by index and the
+// layout-* pages.
+templ dashboardContent(rtl bool) {
+	<div class="row row-deck row-cards">
+		<div class="col-sm-12 col-lg-6">
+			@dashboard.Welcome(dashboard.WelcomeProps{
+				Title: "Welcome back, Paweł", Text: "You have 5 new messages and 2 new notifications.",
+				Stats: []dashboard.WelcomeStat{{Label: "Today's Sales", Value: "6,782", Trend: 7, Progress: 75, Color: "success"},
+					{Label: "Growth Rate", Value: "78,4%", Trend: -1, Progress: 78, Color: "danger"}},
+				Image: goodInfo(), Href: "/illustrations", ImageText: "Illustrations",
+			})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "Total Users", Value: "75,782", Trend: trend(2), Note: "24,635 users increased from last month",
+				Bottom: chart.Chart(tc("visitors", "Total users", 6))})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "Active Users", Value: "25,782", Trend: trend(-1), Tight: true,
+				Chart: chart.Radial(chart.RadialProps{ID: "active-users-4", Title: "Active users", Value: 58, Height: 200})})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "Sales", Action: dateRange("sales", "Select time range for sales data"), Value: "75%",
+				ProgressLabel: "Conversion rate", Trend: trend(7), Progress: &progressProps75})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "Revenue", Action: dateRange("revenue", "Select time range for revenue"), Value: "$4,300", Trend: trend(8),
+				Bottom: chart.Chart(small(tc("revenue-bg", "Revenue", 0), "rounded-bottom-3"))})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "New clients", Action: dateRange("new-clients", "Select time range for new clients"), Value: "6,782", Trend: trend(0),
+				Chart: chart.Chart(small(tc("new-clients", "New clients", 0), ""))})
+		</div>
+		<div class="col-sm-6 col-lg-3">
+			@metric.Card(metric.Props{Label: "Active subscriptions", Action: dateRange("active-users", "Select time range for active users"), Value: "2,986", Trend: trend(4),
+				Chart: chart.Chart(small(tc("active-users", "Active subscriptions", 0), ""))})
+		</div>
+		<div class="col-12">
+			<div class="row row-cards">
+				<div class="col-sm-6 col-lg-3">
+					@metric.Small(metric.SmallProps{Icon: "ti-currency-dollar", Color: "primary", Title: "132 Sales", Text: "12 waiting payments"})
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					@metric.Small(metric.SmallProps{Icon: "ti-shopping-cart", Color: "green", Title: "78 Orders", Text: "32 shipped"})
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					@metric.Small(metric.SmallProps{Icon: "ti-brand-x", Color: "x", Title: "623 Shares", Text: "16 today"})
+				</div>
+				<div class="col-sm-6 col-lg-3">
+					@metric.Small(metric.SmallProps{Icon: "ti-brand-facebook", Color: "facebook", Title: "132 Likes", Text: "21 today"})
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+						<h2 class="card-title mb-0">Traffic summary</h2>
+						{{ mentions := tc("mentions", "Traffic summary", 18) }}
+						@legend.List(legend.ListProps{Attributes: templ.Attributes{"id": "traffic-summary-legend"}}) {
+							for i, s := range []string{"Web", "Social", "Other"} {
+								@legend.Legend(legend.Props{Button: true, Text: s, Attributes: kitAttrs(chart.Toggle("mentions", s),
+									templ.Attributes{"style": "--tblr-legend-color: " + mentions.SerieColor(i)})})
+							}
+						}
+					</div>
+					@chart.Chart(mentions)
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h2 class="card-title">Locations</h2>
+					@vectormap.Map(vectormap.Props{Map: "world", Label: "World map", Values: worldValues})
+					@vectormap.Library()
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="row row-cards">
+				<div class="col-12">
+					@dashboard.Usage(dashboard.UsageProps{Text: storageText(), Parts: []dashboard.UsagePart{
+						{Label: "Regular", Color: "primary", Percent: 44, Value: "3520MB"}, {Label: "System", Color: "info", Percent: 19, Value: "1520MB"},
+						{Label: "Shared", Color: "success", Percent: 9, Value: "720MB"}, {Label: "Free", Value: "2240MB"}}})
+				</div>
+				<div class="col-12">
+					@activity.Card(activity.CardProps{}, cActivity)
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			@dashboard.ChartTable(dashboard.ChartTableProps{Title: "Development activity",
+				Summary: dashboard.Goal(dashboard.GoalProps{Percent: 35, Label: "35% of today's goal", Title: "Today's Earning: $4,262.40", Note: "+5% more than yesterday"}),
+				Chart:   chart.Chart(tc("development-activity", "Development activity", 12))}) {
+				@dashboard.Commits(aCommits)
+			}
+		</div>
+		<div class="col-12">
+			@dashboard.Banner(dashboard.BannerProps{Icon: "ti-ghost", Title: "Tabler Icons", Action: iconsAction()}) {
+				@iconsText()
+			}
+		</div>
+		<div class="col-md-12 col-lg-8">
+			@dashboard.Visits(dashboard.VisitsProps{}, aVisits)
+		</div>
+		<div class="col-md-6 col-lg-4">
+			@dashboard.Sponsor(dashboard.SponsorProps{Href: "https://github.com/sponsors/codecalm", Label: "Sponsor Tabler!", Image: sponsorDrawing(),
+				Title: "Help Tabler Grow and Thrive", Text: "Sponsor Tabler and help us make a difference!", Action: "Become a Sponsor", IconEnd: rtl})
+		</div>
+		<div class="col-md-6 col-lg-4">
+			@dashboard.Bars(dashboard.BarsProps{Title: "Social Media Traffic", Label: "Network", ValueLabel: "Visitors"}, aSocial)
+		</div>
+		<div class="col-md-12 col-lg-8">
+			@dashboard.Tasks(dashboard.TasksProps{}, aTasks)
+		</div>
+		<div class="col-12">
+			@tables.Invoices(tables.InvoicesProps{Count: 8, Total: 16, Page: 3, Pages: 5, Actions: bfRowMenu()}, bfInvoices)
+		</div>
+	</div>
+}
+
+templ dealActions() {
+	<button type="button" class="btn btn-sm">
+		@icon.Icon("ti-filter")
+		Filter
+	</button>
+	<button type="button" class="btn btn-primary btn-sm">
+		@icon.Icon("ti-plus")
+		Add deal
+	</button>
+}
+
+templ addTask() {
+	<button type="button" class="btn btn-primary btn-sm">
+		@icon.Icon("ti-plus")
+		Add task
+	</button>
+}
+
+templ viewAllLink() {
+	<a href="#" class="small fw-medium text-primary">View all</a>
+}
+
+templ crmPage() {
+	@preview("dashboard-crm") {
+		<div>
+			<div class="col-12">
+				<div class="row row-cards">
+					for _, t := range []metric.TileProps{
+						{Icon: "ti-currency-dollar", Color: "primary", Label: "MRR", Value: "$92.4K", Trend: &trending.Props{Value: 9.5, Text: "+9.5"}},
+						{Icon: "ti-filter", Color: "azure", Label: "Pipeline", Value: "$2.4M", Trend: &trending.Props{Value: 14, Text: "+14"}},
+						{Icon: "ti-circle-check", Color: "green", Label: "Deals won", Value: "74", Trend: &trending.Props{Value: 8, Text: "+8"}},
+						{Icon: "ti-percentage", Color: "purple", Label: "Conversion", Value: "5.97%", Trend: &trending.Props{Value: 0.4, Text: "+0.4"}},
+						{Icon: "ti-activity", Color: "yellow", Label: "Activities", Value: "318", Trend: &trending.Props{Value: 22, Text: "+22"}},
+						{Icon: "ti-clock", Color: "red", Label: "Tasks due", Value: "12", Trend: &trending.Props{Value: -3, Unit: " urgent"}},
+						{Icon: "ti-user-plus", Color: "cyan", Label: "Leads added", Value: "148", Trend: &trending.Props{Value: 31, Text: "+31"}},
+						{Icon: "ti-trending-up", Color: "green", Label: "Churn rate", Value: "1.8%", Trend: &trending.Props{Value: -0.3}},
+					} {
+						<div class="col-sm-6 col-lg-3">
+							@metric.Tile(t)
+						</div>
+					}
+					<div class="col-lg-6">
+						<div class="row row-cards">
+							<div class="col-12">
+								@metric.Overview(metric.OverviewProps{Label: "Monthly recurring revenue", Value: "$92,400", Change: "+9.5%",
+									Legend: []metric.Series{{Text: "This year", Color: "primary"}, {Text: "Last year", Color: "secondary"}},
+									Chart:  chart.Chart(tc("crm-mrr-overview", "Monthly recurring revenue", 15))})
+							</div>
+							<div class="col-12">
+								@crm.Deals(crm.DealsProps{Actions: dealActions()}, crmDeals)
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="row row-cards">
+							<div class="col-12">
+								@crm.Funnel(crm.FunnelProps{Title: "Pipeline funnel", Period: "This quarter", Stages: crmStages, ConversionLabel: "Conversion rate", ConversionValue: "5.97%"})
+							</div>
+							<div class="col-12">
+								@crm.Activity(crm.ActivityProps{Actions: viewAllLink()}, crmActivity)
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4">
+						@dashboard.Checklist(dashboard.ChecklistProps{Title: "Tasks due", Count: "3", Action: addTask()}, crmTodos)
+					</div>
+					<div class="col-lg-4">
+						@dashboard.Leaderboard(dashboard.LeaderboardProps{Title: "Team leaderboard", Subtitle: "Q2 - May 1, 2026"}, crmLeaders)
+					</div>
+					<div class="col-lg-4">
+						@crm.Risks(crm.RisksProps{Count: "5 accounts"}, crmRisks)
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

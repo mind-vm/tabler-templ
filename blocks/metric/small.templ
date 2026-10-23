@@ -1,0 +1,116 @@
+package metric
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+type SmallProps struct {
+	Class string
+	// Icon is shown in a square of Color (a white icon, or a colored one on a light square with Light);
+	// Avatar instead shows a person.
+	Icon   string
+	Color  string
+	Light  bool
+	Avatar *avatar.Props
+	Title  string // e.g. "132 Sales"
+	// TitleIcon is a small icon after the title in Color; Value a figure at the right of it in
+	// ValueColor (default "green").
+	TitleIcon  string
+	Value      string
+	ValueColor string
+	Text       string // below the title, e.g. "12 waiting payments"
+	// Chart is shown at the right, e.g. a sparkline.Sparkline; ChartStart puts it at the left instead of
+	// the icon.
+	Chart      templ.Component
+	ChartStart bool
+}
+
+// Small is a small stat card: an icon, a figure and a line of text (Tabler's small stats).
+templ Small(p SmallProps) {
+	<div class={ kit.Classes("card card-sm", p.Class) }>
+		<div class="card-body">
+			<div class="row align-items-center">
+				if p.Icon != "" {
+					<div class="col-auto">
+						@iconSquare(p.Icon, p.Color, p.Light)
+					</div>
+				} else if p.Avatar != nil {
+					<div class="col-auto">
+						@avatar.Avatar(*p.Avatar)
+					</div>
+				} else if p.Chart != nil && p.ChartStart {
+					<div class="col-auto">
+						@p.Chart
+					</div>
+				}
+				<div class="col">
+					<div class="fw-medium">
+						{ p.Title }
+						if p.TitleIcon != "" {
+							@icon.Icon(p.TitleIcon, icon.Props{Inline: true, Color: p.Color, Class: "icon-sm ms-1"})
+						}
+						if p.Value != "" {
+							<span class={ "float-end fw-medium text-" + kit.Or(p.ValueColor, "green") }>{ p.Value }</span>
+						}
+					</div>
+					<div class="text-secondary">
+						{ p.Text }
+					</div>
+				</div>
+				if p.Chart != nil && !p.ChartStart {
+					<div class="col-auto">
+						@p.Chart
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ iconSquare(name, color string, light bool) {
+	<span class={ kit.Classes(kit.If(color != "" && light, "bg-"+color+"-lt"), kit.If(color != "" && !light, "bg-"+color+" text-white"), "avatar avatar-square") }>
+		@icon.Icon(name)
+	</span>
+}
+
+type TileProps struct {
+	Class string
+	Icon  string // in a light square of Color
+	Color string
+	Label string // the subheader, e.g. "MRR"
+	Value string // e.g. "$92.4K"
+	Trend *trending.Props
+}
+
+// Tile is a compact KPI card: an icon, a label above the value and the change at the right (the CRM
+// dashboard's stats).
+templ Tile(p TileProps) {
+	<div class={ kit.Classes("card card-sm", p.Class) }>
+		<div class="card-body p-3">
+			<div class="row align-items-center">
+				if p.Icon != "" {
+					<div class="col-auto">
+						@iconSquare(p.Icon, p.Color, true)
+					</div>
+				}
+				<div class="col">
+					@typography.Subheader() {
+						{ p.Label }
+					}
+					<div class="h3 m-0 p-0">
+						{ p.Value }
+					</div>
+				</div>
+				if p.Trend != nil {
+					<div class="col-auto">
+						@trending.Trending(*p.Trend)
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}

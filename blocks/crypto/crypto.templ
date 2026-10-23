@@ -1,0 +1,234 @@
+// Package crypto holds the cards of Tabler's crypto dashboard: a market list with favorites, an order
+// book, an order form and a chart card with a time frame switch. The rate cards at the top are
+// metric.Ticker.
+package crypto
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/switchicon"
+	"github.com/mind-vm/tabler-templ/trending"
+)
+
+// Market is a row of Markets.
+type Market struct {
+	Coin     string
+	Price    string
+	Volume   string
+	Change   float64
+	// ChangeText is the change as shown, e.g. "+0.30"; default Change with a sign.
+	ChangeText string
+	Favorite   bool
+}
+
+type MarketsProps struct {
+	Class   string
+	Title   string          // default "Markets"
+	Actions templ.Component // in the header, e.g. a card.Dropdown
+	// Column heads, default "Coin", "Price", "Volume", "Change"; Favorite is the star's label, default
+	// "Add to favorites".
+	CoinLabel, PriceLabel, VolumeLabel, ChangeLabel, FavoriteLabel string
+}
+
+func star(active bool, label string) switchicon.Props {
+	return switchicon.Props{Icon: "ti-star", ActiveColor: "yellow", Variant: switchicon.SlideUp, Active: active, Label: kit.Or(label, "Add to favorites")}
+}
+
+func change(m Market) trending.Props {
+	t := m.ChangeText
+	if t == "" {
+		t = strconv.FormatFloat(m.Change, 'f', -1, 64)
+		if m.Change > 0 {
+			t = "+" + t
+		}
+	}
+	return trending.Props{Value: m.Change, Text: t}
+}
+
+// Markets is a card with a striped table of coins: a favorite star, price, volume and change (volume and
+// change from xl screens on).
+templ Markets(p MarketsProps, markets []Market) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(kit.Or(p.Title, "Markets"), p.Actions)
+		<table class="table card-table table-striped">
+			<thead>
+				<tr>
+					<th>
+						@switchicon.SwitchIcon(star(false, p.FavoriteLabel))
+					</th>
+					<th>{ kit.Or(p.CoinLabel, "Coin") }</th>
+					<th>{ kit.Or(p.PriceLabel, "Price") }</th>
+					<th class="d-none d-xl-table-cell">{ kit.Or(p.VolumeLabel, "Volume") }</th>
+					<th class="d-none d-xl-table-cell text-end">{ kit.Or(p.ChangeLabel, "Change") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, m := range markets {
+					<tr>
+						<td>
+							@switchicon.SwitchIcon(star(m.Favorite, p.FavoriteLabel))
+						</td>
+						<td>{ m.Coin }</td>
+						<td class="">{ m.Price }</td>
+						<td class="d-none d-xl-table-cell">{ m.Volume }</td>
+						<td class="d-none d-xl-table-cell text-end">
+							@trending.Trending(change(m))
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ header(title string, actions templ.Component) {
+	<div class="card-header">
+		<h2 class="card-title mb-0">{ title }</h2>
+		if actions != nil {
+			<div class="card-actions">
+				@actions
+			</div>
+		}
+	</div>
+}
+
+// Order is a row of an order book.
+type Order struct {
+	Price  string
+	Amount string
+	Sum    string
+}
+
+type OrdersProps struct {
+	Class   string
+	Title   string          // e.g. "Sell Orders"
+	Actions templ.Component // in the header, e.g. a "View all" button
+	// Currency names the amount columns, default "BTC": "BTC" and "Sum(BTC)".
+	Currency   string
+	PriceLabel string // default "Price"
+}
+
+// Orders is a card with one side of an order book: price, amount (from xl screens on) and running sum.
+templ Orders(p OrdersProps, orders []Order) {
+	{{ cur := kit.Or(p.Currency, "BTC") }}
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title, p.Actions)
+		<table class="table card-table table-striped">
+			<thead>
+				<tr>
+					<th>{ kit.Or(p.PriceLabel, "Price") }</th>
+					<th class="d-none d-xl-table-cell">{ cur }</th>
+					<th>Sum({ cur })</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, o := range orders {
+					<tr>
+						<td>{ o.Price }</td>
+						<td class="d-none d-xl-table-cell">{ o.Amount }</td>
+						<td>{ o.Sum }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+type SwitchProps struct {
+	Name    string   // of the radio buttons
+	Options []string // e.g. "1m", "5m", "1h"
+	Active  int      // the checked option
+}
+
+// Switch is the small segmented control of a card header, e.g. a chart's time frame or Buy/Sell/Send.
+templ Switch(p SwitchProps) {
+	@nav.Segmented(nav.SegmentedProps{Name: p.Name, Size: nav.SizeSmall}) {
+		for i, o := range p.Options {
+			@nav.Segment(nav.SegmentProps{Name: p.Name, ID: "segmented-" + p.Name + "-" + strconv.Itoa(i+1), Active: i == p.Active}) {
+				{ o }
+			}
+		}
+	}
+}
+
+type ChartCardProps struct {
+	Class string
+	Title string
+	// Switch is the time frame control in the header; empty Options for none.
+	Switch SwitchProps
+}
+
+// ChartCard is a card with a title and time frame switch in the header; the children are the chart,
+// e.g. a candlestick chart.Chart.
+templ ChartCard(p ChartCardProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		if len(p.Switch.Options) > 0 {
+			@header(p.Title, Switch(p.Switch))
+		} else {
+			@header(p.Title, nil)
+		}
+		<div class="card-body">
+			{ children... }
+		</div>
+	</div>
+}
+
+type OrderFormProps struct {
+	Class      string
+	Title      string // default "Operations"
+	Operations SwitchProps
+	Lead       string   // default "Place new order:"
+	ID         string   // prefix of the field ids, default "crypto"
+	Currencies []string // of the amount
+	Amount     string
+	Price      string
+	Total      string
+	Unit       string // after price and total, default "$"
+	// Field labels, default "Amount", "Price", "Total", "Currency".
+	AmountLabel, PriceLabel, TotalLabel, CurrencyLabel string
+	Submit                                             string // default "Process to wallet"
+	Note                                               string // small below the button
+}
+
+// OrderForm is the card to place an order: an operation switch, amount with currency, price and total.
+templ OrderForm(p OrderFormProps) {
+	{{ id := kit.Or(p.ID, "crypto") }}
+	{{ unit := kit.Or(p.Unit, "$") }}
+	<div class={ kit.Classes("card", p.Class) }>
+		if len(p.Operations.Options) > 0 {
+			@header(kit.Or(p.Title, "Operations"), Switch(p.Operations))
+		} else {
+			@header(kit.Or(p.Title, "Operations"), nil)
+		}
+		<div class="card-body">
+			<p>{ kit.Or(p.Lead, "Place new order:") }</p>
+			<div class="input-group mb-3">
+				<label class="input-group-text" for={ id + "-amount-value" }>{ kit.Or(p.AmountLabel, "Amount") }</label>
+				<select class="form-select" aria-label={ kit.Or(p.CurrencyLabel, "Currency") }>
+					for i, c := range p.Currencies {
+						<option value={ c } selected?={ i == 0 }>{ c }</option>
+					}
+				</select>
+				<input type="text" id={ id + "-amount-value" } class="form-control" value={ p.Amount }/>
+			</div>
+			<div class="input-group mb-3">
+				<label class="input-group-text" for={ id + "-order-price" }>{ kit.Or(p.PriceLabel, "Price") }</label>
+				<input type="text" id={ id + "-order-price" } class="form-control" readonly="" value={ p.Price }/>
+				<label class="input-group-text" for={ id + "-order-price" }>{ unit }</label>
+			</div>
+			<div class="input-group mb-3">
+				<label class="input-group-text" for={ id + "-order-total" }>{ kit.Or(p.TotalLabel, "Total") }</label>
+				<input type="text" id={ id + "-order-total" } class="form-control" readonly="" value={ p.Total }/>
+				<label class="input-group-text" for={ id + "-order-total" }>{ unit }</label>
+			</div>
+			<div class="d-grid">
+				<button type="button" class="btn btn-primary mb-3">{ kit.Or(p.Submit, "Process to wallet") }</button>
+			</div>
+			if p.Note != "" {
+				<p class="text-muted mb-0 small">{ p.Note }</p>
+			}
+		</div>
+	</div>
+}
