@@ -1,0 +1,65 @@
+package form
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type FieldsetProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Legend     string // names the group of fields
+	Disabled   bool   // disables every control inside
+	// Plain drops Tabler's framed look (form-fieldset), keeping the semantic group.
+	Plain bool
+}
+
+// Fieldset groups related fields, e.g. a set of radios, under a legend.
+templ Fieldset(p FieldsetProps) {
+	<fieldset class={ kit.Classes(kit.If(!p.Plain, "form-fieldset"), p.Class) } disabled?={ p.Disabled } { p.Attributes... }>
+		if p.Legend != "" {
+			<legend class="form-label">{ p.Legend }</legend>
+		}
+		{ children... }
+	</fieldset>
+}
+
+type FloatingProps struct {
+	Class string // wrapper, e.g. "mb-3"
+	Label string
+	For   string // id of the control
+}
+
+// Floating puts the label inside the control, moving up when it is filled (form-floating). The
+// children are the control (Input, Select or Textarea); give it a Placeholder, which Tabler hides.
+templ Floating(p FloatingProps) {
+	<div class={ kit.Classes("form-floating", p.Class) }>
+		{ children... }
+		<label
+			if p.For != "" {
+				for={ p.For }
+			}
+		>{ p.Label }</label>
+	</div>
+}
+
+type FooterProps struct {
+	Class string
+}
+
+// Footer is the end of a form, e.g. the submit button (form-footer).
+templ Footer(props ...FooterProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("form-footer", p.Class) }>
+		{ children... }
+	</div>
+}
+
+// Text is a muted line below a control (form-text); give it an id for the control's aria-describedby.
+templ Text(id string) {
+	<div
+		class="form-text"
+		if id != "" {
+			id={ id }
+		}
+	>
+		{ children... }
+	</div>
+}

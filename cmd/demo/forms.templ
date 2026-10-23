@@ -1,0 +1,263 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+type cartLine struct{ Name, SKU, Price, Qty, Max string }
+
+var cart = []cartLine{
+	{"Hex nut M8 DIN 934, zinc plated", "8-934-8-ZN", "$12.40", "2", "50"},
+	{"Lock nut M8 DIN 985, stainless A2", "8-985-A2", "$28.90", "1", "20"},
+	{"Cap nut M8 DIN 1587, brass", "8-1587-MS", "$41.00", "3", "3"},
+}
+
+templ numberInputPage() {
+	@preview("number-input") {
+		<div class="row row-cards">
+			<div class="col-md-6 col-lg-4">
+				@section("Basic", "Add `data-bs-toggle=\"number-input\"` to the input; the plugin renders the box and the buttons, `min` and `max` set the bounds.") {
+					@form.NumberInput(form.NumberInputProps{Value: "1", Min: "1", Max: "99", AriaLabel: "Quantity"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("At a bound", "The button at `min` or `max` goes disabled, so the user sees the value cannot go further.") {
+					<div class="d-flex flex-wrap gap-3">
+						@form.NumberInput(form.NumberInputProps{Value: "0", Min: "0", Max: "10", AriaLabel: "At the minimum"})
+						@form.NumberInput(form.NumberInputProps{Value: "10", Min: "0", Max: "10", AriaLabel: "At the maximum"})
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Step and precision", "A fractional `step` sets how many decimals the value keeps.") {
+					<div class="d-flex flex-wrap gap-3">
+						@form.NumberInput(form.NumberInputProps{Value: "1.5", Min: "0", Max: "10", Step: "0.25", AriaLabel: "Hours"})
+						@form.NumberInput(form.NumberInputProps{Value: "500", Min: "0", Step: "100", AriaLabel: "Amount", Width: "5rem"})
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Sizes", "Add `.form-control-sm` or `.form-control-lg` to the input; the box gets `.number-input-sm` or `-lg`.") {
+					<div class="d-flex flex-wrap align-items-center gap-3">
+						@form.NumberInput(form.NumberInputProps{Value: "1", Min: "0", AriaLabel: "Small", Size: form.SizeSmall})
+						@form.NumberInput(form.NumberInputProps{Value: "1", Min: "0", AriaLabel: "Default"})
+						@form.NumberInput(form.NumberInputProps{Value: "1", Min: "0", AriaLabel: "Large", Size: form.SizeLarge})
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Without bounds", "Without `min` and `max` the value goes both ways, so a minus sign can be typed too.") {
+					@form.NumberInput(form.NumberInputProps{Value: "0", AriaLabel: "Offset"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Native number input", "Use `type=\"number\"` to keep the browser's own validation; the number input only hides its spin buttons.") {
+					@form.NumberInput(form.NumberInputProps{Number: true, Value: "5", Min: "0", Max: "10", AriaLabel: "Seats"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("No repeat", "Add `data-bs-repeat=\"false\"` to step once per click instead of repeating while the button is held.") {
+					@form.NumberInput(form.NumberInputProps{NoRepeat: true, Value: "1", Min: "1", Max: "99", AriaLabel: "Quantity, one step per click"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Wider input", "Set `--tblr-number-input-input-width` on the input for longer values.") {
+					@form.NumberInput(form.NumberInputProps{Value: "125000", Min: "0", Step: "1000", AriaLabel: "Budget", Width: "7rem"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Disabled and readonly", "Add `disabled` or `readonly` to the input; both buttons follow.") {
+					<div class="d-flex flex-wrap gap-3">
+						@form.NumberInput(form.NumberInputProps{Value: "3", Disabled: true, AriaLabel: "Disabled"})
+						@form.NumberInput(form.NumberInputProps{Value: "3", Readonly: true, AriaLabel: "Readonly"})
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Validation", "Add `.is-valid` or `.is-invalid` to the input, like on any `.form-control`; the feedback text after it still shows.") {
+					<div class="space-y-3">
+						<div>
+							@form.NumberInput(form.NumberInputProps{State: form.StateValid, Value: "2", Min: "1", Max: "5", AriaLabel: "Valid quantity"})
+							<div class="valid-feedback">In stock, ships today.</div>
+						</div>
+						<div>
+							@form.NumberInput(form.NumberInputProps{State: form.StateInvalid, Value: "5", Min: "1", Max: "5", AriaLabel: "Invalid quantity"})
+							<div class="invalid-feedback">Only 5 pieces left.</div>
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Custom buttons", "Write the `.number-input` markup yourself to change the icons or labels; `data-bs-number-input-action` marks the buttons.") {
+					@form.NumberInput(form.NumberInputProps{Value: "1", Min: "1", Max: "99", AriaLabel: "Quantity with custom buttons",
+						DecrementIcon: "ti-chevron-down", DecrementLabel: "Fewer", IncrementIcon: "ti-chevron-up", IncrementLabel: "More"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("With a label and hint", "A number input sits in a `FormGroup` like any other control.") {
+					@form.Field(form.FieldProps{Label: "Number of seats", For: "number-input-seats"}) {
+						@form.NumberInput(form.NumberInputProps{ID: "number-input-seats", Name: "seats", Value: "2", Min: "1", Max: "8"})
+						@form.Text("number-input-seats-hint") {
+							Up to 8 seats per booking.
+						}
+					}
+				}
+			</div>
+			<div class="col-md-12 col-lg-8">
+				@section("In a cart", "The usual place for a number input: a quantity per line, with `max` set to the stock.") {
+					@table.Table(table.Props{Responsive: true, Class: "table-vcenter card-table"}) {
+						<thead>
+							<tr>
+								<th>Product</th>
+								<th>Price</th>
+								<th>Quantity</th>
+								<th class="w-1"></th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, l := range cart {
+								<tr>
+									<td>
+										<div>{ l.Name }</div>
+										<div class="text-secondary">{ l.SKU }</div>
+									</td>
+									<td class="text-nowrap">{ l.Price }</td>
+									<td>
+										@form.NumberInput(form.NumberInputProps{Value: l.Qty, Min: "1", Max: l.Max, AriaLabel: "Quantity of " + l.Name})
+									</td>
+									<td>
+										@button.Button(button.Props{Type: "button", Variant: button.VariantGhost, Icon: "ti-trash", IconOnly: true,
+											Attributes: templ.Attributes{"aria-label": "Remove " + l.Name}})
+									</td>
+								</tr>
+							}
+						</tbody>
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+// strengthField is a password field with a strength meter, as on the preview.
+templ strengthField(id, label, value, placeholder string, meter form.StrengthProps, class string) {
+	<div class={ class }>
+		<label class="form-label" for={ id }>{ label }</label>
+		@form.Input(form.InputProps{ID: id, Type: "password", Value: value, Placeholder: placeholder, Autocomplete: "new-password"})
+		@form.Strength(meter) {
+			{ children... }
+		}
+	</div>
+}
+
+templ passwordStrengthPage() {
+	@preview("password-strength") {
+		<div class="row row-cards">
+			<div class="col-md-6 col-lg-4">
+				@section("Basic", "Add `data-bs-strength` to a `strength` element next to the field. A `strength-text` shows the label.") {
+					@strengthField("strength-basic", "Password", "", "Type a password…", form.StrengthProps{}, "mb-0")
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Rules until the first letter", "Text written inside `strength-text` shows while the field is empty, so the password rules can stand there until a level takes over.") {
+					@strengthField("strength-hint", "Password", "", "Type a password…", form.StrengthProps{}, "mb-0") {
+						Use 8 to 20 characters, with letters and numbers.
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Without a label", "The `strength-text` is optional. Left out, the meter is the only feedback.") {
+					@strengthField("strength-bare", "Password", "Abcdefgh1!", "", form.StrengthProps{NoText: true}, "mb-0")
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Number of segments", "Segments fill in proportion, so a meter can have three, four or more of them.") {
+					@strengthField("strength-three", "Three segments", "abcdefghijkl", "", form.StrengthProps{Segments: 3, NoText: true, Label: "Password strength, three segments"}, "mb-3")
+					@strengthField("strength-six", "Six segments", "abcdefghijkl", "", form.StrengthProps{Segments: 6, NoText: true, Label: "Password strength, six segments"}, "mb-0")
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Own labels", "Pass `data-bs-messages` as JSON to rename the levels.") {
+					@strengthField("strength-messages", "Password", "Abcdefgh1!", "", form.StrengthProps{
+						Messages: map[string]string{"weak": "Too easy", "fair": "Could be better", "good": "Solid", "strong": "Excellent"}}, "mb-0")
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Stricter scoring", "Raise `data-bs-min-length` and `data-bs-thresholds` to demand more before a password counts as strong.") {
+					@strengthField("strength-strict", "Password", "Abcdefgh1!", "", form.StrengthProps{MinLength: 12, Thresholds: []int{3, 5, 7}}, "mb-0")
+					@form.Text("strength-strict-hint") {
+						The same password rates lower here than in the first card.
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Pointing at a field", "With several password fields, name the one to rate with `data-bs-input`.") {
+					<div class="mb-3">
+						<label class="form-label" for="strength-new">New password</label>
+						@form.Group(form.GroupProps{Flat: true}) {
+							@form.Input(form.InputProps{ID: "strength-new", Type: "password", Placeholder: "Enter a new password", Autocomplete: "new-password"})
+							@form.Addon() {
+								@form.PasswordToggle(form.PasswordToggleProps{Target: "strength-new"})
+							}
+						}
+						@form.Strength(form.StrengthProps{Input: "#strength-new", Label: "New password strength"})
+					</div>
+					<div class="mb-0">
+						<label class="form-label" for="strength-confirm">Confirm password</label>
+						@form.Group(form.GroupProps{Flat: true}) {
+							@form.Input(form.InputProps{ID: "strength-confirm", Type: "password", Placeholder: "Repeat the password", Autocomplete: "new-password"})
+							@form.Addon() {
+								@form.PasswordToggle(form.PasswordToggleProps{Target: "strength-confirm"})
+							}
+						}
+					</div>
+					@form.PasswordToggleScript()
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Reacting to the level", "Every change of level fires `change.bs.strength` with the level and the score.") {
+					<div class="mb-3">
+						<label class="form-label" for="strength-event">Password</label>
+						@form.Input(form.InputProps{ID: "strength-event", Type: "password", Placeholder: "Type a password…", Autocomplete: "new-password"})
+						@form.Strength(form.StrengthProps{NoText: true, Attributes: templ.Attributes{"id": "strength-event-meter"}})
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						@badge.Badge(badge.Props{Color: "secondary", Light: true, Attributes: templ.Attributes{"id": "strength-event-level"}}) {
+							No password
+						}
+						@button.Button(button.Props{Type: "button", ID: "strength-event-submit", Disabled: true, Variant: button.VariantPrimary, Size: button.SizeSmall}) {
+							Create account
+						}
+					</div>
+					@strengthEventScript()
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Without a field", "Without a password field in its parent and without `data-bs-input`, the meter stays empty.") {
+					@form.Strength(form.StrengthProps{NoText: true})
+				}
+			</div>
+		</div>
+	}
+}
+
+// strengthEventScript is the preview's demo of the change.bs.strength event.
+templ strengthEventScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const meter = document.getElementById('strength-event-meter')
+			const badge = document.getElementById('strength-event-level')
+			const submit = document.getElementById('strength-event-submit')
+			const colors = { weak: 'red', fair: 'yellow', good: 'azure', strong: 'green' }
+			meter.addEventListener('change.bs.strength', (event) => {
+				const level = event.strength
+				badge.className = `badge bg-${level ? colors[level] : 'secondary'}-lt`
+				badge.textContent = level ? `${level} (${event.score} ${event.score === 1 ? 'point' : 'points'})` : 'No password'
+				submit.disabled = level !== 'good' && level !== 'strong'
+			})
+		})
+	</script>
+}

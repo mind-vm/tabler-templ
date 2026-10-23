@@ -43,6 +43,11 @@ type Messages struct {
 	Username string
 	Password string
 	Remember string
+	// Password field: the button that shows or hides the password.
+	ShowPassword string
+	HidePassword string
+	// Password strength meter.
+	PasswordStrength string
 }
 
 var (
@@ -52,14 +57,16 @@ var (
 		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		Create: "Create", NoEntries: "No entries.",
-		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in"}
+		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
+		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength"}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		Previous: "Zurück", Next: "Weiter", First: "Erste", Last: "Letzte", FirstPage: "Erste Seite", LastPage: "Letzte Seite", Page: "Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
 		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
-		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben"}
+		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
+		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke"}
 )
 
 type messagesKey struct{}

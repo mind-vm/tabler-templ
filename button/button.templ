@@ -61,6 +61,7 @@ type Props struct {
 	Square     bool   // btn-square: no rounded corners
 	Action     bool   // btn-action: compact, borderless icon button for card headers and toolbars
 	Animate    Animation
+	Floating   bool // pinned to the bottom corner of the viewport (btn-floating)
 	Loading    bool   // btn-loading: a spinner replaces the content
 	IconOnly   bool   // square icon button (btn-icon); give it a Label
 	Label      string // aria-label and title, for icon-only buttons
@@ -86,7 +87,7 @@ func Classes(p Props) string {
 	if p.Animate != AnimateNone {
 		a = "btn-animate-icon" + kit.If(p.Animate != AnimateMove, " btn-animate-icon-"+string(p.Animate))
 	}
-	return kit.Classes("btn", kit.If(p.Pill, "btn-pill"), kit.If(p.Square, "btn-square"), v, s, a, p.Class, kit.If(p.Action, "btn-action"), kit.If(p.Block, "w-100"), kit.If(p.IconOnly, "btn-icon"), kit.If(p.Loading, "btn-loading"),
+	return kit.Classes("btn", kit.If(p.Pill, "btn-pill"), kit.If(p.Square, "btn-square"), v, s, a, p.Class, kit.If(p.Action, "btn-action"), kit.If(p.Floating, "btn-floating"), kit.If(p.Block, "w-100"), kit.If(p.IconOnly, "btn-icon"), kit.If(p.Loading, "btn-loading"),
 		kit.If(p.Disabled && p.Href != "", "disabled"))
 }
 
@@ -164,4 +165,63 @@ templ Actions(props ...ListProps) {
 	<div class={ kit.Classes("btn-actions", p.Class) } { p.Attributes... }>
 		{ children... }
 	</div>
+}
+
+type GroupProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Vertical   bool
+	Size       Size   // btn-group-sm, btn-group-lg
+	Label      string // aria-label of the group
+}
+
+// Group joins buttons (or Checks) into one bar with shared borders (btn-group).
+templ Group(props ...GroupProps) {
+	{{ p := kit.First(props) }}
+	<div
+		class={ kit.Classes(kit.If(!p.Vertical, "btn-group"), kit.If(p.Vertical, "btn-group-vertical"), kit.If(p.Size != SizeDefault, "btn-group-"+string(p.Size)), p.Class) }
+		role="group"
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+type CheckProps struct {
+	ID         string // required: the label points at it
+	Class      string // on the label, e.g. a variant such as "btn-outline-primary"
+	Attributes templ.Attributes
+	Name       string
+	Value      string
+	Label      string
+	Checked    bool
+	Radio      bool
+	Disabled   bool
+}
+
+// Check is a radio or checkbox that looks like a button (btn-check), e.g. in a Group.
+templ Check(p CheckProps) {
+	<input
+		if p.Radio {
+			type="radio"
+		} else {
+			type="checkbox"
+		}
+		class="btn-check"
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		if p.Value != "" {
+			value={ p.Value }
+		}
+		id={ p.ID }
+		autocomplete="off"
+		checked?={ p.Checked }
+		disabled?={ p.Disabled }
+		{ p.Attributes... }
+	/>
+	<label for={ p.ID } class={ kit.Classes("btn", p.Class) }>{ p.Label }</label>
 }

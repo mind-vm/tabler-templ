@@ -117,7 +117,7 @@ func TestForm(t *testing.T) {
 	h := render(t, ctx, mit(form.Field(form.FieldProps{Label: "Name", For: "n", Required: true, Hint: "h", Error: "e"}),
 		"<input>"))
 	assert.Equal(t, `<div class="mb-3"><label class="form-label required" for="n">Name</label><input><div class="invalid-feedback d-block">e</div><div class="form-hint">h</div></div>`, h)
-	assert.Equal(t, `<input class="form-control is-invalid" value="a&amp;b" required id="n" name="name">`,
+	assert.Equal(t, `<input class="form-control is-invalid" value="a&amp;b" required aria-invalid="true" id="n" name="name">`,
 		render(t, ctx, form.Input(form.InputProps{ID: "n", Name: "name", Value: "a&b", Required: true, Invalid: true})))
 	h = render(t, ctx, form.Select(form.SelectProps{Name: "s", Empty: "All", Selected: "b",
 		Options: []form.Option{{Value: "a", Label: "A"}, {Value: "b", Label: "B"}}}))

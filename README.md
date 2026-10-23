@@ -99,10 +99,10 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 
 | Package | Components |
 |---|---|
-| `button` | `Button` (`<button>` or `<a>` with `Href`), colors, outline, ghost, pill, square, sizes up to xl, icon at start or end, icon-only, action, block, loading, animated icons; `List`, `Actions`; `Classes(p)` |
+| `button` | `Button` (`<button>` or `<a>` with `Href`), colors, outline, ghost, pill, square, sizes up to xl, icon at start or end, icon-only, action, block, loading, animated icons, floating; `List`, `Actions`, `Group` (button groups), `Check` (radio or checkbox as a button); `Classes(p)` |
 | `card` | `Card` (sizes, link with hover effect, borderless, dashed, transparent, stacked, active, inactive, status line), `Header` (light), `Title`, `Subtitle`, `Actions`, `Body` (scrollable), `Footer` (transparent), `Stamp`, `Progress`, `Image` |
 | `modal` | `Modal` (sizes, centered, scrollable, custom header, footer, `<form>` as content); `Trigger(id)` attributes for any button |
-| `form` | `Field` (label, hint, error), `Input`, `Select`, `Textarea`, `Check` (checkbox, radio, switch); `AriaLabel` for controls without a visible label |
+| `form` | `Field` (label, required, description, help popover, hint, error, valid feedback), `Input` (sizes, rounded, flush, plaintext, color, datalist, validation incl. lite), `Select` (groups, multiple, sizes), `Textarea` (autosize), `Check` (checkbox, radio, switch, large, inline, on/off labels), `Group`/`Addon`/`AddonLink` (input groups), `InputIcon`, `PasswordToggle` + `PasswordToggleScript`, `SelectGroup`/`SelectItem` (pills, boxes), `ImageCheck`, `ColorCheck`, `Floating`, `Fieldset`, `Range`, `NumberInput`, `OTP`, `Strength`, `Footer`, `Text` |
 | `table` | `Table` (optionally responsive, wrapper classes), `Empty` row |
 | `pagination` | `Pagination` with first/last/neighbour pages, arrows or text labels, first/last links, named previous/next pages; `Numbers(page, pages)` |
 | `alert` | `Alert` (variant with its default icon, heading and description, important, minor, dismissible), `Action`, `Link`, `List` |

@@ -8,9 +8,9 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 24 done, 6 partial, 33 open (of 63) |
+| Components | 35 done, 4 partial, 24 open (of 63) |
 | Blocks | 1 done, 7 partial, 170 open (of 178) |
-| Preview pages | 11 done, 3 partial, 132 open (of 146) |
+| Preview pages | 13 done, 3 partial, 130 open (of 146) |
 
 ## Plan
 
@@ -36,7 +36,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [x] [Avatar](https://docs.tabler.io/ui/components/avatar) (Avatar, AvatarList, AvatarUpload) — `avatar`
 - [x] [Badge](https://docs.tabler.io/ui/components/badge) (Badge, BadgeList) — `badge`
 - [x] [Breadcrumb](https://docs.tabler.io/ui/components/breadcrumb) (Breadcrumb) — `breadcrumb`
-- [ ] [Button](https://docs.tabler.io/ui/components/button) (Button, ButtonGroup, ButtonList) — `button`, partial, no button group (btn-group) yet
+- [x] [Button](https://docs.tabler.io/ui/components/button) (Button, ButtonGroup, ButtonList) — `button`
 - [ ] [Card gradient](https://docs.tabler.io/ui/components/card-gradient)
 - [ ] [Card](https://docs.tabler.io/ui/components/card) (Card, CardHeader, CardTitle, CardSubtitle, CardBody, CardFooter, CardActions, CardDropdown, CardStamp) — `card`, partial, no tabs, image overlay, cover, rotation or dropdown yet
 - [ ] [Carousel](https://docs.tabler.io/ui/components/carousel) (Carousel)
@@ -83,16 +83,16 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [x] [Tooltip](https://docs.tabler.io/ui/components/tooltip) — `tooltip`
 - [x] [Tracking](https://docs.tabler.io/ui/components/tracking) — `tracking`
 - [ ] [Trending](https://docs.tabler.io/ui/components/trending) (Trending)
-- [ ] [Color check](https://docs.tabler.io/ui/forms/color-check)
-- [ ] [Elements](https://docs.tabler.io/ui/forms/elements) (FormGroup, FormText, FormFooter, Select, InputGroup, Range, form/Check, form/InputIcon, form/InputMask) — `form`, partial, field, input, select, textarea, check; no input groups or icons yet
-- [ ] [Fieldset](https://docs.tabler.io/ui/forms/fieldset)
-- [ ] [Floating labels](https://docs.tabler.io/ui/forms/floating-labels)
-- [ ] [Image check](https://docs.tabler.io/ui/forms/image-check)
-- [ ] [Number input](https://docs.tabler.io/ui/forms/number-input) (NumberInput)
-- [ ] [OTP input](https://docs.tabler.io/ui/forms/otp-input) (OtpInput)
-- [ ] [Select group](https://docs.tabler.io/ui/forms/select-group)
-- [ ] [Password strength](https://docs.tabler.io/ui/forms/strength) (Strength)
-- [ ] [Validation](https://docs.tabler.io/ui/forms/validation)
+- [x] [Color check](https://docs.tabler.io/ui/forms/color-check) — `form`
+- [x] [Elements](https://docs.tabler.io/ui/forms/elements) (FormGroup, FormText, FormFooter, Select, InputGroup, Range, form/Check, form/InputIcon, form/InputMask) — `form`
+- [x] [Fieldset](https://docs.tabler.io/ui/forms/fieldset) — `form`
+- [x] [Floating labels](https://docs.tabler.io/ui/forms/floating-labels) — `form`
+- [x] [Image check](https://docs.tabler.io/ui/forms/image-check) — `form`
+- [x] [Number input](https://docs.tabler.io/ui/forms/number-input) (NumberInput) — `form`
+- [x] [OTP input](https://docs.tabler.io/ui/forms/otp-input) (OtpInput) — `form`
+- [x] [Select group](https://docs.tabler.io/ui/forms/select-group) — `form`
+- [x] [Password strength](https://docs.tabler.io/ui/forms/strength) (Strength) — `form`
+- [x] [Validation](https://docs.tabler.io/ui/forms/validation) — `form`
 - [x] [Flag](https://github.com/tabler/tabler/blob/dev/shared/ui/Flag.astro) (Flag) — `flag`
 
 ## Blocks
@@ -449,10 +449,10 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [modals](https://preview.tabler.io/modals.html) Modals — partial, simple, large, full width and scrollable; no small modal without header, no forms, status or native dialogs
 - [ ] [nav-overflow](https://preview.tabler.io/nav-overflow.html) Nav overflow
 - [ ] [navigation](https://preview.tabler.io/navigation.html) Navigation
-- [ ] [number-input](https://preview.tabler.io/number-input.html) Number input
+- [x] [number-input](https://preview.tabler.io/number-input.html) Number input
 - [x] [offcanvas](https://preview.tabler.io/offcanvas.html) Offcanvas
 - [x] [pagination](https://preview.tabler.io/pagination.html) Pagination
-- [ ] [password-strength](https://preview.tabler.io/password-strength.html) Password strength
+- [x] [password-strength](https://preview.tabler.io/password-strength.html) Password strength
 - [ ] [patterns](https://preview.tabler.io/patterns.html) Patterns
 - [ ] [placeholder](https://preview.tabler.io/placeholder.html) Placeholder
 - [x] [progress](https://preview.tabler.io/progress.html) Progress

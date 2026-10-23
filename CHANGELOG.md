@@ -25,10 +25,14 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   `breadcrumb`.
 - New packages for showing data: `listgroup`, `progress`, `steps`, `status`, `timeline`, `datagrid`, `empty`,
   `ribbon`, `tracking`. `breadcrumb.Crumb` gets `Active` and `Disabled` (breadcrumbs as wizard steps).
+- `form`: input groups and icons, password toggle, select groups (pills, boxes), image and color checks,
+  floating labels, fieldsets, range, number input, OTP input and password strength meter; sizes, validation
+  states (also lite) and more variants on `Input`, `Select`, `Textarea`, `Check`; `Field` gets `Description`,
+  `Help` and `Valid`. Invalid inputs carry `aria-invalid`. `button.Group`, `button.Check`, `Floating`.
 - `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
   `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
   default is `ShapeDefault`.
-- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps and empty pages, checked against the
+- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps, empty, number-input and password-strength pages, checked against the
   preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
 

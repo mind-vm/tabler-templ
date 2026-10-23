@@ -1,0 +1,133 @@
+package form
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type SelectGroupProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Pills      bool // rounded options (form-selectgroup-pills)
+	Boxes      bool // options as boxes with a check and free content (form-selectgroup-boxes)
+}
+
+// SelectGroup shows options of a radio or checkbox field as buttons; the children are SelectItems.
+templ SelectGroup(props ...SelectGroupProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("form-selectgroup", kit.If(p.Pills, "form-selectgroup-pills"), kit.If(p.Boxes, "form-selectgroup-boxes"), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+type SelectItemProps struct {
+	Class      string           // on the item label, e.g. "flex-fill"
+	Attributes templ.Attributes // on the input
+	Name       string
+	Value      string
+	Label      string // text; Icon or children replace it
+	Icon       string
+	Checked    bool
+	Disabled   bool
+	Radio      bool
+	// Box renders the children in a box with a check mark, for a SelectGroup with Boxes.
+	Box bool
+}
+
+func choiceInput(radio bool) string {
+	if radio {
+		return "radio"
+	}
+	return "checkbox"
+}
+
+// SelectItem is one option of a SelectGroup.
+templ SelectItem(p SelectItemProps) {
+	<label class={ kit.Classes("form-selectgroup-item", p.Class) }>
+		<input
+			type={ choiceInput(p.Radio) }
+			name={ p.Name }
+			value={ p.Value }
+			class="form-selectgroup-input"
+			checked?={ p.Checked }
+			disabled?={ p.Disabled }
+			{ p.Attributes... }
+		/>
+		if p.Box {
+			<div class="form-selectgroup-label d-flex align-items-center p-3">
+				<div class="me-3">
+					<span class="form-selectgroup-check"></span>
+				</div>
+				<div>
+					{ children... }
+				</div>
+			</div>
+		} else {
+			<span class="form-selectgroup-label">
+				if p.Icon != "" {
+					@icon.Icon(p.Icon)
+				}
+				{ p.Label }
+				{ children... }
+			</span>
+		}
+	</label>
+}
+
+type ImageCheckProps struct {
+	Class      string
+	Attributes templ.Attributes // on the input
+	Name       string
+	Value      string
+	Src        string // the picture; without it the children (e.g. an avatar) are the image
+	Alt        string
+	Checked    bool
+	Radio      bool
+}
+
+// ImageCheck is a picture that can be checked like a checkbox or radio.
+templ ImageCheck(p ImageCheckProps) {
+	<label class={ kit.Classes("form-imagecheck", p.Class) }>
+		<input name={ p.Name } type={ choiceInput(p.Radio) } value={ p.Value } class="form-imagecheck-input" checked?={ p.Checked } { p.Attributes... }/>
+		<span class="form-imagecheck-figure">
+			if p.Src != "" {
+				<img src={ p.Src } alt={ p.Alt } class="form-imagecheck-image"/>
+			} else {
+				<span class="form-imagecheck-image">
+					{ children... }
+				</span>
+			}
+		</span>
+	</label>
+}
+
+type ColorCheckProps struct {
+	Class      string
+	Attributes templ.Attributes // on the input
+	Name       string
+	Value      string
+	Color      string // background of the swatch, e.g. "lime" → bg-lime
+	Label      string // aria-label, e.g. "Lime"
+	Checked    bool
+	Radio      bool
+	// Light uses a dark check mark for light colors (form-colorinput-light).
+	Light bool
+}
+
+// ColorCheck is a color swatch that can be checked like a checkbox or radio.
+templ ColorCheck(p ColorCheckProps) {
+	<label class={ kit.Classes("form-colorinput", kit.If(p.Light, "form-colorinput-light"), p.Class) }>
+		<input
+			name={ p.Name }
+			type={ choiceInput(p.Radio) }
+			value={ p.Value }
+			class="form-colorinput-input"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			checked?={ p.Checked }
+			{ p.Attributes... }
+		/>
+		<span class={ kit.Classes("form-colorinput-color", kit.If(p.Color != "", "bg-"+p.Color)) }></span>
+	</label>
+}
