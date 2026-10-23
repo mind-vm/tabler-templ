@@ -52,14 +52,14 @@ func defaults(ctx context.Context, p Props) Props {
 
 // edge is one of the links at the ends: first, previous, next, last.
 type edge struct {
-	page      int
-	disabled  bool
-	class     string // page-prev, page-next
-	label     string // aria-label for arrows
-	text      string // text label
-	icon      string
-	subtitle  string
-	title     string // the adjacent page's name
+	page     int
+	disabled bool
+	class    string // page-prev, page-next
+	label    string // aria-label for arrows
+	text     string // text label
+	icon     string
+	subtitle string
+	title    string // the adjacent page's name
 }
 
 templ edgeItem(p Props, e edge) {

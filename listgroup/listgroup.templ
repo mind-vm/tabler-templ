@@ -1,0 +1,241 @@
+// Package listgroup renders Tabler list groups: items as text, links, buttons or labels (around a
+// checkbox or switch), with media, title, description, meta and actions slots; sizes, flush,
+// hoverable, selectable, transparent, numbered and horizontal lists, section headers, nested
+// (collapsible) groups and contextual colors.
+package listgroup
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+)
+
+type Props struct {
+	Class       string
+	Attributes  templ.Attributes
+	Size        Size
+	Flush       bool // no outer border, e.g. inside a card
+	Hoverable   bool // actions appear on hover
+	Selectable  bool // a checked SelectCheck gives its item the active look
+	Transparent bool // no background and borders, e.g. a settings menu
+	Horizontal  bool
+	CardList    bool // the list inside a card (card-list-group)
+	// Numbered renders an <ol> with numbers; give its Items ListItem.
+	Numbered bool
+}
+
+func classes(p Props) string {
+	return kit.Classes("list-group", kit.If(p.Size != SizeDefault, "list-group-"+string(p.Size)), kit.If(p.Flush, "list-group-flush"),
+		kit.If(p.Hoverable, "list-group-hoverable"), kit.If(p.Selectable, "list-group-selectable"), kit.If(p.Transparent, "list-group-transparent"),
+		kit.If(p.Horizontal, "list-group-horizontal"), kit.If(p.Numbered, "list-group-numbered"), kit.If(p.CardList, "card-list-group"), p.Class)
+}
+
+templ List(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Numbered {
+		<ol class={ classes(p) } { p.Attributes... }>
+			{ children... }
+		</ol>
+	} else {
+		<div class={ classes(p) } { p.Attributes... }>
+			{ children... }
+		</div>
+	}
+}
+
+type ItemProps struct {
+	Class      string
+	Attributes templ.Attributes
+	// The element: a link with Href, a <button> with Button, a <label> with Label (for an input in the
+	// row), an <li> with ListItem (in a Numbered list), otherwise a <div>.
+	Href     string
+	Button   bool
+	Label    bool
+	ListItem bool
+	// Action adds the hover and focus state; links and buttons get it by default.
+	Action   bool
+	Active   bool
+	Disabled bool
+	Color    string // contextual color: primary, success, warning, danger …
+	// The row of slots; without them the children are the item's content.
+	Media       templ.Component
+	Title       string
+	Description string
+	Meta        templ.Component
+	Actions     templ.Component
+	ShowActions bool // keep the actions visible in a hoverable list
+}
+
+func itemClasses(p ItemProps) string {
+	return kit.Classes("list-group-item", kit.If(p.Action || p.Href != "" || p.Button, "list-group-item-action"), kit.If(p.Active, "active"),
+		kit.If(p.Disabled, "disabled"), kit.If(p.Color != "", "list-group-item-"+p.Color), p.Class)
+}
+
+func itemAttrs(p ItemProps) templ.Attributes {
+	a := templ.Attributes{}
+	if p.Active && (p.Href != "" || p.Button) {
+		a["aria-current"] = "true"
+	}
+	if p.Disabled {
+		a["aria-disabled"] = "true"
+		if p.Href != "" {
+			a["tabindex"] = "-1"
+		}
+	}
+	return kit.Attrs(a, p.Attributes)
+}
+
+func slotted(p ItemProps) bool {
+	return p.Media != nil || p.Title != "" || p.Description != "" || p.Meta != nil || p.Actions != nil
+}
+
+// slot renders a slot as <span> inside inline items (links, buttons, labels), else as <div>.
+templ slot(inline bool, class string) {
+	if inline {
+		<span class={ class }>
+			{ children... }
+		</span>
+	} else {
+		<div class={ class }>
+			{ children... }
+		</div>
+	}
+}
+
+templ itemInner(p ItemProps) {
+	if slotted(p) {
+		{{ inline := p.Href != "" || p.Button || p.Label }}
+		if p.Media != nil {
+			@slot(inline, "list-group-item-media") {
+				@p.Media
+			}
+		}
+		@slot(inline, "list-group-item-content") {
+			if p.Title != "" {
+				@slot(inline, "list-group-item-title") {
+					{ p.Title }
+				}
+			}
+			if p.Description != "" {
+				@slot(inline, "list-group-item-description") {
+					{ p.Description }
+				}
+			}
+			{ children... }
+		}
+		if p.Meta != nil {
+			@slot(inline, "list-group-item-meta") {
+				@p.Meta
+			}
+		}
+		if p.Actions != nil {
+			@slot(inline, kit.Classes("list-group-item-actions", kit.If(p.ShowActions, "show"))) {
+				@p.Actions
+			}
+		}
+	} else {
+		{ children... }
+	}
+}
+
+templ Item(p ItemProps) {
+	switch  {
+		case p.Href != "":
+			<a href={ templ.URL(p.Href) } class={ itemClasses(p) } { itemAttrs(p)... }>
+				@itemInner(p) {
+					{ children... }
+				}
+			</a>
+		case p.Button:
+			<button type="button" class={ itemClasses(p) } disabled?={ p.Disabled } { itemAttrs(p)... }>
+				@itemInner(p) {
+					{ children... }
+				}
+			</button>
+		case p.Label:
+			<label class={ itemClasses(p) } { itemAttrs(p)... }>
+				@itemInner(p) {
+					{ children... }
+				}
+			</label>
+		case p.ListItem:
+			<li class={ itemClasses(p) } { itemAttrs(p)... }>
+				@itemInner(p) {
+					{ children... }
+				}
+			</li>
+		default:
+			<div class={ itemClasses(p) } { itemAttrs(p)... }>
+				@itemInner(p) {
+					{ children... }
+				}
+			</div>
+	}
+}
+
+// Header names the section of items that follow it.
+templ Header() {
+	<div class="list-group-header">
+		{ children... }
+	</div>
+}
+
+type NestedProps struct {
+	ID   string // the target of the parent item's CollapseToggle
+	Show bool   // open on load
+}
+
+// Nested holds the child items of the item before it, indented and collapsible.
+templ Nested(p NestedProps) {
+	<div class={ kit.Classes("list-group-nested collapse", kit.If(p.Show, "show")) } id={ p.ID }>
+		{ children... }
+	</div>
+}
+
+// CollapseToggle returns the attributes that make an item (Button: true) open and close a Nested group.
+func CollapseToggle(id string, open bool) templ.Attributes {
+	a := templ.Attributes{"data-bs-toggle": "collapse", "data-bs-target": "#" + id, "aria-controls": id, "aria-expanded": "false"}
+	if open {
+		a["aria-expanded"] = "true"
+	}
+	return a
+}
+
+// ToggleIcon is the chevron for the Meta slot of a collapsible item; it turns over while the group is open.
+templ ToggleIcon() {
+	@icon.Icon("ti-chevron-down", icon.Props{Class: "list-group-item-toggle"})
+}
+
+type CheckProps struct {
+	Name    string
+	Value   string
+	Checked bool
+	Radio   bool
+}
+
+// SelectCheck is the checkbox (or radio) of an item in a Selectable list; put it in the Media slot of a
+// Label item.
+templ SelectCheck(p CheckProps) {
+	<input
+		if p.Radio {
+			type="radio"
+		} else {
+			type="checkbox"
+		}
+		class="form-check-input list-group-selectable-check m-0"
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		if p.Value != "" {
+			value={ p.Value }
+		}
+		checked?={ p.Checked }
+	/>
+}

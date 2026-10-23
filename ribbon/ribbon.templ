@@ -1,0 +1,39 @@
+// Package ribbon renders Tabler ribbons: a label on the edge of a card (put it inside the card).
+package ribbon
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	// Position: Top moves it to the top edge, Start to the left side; Bottom and End are the defaults
+	// of the right side.
+	Top      bool
+	Bottom   bool
+	Start    bool
+	End      bool
+	Bookmark bool   // bookmark shape (ribbon-bookmark)
+	Color    string // e.g. "red"
+	// Text is a short label such as NEW; without it the ribbon shows Icon (default "ti-star").
+	Text string
+	Icon string
+}
+
+// Ribbon shows its Text or icon.
+templ Ribbon(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div
+		class={ kit.Classes("ribbon", kit.If(p.Top, "ribbon-top"), kit.If(p.Bottom, "ribbon-bottom"), kit.If(p.Start, "ribbon-start"), kit.If(p.End, "ribbon-end"),
+		kit.If(p.Bookmark, "ribbon-bookmark"), kit.If(p.Color != "", "bg-"+p.Color), p.Class) }
+		{ p.Attributes... }
+	>
+		if p.Text != "" {
+			{ p.Text }
+		} else {
+			@icon.Icon(kit.Or(p.Icon, "ti-star"))
+		}
+	</div>
+}

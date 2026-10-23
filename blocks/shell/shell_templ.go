@@ -50,6 +50,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/blocks/stats"
 	"github.com/mind-vm/tabler-templ/breadcrumb"
+	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/sidebar"
 )
@@ -130,7 +131,7 @@ func Page(p Props) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Lang, "en"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 82, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 83, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -143,7 +144,7 @@ func Page(p Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 86, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 87, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -213,7 +214,7 @@ func Page(p Props) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(f.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 104, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 105, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -378,7 +379,7 @@ func PageHeader(p Props) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Heading, p.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 153, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/shell/shell.templ`, Line: 154, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -438,7 +439,7 @@ func PageHeader(p Props) templ.Component {
 	})
 }
 
-// Styles is the CSS of the shell, of the sidebar and of the other blocks (list page, detail, create, history, stats).
+// Styles is the CSS of the shell, of webfont icons (icon.Styles), of the sidebar and of the other blocks (list page, detail, create, history, stats).
 // Page includes it; render it yourself only when you build your own frame.
 func Styles() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -461,6 +462,10 @@ func Styles() templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = icon.Styles().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = sidebar.Styles().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

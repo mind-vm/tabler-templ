@@ -1,0 +1,134 @@
+package main
+
+import "github.com/mind-vm/tabler-templ/avatar"
+
+var (
+	avatarPhotos   = []string{"000m", "052f", "002m", "003m", "000f", "001f", "004m", "002f"}
+	avatarInitials = []string{"PK", "JL", "MH", "DS", "EL", "ML", "EP", "KS"}
+	avatarSizes    = []avatar.Size{avatar.SizeXXS, avatar.SizeXS, avatar.SizeSmall, avatar.SizeMedium, avatar.SizeLarge, avatar.SizeXL}
+	avatarColors   = []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan"}
+)
+
+type branded struct{ Photo, Brand string }
+
+// stackedList is the preview's stacked list of five photos and an add link, square or round.
+templ stackedList(size avatar.Size, class string) {
+	@avatar.List(avatar.ListProps{Stacked: true, Size: size}) {
+		for _, a := range avatarPhotos[:5] {
+			@avatar.Avatar(avatar.Props{Src: avatarURL(a), Class: class})
+		}
+		@avatar.Avatar(avatar.Props{Href: "#", Icon: "ti-plus", Class: class})
+	}
+}
+
+templ avatarsPage() {
+	@preview("avatars") {
+		<div class="row row-cards">
+			<div class="col-sm-6 col-lg-4">
+				@section("Default avatar", "The base `.avatar` element — a placeholder box for a photo, icon, or initials.") {
+					@avatar.Avatar()
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar with icon", "Put an icon inside the `avatar` instead of a photo.") {
+					@avatar.List() {
+						for _, i := range []string{"ti-user", "ti-settings", "ti-car", "ti-balloon", "ti-users", "ti-users-group", "ti-apps", "ti-ghost"} {
+							@avatar.Avatar(avatar.Props{Icon: i})
+						}
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar icon colors", "Combine an icon avatar with any theme color.") {
+					@avatar.List() {
+						for _, c := range avatarColors {
+							@avatar.Avatar(avatar.Props{Color: c})
+						}
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Simple avatar", "Show a photo by setting it as the `background-image` of the avatar.") {
+					@avatar.List() {
+						for _, a := range avatarPhotos {
+							@avatar.Avatar(avatar.Props{Src: avatarURL(a)})
+						}
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar placeholder", "Fall back to initials as the avatar text when there's no photo.") {
+					@avatar.List() {
+						for _, i := range avatarInitials {
+							@avatar.Avatar(avatar.Props{Initials: i})
+						}
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar shapes", "Square by default — add `.rounded-circle` or `.rounded-0` to change the shape.") {
+					@avatar.List() {
+						@avatar.Avatar()
+						@avatar.Avatar(avatar.Props{Class: "rounded-circle"})
+						@avatar.Avatar(avatar.Props{Class: "rounded-0"})
+					}
+				}
+			</div>
+			<div class="col-12 col-lg-6">
+				@section("Avatar sizes", "Six sizes from `avatar-xxs` to `avatar-xl`, for both photos and placeholders.") {
+					<div class="row">
+						<div class="col-6">
+							@avatar.List() {
+								for _, s := range avatarSizes {
+									@avatar.Avatar(avatar.Props{Size: s})
+								}
+							}
+						</div>
+						<div class="col-6">
+							@avatar.List() {
+								for _, s := range avatarSizes {
+									@avatar.Avatar(avatar.Props{Size: s, Initials: "PK"})
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12 col-lg-6">
+				@section("Avatar lists", "Stack avatars inside an `.avatar-list` container to show a group at a glance.") {
+					<div class="row g-3">
+						for _, s := range avatarSizes[:5] {
+							<div class="col-6">
+								@stackedList(s, "")
+							</div>
+							<div class="col-6">
+								@stackedList(s, "rounded-circle")
+							</div>
+						}
+					</div>
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar upload", "An upload control styled as an avatar, for profile photo pickers.") {
+					for _, s := range append(avatarSizes, avatar.Size2XL) {
+						@avatar.Upload(avatar.UploadProps{Size: s, Label: "Upload photo"})
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar statuses", "Add a `badge` inside the avatar for an online, away, or busy status dot.") {
+					for i, c := range []string{"red", "green", "blue", "yellow", "secondary"} {
+						@avatar.Avatar(avatar.Props{Src: avatarURL(avatarPhotos[i]), Class: "rounded-circle", Status: c})
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-4">
+				@section("Avatar brands", "Add a recognizable brand icon on top of an avatar.") {
+					for _, b := range []branded{{"000m", "netflix"}, {"052f", "amazon"}, {"002m", "messenger"}, {"003m", "figma"}, {"000f", "twitch"}} {
+						@avatar.Avatar(avatar.Props{Src: avatarURL(b.Photo), Brand: photo("brands/" + b.Brand + ".svg")})
+					}
+				}
+			</div>
+		</div>
+	}
+}

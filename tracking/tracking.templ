@@ -1,0 +1,32 @@
+// Package tracking renders Tabler's tracking strip: one block per period, colored by its state, with a
+// tooltip, e.g. the uptime of a service.
+package tracking
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/tooltip"
+)
+
+// Block is one period; Color is a background color ("success", "danger" …), empty for no data.
+type Block struct {
+	Color string
+	Title string // tooltip, e.g. "Operational"
+}
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Squares    bool // square blocks (tracking-squares)
+}
+
+templ Tracking(p Props, blocks []Block) {
+	<div class={ kit.Classes("tracking", kit.If(p.Squares, "tracking-squares"), p.Class) } { p.Attributes... }>
+		for _, b := range blocks {
+			if b.Title != "" {
+				<div class={ kit.Classes("tracking-block", kit.If(b.Color != "", "bg-"+b.Color)) } { tooltip.Attrs(b.Title, tooltip.Top)... }></div>
+			} else {
+				<div class={ kit.Classes("tracking-block", kit.If(b.Color != "", "bg-"+b.Color)) }></div>
+			}
+		}
+	</div>
+}

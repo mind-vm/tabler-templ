@@ -1,0 +1,54 @@
+// Package status renders Tabler status labels (colored text with an optional dot, lite style), bare
+// status dots and the pulsing status indicator.
+package status
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Color      string // e.g. "green", "red"
+	Dot        bool   // a dot before the text
+	Animated   bool   // pulsing dot
+	Lite       bool   // quieter style (status-lite)
+}
+
+// Status is a colored label; the children are its text.
+templ Status(props ...Props) {
+	{{ p := kit.First(props) }}
+	<span class={ kit.Classes("status", kit.If(p.Color != "", "status-"+p.Color), kit.If(p.Lite, "status-lite"), p.Class) } { p.Attributes... }>
+		if p.Dot || p.Animated {
+			<span class={ kit.Classes("status-dot", kit.If(p.Animated, "status-dot-animated")) }></span>
+		}
+		{ children... }
+	</span>
+}
+
+type DotProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Color      string
+	Animated   bool
+	Label      string // read out for screen readers, e.g. "Online"
+}
+
+// Dot is a bare status dot.
+templ Dot(p DotProps) {
+	<span class={ kit.Classes("status-dot", kit.If(p.Color != "", "status-"+p.Color), kit.If(p.Animated, "status-dot-animated"), p.Class) } { p.Attributes... }>
+		if p.Label != "" {
+			<span class="visually-hidden">{ p.Label }</span>
+		}
+	</span>
+}
+
+// Indicator is the larger status mark with three circles, optionally pulsing.
+templ Indicator(p DotProps) {
+	<span class={ kit.Classes("status-indicator", kit.If(p.Color != "", "status-"+p.Color), kit.If(p.Animated, "status-indicator-animated"), p.Class) } { p.Attributes... }>
+		<span class="status-indicator-circle"></span>
+		<span class="status-indicator-circle"></span>
+		<span class="status-indicator-circle"></span>
+		if p.Label != "" {
+			<span class="visually-hidden">{ p.Label }</span>
+		}
+	</span>
+}

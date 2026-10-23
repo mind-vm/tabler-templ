@@ -39,3 +39,8 @@ templ Icon(name string, props ...Props) {
 		<i class={ Classes(name, p) } aria-hidden="true" { p.Attributes... }></i>
 	}
 }
+
+// Styles renders CSS in a <style> element.
+templ Styles() {
+	@templ.Raw("<style>" + CSS + "</style>")
+}

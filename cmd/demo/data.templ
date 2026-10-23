@@ -1,0 +1,248 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/breadcrumb"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/steps"
+)
+
+type bar struct {
+	Value int
+	Color string
+}
+
+templ bars(size progress.Size, items []bar, style progress.Props) {
+	<div class="space-y">
+		for _, b := range items {
+			{{ p := style }}
+			{{ p.Value, p.Color = b.Value, b.Color }}
+			if p.Size == "" {
+				{{ p.Size = size }}
+			}
+			@progress.Progress(p)
+		}
+	</div>
+}
+
+var fourColors = []bar{{20, "blue"}, {40, "green"}, {60, "yellow"}, {80, "red"}}
+
+type described struct {
+	Label, Description string
+	Value              int
+	Color              string
+	Size               progress.Size
+}
+
+templ progressPage() {
+	@preview("progress") {
+		<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+			<div class="col">
+				@section("Default", "Track completion with a simple bar from empty to full.") {
+					@bars("", []bar{{0, ""}, {20, ""}, {40, ""}, {100, ""}}, progress.Props{})
+				}
+			</div>
+			<div class="col">
+				@section("With value", "Show the exact percentage as the `progress-bar` text inside a larger bar.") {
+					@bars(progress.SizeLarge, []bar{{10, ""}, {20, ""}, {90, ""}}, progress.Props{ShowValue: true})
+				}
+			</div>
+			<div class="col">
+				@section("Colors", "Match the bar color to the context with any theme color.") {
+					@bars("", fourColors, progress.Props{})
+				}
+			</div>
+			<div class="col">
+				@section("Sizes", "Scale a bar from `progress-sm` to `progress-xl`.") {
+					<div class="space-y">
+						@progress.Progress(progress.Props{Value: 20, Size: progress.SizeSmall})
+						@progress.Progress(progress.Props{Value: 40})
+						@progress.Progress(progress.Props{Value: 60, Size: progress.SizeLarge})
+						@progress.Progress(progress.Props{Value: 80, Size: progress.SizeXL})
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Indeterminate", "Animate a bar with no known end point with `progress-bar-indeterminate`.") {
+					<div class="space-y">
+						@progress.Progress(progress.Props{Indeterminate: true})
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Multiple values", "Stack several segments in one bar to compare parts of a whole.") {
+					<div class="space-y">
+						@progress.Multi(progress.Props{}, []progress.Bar{{Value: 20, Color: "blue"}, {Value: 30, Color: "red"}, {Value: 10, Color: "green"}})
+						@progress.Multi(progress.Props{Separated: true}, []progress.Bar{{Value: 10, Color: "blue"}, {Value: 20, Color: "red"}, {Value: 30, Color: "green"}, {Value: 40, Color: "yellow"}})
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Striped", "Add diagonal stripes with `progress-bar-striped` for a textured look.") {
+					@bars("", fourColors, progress.Props{Striped: true})
+				}
+			</div>
+			<div class="col">
+				@section("Animated", "Combine `progress-bar-striped` with `progress-bar-animated` to keep the stripes moving.") {
+					@bars("", []bar{{20, ""}, {40, "green"}, {60, "yellow"}, {80, "red"}}, progress.Props{Striped: true, Animated: true})
+				}
+			</div>
+			<div class="col">
+				@section("Animated with JavaScript", "Update the bar's width at runtime and watch it react.") {
+					<div class="row align-items-center g-0">
+						<div class="col">
+							@progress.Progress(progress.Props{Attributes: templ.Attributes{"id": "progress-animated"}})
+						</div>
+						<div class="col-2 text-end" id="progress-animated-value">0%</div>
+					</div>
+					@button.List(button.ListProps{Class: "mt-3"}) {
+						for _, b := range []named{{"0", "0%"}, {"10", "10%"}, {"50", "50%"}, {"100", "100%"}, {"minus-10", "-10%"}, {"add-10", "+10%"}} {
+							@button.Button(button.Props{Size: button.SizeSmall, ID: "progress-animated-" + b.Variant, Class: kitIf(b.Variant == "minus-10", "ms-3")}) {
+								{ b.Text }
+							}
+						}
+					}
+					@progressScript()
+				}
+			</div>
+			<div class="col">
+				@section("Steps Progress", "Mark discrete steps instead of a continuous percentage.") {
+					<div class="space-y">
+						@progress.Steps(progress.StepsProps{Count: 3, Active: 1})
+						@progress.Steps(progress.StepsProps{Count: 5, Active: 4})
+						@progress.Steps(progress.StepsProps{Count: 10, Active: 1, Color: "red"})
+						@progress.Steps(progress.StepsProps{Count: 8, Active: 8, Color: "green"})
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Progress Background", "Fill a row's background as the progress indicator itself.") {
+					<div class="space-y">
+						for _, c := range []described{{"Poland", "", 85, "", ""}, {"Germany", "", 65, "", ""}, {"United States", "", 45, "", ""}, {"France", "", 25, "", ""}} {
+							@progress.Background(progress.BackgroundProps{Value: c.Value, Text: c.Label, ShowValue: true})
+						}
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Progress Background Colors", "Pair a light background fill with a matching accent color.") {
+					<div class="space-y">
+						for _, c := range []described{{"Success", "", 75, "success", ""}, {"Warning", "", 60, "warning", ""}, {"Danger", "", 40, "danger", ""}, {"Info", "", 90, "info", ""}} {
+							@progress.Background(progress.BackgroundProps{Value: c.Value, Text: c.Label, Color: c.Color, ShowValue: true})
+						}
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Progress Description", "Pair a label and percentage with the bar for more context.") {
+					<div class="space-y">
+						for _, d := range []described{{"Project completion", "", 85, "green", ""}, {"Storage usage", "2.4GB of 5GB", 48, "blue", ""},
+							{"Download progress", "", 75, "yellow", ""}, {"Skills assessment", "HTML/CSS", 92, "red", ""}} {
+							@progress.Description(progress.DescriptionProps{Label: d.Label, Description: d.Description, Value: d.Value, Color: d.Color})
+						}
+					</div>
+				}
+			</div>
+			<div class="col">
+				@section("Progress Description Sizes", "Scale the labeled progress bar from `progress-sm` to `progress-xl`.") {
+					<div class="space-y">
+						for _, d := range []described{{"Small progress", "", 60, "blue", progress.SizeSmall}, {"Default progress", "", 70, "green", ""},
+							{"Large progress", "", 80, "orange", progress.SizeLarge}, {"Extra large", "", 90, "purple", progress.SizeXL}} {
+							@progress.Description(progress.DescriptionProps{Label: d.Label, Value: d.Value, Color: d.Color, Size: d.Size})
+						}
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+// progressScript is the preview's own demo script for the animated bar.
+templ progressScript() {
+	<script>
+		(() => {
+			const progress = document.getElementById('progress-animated')
+			let width = 0
+			const setWidth = (w) => {
+				width = Math.min(Math.max(w, 0), 100)
+				const bar = progress.querySelector('.progress-bar')
+				bar.style.width = `${width}%`
+				bar.setAttribute('aria-valuenow', `${width}`)
+				document.getElementById('progress-animated-value').innerText = `${width}%`
+				bar.classList.toggle('bg-green', width >= 100)
+			}
+			const interval = setInterval(() => {
+				setWidth(width + Math.ceil(Math.random() * 10))
+				if (width >= 100) clearInterval(interval)
+			}, 2000)
+			for (const [id, f] of [['0', () => 0], ['10', () => 10], ['50', () => 50], ['100', () => 100], ['add-10', () => width + 10], ['minus-10', () => width - 10]]) {
+				document.getElementById('progress-animated-' + id).addEventListener('click', () => setWidth(f()))
+			}
+		})()
+	</script>
+}
+
+var (
+	wizardSteps   = []breadcrumb.Crumb{{Text: "Step one", Href: "#"}, {Text: "Step two", Href: "#", Active: true}, {Text: "Step three", Href: "#", Disabled: true}, {Text: "Step four", Href: "#", Disabled: true}}
+	numberedSteps = []breadcrumb.Crumb{{Text: "1. Step one", Href: "#"}, {Text: "2. Step two", Href: "#"}, {Text: "3. Step three", Href: "#", Active: true},
+		{Text: "4. Step four", Href: "#", Disabled: true}, {Text: "5. Step five", Href: "#", Disabled: true}}
+)
+
+templ stepsPage() {
+	@preview("steps") {
+		<div class="row row-cards mb-5">
+			<div class="col-12">
+				@section("Horizontal", "Numbered steps for a linear process, with the current step highlighted.") {
+					@steps.Steps(steps.Props{Color: "green", Active: 2, Class: "my-4"}, []steps.Step{{Title: "1"}, {Title: "2"}, {Title: "3"}})
+				}
+			</div>
+			<div class="col-12">
+				@section("Horizontal counter", "The same steps without numbers, for a more minimal look.") {
+					@steps.Steps(steps.Props{Color: "green", Counter: true, Active: 2, Class: "my-4"}, make([]steps.Step, 3))
+				}
+			</div>
+			<div class="col-12">
+				@section("With labels", "Give each step a title instead of a number.") {
+					@steps.Steps(steps.Props{Color: "green", Counter: true, Active: 2, Class: "my-4"}, []steps.Step{{Title: "Cart"}, {Title: "Billing Information"}, {Title: "Confirmation"}})
+				}
+			</div>
+			<div class="col-12">
+				@section("Breadcrumb arrows", "Chevron-style steps, useful for wizards and checkouts.") {
+					@breadcrumb.Breadcrumb(breadcrumb.Props{Separator: breadcrumb.SeparatorArrows}, wizardSteps)
+				}
+			</div>
+			<div class="col-12">
+				@section("Breadcrumb numbered", "Number each step and mute the ones not yet reached.") {
+					@breadcrumb.Breadcrumb(breadcrumb.Props{}, numberedSteps)
+				}
+			</div>
+			<div class="col-12">
+				@section("Breadcrumb muted", "A quieter style for steps that shouldn't compete with the rest of the page.") {
+					@breadcrumb.Breadcrumb(breadcrumb.Props{Muted: true}, numberedSteps)
+				}
+			</div>
+		</div>
+		<div class="row row-cards">
+			<div class="col-md-6">
+				@section("Vertical", "A title and description per step, for a detailed timeline.") {
+					@steps.Steps(steps.Props{Vertical: true, Active: 3}, []steps.Step{
+						{Title: "Order received", Description: "The order was placed and payment was confirmed. A confirmation email is on its way."},
+						{Title: "Preparing", Description: "The warehouse picked and packed the items."},
+						{Title: "Out for delivery", Description: "The courier has the package and is on the way."},
+						{Title: "Delivered", Description: "Signed for at the delivery address."},
+					})
+				}
+			</div>
+			<div class="col-md-6">
+				@section("Vertical counter", "Numbered steps in a vertical list, without descriptions.") {
+					@steps.Steps(steps.Props{Counter: true, Vertical: true, Active: 3}, []steps.Step{{Title: "Step one"}, {Title: "Step two"}, {Title: "Step three"}, {Title: "Step four"}, {Title: "Step five"}})
+				}
+			</div>
+		</div>
+	}
+}
+
+// The preview's "Empty page" is a page frame with nothing in it.
+templ emptyPage() {
+	@preview("empty")
+}

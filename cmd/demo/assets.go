@@ -12,3 +12,6 @@ func avatarURL(name string) string { return photo("avatars/" + name + ".jpg") }
 
 // kitAttrs merges attribute maps; later maps win.
 var kitAttrs = kit.Attrs
+
+// kitIf returns class when cond holds.
+var kitIf = kit.If

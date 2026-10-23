@@ -1,0 +1,89 @@
+// Package datagrid renders Tabler's data grid: label and value pairs in columns, or label beside value
+// (horizontal), as divs or as a description list.
+package datagrid
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Horizontal bool   // label beside the value, one pair per row
+	Columns    int    // a fixed number of columns (1–4) instead of as many as fit
+	ItemWidth  string // minimum width of a column, e.g. "10rem"
+	Gap        string // gap between items, e.g. "1rem"
+	TitleWidth string // label column of the horizontal grid, e.g. "8rem"
+	// List renders a <dl>; give the Items List as well.
+	List bool
+}
+
+func style(p Props) string {
+	s := ""
+	add := func(k, v string) {
+		if v != "" {
+			if s != "" {
+				s += "; "
+			}
+			s += k + ": " + v
+		}
+	}
+	add("--tblr-datagrid-item-width", p.ItemWidth)
+	add("--tblr-datagrid-padding", p.Gap)
+	add("--tblr-datagrid-title-width", p.TitleWidth)
+	return s
+}
+
+func classes(p Props) string {
+	c := ""
+	if p.Columns > 0 {
+		c = "datagrid-cols-" + string(rune('0'+p.Columns))
+	}
+	return kit.Classes("datagrid", kit.If(p.Horizontal, "datagrid-horizontal"), c, p.Class)
+}
+
+templ Grid(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.List {
+		<dl
+			class={ classes(p) }
+			if style(p) != "" {
+				style={ style(p) }
+			}
+			{ p.Attributes... }
+		>
+			{ children... }
+		</dl>
+	} else {
+		<div
+			class={ classes(p) }
+			if style(p) != "" {
+				style={ style(p) }
+			}
+			{ p.Attributes... }
+		>
+			{ children... }
+		</div>
+	}
+}
+
+type ItemProps struct {
+	Class string
+	Title string
+	List  bool // dt/dd inside a Grid with List
+}
+
+// Item is a label (Title) and its value (the children).
+templ Item(p ItemProps) {
+	<div class={ kit.Classes("datagrid-item", p.Class) }>
+		if p.List {
+			<dt class="datagrid-title">{ p.Title }</dt>
+			<dd class="datagrid-content">
+				{ children... }
+			</dd>
+		} else {
+			<div class="datagrid-title">{ p.Title }</div>
+			<div class="datagrid-content">
+				{ children... }
+			</div>
+		}
+	</div>
+}

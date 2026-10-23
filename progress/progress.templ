@@ -1,0 +1,214 @@
+// Package progress renders Tabler progress bars: sizes, colors, value label, indeterminate, striped and
+// animated bars, several bars in one track, stacked (separated) segments, a progress background for a
+// row, a labelled bar with description, and progress steps.
+package progress
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+	SizeXL      Size = "xl"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Value      int    // percent, 0–100
+	Color      string // bar color, e.g. "red", "primary"
+	Size       Size
+	Width      string // width of the track, e.g. "8rem"
+	// ShowValue prints the value in the bar; otherwise it is only read out (visually-hidden).
+	ShowValue     bool
+	Label         string // aria-label, default "<value>% Complete"
+	Indeterminate bool   // a moving bar for an unknown duration
+	Striped       bool
+	Animated      bool // animated stripes
+	// Separated leaves gaps between the bars of a Multi progress (progress-separated).
+	Separated bool
+}
+
+func pct(v int) string { return strconv.Itoa(v) + "%" }
+
+func track(p Props) string {
+	return kit.Classes("progress", kit.If(p.Size != SizeDefault, "progress-"+string(p.Size)), kit.If(p.Separated, "progress-separated"), p.Class)
+}
+
+func width(w string) string {
+	if w == "" {
+		return ""
+	}
+	return "width: " + w
+}
+
+templ Progress(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div
+		class={ track(p) }
+		if p.Width != "" {
+			style={ width(p.Width) }
+		}
+		{ p.Attributes... }
+	>
+		if p.Indeterminate {
+			<div class={ kit.Classes("progress-bar progress-bar-indeterminate", kit.If(p.Color != "", "bg-"+p.Color)) }></div>
+		} else {
+			<div
+				class={ kit.Classes("progress-bar", kit.If(p.Color != "", "bg-"+p.Color), kit.If(p.Striped, "progress-bar-striped"), kit.If(p.Striped && p.Animated, "progress-bar-animated")) }
+				style={ "width: " + pct(p.Value) }
+				role="progressbar"
+				aria-valuenow={ strconv.Itoa(p.Value) }
+				aria-valuemin="0"
+				aria-valuemax="100"
+				aria-label={ kit.Or(p.Label, pct(p.Value)+" Complete") }
+			>
+				if p.ShowValue {
+					{ pct(p.Value) }
+				} else {
+					<span class="visually-hidden">{ kit.Or(p.Label, pct(p.Value)+" Complete") }</span>
+				}
+			</div>
+		}
+	</div>
+}
+
+// Bar is one part of a Multi or Stacked progress.
+type Bar struct {
+	Value int
+	Color string
+	Label string // aria-label, default "<value>%"
+}
+
+// Multi puts several bars into one track, e.g. used and reserved space.
+templ Multi(p Props, bars []Bar) {
+	<div class={ track(p) } { p.Attributes... }>
+		for _, b := range bars {
+			<div
+				class={ kit.Classes("progress-bar", kit.If(b.Color != "", "bg-"+b.Color)) }
+				style={ "width: " + pct(b.Value) }
+				role="progressbar"
+				aria-valuenow={ strconv.Itoa(b.Value) }
+				aria-valuemin="0"
+				aria-valuemax="100"
+				aria-label={ kit.Or(b.Label, pct(b.Value)) }
+			></div>
+		}
+	</div>
+}
+
+// Stacked shows segments with gaps between them (progress-stacked, progress-separated).
+templ Stacked(p Props, bars []Bar) {
+	<div class={ kit.Classes("progress-stacked", p.Class) } { p.Attributes... }>
+		for _, b := range bars {
+			<div
+				class="progress progress-separated"
+				style={ "width: " + pct(b.Value) }
+				role="progressbar"
+				aria-valuenow={ strconv.Itoa(b.Value) }
+				aria-valuemin="0"
+				aria-valuemax="100"
+				aria-label={ kit.Or(b.Label, pct(b.Value)+" of total") }
+			>
+				<div class={ kit.Classes("progress-bar", kit.If(b.Color != "", "bg-"+b.Color)) }></div>
+			</div>
+		}
+	</div>
+}
+
+type BackgroundProps struct {
+	Class     string
+	Value     int
+	Color     string // default "primary"
+	Strong    bool   // the full color instead of the light (-lt) one
+	Text      string
+	ShowValue bool
+}
+
+// Background fills a row from the left as the value grows (progressbg), e.g. for a ranking.
+templ Background(p BackgroundProps) {
+	{{ c := kit.Or(p.Color, "primary") + kit.If(!p.Strong, "-lt") }}
+	<div class={ kit.Classes("progressbg", p.Class) }>
+		@Progress(Props{Value: p.Value, Color: c, Class: "progressbg-progress"})
+		if p.Text != "" {
+			<div class="progressbg-text">{ p.Text }</div>
+		}
+		if p.ShowValue {
+			<div class="progressbg-value">{ pct(p.Value) }</div>
+		}
+	</div>
+}
+
+type DescriptionProps struct {
+	Class       string
+	Label       string
+	Description string
+	Value       int
+	Color       string
+	Size        Size
+}
+
+// Description is a bar with a label, a description and the value above it.
+templ Description(p DescriptionProps) {
+	<div class={ p.Class }>
+		<div class="d-flex mb-1 align-items-center lh-1">
+			<div class="fs-5 fw-semibold m-0">{ p.Label }</div>
+			if p.Description != "" {
+				<div class="fs-6 text-secondary ms-2">{ p.Description }</div>
+			}
+			<span class="ms-auto fs-6 strong">{ pct(p.Value) }</span>
+		</div>
+		@Progress(Props{Size: p.Size, Value: p.Value, Color: p.Color})
+	</div>
+}
+
+type StepsProps struct {
+	Class  string
+	ID     string
+	Labels []string // one per step, read out for screen readers
+	Count  int      // number of steps without Labels; they are read out as "Step n"
+	Active int      // 1-based; steps up to it are filled
+	Color  string   // default "primary"
+	Label  string   // aria-label of the list
+}
+
+func stepLabels(p StepsProps) []string {
+	if len(p.Labels) > 0 {
+		return p.Labels
+	}
+	ls := make([]string, p.Count)
+	for i := range ls {
+		ls[i] = "Step " + strconv.Itoa(i+1)
+	}
+	return ls
+}
+
+// Steps is a row of short bars, one per step of a flow (progress-steps).
+templ Steps(p StepsProps) {
+	<ol
+		class={ kit.Classes("progress-steps", p.Class) }
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+	>
+		for i, l := range stepLabels(p) {
+			<li
+				class={ kit.Classes("progress-steps-item", kit.If(i+1 <= p.Active, "bg-"+kit.Or(p.Color, "primary"))) }
+				if i+1 == p.Active {
+					aria-current="step"
+				}
+			>
+				<span class="visually-hidden">{ l }</span>
+			</li>
+		}
+	</ol>
+}

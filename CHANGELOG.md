@@ -23,7 +23,13 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   `offcanvas`, `toast`, `tooltip`, `popover`, `avatar`, `flag`; block `blocks/tabscard`.
 - `blocks/shell`: `Crumb` is now `breadcrumb.Crumb` (same fields); the breadcrumbs render through package
   `breadcrumb`.
-- Demo: dropdowns, tabs, offcanvas and toasts pages, checked against the preview.
+- New packages for showing data: `listgroup`, `progress`, `steps`, `status`, `timeline`, `datagrid`, `empty`,
+  `ribbon`, `tracking`. `breadcrumb.Crumb` gets `Active` and `Disabled` (breadcrumbs as wizard steps).
+- `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
+  `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
+  default is `ShapeDefault`.
+- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps and empty pages, checked against the
+  preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
 
 ## v0.8.0

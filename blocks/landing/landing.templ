@@ -246,6 +246,7 @@ templ Footer(p FooterProps) {
 
 // Styles renders the block's CSS; Page includes it.
 templ Styles() {
+	@icon.Styles()
 	@templ.Raw("<style>" + css + "</style>")
 }
 

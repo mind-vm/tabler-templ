@@ -8,9 +8,9 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 14 done, 6 partial, 43 open (of 63) |
+| Components | 24 done, 6 partial, 33 open (of 63) |
 | Blocks | 1 done, 7 partial, 170 open (of 178) |
-| Preview pages | 7 done, 3 partial, 136 open (of 146) |
+| Preview pages | 11 done, 3 partial, 132 open (of 146) |
 
 ## Plan
 
@@ -42,16 +42,16 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Carousel](https://docs.tabler.io/ui/components/carousel) (Carousel)
 - [ ] [Chat](https://docs.tabler.io/ui/components/chat)
 - [ ] [Confetti](https://docs.tabler.io/ui/components/confetti)
-- [ ] [Data grid](https://docs.tabler.io/ui/components/datagrid) (Datagrid, DatagridItem)
+- [x] [Data grid](https://docs.tabler.io/ui/components/datagrid) (Datagrid, DatagridItem) — `datagrid`
 - [ ] [Divider](https://docs.tabler.io/ui/components/divider) (HrText)
 - [x] [Dropdown](https://docs.tabler.io/ui/components/dropdown) — `dropdown`
-- [ ] [Empty state](https://docs.tabler.io/ui/components/empty) (Empty)
+- [x] [Empty state](https://docs.tabler.io/ui/components/empty) (Empty) — `empty`
 - [ ] [Hover gallery](https://docs.tabler.io/ui/components/hover-gallery) (HoverGallery)
 - [ ] [Icon list](https://docs.tabler.io/ui/components/icon-list) (IconList, IconListItem)
 - [ ] [Icon](https://docs.tabler.io/ui/components/icon) (Icon) — `icon`, partial, filled icons: the webfont cannot mix outline and filled glyphs
 - [ ] [Image label](https://docs.tabler.io/ui/components/image-label) (ImageLabel)
 - [ ] [Legend](https://docs.tabler.io/ui/components/legend) (Legend, LegendList)
-- [ ] [List group](https://docs.tabler.io/ui/components/list-group) (ListGroup, ListGroupHeader, ListGroupItem)
+- [x] [List group](https://docs.tabler.io/ui/components/list-group) (ListGroup, ListGroupHeader, ListGroupItem) — `listgroup`
 - [ ] [Map](https://docs.tabler.io/ui/components/map)
 - [ ] [Mention](https://docs.tabler.io/ui/components/mention)
 - [ ] [Mockup browser](https://docs.tabler.io/ui/components/mockup-browser) (MockupBrowser)
@@ -62,26 +62,26 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Placeholder](https://docs.tabler.io/ui/components/placeholder)
 - [x] [Popover](https://docs.tabler.io/ui/components/popover) — `popover`
 - [ ] [Pricing](https://docs.tabler.io/ui/components/pricing)
-- [ ] [Progress steps](https://docs.tabler.io/ui/components/progress-step) (ProgressSteps)
-- [ ] [Progress bar](https://docs.tabler.io/ui/components/progress) (Progress, ProgressBg, ProgressDescription)
-- [ ] [Ribbon](https://docs.tabler.io/ui/components/ribbon) (Ribbon)
+- [x] [Progress steps](https://docs.tabler.io/ui/components/progress-step) (ProgressSteps) — `progress`
+- [x] [Progress bar](https://docs.tabler.io/ui/components/progress) (Progress, ProgressBg, ProgressDescription) — `progress`
+- [x] [Ribbon](https://docs.tabler.io/ui/components/ribbon) (Ribbon) — `ribbon`
 - [x] [Segmented control](https://docs.tabler.io/ui/components/segmented-control) (NavSegmented) — `nav`
 - [ ] [Shape](https://docs.tabler.io/ui/components/shape)
 - [ ] [Signal](https://docs.tabler.io/ui/components/signal) (Signal)
 - [ ] [Sparkline](https://docs.tabler.io/ui/components/sparkline) (Sparkline, ChartSparkline)
 - [ ] [Spinner](https://docs.tabler.io/ui/components/spinner) (Spinner)
 - [ ] [Star rating](https://docs.tabler.io/ui/components/star-rating) (Rating)
-- [ ] [Status](https://docs.tabler.io/ui/components/status) (StatusDot)
-- [ ] [Step](https://docs.tabler.io/ui/components/step) (Steps)
+- [x] [Status](https://docs.tabler.io/ui/components/status) (StatusDot) — `status`
+- [x] [Step](https://docs.tabler.io/ui/components/step) (Steps) — `steps`
 - [ ] [Switch icon](https://docs.tabler.io/ui/components/switch-icon) (SwitchIcon)
 - [x] [Tab](https://docs.tabler.io/ui/components/tab) — `nav`
 - [ ] [Table](https://docs.tabler.io/ui/components/table) — `table`, partial, table wrapper and empty row only
 - [ ] [Tag](https://docs.tabler.io/ui/components/tag) (Tag, TagList)
 - [ ] [Text shimmer](https://docs.tabler.io/ui/components/text-shimmer) (TextShimmer)
-- [ ] [Timeline](https://docs.tabler.io/ui/components/timeline)
+- [x] [Timeline](https://docs.tabler.io/ui/components/timeline) — `timeline`
 - [x] [Toast](https://docs.tabler.io/ui/components/toast) — `toast`
 - [x] [Tooltip](https://docs.tabler.io/ui/components/tooltip) — `tooltip`
-- [ ] [Tracking](https://docs.tabler.io/ui/components/tracking)
+- [x] [Tracking](https://docs.tabler.io/ui/components/tracking) — `tracking`
 - [ ] [Trending](https://docs.tabler.io/ui/components/trending) (Trending)
 - [ ] [Color check](https://docs.tabler.io/ui/forms/color-check)
 - [ ] [Elements](https://docs.tabler.io/ui/forms/elements) (FormGroup, FormText, FormFooter, Select, InputGroup, Range, form/Check, form/InputIcon, form/InputMask) — `form`, partial, field, input, select, textarea, check; no input groups or icons yet
@@ -331,7 +331,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 ### Errors, empty and maintenance
 
 - [ ] [cookie-banner](https://preview.tabler.io/cookie-banner.html) Cookie banner
-- [ ] [empty](https://preview.tabler.io/empty.html) Empty page
+- [x] [empty](https://preview.tabler.io/empty.html) Empty page
 - [ ] [error-404](https://preview.tabler.io/error-404.html) Page 404
 - [ ] [error-500](https://preview.tabler.io/error-500.html) Page 500
 - [ ] [error-maintenance](https://preview.tabler.io/error-maintenance.html) Maintenance mode
@@ -421,7 +421,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [accordion](https://preview.tabler.io/accordion.html) Accordion
 - [x] [alerts](https://preview.tabler.io/alerts.html) Alerts
 - [ ] [all-elements](https://preview.tabler.io/all-elements.html) All Elements - Kitchen Sink
-- [ ] [avatars](https://preview.tabler.io/avatars.html) Avatars
+- [x] [avatars](https://preview.tabler.io/avatars.html) Avatars
 - [ ] [badges](https://preview.tabler.io/badges.html) Badges — partial, filled star icons missing (webfont)
 - [x] [buttons](https://preview.tabler.io/buttons.html) Buttons
 - [ ] [card-actions](https://preview.tabler.io/card-actions.html) Card actions
@@ -455,7 +455,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [password-strength](https://preview.tabler.io/password-strength.html) Password strength
 - [ ] [patterns](https://preview.tabler.io/patterns.html) Patterns
 - [ ] [placeholder](https://preview.tabler.io/placeholder.html) Placeholder
-- [ ] [progress](https://preview.tabler.io/progress.html) Progress
+- [x] [progress](https://preview.tabler.io/progress.html) Progress
 - [ ] [prose](https://preview.tabler.io/prose.html) Prose
 - [ ] [screenshot](https://preview.tabler.io/screenshot.html) Screenshot
 - [ ] [scroll-spy](https://preview.tabler.io/scroll-spy.html) Scroll Spy
@@ -466,7 +466,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [social-icons](https://preview.tabler.io/social-icons.html) Social icons
 - [ ] [sparkline](https://preview.tabler.io/sparkline.html) Sparkline
 - [ ] [stars-rating](https://preview.tabler.io/stars-rating.html) Star Ratings
-- [ ] [steps](https://preview.tabler.io/steps.html) Steps
+- [x] [steps](https://preview.tabler.io/steps.html) Steps
 - [ ] [switch-icons](https://preview.tabler.io/switch-icons.html) Switch icons
 - [ ] [tables](https://preview.tabler.io/tables.html) Tables
 - [x] [tabs](https://preview.tabler.io/tabs.html) Tabs
