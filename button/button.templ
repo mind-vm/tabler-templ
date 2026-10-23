@@ -27,6 +27,20 @@ const (
 	SizeDefault Size = ""
 	SizeSmall   Size = "sm"
 	SizeLarge   Size = "lg"
+	SizeXLarge  Size = "xl"
+)
+
+// Animation is a hover animation of the button's icon (btn-animate-icon).
+type Animation string
+
+const (
+	AnimateNone      Animation = ""
+	AnimateMove      Animation = "move"       // the trailing icon moves to the end
+	AnimateMoveStart Animation = "move-start" // the leading icon moves to the start
+	AnimateRotate    Animation = "rotate"
+	AnimateShake     Animation = "shake"
+	AnimatePulse     Animation = "pulse"
+	AnimateTada      Animation = "tada"
 )
 
 type Props struct {
@@ -35,11 +49,19 @@ type Props struct {
 	Attributes templ.Attributes
 	Variant    Variant
 	Outline    bool // btn-outline-<variant>
+	Ghost      bool // btn-ghost-<variant>: no border, color on hover
 	Size       Size
 	Href       string // renders <a>
 	Type       string // button type, default "submit" like a plain <button>
 	Disabled   bool
 	Icon       string // leading icon, e.g. "ti-plus"
+	IconEnd    string // trailing icon (icon-end), not shown on icon-only buttons
+	Block      bool   // full width (w-100)
+	Pill       bool   // btn-pill: fully rounded
+	Square     bool   // btn-square: no rounded corners
+	Action     bool   // btn-action: compact, borderless icon button for card headers and toolbars
+	Animate    Animation
+	Loading    bool   // btn-loading: a spinner replaces the content
 	IconOnly   bool   // square icon button (btn-icon); give it a Label
 	Label      string // aria-label and title, for icon-only buttons
 }
@@ -50,6 +72,8 @@ func Classes(p Props) string {
 	if p.Variant != VariantDefault {
 		if p.Outline {
 			v = "btn-outline-" + string(p.Variant)
+		} else if p.Ghost {
+			v = "btn-ghost-" + string(p.Variant)
 		} else {
 			v = "btn-" + string(p.Variant)
 		}
@@ -58,7 +82,12 @@ func Classes(p Props) string {
 	if p.Size != SizeDefault {
 		s = "btn-" + string(p.Size)
 	}
-	return kit.Classes("btn", v, s, kit.If(p.IconOnly, "btn-icon"), kit.If(p.Disabled && p.Href != "", "disabled"), p.Class)
+	a := ""
+	if p.Animate != AnimateNone {
+		a = "btn-animate-icon" + kit.If(p.Animate != AnimateMove, " btn-animate-icon-"+string(p.Animate))
+	}
+	return kit.Classes("btn", kit.If(p.Pill, "btn-pill"), kit.If(p.Square, "btn-square"), v, s, a, p.Class, kit.If(p.Action, "btn-action"), kit.If(p.Block, "w-100"), kit.If(p.IconOnly, "btn-icon"), kit.If(p.Loading, "btn-loading"),
+		kit.If(p.Disabled && p.Href != "", "disabled"))
 }
 
 func attrs(p Props) templ.Attributes {
@@ -81,13 +110,13 @@ templ Button(props ...Props) {
 			class={ Classes(p) }
 			if p.Disabled {
 				aria-disabled="true"
+				tabindex="-1"
 			}
 			{ attrs(p)... }
 		>
-			if p.Icon != "" {
-				@icon.Icon(p.Icon)
+			@content(p) {
+				{ children... }
 			}
-			{ children... }
 		</a>
 	} else {
 		<button
@@ -98,10 +127,41 @@ templ Button(props ...Props) {
 			disabled?={ p.Disabled }
 			{ attrs(p)... }
 		>
-			if p.Icon != "" {
-				@icon.Icon(p.Icon)
+			@content(p) {
+				{ children... }
 			}
-			{ children... }
 		</button>
 	}
+}
+
+templ content(p Props) {
+	if p.Icon != "" {
+		@icon.Icon(p.Icon)
+	}
+	{ children... }
+	if p.IconEnd != "" && !p.IconOnly {
+		@icon.Icon(p.IconEnd, icon.Props{Class: "icon-end"})
+	}
+}
+
+type ListProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Center     bool // btn-list-center
+}
+
+// List lays out buttons in a row with Tabler's gaps (.btn-list).
+templ List(props ...ListProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("btn-list", kit.If(p.Center, "btn-list-center"), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// Actions groups action buttons (Action: true) without gaps (.btn-actions).
+templ Actions(props ...ListProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("btn-actions", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
 }

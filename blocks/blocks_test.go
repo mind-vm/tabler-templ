@@ -192,7 +192,7 @@ func TestCreate(t *testing.T) {
 	h = render(t, ctx, create.Footer(create.FooterProps{Cancel: "/kunden", Submit: "Kunde anlegen", Hint: "Danach öffnet sich die Akte."}))
 	assert.Contains(t, h, `<span class="kit-create-hint">Danach öffnet sich die Akte.</span>`)
 	assert.Contains(t, h, `<a href="/kunden" class="btn">Abbrechen</a>`)
-	assert.Contains(t, h, `<button class="btn btn-primary"><i class="ti ti-plus" aria-hidden="true"></i>Kunde anlegen</button>`)
+	assert.Contains(t, h, `<button class="btn btn-primary"><i class="ti ti-plus icon" aria-hidden="true"></i>Kunde anlegen</button>`)
 
 	h = render(t, ctx, create.Footer(create.FooterProps{}))
 	assert.Contains(t, h, ">Anlegen</button>", "default label")
@@ -256,7 +256,7 @@ func TestStats(t *testing.T) {
 	assert.Contains(t, h, `<div class="kit-stats mb-4">`)
 	assert.Regexp(t, `<div class="kit-stat-value"><span>4.595,00 €</span>\s*<small>26 %</small>`, h)
 	assert.Contains(t, h, `<div class="kit-stat-label"><span class="dot"></span><span>Rote Positionen</span></div>`)
-	assert.Contains(t, h, `<a href="/freigabe"><span>Prüfen</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>`)
+	assert.Contains(t, h, `<a href="/freigabe"><span>Prüfen</span><i class="ti ti-arrow-right icon" aria-hidden="true"></i></a>`)
 }
 
 func TestLanding(t *testing.T) {
@@ -287,7 +287,7 @@ func TestLanding(t *testing.T) {
 		"<p>x</p>"))
 	assert.Contains(t, h, `<section id="funktionen" class="kit-landing-section kit-landing-muted">`)
 	h = render(t, ctx, landing.Features([]landing.Feature{{Icon: "ti-bolt", Title: "Schnell", Text: "In Sekunden"}}))
-	assert.Contains(t, h, `<i class="ti ti-bolt" aria-hidden="true"></i>`)
+	assert.Contains(t, h, `<i class="ti ti-bolt icon" aria-hidden="true"></i>`)
 	assert.Contains(t, h, `<h3>Schnell</h3>`)
 	h = render(t, ctx, landing.Steps([]landing.Step{{Title: "Angebot"}, {Title: "Auftrag"}}))
 	assert.Regexp(t, `>2</span><h3>Auftrag</h3>`, h)

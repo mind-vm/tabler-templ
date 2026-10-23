@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+Existing components follow Tabler 1.7's markup and cover the variants of Tabler's own components
+(`shared/ui/*.astro`). The demo's buttons, alerts and pagination pages now match the preview.
+
+- **Breaking (look):** `icon.Icon` adds Tabler's `.icon` class, so icons get Tabler's size (1.25rem) and
+  spacing in buttons, badges and alerts. New: `Size`, `Color`, `Inline`, `icon.Classes`.
+- **Breaking:** `alert.Alert` uses Tabler 1.7's markup (`.alert-icon`) and shows the variant's default icon
+  when `Icon` is empty (set `NoIcon` for none; `shell.Flash` follows). The close control is a `<button>`.
+  New: `Title` (heading with the children as description), `Important`, `Minor`, `Action`, `Link`, `List`.
+- **Breaking:** pagination numbers carry `aria-label="Page n"`; disabled links get `tabindex="-1"` and
+  `aria-disabled`. New: `Text`, `FirstLast`, `PrevTitle`, `NextTitle`.
+- `button`: `Ghost`, `Pill`, `Square`, `Action`, `Block`, `Loading`, `IconEnd`, `Animate`, `SizeXLarge`;
+  `List` and `Actions`. Disabled links get `tabindex="-1"`.
+- `badge`: `Outline`, `Size`, `Pill`, `Icon`, `IconEnd`, `IconOnly`, `Dot`, `Notification`, `Blink`; `List`.
+- `card`: `Size`, `Href`/`Hover`, `Borderless`, `Dashed`, `Transparent`, `Stacked`, `Active`, `Inactive`,
+  `Status`/`StatusEdge`, `Light` header, `Scrollable` body; `Subtitle`, `Stamp`, `Progress`, `Image`.
+- `kit.Messages`: new texts for pagination. Empty fields of an app's own `Messages` now fall back to English,
+  so new texts never render empty.
+- `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
+
 ## v0.8.0
 
 - **Breaking:** the module moved from `github.com/mind-vm/tablerkit` to `github.com/mind-vm/tabler-templ`

@@ -41,7 +41,7 @@ func mit(c templ.Component, kinder string) templ.Component {
 func TestButton(t *testing.T) {
 	ctx := context.Background()
 	h := render(t, ctx, mit(button.Button(button.Props{Variant: button.VariantPrimary, Size: button.SizeSmall, Icon: "ti-plus"}), "Add"))
-	assert.Equal(t, `<button class="btn btn-primary btn-sm"><i class="ti ti-plus" aria-hidden="true"></i>Add</button>`, h)
+	assert.Equal(t, `<button class="btn btn-primary btn-sm"><i class="ti ti-plus icon" aria-hidden="true"></i>Add</button>`, h)
 
 	h = render(t, ctx, mit(button.Button(button.Props{Href: "/x", Variant: button.VariantDanger, Outline: true}), "Go"))
 	assert.Equal(t, `<a href="/x" class="btn btn-outline-danger">Go</a>`, h)
@@ -70,7 +70,7 @@ func TestCardAndIcon(t *testing.T) {
 	ctx := context.Background()
 	h := render(t, ctx, mit(card.Card(card.Props{Section: true, Class: "h-100 card"}), "x"))
 	assert.Equal(t, `<section class="card h-100">x</section>`, h)
-	assert.Equal(t, `<i class="ti ti-alert-triangle" role="img" aria-label="Warning"></i>`,
+	assert.Equal(t, `<i class="ti ti-alert-triangle icon" role="img" aria-label="Warning"></i>`,
 		render(t, ctx, icon.Icon("ti-alert-triangle", icon.Props{Label: "Warning"})))
 	assert.Equal(t, `<span class="badge bg-green-lt">ok</span>`, render(t, ctx, mit(badge.Badge(badge.Props{Color: "green", Light: true}), "ok")))
 }
@@ -109,7 +109,7 @@ func TestPagination(t *testing.T) {
 	href := func(n int) string { return "/l?seite=" + strings.Repeat("I", n) }
 	assert.Empty(t, render(t, context.Background(), pagination.Pagination(pagination.Props{Page: 1, Pages: 1, Href: href})))
 	h := render(t, context.Background(), pagination.Pagination(pagination.Props{Page: 2, Pages: 3, Href: href}))
-	assert.Contains(t, h, `<li class="page-item active"><a class="page-link" href="/l?seite=II" aria-current="page">2</a></li>`)
+	assert.Contains(t, h, `<li class="page-item active"><a class="page-link" href="/l?seite=II" aria-label="Page 2" aria-current="page">2</a></li>`)
 }
 
 func TestForm(t *testing.T) {
@@ -184,4 +184,48 @@ func TestSidebarCollapsedCookie(t *testing.T) {
 	assert.False(t, sidebar.Collapsed(r))
 	r.AddCookie(&http.Cookie{Name: sidebar.CookieName, Value: "collapsed"})
 	assert.True(t, sidebar.Collapsed(r))
+}
+
+func TestTabler17Variants(t *testing.T) {
+	ctx := context.Background()
+	assert.Equal(t, `<i class="ti ti-star icon text-red icon-inline icon-sm" aria-hidden="true"></i>`,
+		render(t, ctx, icon.Icon("ti-star", icon.Props{Color: "red", Inline: true, Size: icon.SizeSmall})))
+
+	h := render(t, ctx, mit(button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Ghost: true, Pill: true, Size: button.SizeXLarge,
+		IconEnd: "ti-arrow-right", Animate: button.AnimateMove}), "Next"))
+	assert.Equal(t, `<button type="button" class="btn btn-pill btn-ghost-primary btn-xl btn-animate-icon">Next<i class="ti ti-arrow-right icon icon-end" aria-hidden="true"></i></button>`, h)
+	assert.Contains(t, render(t, ctx, button.Button(button.Props{Animate: button.AnimateTada, Action: true, Square: true})),
+		`class="btn btn-square btn-animate-icon btn-animate-icon-tada btn-action"`)
+	assert.Contains(t, render(t, ctx, button.Button(button.Props{Href: "/x", Disabled: true})), `aria-disabled="true" tabindex="-1"`)
+
+	assert.Equal(t, `<span class="badge badge-outline text-blue">x</span>`, render(t, ctx, mit(badge.Badge(badge.Props{Color: "blue", Outline: true}), "x")))
+	assert.Equal(t, `<span class="badge badge-dot bg-red badge-notification badge-blink"></span>`,
+		render(t, ctx, badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true, Blink: true})))
+	assert.Equal(t, `<span class="badge badge-sm bg-blue text-blue-fg badge-notification badge-pill">1</span>`,
+		render(t, ctx, mit(badge.Badge(badge.Props{Color: "blue", Size: badge.SizeSmall, Notification: true, Pill: true}), "1")))
+
+	h = render(t, ctx, mit(alert.Alert(alert.Props{Variant: alert.VariantDanger, Important: true, Title: "T", Dismissible: true}), "d"))
+	assert.Equal(t, `<div class="alert alert-important alert-danger alert-dismissible" role="alert"><div class="alert-icon"><i class="ti ti-alert-circle icon alert-icon" aria-hidden="true"></i></div><div><h3 class="alert-heading">T</h3><div class="alert-description">d</div></div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`, h)
+	assert.NotContains(t, render(t, ctx, alert.Alert(alert.Props{NoIcon: true})), "alert-icon")
+
+	href := func(n int) string { return "#" }
+	h = render(t, ctx, pagination.Pagination(pagination.Props{Page: 1, Pages: 5, Href: href, Text: true, FirstLast: true}))
+	assert.Contains(t, h, `<a class="page-link page-text" href="#" tabindex="-1" aria-disabled="true">First</a>`)
+	assert.Contains(t, h, `<a class="page-link page-text" href="#">Last</a>`)
+	h = render(t, ctx, pagination.Pagination(pagination.Props{Page: 2, Pages: 3, Href: href, PrevTitle: "Getting started", NextTitle: "Theming"}))
+	assert.Contains(t, h, `<li class="page-item page-prev"><a class="page-link" href="#"><div class="page-item-subtitle">Previous</div><div class="page-item-title">Getting started</div></a></li>`)
+	assert.NotContains(t, h, "Page 2")
+
+	h = render(t, ctx, mit(card.Card(card.Props{Href: "/x", Hover: card.HoverPop, Size: card.SizeSmall, Status: "green", StatusEdge: card.EdgeStart}), "x"))
+	assert.Equal(t, `<a href="/x" class="card card-sm card-link card-link-pop"><div class="card-status-start bg-green"></div>x</a>`, h)
+	assert.Contains(t, render(t, ctx, card.Stamp(card.StampProps{Icon: "ti-bell", Color: "yellow", Large: true})),
+		`<div class="card-stamp card-stamp-lg"><div class="card-stamp-icon bg-yellow"><i class="ti ti-bell icon"`)
+	assert.Contains(t, render(t, ctx, card.Progress(card.ProgressProps{Value: 94, Label: "94% used"})), `style="width: 94%;" role="progressbar" aria-valuenow="94"`)
+}
+
+// An app's own Messages keep working when the kit adds texts: empty fields fall back to English.
+func TestMessagesFallback(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.Messages{Close: "Zu"})
+	assert.Equal(t, "Zu", kit.T(ctx).Close)
+	assert.Equal(t, "Next", kit.T(ctx).Next)
 }

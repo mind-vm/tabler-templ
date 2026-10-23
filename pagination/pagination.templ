@@ -1,4 +1,5 @@
-// Package pagination renders Tabler's .pagination with first, last and neighbouring pages.
+// Package pagination renders Tabler's .pagination with first, last and neighbouring pages; arrows or
+// text labels, optional first/last links, and previous/next links that name the adjacent page.
 package pagination
 
 import (
@@ -15,9 +16,17 @@ type Props struct {
 	Page       int                   // current page, 1-based
 	Pages      int                   // total pages
 	Href       func(page int) string // link to a page
-	Label      string                // aria-labels; default kit.T(ctx)
-	PrevLabel  string
-	NextLabel  string
+	// Text shows "Previous" and "Next" (and "First", "Last") instead of arrows (page-text).
+	Text bool
+	// FirstLast adds links to the first and the last page.
+	FirstLast bool
+	// PrevTitle and NextTitle name the adjacent pages (page-prev, page-next), e.g. the previous article.
+	PrevTitle string
+	NextTitle string
+	// Texts; default kit.T(ctx).
+	Label     string
+	PrevLabel string
+	NextLabel string
 }
 
 // Numbers lists the first, the last and the current page with its neighbours; 0 marks a gap ("…").
@@ -41,31 +50,71 @@ func defaults(ctx context.Context, p Props) Props {
 	return p
 }
 
+// edge is one of the links at the ends: first, previous, next, last.
+type edge struct {
+	page      int
+	disabled  bool
+	class     string // page-prev, page-next
+	label     string // aria-label for arrows
+	text      string // text label
+	icon      string
+	subtitle  string
+	title     string // the adjacent page's name
+}
+
+templ edgeItem(p Props, e edge) {
+	<li class={ kit.Classes("page-item", e.class, kit.If(e.disabled, "disabled")) }>
+		<a
+			class={ kit.Classes("page-link", kit.If(p.Text && e.title == "", "page-text")) }
+			href={ templ.URL(p.Href(e.page)) }
+			if e.disabled {
+				tabindex="-1"
+				aria-disabled="true"
+			}
+			if !p.Text && e.title == "" {
+				aria-label={ e.label }
+			}
+		>
+			if e.title != "" {
+				<div class="page-item-subtitle">{ e.subtitle }</div>
+				<div class="page-item-title">{ e.title }</div>
+			} else if p.Text {
+				{ e.text }
+			} else {
+				@icon.Icon(e.icon)
+			}
+		</a>
+	</li>
+}
+
 // Pagination renders nothing for a single page.
 templ Pagination(p Props) {
 	{{ p = defaults(ctx, p) }}
+	{{ m := kit.T(ctx) }}
 	if p.Pages > 1 {
 		<nav aria-label={ p.Label } { p.Attributes... }>
 			<ul class={ kit.Classes("pagination", p.Class) }>
-				<li class={ kit.Classes("page-item", kit.If(p.Page <= 1, "disabled")) }>
-					<a class="page-link" href={ templ.URL(p.Href(p.Page - 1)) } aria-label={ p.PrevLabel }>
-						@icon.Icon("ti-chevron-left")
-					</a>
-				</li>
-				for _, n := range Numbers(p.Page, p.Pages) {
-					if n == 0 {
-						<li class="page-item disabled"><span class="page-link">…</span></li>
-					} else if n == p.Page {
-						<li class="page-item active"><a class="page-link" href={ templ.URL(p.Href(n)) } aria-current="page">{ strconv.Itoa(n) }</a></li>
-					} else {
-						<li class="page-item"><a class="page-link" href={ templ.URL(p.Href(n)) }>{ strconv.Itoa(n) }</a></li>
+				if p.FirstLast {
+					@edgeItem(p, edge{page: 1, disabled: p.Page <= 1, label: m.FirstPage, text: m.First, icon: "ti-chevrons-left"})
+				}
+				@edgeItem(p, edge{page: p.Page - 1, disabled: p.Page <= 1, class: kit.If(p.PrevTitle != "", "page-prev"), label: p.PrevLabel,
+					text: m.Previous, icon: "ti-chevron-left", subtitle: m.Previous, title: p.PrevTitle})
+				if p.PrevTitle == "" && p.NextTitle == "" {
+					for _, n := range Numbers(p.Page, p.Pages) {
+						if n == 0 {
+							<li class="page-item disabled"><span class="page-link">…</span></li>
+						} else if n == p.Page {
+							<li class="page-item active"><a class="page-link" href={ templ.URL(p.Href(n)) } aria-label={ m.Page + " " + strconv.Itoa(n) } aria-current="page">{ strconv.Itoa(n) }</a></li>
+						} else {
+							<li class="page-item"><a class="page-link" href={ templ.URL(p.Href(n)) } aria-label={ m.Page + " " + strconv.Itoa(n) }>{ strconv.Itoa(n) }</a></li>
+						}
 					}
 				}
-				<li class={ kit.Classes("page-item", kit.If(p.Page >= p.Pages, "disabled")) }>
-					<a class="page-link" href={ templ.URL(p.Href(p.Page + 1)) } aria-label={ p.NextLabel }>
-						@icon.Icon("ti-chevron-right")
-					</a>
-				</li>
+				@edgeItem(p, edge{page: p.Page + 1, disabled: p.Page >= p.Pages, class: kit.If(p.NextTitle != "", "page-next"), label: p.NextLabel,
+					text: m.Next, icon: "ti-chevron-right", subtitle: m.Next, title: p.NextTitle})
+				if p.FirstLast {
+					@edgeItem(p, edge{page: p.Pages, disabled: p.Page >= p.Pages, label: m.LastPage, text: m.Last, icon: "ti-chevrons-right"})
+				}
 			</ul>
 		</nav>
 	}

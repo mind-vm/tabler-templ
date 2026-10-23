@@ -8,9 +8,9 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 0 done, 9 partial, 53 open (of 62) |
+| Components | 3 done, 6 partial, 53 open (of 62) |
 | Blocks | 0 done, 7 partial, 171 open (of 178) |
-| Preview pages | 0 done, 6 partial, 140 open (of 146) |
+| Preview pages | 3 done, 3 partial, 140 open (of 146) |
 
 ## Plan
 
@@ -32,13 +32,13 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 [`shared/ui`](https://github.com/tabler/tabler/blob/dev/shared/ui) show the props and variants the packages mirror.
 
 - [ ] [Accordion](https://docs.tabler.io/ui/components/accordion)
-- [ ] [Alert](https://docs.tabler.io/ui/components/alert) (Alert) — `alert`, partial, no important, minor, description or action variants yet
+- [x] [Alert](https://docs.tabler.io/ui/components/alert) (Alert) — `alert`
 - [ ] [Avatar](https://docs.tabler.io/ui/components/avatar) (Avatar, AvatarList, AvatarUpload)
-- [ ] [Badge](https://docs.tabler.io/ui/components/badge) (Badge, BadgeList) — `badge`, partial, no outline, pill, sizes, dot or notification yet
+- [x] [Badge](https://docs.tabler.io/ui/components/badge) (Badge, BadgeList) — `badge`
 - [ ] [Breadcrumb](https://docs.tabler.io/ui/components/breadcrumb) (Breadcrumb)
-- [ ] [Button](https://docs.tabler.io/ui/components/button) (Button, ButtonGroup, ButtonList) — `button`, partial, no pill, square, ghost, xl, icon at end or button list yet
+- [ ] [Button](https://docs.tabler.io/ui/components/button) (Button, ButtonGroup, ButtonList) — `button`, partial, no button group (btn-group) yet
 - [ ] [Card gradient](https://docs.tabler.io/ui/components/card-gradient)
-- [ ] [Card](https://docs.tabler.io/ui/components/card) (Card, CardHeader, CardTitle, CardSubtitle, CardBody, CardFooter, CardActions, CardDropdown, CardStamp) — `card`, partial, no subtitle, stamp, status, tabs or sizes yet
+- [ ] [Card](https://docs.tabler.io/ui/components/card) (Card, CardHeader, CardTitle, CardSubtitle, CardBody, CardFooter, CardActions, CardDropdown, CardStamp) — `card`, partial, no tabs, image overlay, cover, rotation or dropdown yet
 - [ ] [Carousel](https://docs.tabler.io/ui/components/carousel) (Carousel)
 - [ ] [Chat](https://docs.tabler.io/ui/components/chat)
 - [ ] [Confetti](https://docs.tabler.io/ui/components/confetti)
@@ -48,7 +48,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Empty state](https://docs.tabler.io/ui/components/empty) (Empty)
 - [ ] [Hover gallery](https://docs.tabler.io/ui/components/hover-gallery) (HoverGallery)
 - [ ] [Icon list](https://docs.tabler.io/ui/components/icon-list) (IconList, IconListItem)
-- [ ] [Icon](https://docs.tabler.io/ui/components/icon) (Icon) — `icon`, partial, without Tabler's .icon class and sizes
+- [ ] [Icon](https://docs.tabler.io/ui/components/icon) (Icon) — `icon`, partial, filled icons: the webfont cannot mix outline and filled glyphs
 - [ ] [Image label](https://docs.tabler.io/ui/components/image-label) (ImageLabel)
 - [ ] [Legend](https://docs.tabler.io/ui/components/legend) (Legend, LegendList)
 - [ ] [List group](https://docs.tabler.io/ui/components/list-group) (ListGroup, ListGroupHeader, ListGroupItem)
@@ -58,7 +58,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Modal](https://docs.tabler.io/ui/components/modal) — `modal`, partial, no status bar, blur or inline dialogs yet
 - [ ] [Nav overflow](https://docs.tabler.io/ui/components/nav-overflow)
 - [ ] [Offcanvas](https://docs.tabler.io/ui/components/offcanvas) (Offcanvas, OffcanvasHeader, OffcanvasBody)
-- [ ] [Pagination](https://docs.tabler.io/ui/components/pagination) (Pagination) — `pagination`, partial, no text or description variants yet
+- [x] [Pagination](https://docs.tabler.io/ui/components/pagination) (Pagination) — `pagination`
 - [ ] [Placeholder](https://docs.tabler.io/ui/components/placeholder)
 - [ ] [Popover](https://docs.tabler.io/ui/components/popover)
 - [ ] [Pricing](https://docs.tabler.io/ui/components/pricing)
@@ -418,11 +418,11 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 ### Components and elements
 
 - [ ] [accordion](https://preview.tabler.io/accordion.html) Accordion
-- [ ] [alerts](https://preview.tabler.io/alerts.html) Alerts — partial, basic and dismissible; the alert markup predates Tabler 1.7 (no .alert-icon), no action, description, important or minor
+- [x] [alerts](https://preview.tabler.io/alerts.html) Alerts
 - [ ] [all-elements](https://preview.tabler.io/all-elements.html) All Elements - Kitchen Sink
 - [ ] [avatars](https://preview.tabler.io/avatars.html) Avatars
-- [ ] [badges](https://preview.tabler.io/badges.html) Badges — partial, basic, light and outline; no sizes, positioned, dot, notification or icons
-- [ ] [buttons](https://preview.tabler.io/buttons.html) Buttons — partial, icons lack Tabler's .icon class; pill, square, ghost, outline, xl and action buttons through Class
+- [ ] [badges](https://preview.tabler.io/badges.html) Badges — partial, no dropdown example yet; filled star icons missing (webfont)
+- [x] [buttons](https://preview.tabler.io/buttons.html) Buttons
 - [ ] [card-actions](https://preview.tabler.io/card-actions.html) Card actions
 - [ ] [card-gradients](https://preview.tabler.io/card-gradients.html) Card Gradients
 - [ ] [cards-masonry](https://preview.tabler.io/cards-masonry.html) Cards Masonry
@@ -450,7 +450,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [navigation](https://preview.tabler.io/navigation.html) Navigation
 - [ ] [number-input](https://preview.tabler.io/number-input.html) Number input
 - [ ] [offcanvas](https://preview.tabler.io/offcanvas.html) Offcanvas
-- [ ] [pagination](https://preview.tabler.io/pagination.html) Pagination — partial, numbered with arrows; no text labels or descriptions
+- [x] [pagination](https://preview.tabler.io/pagination.html) Pagination
 - [ ] [password-strength](https://preview.tabler.io/password-strength.html) Password strength
 - [ ] [patterns](https://preview.tabler.io/patterns.html) Patterns
 - [ ] [placeholder](https://preview.tabler.io/placeholder.html) Placeholder

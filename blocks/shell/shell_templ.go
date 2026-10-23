@@ -62,7 +62,7 @@ type Crumb struct {
 // Flash is a message after an action, shown above the content and dismissible.
 type Flash struct {
 	Variant alert.Variant
-	Icon    string // "ti-…"; empty = none
+	Icon    string // "ti-…"; empty = the variant's default icon
 	Text    string
 }
 

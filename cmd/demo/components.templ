@@ -10,16 +10,36 @@ import (
 
 type alertExample struct {
 	Variant alert.Variant
-	Icon    string
 	Text    string
 }
 
 var alertExamples = []alertExample{
-	{alert.VariantDanger, "ti-alert-circle", "An error occurred!"},
-	{alert.VariantWarning, "ti-alert-triangle", "Some information is missing!"},
-	{alert.VariantSuccess, "ti-check", "Completed successfully!"},
-	{alert.VariantInfo, "ti-info-circle", "Just a quick note!"},
+	{alert.VariantDanger, "An error occurred!"},
+	{alert.VariantWarning, "Some information is missing!"},
+	{alert.VariantSuccess, "Completed successfully!"},
+	{alert.VariantInfo, "Just a quick note!"},
 }
+
+var passwordRules = []string{"Minimum 8 characters", "Include a special character"}
+
+// describedAlerts are the alerts with a heading and a description in a style (important, minor);
+// the other alerts follow in the given order.
+templ describedAlerts(style alert.Props, others []alertExample) {
+	{{ p := style }}
+	{{ p.Variant, p.Title, p.Dismissible = alert.VariantDanger, "Password does not meet requirements:", true }}
+	@alert.Alert(p) {
+		@alert.List(passwordRules)
+	}
+	for _, o := range others {
+		{{ p.Variant, p.Title = o.Variant, o.Text }}
+		@alert.Alert(p) {
+			This is a custom alert box with a description.
+		}
+	}
+}
+
+var customAlerts = []alertExample{{alert.VariantSuccess, "This is a custom alert box!"}, {alert.VariantWarning, "This is a custom alert box!"},
+	{alert.VariantInfo, "This is a custom alert box!"}}
 
 templ alertsPage() {
 	@preview("alerts") {
@@ -27,19 +47,58 @@ templ alertsPage() {
 			<div class="col-12">
 				@section("Basic", "A title and a color are enough to show the status of an action.") {
 					for _, a := range alertExamples {
-						@alert.Alert(alert.Props{Variant: a.Variant, Icon: a.Icon}) {
+						@alert.Alert(alert.Props{Variant: a.Variant}) {
 							{ a.Text }
 						}
 					}
 				}
 			</div>
 			<div class="col-12">
-				@section("Dismissible", "Add alert-dismissible and a btn-close button to let users close the alert.") {
+				@section("With action", "Add an `alert-action` link to give users something to do next.") {
 					for _, a := range alertExamples {
-						@alert.Alert(alert.Props{Variant: a.Variant, Icon: a.Icon, Dismissible: true}) {
+						@alert.Alert(alert.Props{Variant: a.Variant, Dismissible: true}) {
+							{ a.Text }
+							@alert.Action("#") {
+								Link
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-12">
+				@section("Dismissible", "Add `alert-dismissible` and a `btn-close` button to let users close the alert.") {
+					for _, a := range alertExamples {
+						@alert.Alert(alert.Props{Variant: a.Variant, Dismissible: true}) {
 							{ a.Text }
 						}
 					}
+				}
+			</div>
+			<div class="col-12">
+				@section("With a description", "Add an `alert-description` or an `alert-list` when the title alone isn't enough context.") {
+					@describedAlerts(alert.Props{}, alertExamples[1:])
+				}
+			</div>
+			<div class="col-12">
+				@section("Important", "Add `alert-important` for a bolder style that stands out from the rest of the page.") {
+					@describedAlerts(alert.Props{Important: true}, customAlerts)
+					@alert.Alert(alert.Props{Variant: alert.VariantDanger, Important: true, Dismissible: true}) {
+						An error occurred!
+						@alert.Action("#") {
+							Link
+						}
+					}
+					@alert.Alert(alert.Props{Variant: alert.VariantInfo, Important: true, Dismissible: true}) {
+						Just a quick note!
+						@alert.Link("#") {
+							Link
+						}
+					}
+				}
+			</div>
+			<div class="col-12">
+				@section("Minor", "Add `alert-minor` for a quieter style that fits inline with other content.") {
+					@describedAlerts(alert.Props{Minor: true}, customAlerts)
 				}
 			</div>
 		</div>
@@ -50,40 +109,150 @@ var badgeColors = []string{"blue", "azure", "indigo", "purple", "pink", "red", "
 
 func title(s string) string { return string(s[0]-'a'+'A') + s[1:] }
 
+templ badgeRow(style badge.Props, icon string) {
+	@badge.List() {
+		for _, c := range badgeColors {
+			{{ p := style }}
+			{{ p.Color, p.Icon = c, icon }}
+			@badge.Badge(p) {
+				{ title(c) }
+			}
+		}
+	}
+}
+
+templ badgeSizes(size badge.Size) {
+	@badge.List() {
+		@badge.Badge(badge.Props{Size: size}) {
+			Default
+		}
+		@badge.Badge(badge.Props{Size: size, Icon: "ti-check"}) {
+			Left icon
+		}
+		@badge.Badge(badge.Props{Size: size, IconEnd: "ti-arrow-right"}) {
+			Right icon
+		}
+		@badge.Badge(badge.Props{Size: size, Icon: "ti-star-filled", IconOnly: true})
+	}
+}
+
 templ badgesPage() {
 	@preview("badges") {
+		<div class="row row-cards mb-5">
+			<div class="col-md-6 col-lg-4">
+				@section("In headings", "A badge scales with the heading level it sits next to.") {
+					for _, h := range []string{"h1", "h2", "h3", "h4", "h5", "h6"} {
+						<div class={ h }>
+							Example heading
+							@badge.Badge() {
+								New
+							}
+						</div>
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Sizes", "Three sizes, with an optional icon before or after the label.") {
+					<div class="space-y">
+						@badgeSizes(badge.SizeSmall)
+						@badgeSizes(badge.SizeDefault)
+						@badgeSizes(badge.SizeLarge)
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Positioned", "Attach a count or a dot to a button with `.badge-notification`.") {
+					@button.List() {
+						@button.Button(button.Props{Type: "button"}) {
+							Notifications
+							@badge.Badge(badge.Props{Class: "text-bg-secondary ms-2"}) {
+								4
+							}
+						}
+						@button.Button(button.Props{Type: "button"}) {
+							Inbox
+							@badge.Badge(badge.Props{Color: "red", Notification: true}) {
+								9+
+								<span class="visually-hidden">unread messages</span>
+							}
+						}
+						@button.Button(button.Props{Type: "button"}) {
+							Profile
+							@badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true})
+						}
+						@button.Button(button.Props{Type: "button"}) {
+							Settings
+							@badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true, Blink: true})
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-bell", IconOnly: true}) {
+							@badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true, Blink: true})
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-bell", IconOnly: true, Action: true, Attributes: templ.Attributes{"aria-label": "Notifications"}}) {
+							@badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true})
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("On buttons", "Pair any badge color with a button label.") {
+					@button.List() {
+						for i, c := range badgeColors {
+							@button.Button() {
+								{ title(c) } badge
+								@badge.Badge(badge.Props{Color: c, Class: "ms-2"}) {
+									{ i + 1 }
+								}
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Notification dot", "A pill-shaped counter positioned on the corner of a button.") {
+					@button.List() {
+						for i, c := range badgeColors {
+							@button.Button(button.Props{Class: "position-relative"}) {
+								{ title(c) } badge
+								@badge.Badge(badge.Props{Color: c, Notification: true, Pill: true}) {
+									{ i + 1 }
+								}
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Blinking notification", "Add `.badge-blink` to draw attention to unread activity.") {
+					@button.List() {
+						for _, c := range badgeColors {
+							@button.Button(button.Props{Class: "position-relative"}) {
+								{ title(c) } badge
+								@badge.Badge(badge.Props{Color: c, Notification: true, Blink: true})
+							}
+						}
+					}
+				}
+			</div>
+		</div>
 		<div class="row row-cards">
 			<div class="col-12">
 				@section("Basic", "Fill a badge with a theme or extended color.") {
-					<div class="badge-list">
-						for _, c := range badgeColors {
-							@badge.Badge(badge.Props{Color: c}) {
-								{ title(c) }
-							}
-						}
-					</div>
+					@badgeRow(badge.Props{}, "")
 				}
 			</div>
 			<div class="col-12">
 				@section("Light", "A tinted background for a softer, secondary badge.") {
-					<div class="badge-list">
-						for _, c := range badgeColors {
-							@badge.Badge(badge.Props{Color: c, Light: true}) {
-								{ title(c) }
-							}
-						}
-					</div>
+					@badgeRow(badge.Props{Light: true}, "")
 				}
 			</div>
 			<div class="col-12">
 				@section("Outline", "A colored border with a transparent background.") {
-					<div class="badge-list">
-						for _, c := range badgeColors {
-							@badge.Badge(badge.Props{Class: "badge-outline text-" + c}) {
-								{ title(c) }
-							}
-						}
-					</div>
+					@badgeRow(badge.Props{Outline: true}, "")
+				}
+			</div>
+			<div class="col-12">
+				@section("With icons", "Add an icon before the label to reinforce its meaning.") {
+					@badgeRow(badge.Props{}, "ti-star-filled")
 				}
 			</div>
 		</div>
@@ -96,9 +265,15 @@ templ paginationPage() {
 	@preview("pagination") {
 		<div class="row row-cards">
 			<div class="col-12">
-				@section("Numbered", "Page numbers with Prev/Next arrows.") {
-					@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: pageHref})
-					@pagination.Pagination(pagination.Props{Page: 6, Pages: 12, Href: pageHref})
+				@section("Numbered", "Page numbers, with or without Prev/Next text labels (`page-text`).") {
+					@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: pageHref, Label: "Numbered pagination"})
+					@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: pageHref, Label: "Pagination with text", Text: true})
+				}
+			</div>
+			<div class="col-12">
+				@section("With descriptions", "Name the adjacent page with `page-item-subtitle` for the direction and `page-item-title` for the page name.") {
+					@pagination.Pagination(pagination.Props{Page: 1, Pages: 2, Href: pageHref, Label: "Pagination with descriptions",
+						PrevTitle: "Getting started", NextTitle: "Breadcrumbs"})
 				}
 			</div>
 		</div>

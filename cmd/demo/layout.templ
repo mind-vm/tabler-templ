@@ -1,6 +1,11 @@
 package main
 
-import "github.com/mind-vm/tabler-templ/internal/catalog"
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+)
 
 templ head(title string) {
 	<meta charset="utf-8"/>
@@ -77,13 +82,28 @@ templ preview(name string) {
 
 // section is the card the component pages of the preview use for each example.
 templ section(title, subtitle string) {
-	<div class="card">
-		<div class="card-body">
-			<h2 class="card-title">{ title }</h2>
+	@card.Card() {
+		@card.Body() {
+			@card.Title() {
+				{ title }
+			}
 			if subtitle != "" {
-				<p class="card-subtitle">{ subtitle }</p>
+				@card.Subtitle() {
+					@withCode(subtitle)
+				}
 			}
 			{ children... }
-		</div>
-	</div>
+		}
+	}
+}
+
+// withCode renders text with `backticks` as <code>, like the preview's subtitles.
+templ withCode(text string) {
+	for i, part := range strings.Split(text, "`") {
+		if i%2 == 1 {
+			<code>{ part }</code>
+		} else {
+			{ part }
+		}
+	}
 }
