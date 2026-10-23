@@ -1,4 +1,4 @@
-package tablerkit_test
+package tablertempl_test
 
 import (
 	"context"
@@ -12,17 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mind-vm/tablerkit/alert"
-	"github.com/mind-vm/tablerkit/badge"
-	"github.com/mind-vm/tablerkit/button"
-	"github.com/mind-vm/tablerkit/card"
-	"github.com/mind-vm/tablerkit/form"
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
-	"github.com/mind-vm/tablerkit/modal"
-	"github.com/mind-vm/tablerkit/pagination"
-	"github.com/mind-vm/tablerkit/sidebar"
-	"github.com/mind-vm/tablerkit/table"
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/pagination"
+	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/table"
 )
 
 func render(t *testing.T, ctx context.Context, c templ.Component) string {

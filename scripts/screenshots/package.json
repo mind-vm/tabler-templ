@@ -1,0 +1,9 @@
+{
+  "name": "tabler-templ-screenshots",
+  "private": true,
+  "description": "Screenshots of the demo's rebuilt pages for the README. Only this tool needs Node; the Go module does not.",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

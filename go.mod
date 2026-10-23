@@ -1,4 +1,4 @@
-module github.com/mind-vm/tablerkit
+module github.com/mind-vm/tabler-templ
 
 go 1.26.5
 

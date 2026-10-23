@@ -1,0 +1,189 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+type named struct{ Variant, Text string }
+
+var themeColors = []named{{"primary", "Primary"}, {"secondary", "Secondary"}, {"success", "Success"}, {"warning", "Warning"},
+	{"danger", "Danger"}, {"info", "Info"}, {"dark", "Dark"}, {"light", "Light"}}
+
+var extraColors = []named{{"blue", "Blue"}, {"azure", "Azure"}, {"indigo", "Indigo"}, {"purple", "Purple"}, {"pink", "Pink"},
+	{"red", "Red"}, {"orange", "Orange"}, {"yellow", "Yellow"}, {"lime", "Lime"}, {"green", "Green"}, {"teal", "Teal"}, {"cyan", "Cyan"}}
+
+type social struct{ Variant, Icon, Text string }
+
+var socialColors = []social{{"facebook", "ti-brand-facebook", "Facebook"}, {"twitter", "ti-brand-twitter", "Twitter"}, {"x", "ti-brand-x", "X"},
+	{"linkedin", "ti-brand-linkedin", "Linkedin"}, {"google", "ti-brand-google", "Google"}, {"youtube", "ti-brand-youtube", "Youtube"},
+	{"vimeo", "ti-brand-vimeo", "Vimeo"}, {"dribbble", "ti-brand-dribbble", "Dribbble"}, {"github", "ti-brand-github", "Github"},
+	{"instagram", "ti-brand-instagram", "Instagram"}, {"pinterest", "ti-brand-pinterest", "Pinterest"}, {"vk", "ti-brand-vk", "VK"},
+	{"rss", "ti-rss", "RSS"}, {"flickr", "ti-brand-flickr", "Flickr"}, {"bitbucket", "ti-brand-bitbucket", "Bitbucket"}, {"tabler", "ti-brand-tabler", "Tabler"}}
+
+// colorRow renders one button per color, with extra classes such as btn-pill.
+templ colorRow(colors []named, class string) {
+	<div class="btn-list">
+		for _, c := range colors {
+			@button.Button(button.Props{Type: "button", Variant: button.Variant(c.Variant), Class: class}) {
+				{ c.Text }
+			}
+		}
+	</div>
+}
+
+templ sizeRow(size button.Size, class string) {
+	<div class="btn-list">
+		@button.Button(button.Props{Type: "button", Size: size, Class: class}) {
+			Button
+		}
+		@button.Button(button.Props{Type: "button", Size: size, Class: class, Icon: "ti-star", IconOnly: true, Label: "Icon only"})
+		@button.Button(button.Props{Type: "button", Size: size, Class: class, Icon: "ti-star"}) {
+			Button
+		}
+		@button.Button(button.Props{Type: "button", Size: size, Class: class}) {
+			Button
+			@icon.Icon("ti-star", icon.Props{Class: "icon-end"})
+		}
+	</div>
+}
+
+type animated struct{ Class, Icon, Text string }
+
+templ buttonsPage() {
+	@preview("buttons") {
+		<div class="row row-cards mb-5">
+			<div class="col-md-6 col-lg-4">
+				@section("Basic", "Add an icon to the left, the right, or drop the label for an icon-only button.") {
+					<div class="btn-list">
+						@button.Button(button.Props{Type: "button"}) {
+							Button
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-star"}) {
+							With icon
+						}
+						@button.Button(button.Props{Type: "button"}) {
+							Icon at end
+							@icon.Icon("ti-star", icon.Props{Class: "icon-end"})
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-star", IconOnly: true, Label: "Icon only"})
+						@button.Button(button.Props{Type: "button", Disabled: true}) {
+							Disabled
+						}
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Shapes", "Round the corners with .btn-pill, or square them off with .btn-square.") {
+					<div class="btn-list">
+						@button.Button(button.Props{Type: "button"}) {
+							Default
+						}
+						@button.Button(button.Props{Type: "button", Class: "btn-pill"}) {
+							Pill
+						}
+						@button.Button(button.Props{Type: "button", Class: "btn-square"}) {
+							Square
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-star", IconOnly: true, Label: "Star"})
+						@button.Button(button.Props{Type: "button", Icon: "ti-star", IconOnly: true, Label: "Star (pill)", Class: "btn-pill"})
+						@button.Button(button.Props{Type: "button", Icon: "ti-star", IconOnly: true, Label: "Star (square)", Class: "btn-square"})
+					</div>
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("Action buttons", "Compact, icon-only buttons for card headers and toolbars.") {
+					<div class="btn-actions">
+						for _, a := range []named{{"ti-edit", "Edit"}, {"ti-copy", "Copy"}, {"ti-settings", "Settings"}, {"ti-clipboard", "Clipboard"}, {"ti-x", "X"}} {
+							@button.Button(button.Props{Href: "#", Icon: a.Variant, Class: "btn-action", Attributes: templ.Attributes{"aria-label": a.Text}})
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12 col-lg-8">
+				@section("Sizes", "Scale a button from btn-sm to btn-xl without changing its icon layout.") {
+					<div class="space-y">
+						@sizeRow(button.SizeSmall, "")
+						@sizeRow(button.SizeDefault, "")
+						@sizeRow(button.SizeLarge, "")
+						@sizeRow(button.SizeDefault, "btn-xl")
+					</div>
+				}
+			</div>
+			<div class="col-md-12 col-lg-4">
+				@section("Animated icon", "Small hover animations draw attention to the icon.") {
+					<div class="btn-list">
+						@button.Button(button.Props{Type: "button", Class: "btn-animate-icon"}) {
+							Save
+							@icon.Icon("ti-arrow-right", icon.Props{Class: "icon-end"})
+						}
+						for _, a := range []animated{{"rotate", "ti-plus", "Add"}, {"shake", "ti-bell", "Notifications"}, {"rotate", "ti-settings", "Settings"},
+							{"pulse", "ti-heart", "Love"}, {"rotate", "ti-x", "Close"}, {"tada", "ti-check", "Confirm"}} {
+							@button.Button(button.Props{Type: "button", Class: "btn-animate-icon btn-animate-icon-" + a.Class, Icon: a.Icon}) {
+								{ a.Text }
+							}
+						}
+						@button.Button(button.Props{Type: "button", Class: "btn-animate-icon"}) {
+							Next
+							@icon.Icon("ti-chevron-right", icon.Props{Class: "icon-end"})
+						}
+						@button.Button(button.Props{Type: "button", Class: "btn-animate-icon btn-animate-icon-move-start", Icon: "ti-chevron-left"}) {
+							Previous
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Standard", "Fill a button with a theme color to mark its purpose.") {
+					@colorRow(themeColors, "")
+				}
+			</div>
+			<div class="col-12">
+				@section("Outline", "Keep the border colored and the background transparent for a subtler action.") {
+					@colorRow(themeColors, "btn-outline")
+				}
+			</div>
+			<div class="col-12">
+				@section("Ghost", "Drop the border too — color appears only on hover.") {
+					@colorRow(themeColors, "btn-ghost")
+				}
+			</div>
+			<div class="col-12">
+				@section("Pill", "Combine .btn-pill with a theme color.") {
+					@colorRow(themeColors, "btn-pill")
+				}
+			</div>
+			<div class="col-12">
+				@section("Square", "Combine .btn-square with a theme color.") {
+					@colorRow(themeColors, "btn-square")
+				}
+			</div>
+			<div class="col-12">
+				@section("Extra colors", "The full Tabler palette, beyond the eight theme colors.") {
+					@colorRow(extraColors, "")
+				}
+			</div>
+			<div class="col-12">
+				@section("Social colors", "Brand colors for linking out to social networks.") {
+					<div class="btn-list">
+						for _, s := range socialColors {
+							@button.Button(button.Props{Type: "button", Variant: button.Variant(s.Variant), Icon: s.Icon}) {
+								{ s.Text }
+							}
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Icon buttons", "Social brand colors without a label, for compact toolbars.") {
+					<div class="btn-list">
+						for _, s := range socialColors {
+							@button.Button(button.Props{Type: "button", Variant: button.Variant(s.Variant), Icon: s.Icon, IconOnly: true,
+								Attributes: templ.Attributes{"aria-label": s.Text}})
+						}
+					</div>
+				}
+			</div>
+		</div>
+	}
+}

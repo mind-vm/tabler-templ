@@ -7,7 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // ScriptConfig names what the script and the server exchange. The zero value uses the defaults; an app

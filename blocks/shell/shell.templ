@@ -1,4 +1,4 @@
-// Package shell is the page frame of an app: the HTML document with the sidebar (tablerkit/sidebar),
+// Package shell is the page frame of an app: the HTML document with the sidebar (sidebar package),
 // a sticky header with the sidebar's buttons, breadcrumbs and actions, the page header (title, extra,
 // subtitle, actions), an optional flash message and the content (the children).
 //
@@ -18,14 +18,14 @@
 package shell
 
 import (
-	"github.com/mind-vm/tablerkit/alert"
-	"github.com/mind-vm/tablerkit/blocks/create"
-	"github.com/mind-vm/tablerkit/blocks/detail"
-	"github.com/mind-vm/tablerkit/blocks/history"
-	"github.com/mind-vm/tablerkit/blocks/listpage"
-	"github.com/mind-vm/tablerkit/blocks/stats"
-	"github.com/mind-vm/tablerkit/kit"
-	"github.com/mind-vm/tablerkit/sidebar"
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/history"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/blocks/stats"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/sidebar"
 )
 
 // Crumb is one step of the breadcrumbs; the last one is the current page, a crumb without Href is text.

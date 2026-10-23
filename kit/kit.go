@@ -1,4 +1,4 @@
-// Package kit holds the small helpers every tablerkit component shares: joining CSS classes and
+// Package kit holds the small helpers every tabler-templ component shares: joining CSS classes and
 // merging attribute maps. Components emit plain Tabler classes, so theming happens in CSS through
 // Tabler's --tblr-* custom properties, never in Go.
 package kit

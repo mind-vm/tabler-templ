@@ -23,11 +23,11 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mind-vm/tablerkit/alert"
-	"github.com/mind-vm/tablerkit/button"
-	"github.com/mind-vm/tablerkit/form"
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // Flash is a message above the card, e.g. after signing out.
