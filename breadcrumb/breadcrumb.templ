@@ -1,0 +1,73 @@
+// Package breadcrumb renders Tabler breadcrumbs: the path to the current page, with separators
+// (slash, dots, arrows, bullets), an icon for an item and a muted style.
+package breadcrumb
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Separator string
+
+const (
+	SeparatorSlash   Separator = ""
+	SeparatorDots    Separator = "dots"
+	SeparatorArrows  Separator = "arrows"
+	SeparatorBullets Separator = "bullets"
+)
+
+// Crumb is one step of the path. The last crumb is the current page and is not linked; neither is a
+// crumb without Href.
+type Crumb struct {
+	Text string
+	Href string
+	// Icon shows an icon; with IconOnly the text becomes its aria-label (e.g. a home icon).
+	Icon     string
+	IconOnly bool
+}
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Separator  Separator
+	Muted      bool   // secondary text color (breadcrumb-muted)
+	Label      string // aria-label of the <nav>, default kit.T(ctx).Breadcrumbs
+}
+
+templ crumbInner(c Crumb) {
+	if c.Icon != "" {
+		@icon.Icon(c.Icon)
+	}
+	if !c.IconOnly || c.Icon == "" {
+		{ c.Text }
+	}
+}
+
+templ Breadcrumb(p Props, crumbs []Crumb) {
+	<nav aria-label={ kit.Or(p.Label, kit.T(ctx).Breadcrumbs) } { p.Attributes... }>
+		<ol class={ kit.Classes("breadcrumb", p.Class, kit.If(p.Separator != SeparatorSlash, "breadcrumb-"+string(p.Separator)), kit.If(p.Muted, "breadcrumb-muted")) }>
+			for i, c := range crumbs {
+				if i == len(crumbs)-1 {
+					<li class="breadcrumb-item active" aria-current="page">
+						@crumbInner(c)
+					</li>
+				} else if c.Href == "" {
+					<li class="breadcrumb-item">
+						@crumbInner(c)
+					</li>
+				} else {
+					<li class="breadcrumb-item">
+						<a
+							href={ templ.URL(c.Href) }
+							if c.IconOnly && c.Icon != "" {
+								aria-label={ c.Text }
+							}
+						>
+							@crumbInner(c)
+						</a>
+					</li>
+				}
+			}
+		</ol>
+	</nav>
+}

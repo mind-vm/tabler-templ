@@ -1,0 +1,109 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/offcanvas"
+	"github.com/mind-vm/tabler-templ/toast"
+)
+
+type panel struct {
+	ID, Title string
+	Placement offcanvas.Placement
+	Floating  bool
+}
+
+var panels = []panel{
+	{"offcanvasStart", "Start offcanvas", offcanvas.Start, false}, {"offcanvasEnd", "End offcanvas", offcanvas.End, false},
+	{"offcanvasTop", "Top offcanvas", offcanvas.Top, false}, {"offcanvasBottom", "Bottom offcanvas", offcanvas.Bottom, false},
+	{"offcanvasFloatingStart", "Start offcanvas", offcanvas.Start, true}, {"offcanvasFloatingEnd", "End offcanvas", offcanvas.End, true},
+	{"offcanvasFloatingTop", "Top offcanvas", offcanvas.Top, true}, {"offcanvasFloatingBottom", "Bottom offcanvas", offcanvas.Bottom, true},
+}
+
+templ panelTriggers(floating bool) {
+	@button.List() {
+		for _, p := range panels {
+			if p.Floating == floating {
+				@button.Button(button.Props{Href: "#" + p.ID, Attributes: kitAttrs(offcanvas.Trigger(p.ID), templ.Attributes{"role": "button"})}) {
+					Toggle { string(p.Placement) } offcanvas
+				}
+			}
+		}
+	}
+}
+
+templ offcanvasPage() {
+	@preview("offcanvas") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							Default
+						}
+					}
+					@card.Body() {
+						@panelTriggers(false)
+					}
+				}
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							Floating
+						}
+					}
+					@card.Body() {
+						@panelTriggers(true)
+					}
+				}
+			</div>
+		</div>
+		for _, p := range panels {
+			@offcanvas.Offcanvas(offcanvas.Props{ID: p.ID, Title: p.Title, Placement: p.Placement, Floating: p.Floating}) {
+				<div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab assumenda ea est, eum exercitationem fugiat illum itaque laboriosam magni necessitatibus, nemo nisi numquam quae reiciendis repellat sit soluta unde. Aut!</div>
+				<div class="mt-3">
+					@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: offcanvas.Dismiss()}) {
+						Close offcanvas
+					}
+				</div>
+			}
+		}
+	}
+}
+
+templ toastSender() {
+	@avatar.Avatar(avatar.Props{Src: avatarURL("002m"), Size: avatar.SizeXS, Class: "me-2"})
+}
+
+templ toastsPage() {
+	@preview("toasts") {
+		@card.Card() {
+			@card.Body() {
+				@button.List() {
+					@button.Button(button.Props{Type: "button", Attributes: toast.Trigger("toast-simple")}) {
+						Simple toast
+					}
+					@button.Button(button.Props{Type: "button", Attributes: toast.Trigger("toast-cookies")}) {
+						Cookies toast
+					}
+				}
+			}
+		}
+		@toast.Container(toast.ContainerProps{Position: toast.BottomEnd}) {
+			@toast.Toast(toast.Props{ID: "toast-simple", Header: toastSender(), Title: "Mallory Hulme", Time: "11 mins ago"}) {
+				Hello, world! This is a toast message.
+			}
+			@toast.Toast(toast.Props{ID: "toast-cookies", Header: toastSender(), Title: "Mallory Hulme", Time: "11 mins ago"}) {
+				🍪 Our site uses cookies. By continuing to use our site, you agree to our Cookie Policy.
+				<div class="mt-2 pt-2 border-top">
+					@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Size: button.SizeSmall, Attributes: toast.Dismiss()}) {
+						I understand
+					}
+				</div>
+			}
+		}
+	}
+}

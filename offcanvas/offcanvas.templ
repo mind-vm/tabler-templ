@@ -1,0 +1,106 @@
+// Package offcanvas renders Tabler's offcanvas: a panel that slides in from an edge of the screen, with
+// a header (title and close button), a body and a footer; narrow and floating panels, and responsive
+// panels that are part of the page above a breakpoint.
+//
+//	@button.Button(button.Props{Type: "button", Attributes: offcanvas.Trigger("filters")}) { Filters }
+//	@offcanvas.Offcanvas(offcanvas.Props{ID: "filters", Title: "Filters", Placement: offcanvas.End, Footer: apply()}) { … }
+package offcanvas
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Placement string
+
+const (
+	Start  Placement = "start"
+	End    Placement = "end"
+	Top    Placement = "top"
+	Bottom Placement = "bottom"
+)
+
+type Props struct {
+	ID         string // required: Trigger targets it
+	Class      string
+	Attributes templ.Attributes
+	Placement  Placement // default Start
+	// Responsive is a breakpoint (sm, md, lg, xl, xxl) above which the panel is shown as part of the page.
+	Responsive string
+	Floating   bool // a gap to the screen edges, rounded corners (offcanvas-floating)
+	Narrow     bool // thinner panel (offcanvas-narrow)
+	Show       bool // open on load
+	// Scroll keeps the page scrollable while the panel is open; NoBackdrop drops the dark backdrop.
+	Scroll     bool
+	NoBackdrop bool
+	// Title renders a header with the title and a close button; Header replaces that header's content.
+	Title      string
+	Header     templ.Component
+	Footer     templ.Component
+	CloseLabel string // default kit.T(ctx).Close
+	// BodyClass is added to the offcanvas-body; NoBody puts the children directly into the panel.
+	BodyClass string
+	NoBody    bool
+}
+
+// Trigger returns the attributes that make any button toggle the panel.
+func Trigger(id string) templ.Attributes {
+	return templ.Attributes{"data-bs-toggle": "offcanvas", "data-bs-target": "#" + id, "aria-controls": id}
+}
+
+// Dismiss returns the attributes that make a button inside the panel close it.
+func Dismiss() templ.Attributes {
+	return templ.Attributes{"data-bs-dismiss": "offcanvas"}
+}
+
+// TitleID is the id of the title element, for aria-labelledby.
+func TitleID(id string) string { return id + "-title" }
+
+func classes(p Props) string {
+	base := "offcanvas"
+	if p.Responsive != "" {
+		base = "offcanvas-" + p.Responsive
+	}
+	return kit.Classes(base, "offcanvas-"+string(kit.Or(string(p.Placement), string(Start))), kit.If(p.Narrow, "offcanvas-narrow"),
+		kit.If(p.Floating, "offcanvas-floating"), kit.If(p.Show, "show"), p.Class)
+}
+
+templ Offcanvas(p Props) {
+	{{ p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close) }}
+	<div
+		class={ classes(p) }
+		tabindex="-1"
+		role="dialog"
+		id={ p.ID }
+		if p.Title != "" {
+			aria-labelledby={ TitleID(p.ID) }
+		}
+		if p.Scroll {
+			data-bs-scroll="true"
+		}
+		if p.NoBackdrop {
+			data-bs-backdrop="false"
+		}
+		{ p.Attributes... }
+	>
+		if p.Title != "" || p.Header != nil {
+			<div class="offcanvas-header">
+				if p.Header != nil {
+					@p.Header
+				} else {
+					<h2 class="offcanvas-title" id={ TitleID(p.ID) }>{ p.Title }</h2>
+				}
+				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label={ p.CloseLabel }></button>
+			</div>
+		}
+		if p.NoBody {
+			{ children... }
+		} else {
+			<div class={ kit.Classes("offcanvas-body", p.BodyClass) }>
+				{ children... }
+			</div>
+		}
+		if p.Footer != nil {
+			<div class="offcanvas-footer">
+				@p.Footer
+			</div>
+		}
+	</div>
+}

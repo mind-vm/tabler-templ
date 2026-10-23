@@ -1,0 +1,215 @@
+// Package dropdown renders Tabler dropdowns: a Dropdown wrapper with a Toggle (any button) and a Menu of
+// items, headers, dividers, check items, columns and submenus. Tabler's script opens and closes them.
+//
+//	@dropdown.Dropdown() {
+//		@dropdown.Toggle(button.Props{}) { Actions }
+//		@dropdown.Menu(dropdown.MenuProps{End: true}) {
+//			@dropdown.Item(dropdown.ItemProps{Href: "/edit", Icon: "ti-edit"}) { Edit }
+//			@dropdown.Divider()
+//			@dropdown.Item(dropdown.ItemProps{Href: "/delete", Class: "text-danger"}) { Delete }
+//		}
+//	}
+package dropdown
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Direction is where the menu opens relative to the toggle.
+type Direction string
+
+const (
+	DirectionDown   Direction = ""
+	DirectionUp     Direction = "dropup"
+	DirectionStart  Direction = "dropstart"
+	DirectionEnd    Direction = "dropend"
+	DirectionCenter Direction = "dropdown-center"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Direction  Direction
+}
+
+// Dropdown wraps a Toggle and its Menu.
+templ Dropdown(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("dropdown", string(p.Direction), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// ToggleAttributes make any element open the menu next to it.
+func ToggleAttributes() templ.Attributes {
+	return templ.Attributes{"data-bs-toggle": "dropdown", "aria-expanded": "false"}
+}
+
+// Toggle is a button (with all of button.Props) that opens the menu, with a caret (dropdown-toggle).
+// Without a caret, spread ToggleAttributes on a button.Button instead, e.g. for an icon-only button.
+templ Toggle(p button.Props) {
+	{{
+		p.Class = kit.Classes("dropdown-toggle", p.Class)
+		p.Attributes = kit.Attrs(ToggleAttributes(), p.Attributes)
+		if p.Href == "" && p.Type == "" {
+			p.Type = "button"
+		}
+	}}
+	@button.Button(p) {
+		{ children... }
+	}
+}
+
+type MenuProps struct {
+	Class      string
+	Attributes templ.Attributes
+	End        bool // aligned to the toggle's end (dropdown-menu-end)
+	Arrow      bool // an arrow pointing at the toggle (dropdown-menu-arrow)
+	Dark       bool // dark menu on a light page (data-bs-theme="dark")
+	Card       bool // holds a card instead of items (dropdown-menu-card)
+	Scrollable bool // limits the height (dropdown-menu-scrollable)
+	Show       bool // open, e.g. to render it statically
+}
+
+templ Menu(props ...MenuProps) {
+	{{ p := kit.First(props) }}
+	<div
+		class={ kit.Classes("dropdown-menu", kit.If(p.End, "dropdown-menu-end"), p.Class, kit.If(p.Arrow, "dropdown-menu-arrow"),
+			kit.If(p.Card, "dropdown-menu-card"), kit.If(p.Scrollable, "dropdown-menu-scrollable"), kit.If(p.Show, "show")) }
+		if p.Dark {
+			data-bs-theme="dark"
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+type ItemProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Href       string // renders <a>; without it a <button type="button">
+	Icon       string // leading icon (dropdown-item-icon)
+	Active     bool
+	Disabled   bool
+}
+
+templ itemInner(p ItemProps) {
+	if p.Icon != "" {
+		@icon.Icon(p.Icon, icon.Props{Class: "dropdown-item-icon"})
+	}
+	{ children... }
+}
+
+// Item is one entry of a Menu. A badge in the children goes to the end with Class "ms-auto".
+templ Item(props ...ItemProps) {
+	{{ p := kit.First(props) }}
+	{{ c := kit.Classes("dropdown-item", kit.If(p.Active, "active"), kit.If(p.Disabled, "disabled"), p.Class) }}
+	if p.Href != "" {
+		<a
+			class={ c }
+			href={ templ.URL(p.Href) }
+			if p.Active {
+				aria-current="true"
+			}
+			if p.Disabled {
+				aria-disabled="true"
+				tabindex="-1"
+			}
+			{ p.Attributes... }
+		>
+			@itemInner(p) {
+				{ children... }
+			}
+		</a>
+	} else {
+		<button type="button" class={ c } disabled?={ p.Disabled } { p.Attributes... }>
+			@itemInner(p) {
+				{ children... }
+			}
+		</button>
+	}
+}
+
+// Text is an entry that holds other controls, e.g. a label with a switch (a <div class="dropdown-item">).
+templ Text(props ...ItemProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("dropdown-item", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+type CheckProps struct {
+	Class      string
+	Attributes templ.Attributes // on the input
+	Name       string
+	Value      string
+	Label      string
+	Checked    bool
+	Radio      bool
+	Switch     bool // a switch (form-switch) instead of a checkbox
+}
+
+// Check is an entry with a checkbox, radio or switch, so a dropdown works as a filter.
+templ Check(p CheckProps) {
+	<label class={ kit.Classes("dropdown-item", kit.If(p.Switch, "form-switch"), p.Class) }>
+		<input
+			class="form-check-input m-0 me-2"
+			if p.Radio {
+				type="radio"
+			} else {
+				type="checkbox"
+			}
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			checked?={ p.Checked }
+			{ p.Attributes... }
+		/>
+		{ p.Label }
+	</label>
+}
+
+// Header names a group of items.
+templ Header() {
+	<span class="dropdown-header">
+		{ children... }
+	</span>
+}
+
+templ Divider() {
+	<div class="dropdown-divider"></div>
+}
+
+// Columns splits a long menu into Column groups side by side.
+templ Columns() {
+	<div class="dropdown-menu-columns">
+		{ children... }
+	</div>
+}
+
+templ Column() {
+	<div class="dropdown-menu-column">
+		{ children... }
+	</div>
+}
+
+type SubmenuProps struct {
+	Label     string
+	Direction Direction // default DirectionEnd: opens to the side
+}
+
+// Submenu is an item that opens a nested menu; the children are its items.
+templ Submenu(p SubmenuProps) {
+	<div class={ kit.Classes("dropdown", string(kit.Or(string(p.Direction), string(DirectionEnd)))) }>
+		<a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">{ p.Label }</a>
+		<div class="dropdown-menu">
+			{ children... }
+		</div>
+	</div>
+}

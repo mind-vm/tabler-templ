@@ -28,7 +28,7 @@ func (s Status) String() string {
 // Component is a page of the Tabler docs under ui/components or ui/forms.
 type Component struct {
 	Name    string
-	Doc     string   // path below https://docs.tabler.io/
+	Doc     string   // path below https://docs.tabler.io/; empty for parts without a docs page
 	Astro   []string // Tabler's Astro components in shared/ui/ that the package mirrors
 	Status  Status
 	Package string // import path below the module, e.g. "button"
@@ -162,7 +162,11 @@ func Roadmap(w io.Writer) {
 		if len(c.Astro) > 0 {
 			src = " (" + strings.Join(c.Astro, ", ") + ")"
 		}
-		p("%s[%s](%s%s)%s%s", check(c.Status), c.Name, docsURL, c.Doc, src, detail(c.Status, c.Package, c.Note))
+		link := docsURL + c.Doc
+		if c.Doc == "" {
+			link = sourceURL + "ui/" + c.Astro[0] + ".astro"
+		}
+		p("%s[%s](%s)%s%s", check(c.Status), c.Name, link, src, detail(c.Status, c.Package, c.Note))
 	}
 	p("")
 	p("## Blocks")

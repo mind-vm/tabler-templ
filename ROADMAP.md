@@ -8,9 +8,9 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 3 done, 6 partial, 53 open (of 62) |
-| Blocks | 0 done, 7 partial, 171 open (of 178) |
-| Preview pages | 3 done, 3 partial, 140 open (of 146) |
+| Components | 14 done, 6 partial, 43 open (of 63) |
+| Blocks | 1 done, 7 partial, 170 open (of 178) |
+| Preview pages | 7 done, 3 partial, 136 open (of 146) |
 
 ## Plan
 
@@ -33,9 +33,9 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 
 - [ ] [Accordion](https://docs.tabler.io/ui/components/accordion)
 - [x] [Alert](https://docs.tabler.io/ui/components/alert) (Alert) — `alert`
-- [ ] [Avatar](https://docs.tabler.io/ui/components/avatar) (Avatar, AvatarList, AvatarUpload)
+- [x] [Avatar](https://docs.tabler.io/ui/components/avatar) (Avatar, AvatarList, AvatarUpload) — `avatar`
 - [x] [Badge](https://docs.tabler.io/ui/components/badge) (Badge, BadgeList) — `badge`
-- [ ] [Breadcrumb](https://docs.tabler.io/ui/components/breadcrumb) (Breadcrumb)
+- [x] [Breadcrumb](https://docs.tabler.io/ui/components/breadcrumb) (Breadcrumb) — `breadcrumb`
 - [ ] [Button](https://docs.tabler.io/ui/components/button) (Button, ButtonGroup, ButtonList) — `button`, partial, no button group (btn-group) yet
 - [ ] [Card gradient](https://docs.tabler.io/ui/components/card-gradient)
 - [ ] [Card](https://docs.tabler.io/ui/components/card) (Card, CardHeader, CardTitle, CardSubtitle, CardBody, CardFooter, CardActions, CardDropdown, CardStamp) — `card`, partial, no tabs, image overlay, cover, rotation or dropdown yet
@@ -44,7 +44,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Confetti](https://docs.tabler.io/ui/components/confetti)
 - [ ] [Data grid](https://docs.tabler.io/ui/components/datagrid) (Datagrid, DatagridItem)
 - [ ] [Divider](https://docs.tabler.io/ui/components/divider) (HrText)
-- [ ] [Dropdown](https://docs.tabler.io/ui/components/dropdown)
+- [x] [Dropdown](https://docs.tabler.io/ui/components/dropdown) — `dropdown`
 - [ ] [Empty state](https://docs.tabler.io/ui/components/empty) (Empty)
 - [ ] [Hover gallery](https://docs.tabler.io/ui/components/hover-gallery) (HoverGallery)
 - [ ] [Icon list](https://docs.tabler.io/ui/components/icon-list) (IconList, IconListItem)
@@ -56,16 +56,16 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Mention](https://docs.tabler.io/ui/components/mention)
 - [ ] [Mockup browser](https://docs.tabler.io/ui/components/mockup-browser) (MockupBrowser)
 - [ ] [Modal](https://docs.tabler.io/ui/components/modal) — `modal`, partial, no status bar, blur or inline dialogs yet
-- [ ] [Nav overflow](https://docs.tabler.io/ui/components/nav-overflow)
-- [ ] [Offcanvas](https://docs.tabler.io/ui/components/offcanvas) (Offcanvas, OffcanvasHeader, OffcanvasBody)
+- [x] [Nav overflow](https://docs.tabler.io/ui/components/nav-overflow) — `nav`
+- [x] [Offcanvas](https://docs.tabler.io/ui/components/offcanvas) (Offcanvas, OffcanvasHeader, OffcanvasBody) — `offcanvas`
 - [x] [Pagination](https://docs.tabler.io/ui/components/pagination) (Pagination) — `pagination`
 - [ ] [Placeholder](https://docs.tabler.io/ui/components/placeholder)
-- [ ] [Popover](https://docs.tabler.io/ui/components/popover)
+- [x] [Popover](https://docs.tabler.io/ui/components/popover) — `popover`
 - [ ] [Pricing](https://docs.tabler.io/ui/components/pricing)
 - [ ] [Progress steps](https://docs.tabler.io/ui/components/progress-step) (ProgressSteps)
 - [ ] [Progress bar](https://docs.tabler.io/ui/components/progress) (Progress, ProgressBg, ProgressDescription)
 - [ ] [Ribbon](https://docs.tabler.io/ui/components/ribbon) (Ribbon)
-- [ ] [Segmented control](https://docs.tabler.io/ui/components/segmented-control) (NavSegmented)
+- [x] [Segmented control](https://docs.tabler.io/ui/components/segmented-control) (NavSegmented) — `nav`
 - [ ] [Shape](https://docs.tabler.io/ui/components/shape)
 - [ ] [Signal](https://docs.tabler.io/ui/components/signal) (Signal)
 - [ ] [Sparkline](https://docs.tabler.io/ui/components/sparkline) (Sparkline, ChartSparkline)
@@ -74,13 +74,13 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Status](https://docs.tabler.io/ui/components/status) (StatusDot)
 - [ ] [Step](https://docs.tabler.io/ui/components/step) (Steps)
 - [ ] [Switch icon](https://docs.tabler.io/ui/components/switch-icon) (SwitchIcon)
-- [ ] [Tab](https://docs.tabler.io/ui/components/tab)
+- [x] [Tab](https://docs.tabler.io/ui/components/tab) — `nav`
 - [ ] [Table](https://docs.tabler.io/ui/components/table) — `table`, partial, table wrapper and empty row only
 - [ ] [Tag](https://docs.tabler.io/ui/components/tag) (Tag, TagList)
 - [ ] [Text shimmer](https://docs.tabler.io/ui/components/text-shimmer) (TextShimmer)
 - [ ] [Timeline](https://docs.tabler.io/ui/components/timeline)
-- [ ] [Toast](https://docs.tabler.io/ui/components/toast)
-- [ ] [Tooltip](https://docs.tabler.io/ui/components/tooltip)
+- [x] [Toast](https://docs.tabler.io/ui/components/toast) — `toast`
+- [x] [Tooltip](https://docs.tabler.io/ui/components/tooltip) — `tooltip`
 - [ ] [Tracking](https://docs.tabler.io/ui/components/tracking)
 - [ ] [Trending](https://docs.tabler.io/ui/components/trending) (Trending)
 - [ ] [Color check](https://docs.tabler.io/ui/forms/color-check)
@@ -93,6 +93,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Select group](https://docs.tabler.io/ui/forms/select-group)
 - [ ] [Password strength](https://docs.tabler.io/ui/forms/strength) (Strength)
 - [ ] [Validation](https://docs.tabler.io/ui/forms/validation)
+- [x] [Flag](https://github.com/tabler/tabler/blob/dev/shared/ui/Flag.astro) (Flag) — `flag`
 
 ## Blocks
 
@@ -157,7 +158,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/Subscribe](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Subscribe.astro)
 - [ ] [cards/SuccessMessage](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SuccessMessage.astro)
 - [ ] [cards/SystemStatus](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SystemStatus.astro)
-- [ ] [cards/TabsCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TabsCard.astro)
+- [x] [cards/TabsCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TabsCard.astro) — `blocks/tabscard`
 - [ ] [cards/Tasks](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Tasks.astro)
 - [ ] [cards/TasksDue](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TasksDue.astro)
 - [ ] [cards/TeamLeaderboard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/TeamLeaderboard.astro)
@@ -421,7 +422,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [x] [alerts](https://preview.tabler.io/alerts.html) Alerts
 - [ ] [all-elements](https://preview.tabler.io/all-elements.html) All Elements - Kitchen Sink
 - [ ] [avatars](https://preview.tabler.io/avatars.html) Avatars
-- [ ] [badges](https://preview.tabler.io/badges.html) Badges — partial, no dropdown example yet; filled star icons missing (webfont)
+- [ ] [badges](https://preview.tabler.io/badges.html) Badges — partial, filled star icons missing (webfont)
 - [x] [buttons](https://preview.tabler.io/buttons.html) Buttons
 - [ ] [card-actions](https://preview.tabler.io/card-actions.html) Card actions
 - [ ] [card-gradients](https://preview.tabler.io/card-gradients.html) Card Gradients
@@ -432,7 +433,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [colors](https://preview.tabler.io/colors.html) Colors
 - [ ] [confetti](https://preview.tabler.io/confetti.html) Confetti
 - [ ] [datagrid](https://preview.tabler.io/datagrid.html) Data grid
-- [ ] [dropdowns](https://preview.tabler.io/dropdowns.html) Dropdowns
+- [x] [dropdowns](https://preview.tabler.io/dropdowns.html) Dropdowns
 - [ ] [flags](https://preview.tabler.io/flags.html) Flags
 - [ ] [form-elements](https://preview.tabler.io/form-elements.html) Form elements
 - [ ] [form-layout](https://preview.tabler.io/form-layout.html) Form layout
@@ -449,7 +450,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [nav-overflow](https://preview.tabler.io/nav-overflow.html) Nav overflow
 - [ ] [navigation](https://preview.tabler.io/navigation.html) Navigation
 - [ ] [number-input](https://preview.tabler.io/number-input.html) Number input
-- [ ] [offcanvas](https://preview.tabler.io/offcanvas.html) Offcanvas
+- [x] [offcanvas](https://preview.tabler.io/offcanvas.html) Offcanvas
 - [x] [pagination](https://preview.tabler.io/pagination.html) Pagination
 - [ ] [password-strength](https://preview.tabler.io/password-strength.html) Password strength
 - [ ] [patterns](https://preview.tabler.io/patterns.html) Patterns
@@ -468,9 +469,9 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [steps](https://preview.tabler.io/steps.html) Steps
 - [ ] [switch-icons](https://preview.tabler.io/switch-icons.html) Switch icons
 - [ ] [tables](https://preview.tabler.io/tables.html) Tables
-- [ ] [tabs](https://preview.tabler.io/tabs.html) Tabs
+- [x] [tabs](https://preview.tabler.io/tabs.html) Tabs
 - [ ] [tags](https://preview.tabler.io/tags.html) Tags
 - [ ] [text-features](https://preview.tabler.io/text-features.html) Text features
 - [ ] [text-shimmer](https://preview.tabler.io/text-shimmer.html) Text shimmer
-- [ ] [toasts](https://preview.tabler.io/toasts.html) Toasts
+- [x] [toasts](https://preview.tabler.io/toasts.html) Toasts
 - [ ] [typography](https://preview.tabler.io/typography.html) Typography

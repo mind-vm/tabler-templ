@@ -1,0 +1,113 @@
+package nav
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type SegmentedProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Vertical   bool
+	Size       Size
+	Block      bool // full width
+	// Name turns the segments into radio buttons of a form field with this name; without it they are
+	// tabs (role="tablist") for Panes.
+	Name  string
+	Label string // aria-label
+}
+
+// Segmented is a segmented control: a row of Segments of which one is selected.
+templ Segmented(p SegmentedProps) {
+	<nav
+		class={ kit.Classes("nav nav-segmented", kit.If(p.Vertical, "nav-segmented-vertical"), kit.If(p.Size != SizeDefault, "nav-"+string(p.Size)), kit.If(p.Block, "w-100"), p.Class) }
+		if p.Name == "" {
+			role="tablist"
+			if p.Vertical {
+				aria-orientation="vertical"
+			}
+		}
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</nav>
+}
+
+type SegmentProps struct {
+	// Name and ID make the segment a radio button (use the Segmented's Name); Value is its value.
+	Name     string
+	ID       string
+	Value    string
+	Target   string // the id of a Pane, for segments that switch panels
+	Icon     string
+	Label    string // aria-label for icon-only segments
+	Active   bool
+	Disabled bool
+}
+
+// Segment is one option of a Segmented control; the children are its text.
+templ Segment(p SegmentProps) {
+	if p.Name != "" {
+		<input
+			type="radio"
+			class="nav-link-input"
+			name={ p.Name }
+			id={ p.ID }
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			checked?={ p.Active }
+			disabled?={ p.Disabled }
+		/>
+		<label
+			for={ p.ID }
+			class={ kit.Classes("nav-link", kit.If(p.Disabled, "disabled")) }
+			if p.Disabled {
+				aria-disabled="true"
+			}
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+		>
+			@segmentInner(p) {
+				{ children... }
+			}
+		</label>
+	} else {
+		<button
+			type="button"
+			class={ kit.Classes("nav-link", kit.If(p.Disabled, "disabled"), kit.If(p.Active, "active")) }
+			role="tab"
+			data-bs-toggle="tab"
+			if p.Target != "" {
+				data-bs-target={ "#" + p.Target }
+				aria-controls={ p.Target }
+			}
+			if p.Active {
+				aria-selected="true"
+			} else {
+				aria-selected="false"
+			}
+			if p.Disabled {
+				aria-disabled="true"
+			}
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+		>
+			@segmentInner(p) {
+				{ children... }
+			}
+		</button>
+	}
+}
+
+templ segmentInner(p SegmentProps) {
+	if p.Icon != "" {
+		@icon.Icon(p.Icon, icon.Props{Class: "nav-link-icon"})
+	}
+	{ children... }
+}

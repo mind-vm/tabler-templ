@@ -1,0 +1,109 @@
+// Package toast renders Tabler toasts: a short notification with a header (avatar or icon, sender,
+// time, close button) and a body, colored variants, and the container that stacks and places them.
+// Tabler's script shows a toast when a button with Trigger(id) is clicked.
+package toast
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	// Header content before the close button, e.g. an avatar and the sender; see Title and Time.
+	Header templ.Component
+	Title  string // the sender or subject (strong, takes the free space)
+	Time   string // small text, e.g. "11 mins ago"
+	Color  string // toast-{color}, e.g. "primary", "success", "red"
+	Show   bool   // visible on load
+	// Autohide hides the toast after Delay milliseconds (Tabler default 5000); off by default.
+	Autohide bool
+	Delay    int
+	// Urgent announces the toast immediately (role="alert"); otherwise politely (role="status").
+	Urgent     bool
+	NoClose    bool
+	CloseLabel string // default kit.T(ctx).Close
+}
+
+// Trigger returns the attributes that make a button show the toast.
+func Trigger(id string) templ.Attributes {
+	return templ.Attributes{"data-bs-toggle": "toast", "data-bs-target": "#" + id}
+}
+
+// Dismiss returns the attributes that make a button inside the toast close it.
+func Dismiss() templ.Attributes {
+	return templ.Attributes{"data-bs-dismiss": "toast"}
+}
+
+func attrs(p Props) templ.Attributes {
+	a := templ.Attributes{}
+	if p.ID != "" {
+		a["id"] = p.ID
+	}
+	if p.Urgent {
+		a["role"], a["aria-live"] = "alert", "assertive"
+	} else {
+		a["role"], a["aria-live"] = "status", "polite"
+	}
+	a["aria-atomic"] = "true"
+	if p.Autohide {
+		if p.Delay > 0 {
+			a["data-bs-delay"] = p.Delay
+		}
+	} else {
+		a["data-bs-autohide"] = "false"
+	}
+	return kit.Attrs(a, p.Attributes)
+}
+
+templ Toast(p Props) {
+	{{ p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close) }}
+	<div class={ kit.Classes("toast", kit.If(p.Color != "", "toast-"+p.Color), kit.If(p.Show, "show"), p.Class) } { attrs(p)... }>
+		if p.Header != nil || p.Title != "" || p.Time != "" {
+			<div class="toast-header">
+				if p.Header != nil {
+					@p.Header
+				}
+				if p.Title != "" {
+					<strong class="me-auto">{ p.Title }</strong>
+				}
+				if p.Time != "" {
+					<small>{ p.Time }</small>
+				}
+				if !p.NoClose {
+					<button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label={ p.CloseLabel }></button>
+				}
+			</div>
+		}
+		<div class="toast-body">
+			{ children... }
+		</div>
+	</div>
+}
+
+// Position places a Container on the screen.
+type Position string
+
+const (
+	Static       Position = ""
+	TopStart     Position = "top-0 start-0"
+	TopCenter    Position = "top-0 start-50 translate-middle-x"
+	TopEnd       Position = "top-0 end-0"
+	MiddleCenter Position = "top-50 start-50 translate-middle"
+	BottomStart  Position = "bottom-0 start-0"
+	BottomCenter Position = "bottom-0 start-50 translate-middle-x"
+	BottomEnd    Position = "bottom-0 end-0"
+)
+
+type ContainerProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Position   Position // fixed on the screen; Static keeps it in the page flow
+}
+
+// Container stacks toasts.
+templ Container(props ...ContainerProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("toast-container", kit.If(p.Position != Static, "position-fixed p-3 "+string(p.Position)), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}

@@ -1,0 +1,197 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/flag"
+)
+
+// The preview shows its menus open in the page (dropdown-menu-demo, from its demo.scss).
+const demoMenu = "dropdown-menu-demo"
+
+type person struct{ Avatar, Name string }
+
+var people = []person{{"000m", "Paweł Kuna"}, {"052f", "Jeffie Lewzey"}, {"002m", "Mallory Hulme"}, {"003m", "Dunn Slane"}, {"000f", "Emmy Levet"}}
+
+type country struct{ Code, Name string }
+
+var countries = []country{{"us", "United States"}, {"gb", "United Kingdom"}, {"de", "Germany"}, {"fr", "France"}, {"pl", "Poland"}}
+
+templ actions() {
+	@dropdown.Item() {
+		Action
+	}
+	@dropdown.Item() {
+		Another action
+	}
+}
+
+// menuSet is the column of plain menus the preview repeats: simple, divider, active, disabled, header.
+templ menuSet() {
+	@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+		@actions()
+	}
+	@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+		@actions()
+		@dropdown.Divider()
+		@dropdown.Item() {
+			Separated link
+		}
+	}
+	@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+		@actions()
+		@dropdown.Item(dropdown.ItemProps{Active: true}) {
+			Active action
+		}
+	}
+	@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+		@actions()
+		@dropdown.Item(dropdown.ItemProps{Disabled: true}) {
+			Disabled action
+		}
+	}
+	@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+		@dropdown.Header() {
+			Dropdown header
+		}
+		@actions()
+	}
+}
+
+templ iconActions() {
+	@dropdown.Item(dropdown.ItemProps{Icon: "ti-settings"}) {
+		Action
+	}
+	@dropdown.Item(dropdown.ItemProps{Icon: "ti-edit"}) {
+		Another action
+	}
+}
+
+templ dropdownsPage() {
+	@preview("dropdowns") {
+		<div class="row">
+			<div class="col-sm-6 col-lg-3">
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					@dropdown.Header() {
+						Dropdown header
+					}
+					@dropdown.Item(dropdown.ItemProps{Icon: "ti-activity"}) {
+						Item 1
+					}
+					@dropdown.Item(dropdown.ItemProps{Icon: "ti-edit"}) {
+						Item 2
+					}
+					@dropdown.Text() {
+						<button type="button" class="text-reset border-0 bg-transparent p-0">My profile</button>
+						<label class="form-check m-0 ms-auto">
+							<input type="checkbox" class="form-check-input"/>
+							Public
+						</label>
+					}
+					@dropdown.Check(dropdown.CheckProps{Radio: true, Name: "dropdown-menu-all-radio", Label: "Radio input"})
+					@dropdown.Check(dropdown.CheckProps{Label: "Checkbox input"})
+					@dropdown.Check(dropdown.CheckProps{Switch: true, Label: "Checkbox input"})
+					@dropdown.Divider()
+					@dropdown.Item() {
+						Dropdown item 1
+					}
+					@dropdown.Item() {
+						Dropdown item 2
+					}
+					@dropdown.Item(dropdown.ItemProps{Disabled: true}) {
+						Dropdown disabled
+					}
+					@dropdown.Item(dropdown.ItemProps{Active: true}) {
+						Dropdown active
+					}
+					@dropdown.Divider()
+					for _, p := range people[:3] {
+						@dropdown.Item() {
+							@avatar.Avatar(avatar.Props{Src: avatarURL(p.Avatar), Size: avatar.SizeXS, Class: "rounded me-2"})
+							{ p.Name }
+						}
+					}
+					@dropdown.Divider()
+					@dropdown.Item(dropdown.ItemProps{Icon: "ti-logout"}) {
+						Logout
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@menuSet()
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					@dropdown.Header() {
+						Dropdown header
+					}
+					@iconActions()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Arrow: true}) {
+					@actions()
+				}
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@menuSet()
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					@iconActions()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					@dropdown.Item() {
+						Action
+						@badge.Badge(badge.Props{Color: "primary", Class: "ms-auto"}) {
+							12
+						}
+					}
+					@dropdown.Item() {
+						Another action
+						@badge.Badge(badge.Props{Class: "bg-green ms-auto"})
+					}
+				}
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Dark: true}) {
+					@actions()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Dark: true}) {
+					@actions()
+					@dropdown.Divider()
+					@dropdown.Item() {
+						Separated link
+					}
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Dark: true, End: true, Arrow: true}) {
+					@actions()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Dark: true, End: true, Arrow: true}) {
+					@iconActions()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					for _, o := range []string{"Option 1", "Option 2", "Option 3"} {
+						@dropdown.Check(dropdown.CheckProps{Label: o})
+					}
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					for _, o := range []string{"Option 1", "Option 2", "Option 3"} {
+						@dropdown.Check(dropdown.CheckProps{Radio: true, Name: "dropdown-menu-radio", Label: o})
+					}
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					for _, p := range people {
+						@dropdown.Item() {
+							@avatar.Avatar(avatar.Props{Src: avatarURL(p.Avatar), Size: avatar.SizeXS})
+							{ p.Name }
+						}
+					}
+				}
+				@dropdown.Menu(dropdown.MenuProps{Class: demoMenu}) {
+					for _, c := range countries {
+						@dropdown.Item() {
+							@flag.Flag(c.Code, flag.Props{Size: flag.SizeXS})
+							{ c.Name }
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
