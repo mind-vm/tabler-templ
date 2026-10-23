@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mind-vm/tabler-templ/datagrid"
+	"github.com/mind-vm/tabler-templ/divider"
+	"github.com/mind-vm/tabler-templ/iconlist"
 	"github.com/mind-vm/tabler-templ/empty"
 	"github.com/mind-vm/tabler-templ/listgroup"
 	"github.com/mind-vm/tabler-templ/progress"
@@ -73,4 +75,12 @@ func TestListGroup(t *testing.T) {
 	assert.Contains(t, h, `<span class="list-group-item-meta">2 h</span>`)
 	assert.Equal(t, `<div class="list-group-item list-group-item-danger">x</div>`, render(t, ctx, mit(listgroup.Item(listgroup.ItemProps{Color: "danger"}), "x")))
 	assert.Equal(t, "true", listgroup.CollapseToggle("n", true)["aria-expanded"])
+}
+
+func TestDividerIconList(t *testing.T) {
+	ctx := context.Background()
+	assert.Equal(t, `<div class="hr-text hr-text-start text-red">or</div>`, render(t, ctx, mit(divider.Text(divider.Props{Position: divider.Start, Class: "text-red"}), "or")))
+	h := render(t, ctx, mit(iconlist.List(iconlist.Props{Color: "success", RowGap: "1rem"}), "x"))
+	assert.Equal(t, `<ul class="list-icon" style="--tblr-list-icon-row-gap: 1rem; --tblr-list-icon-color: var(--tblr-success);">x</ul>`, h)
+	assert.Equal(t, `<li><i class="ti ti-check icon" aria-hidden="true"></i>Done</li>`, render(t, ctx, mit(iconlist.Item(), "Done")))
 }

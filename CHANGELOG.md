@@ -29,10 +29,14 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   floating labels, fieldsets, range, number input, OTP input and password strength meter; sizes, validation
   states (also lite) and more variants on `Input`, `Select`, `Textarea`, `Check`; `Field` gets `Description`,
   `Help` and `Valid`. Invalid inputs carry `aria-invalid`. `button.Group`, `button.Check`, `Floating`.
+- `blocks/auth`: Tabler's sign-in and account pages (sign in in four variants, sign up, forgot password,
+  account locked, 2-step verification, trial ended, onboarding). `blocks/signin` stays for existing apps.
+  New packages `divider` and `iconlist`.
 - `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
   `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
   default is `ShapeDefault`.
-- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps, empty, number-input and password-strength pages, checked against the
+- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps, empty, number-input and password-strength pages, and all authentication pages but license and
+  terms-of-service, checked against the
   preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
 

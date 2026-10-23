@@ -1,0 +1,412 @@
+package auth
+
+import (
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/divider"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Hidden is a hidden field of a form, e.g. where to go after signing in.
+type Hidden struct{ Name, Value string }
+
+templ hiddenFields(hs []Hidden) {
+	for _, h := range hs {
+		<input type="hidden" name={ h.Name } value={ h.Value }/>
+	}
+}
+
+templ formError(msg string) {
+	if msg != "" {
+		@alert.Alert(alert.Props{Variant: alert.VariantDanger}) {
+			{ msg }
+		}
+	}
+}
+
+// method returns the form method, post unless the app sets one.
+func method(m string) string { return kit.Or(m, "post") }
+
+type SignInFormProps struct {
+	Action string
+	Method string // default "post"
+	Hidden []Hidden
+	Error  string // shown above the fields; marks them invalid
+	ID     string // prefix of the field ids, default "signin"
+	// The user name field: an email address by default.
+	UserName        string // field name, default "email"
+	UserType        string // input type, default "email"; "text" for user names
+	UserLabel       string // default "Email address"
+	UserPlaceholder string // default "your@email.com"
+	UserValue       string // value after a failed attempt
+	UserAutofill    string // autocomplete token, default "email" ("username" for user names)
+	// The password field.
+	PasswordName        string // default "password"
+	PasswordLabel       string // default "Password"
+	PasswordPlaceholder string // default "Your password"
+	NoPasswordToggle    bool
+	// A link to reset the password next to its label; empty ForgotHref = none.
+	ForgotHref string
+	ForgotText string // default "I forgot password"
+	// A "remember me" checkbox with this name; empty = none.
+	RememberName  string
+	RememberLabel string // default "Remember me on this device"
+	Submit        string // default "Sign in"
+}
+
+func (p SignInFormProps) id(s string) string { return kit.Or(p.ID, "signin") + "-" + s }
+
+// SignInForm is the sign-in form on its own, e.g. for the CoverPage.
+templ SignInForm(p SignInFormProps) {
+	<form action={ templ.URL(p.Action) } method={ method(p.Method) } novalidate>
+		@hiddenFields(p.Hidden)
+		@formError(p.Error)
+		@form.Field(form.FieldProps{Label: kit.Or(p.UserLabel, "Email address"), For: p.id("email")}) {
+			@form.Input(form.InputProps{ID: p.id("email"), Name: kit.Or(p.UserName, "email"), Type: kit.Or(p.UserType, "email"), Value: p.UserValue,
+				Placeholder: kit.Or(p.UserPlaceholder, "your@email.com"), Autocomplete: kit.Or(p.UserAutofill, "email"), Required: true, Invalid: p.Error != ""})
+		}
+		<div class="mb-2">
+			<div class="d-flex">
+				<label class="form-label" for={ p.id("password") }>{ kit.Or(p.PasswordLabel, "Password") }</label>
+				if p.ForgotHref != "" {
+					<a href={ templ.URL(p.ForgotHref) } class="form-label-description ms-auto">{ kit.Or(p.ForgotText, "I forgot password") }</a>
+				}
+			</div>
+			@passwordInput(p.id("password"), kit.Or(p.PasswordName, "password"), kit.Or(p.PasswordPlaceholder, "Your password"), "current-password", p.Error != "", !p.NoPasswordToggle)
+		</div>
+		if p.RememberName != "" {
+			<div class="mb-2">
+				@form.Check(form.CheckProps{Name: p.RememberName, Value: "1", Label: kit.Or(p.RememberLabel, "Remember me on this device")})
+			</div>
+		}
+		@form.Footer() {
+			@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true}) {
+				{ kit.Or(p.Submit, "Sign in") }
+			}
+		}
+		if !p.NoPasswordToggle {
+			@form.PasswordToggleScript()
+		}
+	</form>
+}
+
+// passwordInput is a password field with the show/hide toggle in a flat input group. The form renders
+// the toggle's script at its end: between the field and a strength meter it would break Tabler's spacing.
+templ passwordInput(id, name, placeholder, autofill string, invalid, toggle bool) {
+	if toggle {
+		@form.Group(form.GroupProps{Flat: true}) {
+			@form.Input(form.InputProps{ID: id, Name: name, Type: "password", Placeholder: placeholder, Autocomplete: autofill, Required: true, Invalid: invalid})
+			@form.Addon() {
+				@form.PasswordToggle(form.PasswordToggleProps{Target: id})
+			}
+		}
+	} else {
+		@form.Input(form.InputProps{ID: id, Name: name, Type: "password", Placeholder: placeholder, Autocomplete: autofill, Required: true, Invalid: invalid})
+	}
+}
+
+// Provider is another way to sign in, e.g. with GitHub.
+type Provider struct {
+	Href  string
+	Icon  string // e.g. "ti-brand-github"
+	Label string // e.g. "Login with Github"
+}
+
+type SignInCardProps struct {
+	Title     string // default "Login to your account"
+	Form      SignInFormProps
+	Providers []Provider
+	Or        string // the divider before the providers, default "or"
+}
+
+// SignInCard is the sign-in card of the preview: title, form and, optionally, other providers.
+templ SignInCard(p SignInCardProps) {
+	<div class="card card-md">
+		<div class="card-body">
+			<h1 class="h2 text-center mb-4">{ kit.Or(p.Title, "Login to your account") }</h1>
+			@SignInForm(p.Form)
+		</div>
+		if len(p.Providers) > 0 {
+			@divider.Text() {
+				{ kit.Or(p.Or, "or") }
+			}
+			<div class="card-body">
+				<div class="row">
+					for _, pr := range p.Providers {
+						<div class="col">
+							@button.Button(button.Props{Href: pr.Href, Type: kit.If(pr.Href == "", "button"), Icon: pr.Icon, Block: true}) {
+								{ pr.Label }
+							}
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+type SignUpCardProps struct {
+	Action string
+	Method string
+	Hidden []Hidden
+	Error  string
+	Title  string // default "Create new account"
+	ID     string // prefix of the field ids, default "signup"
+	// Field texts and the values after a failed attempt.
+	NameLabel, NamePlaceholder         string // "Name", "Enter name"
+	EmailLabel, EmailPlaceholder       string // "Email address", "Enter email"
+	PasswordLabel, PasswordPlaceholder string // "Password", "Password"
+	Name, Email                        string
+	NoStrength                         bool // no password strength meter
+	// The terms checkbox: "Agree the <a>terms and policy</a>."; empty TermsHref = none.
+	TermsHref  string
+	TermsAgree string // default "Agree the"
+	TermsLink  string // default "terms and policy"
+	Submit     string // default "Create new account"
+}
+
+func (p SignUpCardProps) id(s string) string { return kit.Or(p.ID, "signup") + "-" + s }
+
+// SignUpCard is the registration card: name, email, password with strength meter and the terms.
+templ SignUpCard(p SignUpCardProps) {
+	<form class="card card-md" action={ templ.URL(p.Action) } method={ method(p.Method) } novalidate>
+		<div class="card-body">
+			<h1 class="card-title text-center mb-4">{ kit.Or(p.Title, "Create new account") }</h1>
+			@hiddenFields(p.Hidden)
+			@formError(p.Error)
+			@form.Field(form.FieldProps{Label: kit.Or(p.NameLabel, "Name"), For: p.id("name")}) {
+				@form.Input(form.InputProps{ID: p.id("name"), Name: "name", Value: p.Name, Placeholder: kit.Or(p.NamePlaceholder, "Enter name"), Autocomplete: "name", Required: true})
+			}
+			@form.Field(form.FieldProps{Label: kit.Or(p.EmailLabel, "Email address"), For: p.id("email")}) {
+				@form.Input(form.InputProps{ID: p.id("email"), Name: "email", Type: "email", Value: p.Email, Placeholder: kit.Or(p.EmailPlaceholder, "Enter email"), Autocomplete: "email", Required: true})
+			}
+			@form.Field(form.FieldProps{Label: kit.Or(p.PasswordLabel, "Password"), For: p.id("password")}) {
+				@passwordInput(p.id("password"), "password", kit.Or(p.PasswordPlaceholder, "Password"), "new-password", false, true)
+				if !p.NoStrength {
+					@form.Strength(form.StrengthProps{Input: "#" + p.id("password")})
+				}
+			}
+			if p.TermsHref != "" {
+				<div class="mb-3 form-check">
+					<input type="checkbox" class="form-check-input" id={ p.id("terms") } name="terms" value="1" required/>
+					<label class="form-check-label d-inline" for={ p.id("terms") }>{ kit.Or(p.TermsAgree, "Agree the") }</label>
+					<a href={ templ.URL(p.TermsHref) }>{ kit.Or(p.TermsLink, "terms and policy") }</a>.
+				</div>
+			}
+			@form.Footer() {
+				@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true}) {
+					{ kit.Or(p.Submit, "Create new account") }
+				}
+			}
+		</div>
+		@form.PasswordToggleScript()
+	</form>
+}
+
+type ForgotPasswordCardProps struct {
+	Action           string
+	Method           string
+	Hidden           []Hidden
+	Error            string
+	Title            string // default "Forgot password"
+	Intro            string // default Tabler's sentence
+	EmailLabel       string // default "Email address"
+	EmailPlaceholder string // default "Enter email"
+	Email            string
+	Submit           string // default "Send me new password"
+	ID               string // id of the email field, default "forgot-email"
+}
+
+// ForgotPasswordCard asks for the email address to send a reset link to.
+templ ForgotPasswordCard(p ForgotPasswordCardProps) {
+	<form class="card card-md" action={ templ.URL(p.Action) } method={ method(p.Method) } novalidate>
+		<div class="card-body">
+			<h1 class="card-title text-center mb-4">{ kit.Or(p.Title, "Forgot password") }</h1>
+			<p class="text-secondary mb-4">{ kit.Or(p.Intro, "Enter your email address and your password will be reset and emailed to you.") }</p>
+			@hiddenFields(p.Hidden)
+			@formError(p.Error)
+			@form.Field(form.FieldProps{Label: kit.Or(p.EmailLabel, "Email address"), For: kit.Or(p.ID, "forgot-email")}) {
+				@form.Input(form.InputProps{ID: kit.Or(p.ID, "forgot-email"), Name: "email", Type: "email", Value: p.Email, Placeholder: kit.Or(p.EmailPlaceholder, "Enter email"),
+					Autocomplete: "email", Required: true, Invalid: p.Error != ""})
+			}
+			@form.Footer() {
+				@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Icon: "ti-mail"}) {
+					{ kit.Or(p.Submit, "Send me new password") }
+				}
+			}
+		</div>
+	</form>
+}
+
+type LockCardProps struct {
+	Action              string
+	Method              string
+	Hidden              []Hidden
+	Error               string
+	Title               string // default "Account Locked"
+	Intro               string // default "Please enter your password to unlock your account"
+	Name                string // the signed-in user
+	Avatar              avatar.Props
+	PasswordLabel       string // read out only, default "Password"
+	PasswordPlaceholder string // default "Password…"
+	Submit              string // default "Unlock"
+}
+
+// LockCard asks the signed-in user for the password again, e.g. after a time of inactivity.
+templ LockCard(p LockCardProps) {
+	{{ a := p.Avatar }}
+	{{ a.Size, a.Class = avatar.SizeXL, kit.Classes("mb-3", a.Class) }}
+	<form class="card card-md" action={ templ.URL(p.Action) } method={ method(p.Method) } novalidate>
+		<div class="card-body text-center">
+			<div class="mb-4">
+				<h1 class="card-title">{ kit.Or(p.Title, "Account Locked") }</h1>
+				<p class="text-secondary">{ kit.Or(p.Intro, "Please enter your password to unlock your account") }</p>
+			</div>
+			<div class="mb-4">
+				@avatar.Avatar(a)
+				<h2 class="h3">{ p.Name }</h2>
+			</div>
+			@hiddenFields(p.Hidden)
+			@formError(p.Error)
+			<div class="mb-4">
+				<label class="visually-hidden" for="lock-password">{ kit.Or(p.PasswordLabel, "Password") }</label>
+				@form.Input(form.InputProps{ID: "lock-password", Name: "password", Type: "password", Placeholder: kit.Or(p.PasswordPlaceholder, "Password…"),
+					Autocomplete: "current-password", Required: true, Invalid: p.Error != ""})
+			</div>
+			<div>
+				@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Icon: "ti-lock-open"}) {
+					{ kit.Or(p.Submit, "Unlock") }
+				}
+			</div>
+		</div>
+	</form>
+}
+
+type VerifyCardProps struct {
+	Action string
+	Method string
+	Hidden []Hidden
+	Error  string
+	Title  string          // default "Authenticate Your Account"
+	Text   templ.Component // where the code was sent
+	Code   form.OTPProps   // the code field; default 6 digits in groups of 3, large
+	// A checkbox to skip codes on this device; empty RememberName = none.
+	RememberName  string
+	RememberLabel string // default "Don't ask for codes again on this device"
+	CancelHref    string // default "#"
+	Cancel        string // default "Cancel"
+	Submit        string // default "Verify"
+}
+
+// VerifyCard asks for the code of a second factor.
+templ VerifyCard(p VerifyCardProps) {
+	{{
+		c := p.Code
+		c.Name = kit.Or(c.Name, "code")
+		if c.Length == 0 {
+			c.Length, c.Groups = 6, []int{3, 3}
+		}
+		if c.Size == "" {
+			c.Size = form.SizeLarge
+		}
+		c.AriaLabel = kit.Or(c.AriaLabel, "Verification code")
+		c.Invalid = c.Invalid || p.Error != ""
+	}}
+	<form class="card card-md" action={ templ.URL(p.Action) } method={ method(p.Method) } autocomplete="off" novalidate>
+		<div class="card-body">
+			<h1 class="card-title text-center mb-4">{ kit.Or(p.Title, "Authenticate Your Account") }</h1>
+			if p.Text != nil {
+				<p class="my-4 text-center">
+					@p.Text
+				</p>
+			}
+			@hiddenFields(p.Hidden)
+			@formError(p.Error)
+			<fieldset class="my-5 border-0 p-0 m-0">
+				<legend class="visually-hidden">{ c.AriaLabel }</legend>
+				<div class="d-flex justify-content-center">
+					@form.OTP(c)
+				</div>
+			</fieldset>
+			if p.RememberName != "" {
+				<div class="my-4">
+					<label class="form-check">
+						<input type="checkbox" class="form-check-input" name={ p.RememberName } value="1"/>
+						{ kit.Or(p.RememberLabel, "Don't ask for codes again on this device") }
+					</label>
+				</div>
+			}
+			@form.Footer() {
+				@button.List(button.ListProps{Class: "flex-nowrap"}) {
+					@button.Button(button.Props{Href: kit.Or(p.CancelHref, "#"), Block: true}) {
+						{ kit.Or(p.Cancel, "Cancel") }
+					}
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true}) {
+						{ kit.Or(p.Submit, "Verify") }
+					}
+				}
+			}
+		</div>
+	</form>
+}
+
+type FormCardProps struct {
+	Action string
+	Method string
+	Hidden []Hidden
+	Error  string
+	Title  string
+	Submit string // the submit button's text; empty = no footer
+}
+
+// FormCard is a card with a title and a form of the app's own fields (the children), e.g. the
+// preview's 2-step-verification page.
+templ FormCard(p FormCardProps) {
+	<form class="card card-md" action={ templ.URL(p.Action) } method={ method(p.Method) } novalidate>
+		<div class="card-body">
+			<h1 class="card-title text-center mb-4">{ p.Title }</h1>
+			@hiddenFields(p.Hidden)
+			@formError(p.Error)
+			{ children... }
+			if p.Submit != "" {
+				@form.Footer() {
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true}) {
+						{ p.Submit }
+					}
+				}
+			}
+		</div>
+	</form>
+}
+
+// Card is a plain card for a message with the app's content, e.g. the preview's trial-ended page.
+templ Card() {
+	<div class="card card-md">
+		<div class="card-body">
+			{ children... }
+		</div>
+	</div>
+}
+
+type MessageProps struct {
+	Title string
+	Text  templ.Component // e.g. where the link was sent
+}
+
+// Message is a centered message without a card, e.g. "Check your inbox" after a magic link; the
+// children follow below it (e.g. a Note).
+templ Message(p MessageProps) {
+	<div class="text-center">
+		<div class="my-5">
+			<h1>{ p.Title }</h1>
+			if p.Text != nil {
+				<p class="fs-3 text-secondary">
+					@p.Text
+				</p>
+			}
+		</div>
+		{ children... }
+	</div>
+}

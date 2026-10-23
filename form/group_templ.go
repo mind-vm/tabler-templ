@@ -409,7 +409,8 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 	})
 }
 
-// PasswordToggleScript makes every PasswordToggle on the page work; it is Tabler's own script.
+// PasswordToggleScript makes every PasswordToggle on the page work; it is Tabler's own script. Render it
+// at the end of the form or page, not between a field and the next element (e.g. a Strength meter).
 func PasswordToggleScript() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

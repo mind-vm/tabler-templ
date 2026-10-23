@@ -91,7 +91,8 @@ templ PasswordToggle(p PasswordToggleProps) {
 	</button>
 }
 
-// PasswordToggleScript makes every PasswordToggle on the page work; it is Tabler's own script.
+// PasswordToggleScript makes every PasswordToggle on the page work; it is Tabler's own script. Render it
+// at the end of the form or page, not between a field and the next element (e.g. a Strength meter).
 templ PasswordToggleScript() {
 	<script>
 		if (!window.__tablerPasswordToggleInit) {

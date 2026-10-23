@@ -60,6 +60,7 @@ var Own = []struct{ Package, Text string }{
 	{"blocks/create", "create page: post form with footer"},
 	{"blocks/detail", "detail page: sections with edit dialogs that reopen after a failed save"},
 	{"blocks/history", "change history as a timeline"},
+	{"blocks/signin", "sign-in page with its own look and an account picker (Tabler's own look: blocks/auth)"},
 }
 
 // Groups returns the page groups in catalog order.

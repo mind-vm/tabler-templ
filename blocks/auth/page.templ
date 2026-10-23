@@ -1,0 +1,139 @@
+// Package auth holds the sign-in and account pages of the Tabler preview as blocks: the page layouts
+// (centered, with a cover image, with an illustration, onboarding) and the cards that go in them (sign
+// in, sign up, forgot password, account locked, verification code, a message, a form). Checking
+// credentials, sessions and codes stays in the app; the blocks post plain forms.
+//
+//	@auth.Page(auth.PageProps{Title: "Sign in", Head: head(), Scripts: scripts(), Brand: logo()}) {
+//		@auth.SignInCard(auth.SignInCardProps{Form: auth.SignInFormProps{Action: "/login", Error: msg}})
+//	}
+//
+// The texts are Tabler's English ones by default; every one of them is a prop.
+package auth
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type PageProps struct {
+	Lang    string // <html lang>, default "en"
+	Title   string // <title>
+	Head    templ.Component // the app's stylesheets (Tabler, icons)
+	Scripts templ.Component // end of <body>: Tabler's script
+	// Brand is shown above the content, usually Logo.
+	Brand templ.Component
+	// Aside is a second column on large screens, e.g. an illustration (the preview's
+	// sign-in-illustration page).
+	Aside templ.Component
+}
+
+templ document(p PageProps, bodyClass string) {
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body
+			if bodyClass != "" {
+				class={ bodyClass }
+			}
+		>
+			{ children... }
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+templ brand(p PageProps) {
+	if p.Brand != nil {
+		<div class="text-center mb-4">
+			@p.Brand
+		</div>
+	}
+}
+
+// Page is a centered page without navigation (Tabler's single layout); the children are a card and
+// a Note.
+templ Page(p PageProps) {
+	@document(p, "") {
+		<main class="page page-center" id="content">
+			if p.Aside != nil {
+				<div class="container py-4">
+					<div class="row align-items-center g-4">
+						<div class="col-lg">
+							<div class="container-tight">
+								@brand(p)
+								{ children... }
+							</div>
+						</div>
+						<div class="col-lg d-none d-lg-block">
+							@p.Aside
+						</div>
+					</div>
+				</div>
+			} else {
+				<div class="container container-tight py-4">
+					@brand(p)
+					{ children... }
+				</div>
+			}
+		</main>
+	}
+}
+
+type CoverProps struct {
+	Image string // URL of the cover image on the right
+}
+
+// CoverPage puts the form in a column on the left and a cover image beside it on large screens; the
+// children are a SignInForm (or another form) with a title and a Note.
+templ CoverPage(p PageProps, c CoverProps) {
+	@document(p, "d-flex flex-column bg-surface") {
+		<main id="content" class="row g-0 flex-fill">
+			<div class="col-12 col-lg-6 col-xl-4 border-top-wide border-primary d-flex flex-column justify-content-center">
+				<div class="container container-tight my-5 px-lg-5">
+					@brand(p)
+					{ children... }
+				</div>
+			</div>
+			<div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block">
+				<div class="bg-cover h-100 min-vh-100" style={ "background-image: url(" + c.Image + ")" }></div>
+			</div>
+		</main>
+	}
+}
+
+type LogoProps struct {
+	Href  string // default "."
+	Label string // aria-label, e.g. the app's name
+	Class string // e.g. "navbar-brand-gray"
+}
+
+// Logo links the app's logo (the children: an <img> or inline SVG) to the start page, like Tabler's
+// navbar brand.
+templ Logo(p LogoProps) {
+	<a
+		href={ templ.URL(kit.Or(p.Href, ".")) }
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		class={ kit.Classes("navbar-brand navbar-brand-autodark", p.Class) }
+	>
+		{ children... }
+	</a>
+}
+
+// Note is the line below a card, e.g. "Don't have account yet? Sign up".
+templ Note() {
+	<div class="text-center text-secondary mt-3">
+		{ children... }
+	</div>
+}

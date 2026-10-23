@@ -1,0 +1,235 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/auth"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+)
+
+templ logo() {
+	@auth.Logo(auth.LogoProps{Label: "Tabler"}) {
+		@templ.Raw(tablerLogo)
+	}
+}
+
+func authPage(name string) auth.PageProps {
+	p, _ := catalog.Find(name)
+	return auth.PageProps{Title: p.Title + " · tabler-templ", Head: assets(), Scripts: scripts(), Brand: logo()}
+}
+
+// The preview's sign-in form: email, password with toggle and forgot link, remember me.
+var previewSignIn = auth.SignInFormProps{Action: "./", Method: "get", ForgotHref: "./forgot-password", RememberName: "remember"}
+
+var previewProviders = []auth.Provider{{Icon: "ti-brand-github", Label: "Login with Github"}, {Icon: "ti-brand-x", Label: "Login with X"}}
+
+templ signUpNote() {
+	@auth.Note() {
+		Don't have account yet? <a href="./sign-up">Sign up</a>
+	}
+}
+
+templ signInPage() {
+	@auth.Page(authPage("sign-in")) {
+		@auth.SignInCard(auth.SignInCardProps{Form: previewSignIn, Providers: previewProviders})
+		@signUpNote()
+	}
+}
+
+templ signInCoverPage() {
+	@auth.CoverPage(authPage("sign-in-cover"), auth.CoverProps{Image: photo("photos/finances-us-dollars-and-bitcoins-currency-money-2.jpg")}) {
+		<h1 class="h3 text-center mb-3">Login to your account</h1>
+		@auth.SignInForm(previewSignIn)
+		@signUpNote()
+	}
+}
+
+templ illustration() {
+	<img src={ photo("illustrations/light/boy-with-key.png") } height="400" class="d-block mx-auto" alt=""/>
+}
+
+templ signInIllustrationPage() {
+	{{ p := authPage("sign-in-illustration") }}
+	{{ p.Aside = illustration() }}
+	@auth.Page(p) {
+		@auth.SignInCard(auth.SignInCardProps{Form: previewSignIn, Providers: previewProviders})
+		@signUpNote()
+	}
+}
+
+templ magicLinkText() {
+	We've sent you a magic link to <strong>support@tabler.io</strong>.
+	<br/>
+	Please click the link to confirm your address.
+}
+
+templ signInLinkPage() {
+	@auth.Page(authPage("sign-in-link")) {
+		@auth.Message(auth.MessageProps{Title: "Check your inbox", Text: magicLinkText()}) {
+			@auth.Note() {
+				Can't see the email? Please check the spam folder.
+				<br/>
+				Wrong email? Please <a href="#">re-enter your address</a>.
+			}
+		}
+	}
+}
+
+templ signUpPage() {
+	@auth.Page(authPage("sign-up")) {
+		@auth.SignUpCard(auth.SignUpCardProps{Action: "./", Method: "get", TermsHref: "./terms-of-service"})
+		@auth.Note() {
+			Already have account? <a href="./sign-in">Sign in</a>
+		}
+	}
+}
+
+templ forgotPasswordPage() {
+	@auth.Page(authPage("forgot-password")) {
+		@auth.ForgotPasswordCard(auth.ForgotPasswordCardProps{Action: "./", Method: "get"})
+		@auth.Note() {
+			Forget it, <a href="./sign-in">send me back</a> to the sign in screen.
+		}
+	}
+}
+
+templ authLockPage() {
+	@auth.Page(authPage("auth-lock")) {
+		@auth.LockCard(auth.LockCardProps{Action: "./", Method: "get", Name: "Paweł Kuna", Avatar: avatar.Props{Src: avatarURL("000m")}})
+	}
+}
+
+templ twoStepPage() {
+	@auth.Page(authPage("2-step-verification")) {
+		@auth.FormCard(auth.FormCardProps{Action: "./2-step-verification-code", Method: "get", Title: "2-Step Verification", Submit: "Send code"}) {
+			@form.Field(form.FieldProps{Label: "Country", For: "verify-country"}) {
+				@form.Select(form.SelectProps{ID: "verify-country", Options: countryOptions(), Attributes: templ.Attributes{"autocomplete": "country-name"}})
+			}
+			@form.Field(form.FieldProps{Label: "Your Phone Number", For: "verify-phone", Class: "mb-4"}) {
+				@form.Group() {
+					@form.Addon() {
+						+1
+					}
+					@form.Input(form.InputProps{ID: "verify-phone", Type: "tel", Placeholder: "Enter phone number", Autocomplete: "tel"})
+				}
+			}
+			<div class="text-secondary">Security is critical in Tabler. to help keep your account safe, we'll text you a verification code when you sign in on a new device</div>
+		}
+	}
+}
+
+func countryOptions() []form.Option {
+	os := make([]form.Option, len(countries2FA))
+	for i, c := range countries2FA {
+		os[i] = form.Option{Value: c, Label: c}
+	}
+	return os
+}
+
+templ codeSentTo() {
+	Please confirm your account by entering the authorization code sent to <strong>+1 856-672-8552</strong>.
+}
+
+templ twoStepCodePage() {
+	@auth.Page(authPage("2-step-verification-code")) {
+		@auth.VerifyCard(auth.VerifyCardProps{Action: "./", Method: "get", Text: codeSentTo(), RememberName: "trust", CancelHref: "2-step-verification"})
+		@auth.Note() {
+			It may take a minute to receive your code. Haven't received it? <a href="./">Resend a new code.</a>
+		}
+	}
+}
+
+type perk struct{ Title, Text string }
+
+templ trialEndedPage() {
+	@auth.Page(authPage("trial-ended")) {
+		@auth.Card() {
+			<h1 class="mb-3 fs-2">Your free trial period has expired!</h1>
+			<p class="text-secondary mb-4">If you want to continue to benefit from Tabler, it's time to upgrade your plan.</p>
+			@iconlist.List(iconlist.Props{Color: "success", RowGap: "1rem"}) {
+				for _, p := range []perk{{"Over 800+ productions", "Unlimited movies, TV shows and more."}, {"Watch everywhere", "Watch on smart TVs, PlayStation, Xbox, Apple TV, Blu-ray players and more."},
+					{"Personalize", "Choose your own style, watch what you like."}} {
+					@iconlist.Item() {
+						<span>
+							<strong class="d-block">{ p.Title }</strong>
+							<span class="d-block text-secondary">{ p.Text }</span>
+						</span>
+					}
+				}
+			}
+			<div class="my-4">
+				@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary, Block: true}) {
+					Upgrade to a paid plan
+				}
+			</div>
+			<p class="text-secondary">If you need to get a trial extension please feel free to <a href="#">contact us</a>.</p>
+		}
+	}
+}
+
+templ onboardingBrand() {
+	@auth.Logo(auth.LogoProps{Label: "Tabler", Class: "navbar-brand-gray"}) {
+		@templ.Raw(tablerLogo)
+	}
+}
+
+templ skipLink() {
+	<a href="." class="btn btn-ghost">Skip<span class="d-none d-md-inline">&nbsp;to dashboard</span></a>
+}
+
+templ onboardingActions() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantLink, Class: "link-secondary"}) {
+		Back
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary}) {
+		Continue
+	}
+}
+
+templ legendFieldset(legend string) {
+	<fieldset class="border-0 p-0 m-0">
+		<legend class="form-label float-none mb-0" style="font-size: inherit">{ legend }</legend>
+		{ children... }
+	</fieldset>
+}
+
+type opt struct{ Value, Label string }
+
+templ onboardingPage() {
+	{{ p := authPage("onboarding") }}
+	{{ p.Brand = onboardingBrand() }}
+	@auth.OnboardingPage(p, auth.OnboardingProps{Title: "Let's set up your account", Steps: progressSteps5(), Skip: skipLink(), Actions: onboardingActions()}) {
+		@form.Field(form.FieldProps{Label: "Full name", For: "onboarding-full-name", Class: "-"}) {
+			@form.Input(form.InputProps{ID: "onboarding-full-name", Placeholder: "Enter your full name"})
+		}
+		@form.Field(form.FieldProps{Label: "Company name", For: "onboarding-company-name", Class: "-"}) {
+			@form.Input(form.InputProps{ID: "onboarding-company-name", Placeholder: "Enter your company name"})
+		}
+		@form.Field(form.FieldProps{Label: "Role", For: "onboarding-role", Class: "-"}) {
+			@form.Select(form.SelectProps{ID: "onboarding-role", Empty: "Select your role", Options: []form.Option{{Value: "developer", Label: "Developer"},
+				{Value: "designer", Label: "Designer"}, {Value: "manager", Label: "Manager"}, {Value: "founder", Label: "Founder"}, {Value: "other", Label: "Other"}}})
+		}
+		@legendFieldset("Team size") {
+			@form.SelectGroup() {
+				for i, o := range []opt{{"1", "Just me"}, {"2-10", "2-10 people"}, {"11-50", "11-50 people"}, {"50+", "50+ people"}} {
+					@form.SelectItem(form.SelectItemProps{Name: "team-size", Value: o.Value, Label: o.Label, Radio: true, Checked: i == 0})
+				}
+			}
+		}
+		@legendFieldset("What are you planning to use this for?") {
+			for i, o := range []opt{{"personal", "Personal projects"}, {"business", "Business applications"}, {"client", "Client work"}, {"learning", "Learning and experimentation"}} {
+				@form.Check(form.CheckProps{Name: "use-for", Value: o.Value, Label: o.Label, Radio: true, Checked: i == 0})
+			}
+		}
+		@legendFieldset("How did you hear about us?") {
+			for _, o := range []opt{{"search", "Search engine"}, {"social", "Social media"}, {"friend", "Friend or colleague"}, {"blog", "Blog or article"}, {"other", "Other"}} {
+				@form.Check(form.CheckProps{Name: "referral", Value: o.Value, Label: o.Label})
+			}
+		}
+		<div>
+			@form.Check(form.CheckProps{Switch: true, Checked: true, Label: "Send me product updates and tips via email"})
+		</div>
+	}
+}

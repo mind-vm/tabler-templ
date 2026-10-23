@@ -1,0 +1,27 @@
+// Package divider renders Tabler's text divider: a horizontal rule with a label (hr-text), e.g. "or"
+// between two ways to sign in.
+package divider
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Position string
+
+const (
+	Center Position = ""
+	Start  Position = "start"
+	End    Position = "end"
+)
+
+type Props struct {
+	Class      string // e.g. "text-primary" for a colored line and label
+	Attributes templ.Attributes
+	Position   Position
+}
+
+// Text is a rule with its children as the label.
+templ Text(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("hr-text", kit.If(p.Position != Center, "hr-text-"+string(p.Position)), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
