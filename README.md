@@ -1,24 +1,76 @@
-# tablerkit
+# tabler-templ
 
-Server-rendered UI components for [Tabler](https://tabler.io) in Go, written with [templ](https://templ.guide).
-The API follows [shadcn-templ](https://github.com/axadrn/shadcn-templ): one package per component, a `Props`
-struct, `Class` and `Attributes` on every component, children via `{ children... }`. Unlike shadcn-templ it
-needs no Tailwind, no Node and (except for the sidebar and the detail dialogs) no JavaScript of its own: components emit Tabler's classes and
-`data-bs-*` attributes, and Tabler's bundled script does the rest (modals, dropdowns, dismissible alerts).
+**[Tabler](https://tabler.io) for Go and [templ](https://templ.guide).** Server-rendered components, composed
+blocks and whole pages with Tabler's own classes and markup, so an admin or back-office app in Go gets the
+Tabler look without a frontend toolchain.
 
-> Status: early (v0.x). The API may still change between minor versions until v1.
+> Formerly `github.com/mind-vm/tablerkit`. The repository was renamed; the module path is now
+> `github.com/mind-vm/tabler-templ` from v0.8.0 on. Replace the import path in your code and `go.mod`
+> (GitHub redirects the old repository, but Go modules need the new path).
+
+![The demo index: every page of the Tabler preview](docs/screenshots/index.png)
+
+## Why
+
+There are good component libraries for templ, modelled after [shadcn/ui](https://ui.shadcn.com) and built
+on Tailwind ([shadcn-templ](https://github.com/axadrn/shadcn-templ) and others). There was none for Tabler.
+tabler-templ differs from them in three ways:
+
+- **No Node, no Tailwind, no build step.** Go, templ and Tabler's ready-made CSS and JS (from a CDN or
+  embedded in your binary). One binary.
+- **Whole pages, not only building blocks.** The goal is all of Tabler: every component of the Tabler docs,
+  every composed part of the Tabler preview (sign-in cards, modals, navbars …) as a block, and every page of
+  the [preview](https://preview.tabler.io) rebuilt in Go.
+- **Tabler's markup, unchanged.** Classes and structure follow the Tabler docs and its Astro sources, so the
+  Tabler docs (and the agents that read them) apply as they are.
+
+The API follows shadcn-templ: one package per component, a `Props` struct, `Class` and `Attributes` on every
+component, children via `{ children... }`. Except for the sidebar and the detail dialogs the module has no
+JavaScript of its own: components emit Tabler's classes and `data-bs-*` attributes, and Tabler's bundled
+script does the rest (modals, dropdowns, dismissible alerts).
+
+## Status
+
+Early (v0.x); the API may still change between minor versions until v1, breaking changes are listed in
+[CHANGELOG.md](CHANGELOG.md). Today the module has the components and blocks the apps using it needed;
+[ROADMAP.md](ROADMAP.md) is the checklist of everything in Tabler, with the status of each component, block
+and preview page. Next steps, one pull request each:
+
+1. Navigation and overlays: dropdown, tabs, nav, breadcrumb, offcanvas, toast, tooltip, popover
+2. Showing data: avatar, list group, timeline, datagrid, progress, steps, status, ribbon, empty, tracking
+3. Forms: input group, select group, image check, color check, OTP, password strength, validation, floating labels
+4. Sign-in and account blocks: sign-in variants, sign-up, forgot password, 2FA, auth lock, onboarding
+5. Blocks from Tabler's cards, modals and navbars, and the app pages: settings, profile, pricing, invoice, error pages, wizard; the layouts
+6. The remaining preview pages in the demo, with screenshots here
+7. A starter kit (`cmd/new`) that creates a running app with layout, sign-in and a list page
 
 ```sh
-go get github.com/mind-vm/tablerkit@latest
+go get github.com/mind-vm/tabler-templ@latest
 ```
+
+## Demo
+
+`cmd/demo` rebuilds the Tabler preview page by page with this module. Its index lists all 146 preview pages;
+rebuilt ones are linked, open ones grey.
+
+```sh
+go run ./cmd/demo -addr localhost:8080
+```
+
+| Buttons | Modals |
+|---|---|
+| ![Buttons](docs/screenshots/buttons.png) | ![Modals](docs/screenshots/modals.png) |
+
+`scripts/screenshots.sh` takes the screenshots in `docs/screenshots/` with Playwright (the only place that
+uses Node; set `CHROMIUM` to use an installed Chromium).
 
 ## Use
 
 ```go
 import (
-	"github.com/mind-vm/tablerkit/button"
-	"github.com/mind-vm/tablerkit/card"
-	"github.com/mind-vm/tablerkit/modal"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/modal"
 )
 
 templ Customer(c Customer) {
@@ -57,7 +109,7 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `icon` | `Icon("ti-…")` – full class name, so icon-font subsetters can find it in the source |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
-Not yet: dropdown, tabs, avatar, toast, datagrid, steps.
+Everything else in Tabler is listed in [ROADMAP.md](ROADMAP.md).
 
 ## Blocks
 
@@ -203,10 +255,16 @@ request's language (and translates its own texts with whatever it uses, e.g. go-
 ## Develop
 
 ```sh
-go tool templ generate   # after editing .templ files (templ is a Go tool dependency)
+go tool templ generate             # after editing .templ files (templ is a Go tool dependency)
+go run ./internal/catalog/roadmap  # after changing a status in internal/catalog
 go test ./...
 ```
 
+`internal/catalog` holds the checklist (every Tabler component, block and preview page with its status);
+ROADMAP.md and the demo index are generated from it, and a test fails when either is out of step. Markup
+and classes come from Tabler's sources (`shared/ui/*.astro`, `shared/components/**`, `docs/content/ui/**`
+in [tabler/tabler](https://github.com/tabler/tabler)); nothing is invented.
+
 ## License
 
-MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module.
+MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module. tabler-templ is not an official Tabler project.

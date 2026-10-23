@@ -21,7 +21,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strings"
 
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 type Kind string

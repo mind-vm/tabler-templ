@@ -11,16 +11,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mind-vm/tablerkit/alert"
-	"github.com/mind-vm/tablerkit/blocks/create"
-	"github.com/mind-vm/tablerkit/blocks/detail"
-	"github.com/mind-vm/tablerkit/blocks/history"
-	"github.com/mind-vm/tablerkit/blocks/landing"
-	"github.com/mind-vm/tablerkit/blocks/listpage"
-	"github.com/mind-vm/tablerkit/blocks/shell"
-	"github.com/mind-vm/tablerkit/blocks/signin"
-	"github.com/mind-vm/tablerkit/blocks/stats"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/history"
+	"github.com/mind-vm/tabler-templ/blocks/landing"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/blocks/signin"
+	"github.com/mind-vm/tabler-templ/blocks/stats"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 func render(t *testing.T, ctx context.Context, c templ.Component) string {

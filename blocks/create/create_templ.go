@@ -29,8 +29,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mind-vm/tablerkit/button"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 type FormProps struct {

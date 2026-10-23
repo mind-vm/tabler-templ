@@ -1,0 +1,72 @@
+package main
+
+import (
+	"fmt"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+)
+
+func rebuilt(group string) (n, of int) {
+	for _, p := range catalog.Pages {
+		if p.Group == group {
+			of++
+			if p.Status != catalog.Open {
+				n++
+			}
+		}
+	}
+	return
+}
+
+templ index() {
+	@document("Tabler preview") {
+		<div class="page-header d-print-none">
+			<div class="container-xl">
+				<h1 class="page-title">Tabler preview in Go and templ</h1>
+				<div class="text-secondary mt-1">
+					Every page of the Tabler preview, rebuilt with tabler-templ. Linked pages are rebuilt (marked partial where variants are still missing); grey ones are still open, see ROADMAP.md.
+				</div>
+			</div>
+		</div>
+		<div class="page-body">
+			<div class="container-xl">
+				<div class="row row-cards">
+					for _, g := range catalog.Groups() {
+						<div class="col-12">
+							<div class="card">
+								<div class="card-header">
+									<h2 class="card-title">{ g }</h2>
+									<div class="card-actions text-secondary">
+										{{ n, of := rebuilt(g) }}
+										{ fmt.Sprintf("%d of %d", n, of) }
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="row g-2">
+										for _, p := range catalog.Pages {
+											if p.Group == g {
+												<div class="col-sm-6 col-md-4 col-lg-3">
+													if p.Status == catalog.Open {
+														<span class="text-secondary opacity-50" title="open">{ p.Name }</span>
+													} else {
+														<a href={ templ.SafeURL("/" + p.Name) } title={ p.Title }>{ p.Name }</a>
+														if p.Status == catalog.Partial {
+															@badge.Badge(badge.Props{Color: "yellow", Light: true, Class: "ms-1", Attributes: templ.Attributes{"title": p.Note}}) {
+																partial
+															}
+														}
+													}
+												</div>
+											}
+										}
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}

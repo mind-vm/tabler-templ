@@ -13,7 +13,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 type Props struct {

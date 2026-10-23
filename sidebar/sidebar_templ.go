@@ -49,8 +49,8 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // sidebarState passes Collapsed down to the items, so they render a tooltip only when collapsed.

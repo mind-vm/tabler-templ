@@ -1,0 +1,157 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/pagination"
+)
+
+type alertExample struct {
+	Variant alert.Variant
+	Icon    string
+	Text    string
+}
+
+var alertExamples = []alertExample{
+	{alert.VariantDanger, "ti-alert-circle", "An error occurred!"},
+	{alert.VariantWarning, "ti-alert-triangle", "Some information is missing!"},
+	{alert.VariantSuccess, "ti-check", "Completed successfully!"},
+	{alert.VariantInfo, "ti-info-circle", "Just a quick note!"},
+}
+
+templ alertsPage() {
+	@preview("alerts") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Basic", "A title and a color are enough to show the status of an action.") {
+					for _, a := range alertExamples {
+						@alert.Alert(alert.Props{Variant: a.Variant, Icon: a.Icon}) {
+							{ a.Text }
+						}
+					}
+				}
+			</div>
+			<div class="col-12">
+				@section("Dismissible", "Add alert-dismissible and a btn-close button to let users close the alert.") {
+					for _, a := range alertExamples {
+						@alert.Alert(alert.Props{Variant: a.Variant, Icon: a.Icon, Dismissible: true}) {
+							{ a.Text }
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+var badgeColors = []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan", "dark", "light"}
+
+func title(s string) string { return string(s[0]-'a'+'A') + s[1:] }
+
+templ badgesPage() {
+	@preview("badges") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Basic", "Fill a badge with a theme or extended color.") {
+					<div class="badge-list">
+						for _, c := range badgeColors {
+							@badge.Badge(badge.Props{Color: c}) {
+								{ title(c) }
+							}
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Light", "A tinted background for a softer, secondary badge.") {
+					<div class="badge-list">
+						for _, c := range badgeColors {
+							@badge.Badge(badge.Props{Color: c, Light: true}) {
+								{ title(c) }
+							}
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Outline", "A colored border with a transparent background.") {
+					<div class="badge-list">
+						for _, c := range badgeColors {
+							@badge.Badge(badge.Props{Class: "badge-outline text-" + c}) {
+								{ title(c) }
+							}
+						}
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+func pageHref(n int) string { return "#" }
+
+templ paginationPage() {
+	@preview("pagination") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Numbered", "Page numbers with Prev/Next arrows.") {
+					@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: pageHref})
+					@pagination.Pagination(pagination.Props{Page: 6, Pages: 12, Href: pageHref})
+				}
+			</div>
+		</div>
+	}
+}
+
+// Inline modals: the preview shows its dialogs open within the page instead of over it.
+const inlineModal = "modal-blur position-relative rounded d-block bg-surface-backdrop py-6 w-auto h-auto z-0 show"
+
+const lorem = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci animi beatae delectus deleniti dolorem eveniet facere fuga iste nemo nesciunt nihil odio perspiciatis, quia quis reprehenderit sit tempora totam unde."
+
+templ modalFooter() {
+	@button.Button(button.Props{Type: "button", Class: "me-auto", Attributes: templ.Attributes{"data-bs-dismiss": "modal"}}) {
+		Close
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: templ.Attributes{"data-bs-dismiss": "modal"}}) {
+		Save changes
+	}
+}
+
+type modalExample struct {
+	Heading, ID, Title string
+	Size               modal.Size
+	DialogClass        string
+	Scrollable         bool
+	Paragraphs         int
+}
+
+var modalExamples = []modalExample{
+	{"Simple modal", "modal-simple", "Modal title", modal.SizeDefault, "", false, 1},
+	{"Large modal", "modal-large", "Large modal", modal.SizeLarge, "", false, 1},
+	{"Full width modal", "modal-full-width", "Full width modal", modal.SizeDefault, "modal-full-width", false, 1},
+	{"Scrollable modal", "modal-scrollable", "Scrollable modal", modal.SizeDefault, "", true, 12},
+}
+
+templ modalsPage() {
+	@preview("modals") {
+		<div class="card">
+			<div class="card-body">
+				<div class="space-y-6">
+					for _, m := range modalExamples {
+						<div>
+							<h2>{ m.Heading }</h2>
+							@modal.Modal(modal.Props{ID: m.ID, Title: m.Title, Size: m.Size, DialogClass: m.DialogClass, Scrollable: m.Scrollable,
+								Centered: true, Fade: true, Class: inlineModal, Footer: modalFooter(), Attributes: templ.Attributes{"role": "dialog"}}) {
+								for range m.Paragraphs {
+									<p>{ lorem }</p>
+								}
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}

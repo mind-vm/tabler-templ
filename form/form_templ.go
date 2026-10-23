@@ -12,7 +12,7 @@ package form
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mind-vm/tablerkit/kit"
+import "github.com/mind-vm/tabler-templ/kit"
 
 type FieldProps struct {
 	Class      string // wrapper, default "mb-3"; pass "-" for none

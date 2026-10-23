@@ -35,8 +35,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // Link is an entry of the top bar or the footer, e.g. an anchor "#features" or "/imprint".

@@ -12,7 +12,7 @@ package modal
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mind-vm/tablerkit/kit"
+import "github.com/mind-vm/tabler-templ/kit"
 
 type Size string
 

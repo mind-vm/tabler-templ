@@ -1,0 +1,89 @@
+package main
+
+import "github.com/mind-vm/tabler-templ/internal/catalog"
+
+templ head(title string) {
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+	<title>{ title } · tabler-templ</title>
+	@assets()
+}
+
+// assets are Tabler's stylesheet and the icon font.
+templ assets() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+}
+
+templ scripts() {
+	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler.min.js" }></script>
+}
+
+templ document(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			@head(title)
+		</head>
+		<body>
+			<div class="page">
+				<header class="navbar navbar-expand-md d-print-none">
+					<div class="container-xl">
+						<a href="/" class="navbar-brand">tabler-templ</a>
+						<div class="navbar-nav flex-row order-md-last">
+							<a class="nav-link" href="https://github.com/mind-vm/tabler-templ">GitHub</a>
+						</div>
+					</div>
+				</header>
+				<div class="page-wrapper">
+					{ children... }
+				</div>
+			</div>
+			@scripts()
+		</body>
+	</html>
+}
+
+// preview is the frame of a rebuilt preview page: navbar, page header with the original's title and
+// description and a link to the original, page body.
+templ preview(name string) {
+	{{ p, _ := catalog.Find(name) }}
+	@document(p.Title) {
+		<div class="page-header d-print-none">
+			<div class="container-xl">
+				<div class="row g-2 align-items-center">
+					<div class="col">
+						<h1 class="page-title">{ p.Title }</h1>
+						if p.Description != "" {
+							<div class="text-secondary mt-1">{ p.Description }</div>
+						}
+					</div>
+					<div class="col-auto ms-auto d-print-none">
+						<a href={ templ.SafeURL("https://preview.tabler.io/" + name + ".html") } target="_blank" rel="noopener" class="link-secondary">
+							Original
+							<i class="ti ti-external-link icon icon-sm icon-inline" aria-hidden="true"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="page-body">
+			<div class="container-xl">
+				{ children... }
+			</div>
+		</div>
+	}
+}
+
+// section is the card the component pages of the preview use for each example.
+templ section(title, subtitle string) {
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">{ title }</h2>
+			if subtitle != "" {
+				<p class="card-subtitle">{ subtitle }</p>
+			}
+			{ children... }
+		</div>
+	</div>
+}

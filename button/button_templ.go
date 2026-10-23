@@ -11,8 +11,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // Variant picks the Tabler color class. The zero value is Tabler's neutral button.

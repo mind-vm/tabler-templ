@@ -11,12 +11,12 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 
-	"github.com/mind-vm/tablerkit/button"
-	"github.com/mind-vm/tablerkit/card"
-	"github.com/mind-vm/tablerkit/form"
-	"github.com/mind-vm/tablerkit/icon"
-	"github.com/mind-vm/tablerkit/kit"
-	"github.com/mind-vm/tablerkit/pagination"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/pagination"
 )
 
 // Card is the whole block: search and filters, the children (usually a table) and the footer.
