@@ -1,0 +1,38 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/errorpage"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+)
+
+func errorProps(name string) errorpage.Props {
+	p, _ := catalog.Find(name)
+	return errorpage.Props{Title: p.Title + " · tabler-templ", Head: assets(), Scripts: scripts()}
+}
+
+templ illustrationImg(name string) {
+	<img src={ photo("illustrations/light/" + name + ".png") } height="256" alt=""/>
+}
+
+templ error404Page() {
+	@errorpage.Page(errorProps("error-404"), errorpage.Error{Illustration: illustrationImg("not-found"),
+		Text: "We are sorry but the page you are looking for was not found"})
+}
+
+templ error500Page() {
+	@errorpage.Page(errorProps("error-500"), errorpage.Error{Illustration: illustrationImg("500"),
+		Text: "We are sorry but our server encountered an internal error"})
+}
+
+templ maintenancePage() {
+	@errorpage.Page(errorProps("error-maintenance"), errorpage.Error{Illustration: illustrationImg("computer-fix"), Title: "Temporarily down for maintenance",
+		Text: "Sorry for the inconvenience but we’re performing some maintenance at the moment. We’ll be back online shortly!"})
+}
+
+templ smallLogo() {
+	<a href="." class="navbar-brand navbar-brand-autodark"><img src={ photo("logo-small.svg") } height="36" alt=""/></a>
+}
+
+templ pageLoaderPage() {
+	@errorpage.LoaderPage(errorProps("page-loader"), errorpage.LoaderProps{Logo: smallLogo(), Text: "Preparing application"})
+}

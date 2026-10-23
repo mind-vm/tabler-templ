@@ -55,7 +55,7 @@ type Page struct {
 
 // Own lists blocks of this module that have no counterpart in the Tabler preview.
 var Own = []struct{ Package, Text string }{
-	{"blocks/shell", "page frame with sidebar, sticky header, breadcrumbs, page header and flash message"},
+	{"blocks/shell", "app frame with a sidebar that folds to icons, sticky header, breadcrumbs and flash message (Tabler's own frame: blocks/layout)"},
 	{"blocks/listpage", "list page: search, filters and pagination read from the URL"},
 	{"blocks/create", "create page: post form with footer"},
 	{"blocks/detail", "detail page: sections with edit dialogs that reopen after a failed save"},

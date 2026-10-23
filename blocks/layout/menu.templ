@@ -1,0 +1,182 @@
+package layout
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Entry is a top-level entry of the menu: a link, or a dropdown with Children.
+type Entry struct {
+	Title    string
+	Href     string
+	Icon     string // e.g. "ti-home"
+	Badge    string // a small red count or label
+	Active   bool   // the current page or the group that holds it
+	Disabled bool
+	// Section starts a new titled section before the entry (in a Sidebar).
+	Section  string
+	Children []Item
+	Columns  int  // splits the dropdown into columns
+	End      bool // the dropdown opens to the end (dropdown-menu-end)
+}
+
+// Item is an entry of a dropdown; Children make it a submenu.
+type Item struct {
+	Title    string
+	Href     string
+	Icon     string
+	Badge    string // a small green label, e.g. "New"
+	Color    string // text color, e.g. "danger"
+	Active   bool
+	External bool
+	Children []Item
+}
+
+type MenuProps struct {
+	Class string // e.g. "pt-lg-3"
+	// Sections renders the entries' Section titles (sidebars).
+	Sections bool
+	// KeepOpen keeps dropdowns open when clicking elsewhere (sidebars); OpenActive opens the active
+	// entry's dropdown on load.
+	KeepOpen   bool
+	OpenActive bool
+	NoIcons    bool
+}
+
+func autoClose(p MenuProps) string {
+	if p.KeepOpen {
+		return "false"
+	}
+	return "outside"
+}
+
+func chunk(items []Item, n int) [][]Item {
+	if n <= 1 || len(items) == 0 {
+		return [][]Item{items}
+	}
+	size := (len(items) + n - 1) / n
+	var out [][]Item
+	for i := 0; i < len(items); i += size {
+		out = append(out, items[i:min(i+size, len(items))])
+	}
+	return out
+}
+
+// Menu renders the entries as the navbar's or the sidebar's navigation (navbar-nav).
+templ Menu(p MenuProps, entries []Entry) {
+	<ul class={ kit.Classes("navbar-nav", p.Class) }>
+		for _, e := range entries {
+			if p.Sections && e.Section != "" {
+				<li class="nav-section-title">{ e.Section }</li>
+			}
+			<li class={ kit.Classes("nav-item", kit.If(e.Active, "active"), kit.If(len(e.Children) > 0, "dropdown")) }>
+				if len(e.Children) > 0 {
+					<a
+						class={ kit.Classes("nav-link dropdown-toggle", kit.If(e.Disabled, "disabled")) }
+						href="#"
+						data-bs-toggle="dropdown"
+						data-bs-auto-close={ autoClose(p) }
+						role="button"
+						aria-haspopup="true"
+						if p.OpenActive && e.Active {
+							aria-expanded="true"
+						} else {
+							aria-expanded="false"
+						}
+					>
+						@entryInner(p, e)
+					</a>
+					<div class={ kit.Classes("dropdown-menu", kit.If(e.End, "dropdown-menu-end"), kit.If(p.OpenActive && e.Active, "show")) }>
+						if e.Columns > 1 {
+							<div class="dropdown-menu-columns">
+								for _, col := range chunk(e.Children, e.Columns) {
+									<div class="dropdown-menu-column">
+										for _, it := range col {
+											@menuItem(p, it)
+										}
+									</div>
+								}
+							</div>
+						} else {
+							for _, it := range e.Children {
+								@menuItem(p, it)
+							}
+						}
+					</div>
+				} else {
+					<a
+						class={ kit.Classes("nav-link", kit.If(e.Disabled, "disabled")) }
+						href={ templ.URL(e.Href) }
+						if e.Active {
+							aria-current="page"
+						}
+					>
+						@entryInner(p, e)
+					</a>
+				}
+			</li>
+		}
+	</ul>
+}
+
+templ entryInner(p MenuProps, e Entry) {
+	if !p.NoIcons {
+		<span class="nav-link-icon">
+			if e.Icon != "" {
+				@icon.Icon(e.Icon)
+			}
+		</span>
+	}
+	<span class="nav-link-title">{ e.Title }</span>
+	if e.Badge != "" {
+		<span class="badge badge-sm bg-red text-red-fg">{ e.Badge }</span>
+	}
+}
+
+templ itemInner(it Item) {
+	if it.Icon != "" {
+		@icon.Icon(it.Icon, icon.Props{Class: "icon-inline me-1"})
+	}
+	{ it.Title }
+	if it.Badge != "" {
+		<span class="badge badge-sm bg-green-lt text-uppercase ms-auto">{ it.Badge }</span>
+	}
+}
+
+templ menuItem(p MenuProps, it Item) {
+	{{ c := kit.Classes("dropdown-item", kit.If(len(it.Children) > 0, "dropdown-toggle"), kit.If(it.Active, "active"), kit.If(it.Color != "", "text-"+it.Color)) }}
+	if len(it.Children) > 0 {
+		<div class="dropend">
+			<a class={ c } href="#" data-bs-toggle="dropdown" data-bs-auto-close={ autoClose(p) } role="button" aria-haspopup="true" aria-expanded="false">
+				@itemInner(it)
+			</a>
+			<div class="dropdown-menu">
+				for _, ch := range it.Children {
+					<a
+						href={ templ.URL(ch.Href) }
+						class={ kit.Classes("dropdown-item", kit.If(ch.Active, "active")) }
+						if ch.Active {
+							aria-current="page"
+						}
+					>
+						@itemInner(ch)
+					</a>
+				}
+			</div>
+		</div>
+	} else {
+		<a
+			class={ c }
+			href={ templ.URL(it.Href) }
+			if it.External {
+				target="_blank"
+				rel="noopener"
+			}
+			if it.Active {
+				aria-current="page"
+			}
+		>
+			@itemInner(it)
+		</a>
+	}
+}

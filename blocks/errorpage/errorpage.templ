@@ -1,0 +1,113 @@
+// Package errorpage holds Tabler's pages without the app's frame for errors (404, 500 …),
+// maintenance and loading.
+//
+//	w.WriteHeader(http.StatusNotFound)
+//	errorpage.Page(errorpage.Props{Title: "Page 404", Head: head()}, errorpage.Error{Code: "404", Text: "…"}).Render(ctx, w)
+package errorpage
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+)
+
+type Props struct {
+	Lang    string // default "en"
+	Title   string
+	Head    templ.Component // the app's stylesheets
+	Scripts templ.Component
+}
+
+templ document(p Props, bodyClass string) {
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body
+			if bodyClass != "" {
+				class={ bodyClass }
+			}
+		>
+			{ children... }
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+// Error is the content of an error page.
+type Error struct {
+	Code         string          // shown big when there is no Illustration, e.g. "404"
+	Illustration templ.Component // e.g. an <img> of a Tabler illustration
+	Title        string          // default "Oops… You just found an error page"
+	Text         string
+	HomeHref     string // default "."
+	HomeText     string // default "Take me home"
+	// NoAction drops the button back home.
+	NoAction bool
+}
+
+templ home(e Error) {
+	@button.Button(button.Props{Href: kit.Or(e.HomeHref, "."), Variant: button.VariantPrimary, Icon: "ti-arrow-left"}) {
+		{ kit.Or(e.HomeText, "Take me home") }
+	}
+}
+
+// Page is an error (or maintenance) page: a colored top border and the centered message.
+templ Page(p Props, e Error) {
+	{{
+		ep := empty.Props{Image: e.Illustration, Title: kit.Or(e.Title, "Oops… You just found an error page"), Subtitle: e.Text, TitleLevel: 1}
+		if e.Illustration == nil {
+			ep.Header = e.Code
+		}
+		if !e.NoAction {
+			ep.Action = home(e)
+		}
+	}}
+	@document(p, "border-top-wide border-primary") {
+		<main class="page page-center" id="content">
+			<div class="container-tight py-4">
+				@empty.Empty(ep)
+			</div>
+		</main>
+	}
+}
+
+type LoaderProps struct {
+	Logo templ.Component // e.g. the app's small logo
+	Text string          // e.g. "Preparing application"
+	// Heading is read out only, default "Page loader".
+	Heading string
+}
+
+// LoaderPage is shown while the app loads: the logo, a line of text and an indeterminate bar.
+templ LoaderPage(p Props, l LoaderProps) {
+	@document(p, "") {
+		<main class="page page-center" id="content">
+			<div class="container container-slim py-4">
+				<h1 class="visually-hidden">{ kit.Or(l.Heading, "Page loader") }</h1>
+				<div class="text-center">
+					if l.Logo != nil {
+						<div class="mb-3">
+							@l.Logo
+						</div>
+					}
+					if l.Text != "" {
+						<div class="text-secondary mb-3">{ l.Text }</div>
+					}
+					@progress.Progress(progress.Props{Size: progress.SizeSmall, Indeterminate: true})
+				</div>
+			</div>
+		</main>
+	}
+}
