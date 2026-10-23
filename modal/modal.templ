@@ -10,7 +10,9 @@ const (
 	SizeDefault    Size = ""
 	SizeSmall      Size = "sm"
 	SizeLarge      Size = "lg"
+	SizeXL         Size = "xl"
 	SizeFullscreen Size = "fullscreen"
+	SizeFullWidth  Size = "full-width" // the whole width of the screen, with margins
 )
 
 type Props struct {
@@ -19,18 +21,31 @@ type Props struct {
 	Attributes templ.Attributes
 	Title      string
 	// Header replaces the default header content (title) but keeps the close button.
-	Header     templ.Component
+	Header templ.Component
+	// NoHeader drops the header; a close button stays in the corner unless NoClose.
+	NoHeader bool
+	NoClose  bool
+	// Status is a color line at the top, e.g. "success" or "danger" (modal-status).
+	Status     string
 	Size       Size
 	Centered   bool
 	Scrollable bool
 	Fade       bool            // animate (Tabler's .fade)
+	Blur       bool            // blurred backdrop (modal-blur)
 	Footer     templ.Component // optional .modal-footer content
 	CloseLabel string          // aria-label of the close button; default kit.T(ctx).Close
 	// DialogClass adds classes to .modal-dialog (e.g. "modal-fullscreen-lg-down").
 	DialogClass string
+	// BodyClass adds classes to .modal-body, e.g. "text-center py-4".
+	BodyClass string
+	// Sections puts the children directly into .modal-content instead of one .modal-body, so a modal
+	// can hold several Body sections.
+	Sections bool
 	// Form makes .modal-content a <form> with these attributes (method, action, …), so header, body and
 	// footer buttons belong to one form.
 	Form templ.Attributes
+	// Show renders the modal open, e.g. to show it inside a page.
+	Show bool
 }
 
 func dialogClasses(p Props) string {
@@ -51,9 +66,25 @@ func Trigger(id string) templ.Attributes {
 	return templ.Attributes{"data-bs-toggle": "modal", "data-bs-target": "#" + id, "aria-controls": id}
 }
 
+// Dismiss returns the attributes that make a button inside the modal close it.
+func Dismiss() templ.Attributes {
+	return templ.Attributes{"data-bs-dismiss": "modal"}
+}
+
 templ Modal(p Props) {
 	{{ p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close) }}
-	<div class={ kit.Classes("modal", kit.If(p.Fade, "fade"), p.Class) } id={ p.ID } tabindex="-1" aria-labelledby={ TitleID(p.ID) } aria-hidden="true" { p.Attributes... }>
+	<div
+		class={ kit.Classes("modal", kit.If(p.Blur, "modal-blur"), kit.If(p.Fade, "fade"), p.Class, kit.If(p.Show, "show")) }
+		id={ p.ID }
+		tabindex="-1"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby={ TitleID(p.ID) }
+		if !p.Show {
+			aria-hidden="true"
+		}
+		{ p.Attributes... }
+	>
 		<div class={ dialogClasses(p) }>
 			if p.Form != nil {
 				<form class="modal-content" { p.Form... }>
@@ -72,21 +103,59 @@ templ Modal(p Props) {
 	</div>
 }
 
+templ closeButton(label string) {
+	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={ label }></button>
+}
+
 templ inner(p Props) {
-	<div class="modal-header">
-		if p.Header != nil {
-			@p.Header
-		} else {
-			<h2 class="modal-title" id={ TitleID(p.ID) }>{ p.Title }</h2>
+	if p.NoHeader {
+		if !p.NoClose {
+			@closeButton(p.CloseLabel)
 		}
-		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={ p.CloseLabel }></button>
-	</div>
-	<div class="modal-body">
+	} else {
+		<div class="modal-header">
+			if p.Header != nil {
+				@p.Header
+			} else {
+				<h2 class="modal-title" id={ TitleID(p.ID) }>{ p.Title }</h2>
+			}
+			if !p.NoClose {
+				@closeButton(p.CloseLabel)
+			}
+		</div>
+	}
+	if p.Status != "" {
+		<div class={ "modal-status bg-" + p.Status }></div>
+	}
+	if p.Sections {
 		{ children... }
-	</div>
+	} else {
+		<div class={ kit.Classes("modal-body", p.BodyClass) }>
+			{ children... }
+		</div>
+	}
 	if p.Footer != nil {
 		<div class="modal-footer">
 			@p.Footer
 		</div>
 	}
+}
+
+type SectionProps struct {
+	Class string
+}
+
+// Body is a section of a modal with Sections.
+templ Body(props ...SectionProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("modal-body", p.Class) }>
+		{ children... }
+	</div>
+}
+
+// Title is the modal's title inside a body, e.g. in a small modal without header; id is the modal's ID.
+templ Title(id string) {
+	<div class="modal-title" id={ TitleID(id) }>
+		{ children... }
+	</div>
 }

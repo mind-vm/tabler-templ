@@ -1,0 +1,284 @@
+// Package modals holds the ready-made dialogs of the Tabler preview: a status dialog (success, danger),
+// a small confirmation, a confirmation to delete with a check box, and changing the password. They are
+// modal.Modal with Tabler's content; open them with modal.Trigger(id).
+package modals
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/modal"
+)
+
+// Frame are the modal settings every dialog here shares.
+type Frame struct {
+	ID    string // required
+	Class string // on .modal, e.g. to show it inside a page
+	Show  bool
+	// Attributes go on .modal.
+	Attributes templ.Attributes
+}
+
+func (f Frame) props() modal.Props {
+	return modal.Props{ID: f.ID, Class: f.Class, Show: f.Show, Attributes: f.Attributes, Blur: true, Fade: true, Centered: true}
+}
+
+// Action is a button of a dialog's footer; Href makes it a link, otherwise it closes the dialog unless
+// Submit.
+type Action struct {
+	Text    string
+	Href    string
+	Variant button.Variant
+	Icon    string
+	Submit  bool // a submit button (in a dialog with a Form)
+	ID      string
+	// Disabled starts the button disabled (see ConfirmDelete).
+	Disabled bool
+}
+
+// buttonProps turns an Action into a button: a link, a submit button or a button that closes the dialog.
+func buttonProps(a Action, block bool) button.Props {
+	p := button.Props{Href: a.Href, Variant: a.Variant, Icon: a.Icon, Block: block, ID: a.ID, Disabled: a.Disabled}
+	switch {
+	case a.Submit:
+		p.Type = "submit"
+	case a.Href == "":
+		p.Type, p.Attributes = "button", modal.Dismiss()
+	}
+	return p
+}
+
+templ action(a Action) {
+	@button.Button(buttonProps(a, true)) {
+		{ a.Text }
+	}
+}
+
+// buttonRow is the footer of status dialogs: buttons side by side, full width.
+templ buttonRow(actions []Action) {
+	<div class="w-100">
+		<div class="row">
+			for _, a := range actions {
+				<div class="col">
+					@action(a)
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type StatusProps struct {
+	Frame
+	Color   string // "success", "danger", "warning" …; the status line, icon and default button color
+	Icon    string // default "ti-circle-check" (success) or "ti-alert-triangle"
+	// IconColor is the icon's color, default Color (Tabler's success dialog uses "green").
+	IconColor string
+	Title   string
+	Text    string
+	Actions []Action // side by side in the footer, e.g. Cancel and Delete
+}
+
+func statusIcon(p StatusProps) string {
+	if p.Icon != "" {
+		return p.Icon
+	}
+	if p.Color == "success" {
+		return "ti-circle-check"
+	}
+	return "ti-alert-triangle"
+}
+
+// Status is a small dialog with a colored status line and a big icon, e.g. after a payment or before
+// deleting something.
+templ Status(p StatusProps) {
+	{{ m := p.props() }}
+	{{ m.NoHeader, m.Status, m.Size, m.BodyClass = true, p.Color, modal.SizeSmall, "text-center py-4" }}
+	{{ m.Footer = buttonRow(p.Actions) }}
+	@modal.Modal(m) {
+		@icon.Icon(statusIcon(p), icon.Props{Class: "mb-2", Color: kit.Or(p.IconColor, p.Color), Size: icon.SizeLarge})
+		<h3 id={ modal.TitleID(p.ID) }>{ p.Title }</h3>
+		<div class="text-secondary">{ p.Text }</div>
+	}
+}
+
+type ConfirmProps struct {
+	Frame
+	Title   string
+	Text    string
+	Cancel  string // default kit.T(ctx).Cancel
+	Confirm Action // e.g. {Text: "Yes, delete all my data", Variant: button.VariantDanger}
+}
+
+// Confirm is a small question without header: a title, a sentence, Cancel and the confirming button.
+templ Confirm(p ConfirmProps) {
+	{{ m := p.props() }}
+	{{ m.NoHeader, m.NoClose, m.Size = true, true, modal.SizeSmall }}
+	{{ m.Footer = confirmFooter(p) }}
+	@modal.Modal(m) {
+		@modal.Title(p.ID) {
+			{ p.Title }
+		}
+		<div>{ p.Text }</div>
+	}
+}
+
+templ confirmFooter(p ConfirmProps) {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantLink, Class: "link-secondary me-auto", Attributes: modal.Dismiss()}) {
+		{ kit.Or(p.Cancel, kit.T(ctx).Cancel) }
+	}
+	@button.Button(buttonProps(p.Confirm, false)) {
+		{ p.Confirm.Text }
+	}
+}
+
+type ConfirmDeleteProps struct {
+	Frame
+	Title   string   // default "Are you sure?"
+	Text    string   // default "Do you really want to delete this item? This action cannot be undone."
+	Items   []string // the things to delete, listed in a small card
+	ItemsTitle string // default "Items to be deleted:"
+	// Check is the box the user ticks before the delete button is enabled; empty = none.
+	Check  string
+	Cancel string // default kit.T(ctx).Cancel
+	Delete Action // default {Text: "Delete", Variant: danger}
+}
+
+// ConfirmDelete asks before deleting, optionally listing the items and requiring a check box (its
+// small script enables the button).
+templ ConfirmDelete(p ConfirmDeleteProps) {
+	{{
+		m := p.props()
+		m.NoHeader, m.Status, m.Size, m.BodyClass = true, "danger", modal.SizeSmall, "text-center py-4"
+		del := p.Delete
+		del.Text = kit.Or(del.Text, "Delete")
+		if del.Variant == "" {
+			del.Variant = button.VariantDanger
+		}
+		del.ID = kit.Or(del.ID, p.ID+"-button")
+		del.Disabled = del.Disabled || p.Check != ""
+		m.Footer = buttonRow([]Action{{Text: kit.Or(p.Cancel, kit.T(ctx).Cancel)}, del})
+	}}
+	@modal.Modal(m) {
+		@icon.Icon("ti-alert-triangle", icon.Props{Class: "mb-2", Color: "danger", Size: icon.SizeLarge})
+		<h3 id={ modal.TitleID(p.ID) }>{ kit.Or(p.Title, "Are you sure?") }</h3>
+		<div class="text-secondary mb-4">
+			<p>{ kit.Or(p.Text, "Do you really want to delete this item? This action cannot be undone.") }</p>
+			if len(p.Items) > 0 {
+				<div class="text-start">
+					<div class="card card-sm mt-3">
+						<div class="card-body">
+							<div class="fw-bold mb-2">{ kit.Or(p.ItemsTitle, "Items to be deleted:") }</div>
+							<ul class="list-unstyled mb-0">
+								for _, it := range p.Items {
+									<li>• { it }</li>
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+		if p.Check != "" {
+			<label class="form-check text-start">
+				<input class="form-check-input" type="checkbox" id={ p.ID + "-checkbox" } data-enables={ del.ID }/>
+				<span class="form-check-label">{ p.Check }</span>
+			</label>
+			@enableScript()
+		}
+	}
+}
+
+// enableScript enables the button named in a check box's data-enables while the box is ticked.
+templ enableScript() {
+	<script>
+		if (!window.__kitEnables) {
+			window.__kitEnables = true
+			document.addEventListener("change", (e) => {
+				const id = e.target.getAttribute && e.target.getAttribute("data-enables")
+				if (id) document.getElementById(id).disabled = !e.target.checked
+			})
+		}
+	</script>
+}
+
+type ChangePasswordProps struct {
+	Frame
+	Action  string // the form posts here
+	Method  string // default "post"
+	Error   string
+	Title   string // default "Change password"
+	Current string // label, default "Current password"
+	New     string // label, default "New password"
+	Repeat  string // label, default "Confirm new password"
+	Hint    string // below the strength meter, default "Use 8 to 20 characters, with letters and numbers."
+	// Mismatch is shown while the two new passwords differ (checked in the browser).
+	Mismatch string // default "Passwords do not match."
+	Submit   string // default "Update password"
+}
+
+// ChangePassword asks for the current and the new password (twice), with a strength meter.
+templ ChangePassword(p ChangePasswordProps) {
+	{{ m := p.props() }}
+	{{ m.Title = kit.Or(p.Title, "Change password") }}
+	@modal.Modal(m) {
+		<form action={ templ.URL(p.Action) } method={ kit.Or(p.Method, "post") } data-password-match={ p.ID + "-new" }>
+			if p.Error != "" {
+				<div class="alert alert-danger" role="alert">{ p.Error }</div>
+			}
+			@passwordField(p.ID+"-current", "current_password", kit.Or(p.Current, "Current password"), "Enter your current password", "current-password")
+			<div class="mb-4">
+				<label class="form-label" for={ p.ID + "-new" }>{ kit.Or(p.New, "New password") }</label>
+				@passwordGroup(p.ID+"-new", "new_password", "Enter new password", "new-password")
+				@form.Strength(form.StrengthProps{Input: "#" + p.ID + "-new", Label: "New password strength"}) {
+					{ kit.Or(p.Hint, "Use 8 to 20 characters, with letters and numbers.") }
+				}
+			</div>
+			<div class="mb-4">
+				<label class="form-label" for={ p.ID + "-confirm" }>{ kit.Or(p.Repeat, "Confirm new password") }</label>
+				@passwordGroup(p.ID+"-confirm", "confirm_password", "Confirm your new password", "new-password")
+				<div class="invalid-feedback d-none" id={ p.ID + "-mismatch" } role="alert">{ kit.Or(p.Mismatch, "Passwords do not match.") }</div>
+			</div>
+			@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Class: "mt-4"}) {
+				{ kit.Or(p.Submit, "Update password") }
+			}
+			@form.PasswordToggleScript()
+			@matchScript()
+		</form>
+	}
+}
+
+templ passwordField(id, name, label, placeholder, autofill string) {
+	<div class="mb-4">
+		<label class="form-label" for={ id }>{ label }</label>
+		@passwordGroup(id, name, placeholder, autofill)
+	</div>
+}
+
+templ passwordGroup(id, name, placeholder, autofill string) {
+	@form.Group(form.GroupProps{Flat: true}) {
+		@form.Input(form.InputProps{ID: id, Name: name, Type: "password", Placeholder: placeholder, Autocomplete: autofill})
+		@form.Addon() {
+			@form.PasswordToggle(form.PasswordToggleProps{Target: id})
+		}
+	}
+}
+
+// matchScript shows the mismatch message and blocks submitting while the new passwords differ.
+templ matchScript() {
+	<script>
+		if (!window.__kitPasswordMatch) {
+			window.__kitPasswordMatch = true
+			const check = (f) => {
+				const id = f.getAttribute("data-password-match")
+				const a = document.getElementById(id), b = document.getElementById(id.replace(/-new$/, "-confirm"))
+				const bad = b.value !== "" && a.value !== b.value
+				document.getElementById(id.replace(/-new$/, "-mismatch")).classList.toggle("d-none", !bad)
+				b.classList.toggle("is-invalid", bad)
+				return !bad
+			}
+			document.addEventListener("input", (e) => { const f = e.target.closest("form[data-password-match]"); if (f) check(f) })
+			document.addEventListener("submit", (e) => { const f = e.target.closest("form[data-password-match]"); if (f && !check(f)) e.preventDefault() })
+		}
+	</script>
+}

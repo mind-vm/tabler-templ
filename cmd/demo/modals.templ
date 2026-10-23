@@ -1,0 +1,501 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/modals"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/nav"
+)
+
+// The preview shows its modals open inside the page instead of over it.
+const inlineModal = "position-relative rounded d-block bg-surface-backdrop py-6 w-auto h-auto z-0"
+
+func inline(id string) modal.Props {
+	return modal.Props{ID: id, Class: inlineModal, Show: true, Blur: true, Fade: true, Centered: true}
+}
+
+func inlineFrame(id string) modals.Frame { return modals.Frame{ID: id, Class: inlineModal, Show: true} }
+
+const lorem = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci animi beatae delectus deleniti dolorem eveniet facere fuga iste nemo nesciunt nihil odio perspiciatis, quia quis reprehenderit sit tempora totam unde."
+
+var scrollText = []string{
+	"Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.",
+	"Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.",
+	"Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla.",
+}
+
+templ closeSave() {
+	@button.Button(button.Props{Type: "button", Class: "me-auto", Attributes: modal.Dismiss()}) {
+		Close
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: modal.Dismiss()}) {
+		Save changes
+	}
+}
+
+templ cancelThen(text, icon string, cancelClass string) {
+	@button.Button(button.Props{Type: "button", Class: cancelClass, Attributes: modal.Dismiss()}) {
+		Cancel
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Class: "ms-auto", Icon: icon, Attributes: modal.Dismiss()}) {
+		{ text }
+	}
+}
+
+templ reportFooter() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantLink, Class: "link-secondary", Attributes: modal.Dismiss()}) {
+		Cancel
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Class: "ms-auto", Icon: "ti-plus", Attributes: modal.Dismiss()}) {
+		Create new report
+	}
+}
+
+templ addTeamFooter() {
+	@button.Button(button.Props{Type: "button", Class: "me-auto", Attributes: modal.Dismiss()}) {
+		Close
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: modal.Dismiss()}) {
+		Add Team
+	}
+}
+
+type modalLink struct{ ID, Text string }
+
+var modalLinks = []modalLink{{"modal-simple", "Simple modal"}, {"modal-large", "Large modal"}, {"modal-small", "Small modal"}, {"modal-full-width", "Full width modal"},
+	{"modal-scrollable", "Scrollable modal"}, {"modal-report", "Modal with form"}, {"modal-success", "Success modal"}, {"modal-danger", "Danger modal"},
+	{"modal-team", "Modal with simple form"}, {"modal-signature", "Modal with signature form"}, {"modal-new-email", "New email modal"}, {"modal-new-event", "New event modal"},
+	{"modal-new-task", "New task modal"}, {"modal-edit-profile", "Edit profile modal"}, {"modal-confirm-delete", "Confirm delete modal"},
+	{"modal-change-password", "Change password modal"}, {"modal-add-task", "Add task modal"}, {"modal-native", "Native dialog"}}
+
+var teamColors = []string{"dark", "white", "blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green"}
+
+// dateField is the preview's date input with a calendar icon (Tabler's datepicker plugin attaches to it).
+templ dateField(id, label string) {
+	@form.Field(form.FieldProps{Label: label, For: id, Class: "mb-4"}) {
+		@form.InputIcon(form.InputIconProps{Icon: "ti-calendar"}) {
+			@form.Input(form.InputProps{ID: id, Value: "2020-06-20", Placeholder: "Select a date", Autocomplete: "off", Attributes: templ.Attributes{"data-bs-toggle": "datepicker"}})
+		}
+	}
+}
+
+func people8() []form.Option {
+	names := []string{"Paweł Kuna", "Jeffie Lewzey", "Mallory Hulme", "Dunn Slane", "Emmy Levet", "Maryjo Lebarree", "Egan Poetz", "Kellie Skingley"}
+	os := make([]form.Option, len(names))
+	for i, n := range names {
+		os[i] = form.Option{Value: string(rune('1' + i)), Label: n}
+	}
+	return os
+}
+
+templ modalsPage() {
+	@preview("modals") {
+		@card.Card() {
+			@card.Body() {
+				<div class="row g-5">
+					<div class="d-none d-md-block col-3">
+						@nav.Nav(nav.Props{Vertical: true, Class: "sticky-top pt-4"}) {
+							for _, l := range modalLinks {
+								@nav.Item(nav.ItemProps{Href: "#" + l.ID}) {
+									{ l.Text }
+								}
+							}
+						}
+					</div>
+					<div class="col">
+						<div class="space-y-6">
+							<div>
+								<h2>Simple modal</h2>
+								{{ m := inline("modal-simple") }}
+								{{ m.Title, m.Footer = "Modal title", closeSave() }}
+								@modal.Modal(m) {
+									{ lorem }
+								}
+							</div>
+							<div>
+								<h2>Large modal</h2>
+								{{ m = inline("modal-large") }}
+								{{ m.Title, m.Size, m.Footer = "Large modal", modal.SizeLarge, closeSave() }}
+								@modal.Modal(m) {
+									{ lorem }
+								}
+							</div>
+							<div>
+								<h2>Small modal</h2>
+								@modals.Confirm(modals.ConfirmProps{Frame: inlineFrame("modal-small"), Title: "Are you sure?", Text: "If you proceed, you will lose all your personal data.",
+									Confirm: modals.Action{Text: "Yes, delete all my data", Variant: button.VariantDanger}})
+							</div>
+							<div>
+								<h2>Full width modal</h2>
+								{{ m = inline("modal-full-width") }}
+								{{ m.Title, m.Size, m.Footer = "Full width modal", modal.SizeFullWidth, closeSave() }}
+								@modal.Modal(m) {
+									{ lorem }
+								}
+							</div>
+							<div>
+								<h2>Scrollable modal</h2>
+								{{ m = inline("modal-scrollable") }}
+								{{ m.Title, m.Scrollable, m.Footer, m.Attributes = "Scrollable modal", true, closeSave(), templ.Attributes{"style": "max-height: 30rem"} }}
+								@modal.Modal(m) {
+									for range 6 {
+										for _, t := range scrollText {
+											<p>{ t }</p>
+										}
+									}
+								}
+							</div>
+							<div>
+								<h2>Modal with form</h2>
+								{{ m = inline("modal-report") }}
+								{{ m.Title, m.Size, m.Sections, m.Footer = "New report", modal.SizeLarge, true, reportFooter() }}
+								@modal.Modal(m) {
+									@modal.Body() {
+										@form.Field(form.FieldProps{Label: "Name", For: "report-name"}) {
+											@form.Input(form.InputProps{ID: "report-name", Name: "example-text-input", Placeholder: "Your report name"})
+										}
+										<fieldset class="border-0 p-0 mb-3">
+											<legend class="form-label float-none mb-0" style="font-size: inherit">Report type</legend>
+											<div class="form-selectgroup-boxes row">
+												<div class="col-lg-6">
+													@form.SelectItem(form.SelectItemProps{Name: "report-type", Value: "1", Radio: true, Checked: true, Box: true, Title: "Simple",
+														Description: "Provide only basic data needed for the report"})
+												</div>
+												<div class="col-lg-6">
+													@form.SelectItem(form.SelectItemProps{Name: "report-type", Value: "2", Radio: true, Box: true, Title: "Advanced",
+														Description: "Insert charts and additional advanced analyses to be inserted in the report"})
+												</div>
+											</div>
+										</fieldset>
+										<div class="row">
+											<div class="col-lg-8">
+												@form.Field(form.FieldProps{Label: "Report url", For: "report-url"}) {
+													@form.Group(form.GroupProps{Flat: true}) {
+														@form.Addon() {
+															https://tabler.io/reports/
+														}
+														@form.Input(form.InputProps{ID: "report-url", Value: "report-01", Class: "ps-0"})
+													}
+												}
+											</div>
+											<div class="col-lg-4">
+												@form.Field(form.FieldProps{Label: "Visibility", For: "report-visibility"}) {
+													@form.Select(form.SelectProps{ID: "report-visibility", Selected: "1", Options: []form.Option{{Value: "1", Label: "Private"}, {Value: "2", Label: "Public"}, {Value: "3", Label: "Hidden"}}})
+												}
+											</div>
+										</div>
+									}
+									@modal.Body() {
+										<div class="row">
+											<div class="col-lg-6">
+												@form.Field(form.FieldProps{Label: "Client name", For: "report-client-name"}) {
+													@form.Input(form.InputProps{ID: "report-client-name"})
+												}
+											</div>
+											<div class="col-lg-6">
+												@form.Field(form.FieldProps{Label: "Reporting period", For: "report-reporting-period"}) {
+													@form.Input(form.InputProps{ID: "report-reporting-period", Type: "date"})
+												}
+											</div>
+											<div class="col-lg-12">
+												@form.Field(form.FieldProps{Label: "Additional information", For: "report-additional-info", Class: "-"}) {
+													@form.Textarea(form.TextareaProps{ID: "report-additional-info", Rows: 3})
+												}
+											</div>
+										</div>
+									}
+								}
+							</div>
+							<div>
+								<h2>Success modal</h2>
+								@modals.Status(modals.StatusProps{Frame: inlineFrame("modal-success"), Color: "success", IconColor: "green", Title: "Payment succedeed",
+									Text:    "Your payment of $290 has been successfully submitted. Your invoice has been sent to support@tabler.io.",
+									Actions: []modals.Action{{Text: "Go to dashboard"}, {Text: "View invoice", Variant: button.VariantSuccess}}})
+							</div>
+							<div>
+								<h2>Danger modal</h2>
+								@modals.Status(modals.StatusProps{Frame: inlineFrame("modal-danger"), Color: "danger", Title: "Are you sure?",
+									Text:    "Do you really want to remove 84 files? What you've done cannot be undone.",
+									Actions: []modals.Action{{Text: "Cancel"}, {Text: "Delete 84 items", Variant: button.VariantDanger}}})
+							</div>
+							<div>
+								<h2>Modal with simple form</h2>
+								{{ m = inline("modal-team") }}
+								{{ m.Title, m.Footer = "Add a new team", addTeamFooter() }}
+								@modal.Modal(m) {
+									<div class="row mb-3 align-items-end">
+										<div class="col-auto">
+											@avatar.Upload(avatar.UploadProps{Size: avatar.SizeXL, Label: "Upload photo", Class: "rounded"})
+										</div>
+										<div class="col">
+											<label class="form-label" for="team-name">Name</label>
+											@form.Input(form.InputProps{ID: "team-name"})
+										</div>
+									</div>
+									<div class="mb-3">
+										<div class="form-label">Pick your team color</div>
+										<fieldset>
+											<legend class="visually-hidden">Pick your team color</legend>
+											<div class="row g-2">
+												for _, c := range teamColors {
+													<div class="col-auto">
+														@form.ColorCheck(form.ColorCheckProps{Name: "color", Value: c, Color: c, Label: c, Radio: true, Checked: c == "white", Light: c == "white"})
+													</div>
+												}
+											</div>
+										</fieldset>
+									</div>
+									<div>
+										<label class="form-label" for="team-additional-info">Additional info</label>
+										@form.Textarea(form.TextareaProps{ID: "team-additional-info"})
+									</div>
+								}
+							</div>
+							<div>
+								<h2>Modal with signature form</h2>
+								{{ m = inline("modal-signature") }}
+								{{ m.NoHeader, m.Footer = true, cancelThen("Confirm transfer", "", "") }}
+								@modal.Modal(m) {
+									<h2 id="modal-signature-title" class="card-title">Confirm transfer</h2>
+									<p class="card-subtitle">Please confirm the transfer of funds by signing below.</p>
+									<form>
+										<div class="mb-3">
+											<div class="form-label required">Signature</div>
+											<div class="position-relative user-select-none">
+												<div class="signature position-relative">
+													<div class="position-absolute top-0 end-0 p-2">
+														@button.Button(button.Props{Type: "button", Icon: "ti-trash", IconOnly: true, Label: "Clear signature"})
+													</div>
+													<canvas width="684" height="400" class="signature-canvas"></canvas>
+												</div>
+											</div>
+										</div>
+									</form>
+									<div class="text-secondary fs-5">I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on documents, including legally binding contracts - just the same as a pen-and-paper signature or initial.</div>
+								}
+							</div>
+							<div>
+								<h2>New email modal</h2>
+								{{ m = inline("modal-new-email") }}
+								{{ m.Title, m.Footer = "New Message", cancelThen("Send Message", "ti-send", "") }}
+								@modal.Modal(m) {
+									<form>
+										@form.Field(form.FieldProps{Label: "To", For: "new-email-to"}) {
+											@form.Input(form.InputProps{ID: "new-email-to", Placeholder: "Example@email.com"})
+										}
+										@form.Field(form.FieldProps{Label: "Subject", For: "new-email-subject"}) {
+											@form.Input(form.InputProps{ID: "new-email-subject", Placeholder: "Your subject"})
+										}
+										@form.Field(form.FieldProps{Label: "Message", For: "hugerte-email-message", Class: "-"}) {
+											@form.Textarea(form.TextareaProps{ID: "hugerte-email-message", Value: "Hello, <b>Tabler</b>!"})
+										}
+									</form>
+								}
+							</div>
+							<div>
+								<h2>New event modal</h2>
+								{{ m = inline("modal-new-event") }}
+								{{ m.Title = "New event" }}
+								@modal.Modal(m) {
+									<form>
+										@form.Field(form.FieldProps{Label: "Title", For: "event-title", Class: "mb-4"}) {
+											@form.Input(form.InputProps{ID: "event-title", Placeholder: "Event title"})
+										}
+										@form.Field(form.FieldProps{Label: "Description", For: "event-description", Class: "mb-4"}) {
+											@form.Textarea(form.TextareaProps{ID: "event-description", Rows: 3, Placeholder: "Event description"})
+										}
+										<div class="row">
+											<div class="col">
+												@dateField("datepicker-event-start", "Start")
+											</div>
+											<div class="col">
+												@dateField("datepicker-event-end", "End")
+											</div>
+										</div>
+										@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Class: "mt-4"}) {
+											Create event
+										}
+									</form>
+								}
+							</div>
+							<div>
+								<h2>New task modal</h2>
+								{{ m = inline("modal-new-task") }}
+								{{ m.Title = "New task" }}
+								@modal.Modal(m) {
+									<form>
+										@form.Field(form.FieldProps{Label: "Task name", For: "task-name", Class: "mb-4"}) {
+											@form.Input(form.InputProps{ID: "task-name", Placeholder: "Enter task name"})
+										}
+										@form.Field(form.FieldProps{Label: "Description", For: "task-description", Class: "mb-4"}) {
+											@form.Textarea(form.TextareaProps{ID: "task-description", Rows: 3, Placeholder: "Enter task description"})
+										}
+										<div class="row">
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "Assigned to", For: "select-task-assigned", Class: "mb-4"}) {
+													@form.Select(form.SelectProps{ID: "select-task-assigned", Options: people8(), Selected: "4"})
+												}
+											</div>
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "Priority", For: "task-priority", Class: "mb-4"}) {
+													@form.Select(form.SelectProps{ID: "task-priority", Selected: "medium", Options: []form.Option{{Value: "low", Label: "Low"}, {Value: "medium", Label: "Medium"}, {Value: "high", Label: "High"}}})
+												}
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												@dateField("datepicker-task-due-date", "Due date")
+											</div>
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "Category / Tags", For: "select-task-category", Class: "mb-4"}) {
+													@form.Select(form.SelectProps{ID: "select-task-category", Multiple: true, SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"},
+														Options: []form.Option{{Value: "HTML", Label: "HTML"}, {Value: "JavaScript", Label: "JavaScript"}, {Value: "CSS", Label: "CSS"},
+															{Value: "jQuery", Label: "jQuery"}, {Value: "Bootstrap", Label: "Bootstrap"}, {Value: "Ruby", Label: "Ruby"}}})
+												}
+											</div>
+										</div>
+										@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Class: "mt-4"}) {
+											Create task
+										}
+									</form>
+								}
+							</div>
+							<div>
+								<h2>Edit profile modal</h2>
+								{{ m = inline("modal-edit-profile") }}
+								{{ m.Title = "Edit profile" }}
+								@modal.Modal(m) {
+									<form>
+										<div class="mb-4">
+											<div class="row align-items-end">
+												<div class="col-auto">
+													@avatar.Upload(avatar.UploadProps{Size: avatar.SizeLarge, Label: "Upload photo", Class: "rounded"})
+												</div>
+												<div class="col">
+													<label class="form-label">Avatar</label>
+													<div class="text-secondary">Click to upload a new avatar</div>
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "First name", For: "profile-first-name", Class: "mb-4"}) {
+													@form.Input(form.InputProps{ID: "profile-first-name", Placeholder: "John"})
+												}
+											</div>
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "Last name", For: "profile-last-name", Class: "mb-4"}) {
+													@form.Input(form.InputProps{ID: "profile-last-name", Placeholder: "Doe"})
+												}
+											</div>
+										</div>
+										@form.Field(form.FieldProps{Label: "Email", For: "profile-email", Class: "mb-4"}) {
+											@form.Input(form.InputProps{ID: "profile-email", Type: "email", Placeholder: "john.doe@example.com"})
+										}
+										@form.Field(form.FieldProps{Label: "Phone", For: "profile-phone", Class: "mb-4"}) {
+											@form.Input(form.InputProps{ID: "profile-phone", Type: "tel", Placeholder: "+1 (555) 123-4567"})
+										}
+										@form.Field(form.FieldProps{Label: "Bio", For: "profile-bio", Class: "mb-4"}) {
+											@form.Textarea(form.TextareaProps{ID: "profile-bio", Rows: 4, Placeholder: "Tell us about yourself..."})
+										}
+										<div class="row">
+											<div class="col-md-6">
+												@form.Field(form.FieldProps{Label: "Location", For: "profile-location", Class: "mb-4"}) {
+													@form.Input(form.InputProps{ID: "profile-location", Placeholder: "City, Country"})
+												}
+											</div>
+											<div class="col-md-6">
+												@dateField("datepicker-profile-birthdate", "Date of birth")
+											</div>
+										</div>
+										<div class="mb-4">
+											<div class="form-label">Social links</div>
+											<div class="row g-2">
+												for _, l := range []named{{"ti-brand-twitter", "twitter.com/username"}, {"ti-brand-github", "github.com/username"}, {"ti-brand-linkedin", "linkedin.com/in/username"}} {
+													<div class="col-12">
+														@form.Group() {
+															@form.Addon() {
+																@iconOnly(l.Variant)
+															}
+															@form.Input(form.InputProps{Placeholder: l.Text})
+														}
+													</div>
+												}
+											</div>
+										</div>
+										@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true, Class: "mt-4"}) {
+											Save changes
+										}
+									</form>
+								}
+							</div>
+							<div>
+								<h2>Confirm delete modal</h2>
+								@modals.ConfirmDelete(modals.ConfirmDeleteProps{Frame: inlineFrame("modal-confirm-delete"), Check: "I understand this action cannot be undone"})
+							</div>
+							<div>
+								<h2>Change password modal</h2>
+								@modals.ChangePassword(modals.ChangePasswordProps{Frame: inlineFrame("modal-change-password")})
+							</div>
+							<div>
+								<h2>Add task modal</h2>
+								{{ m = inline("modal-add-task") }}
+								{{ m.Title, m.Footer = "Add task", cancelThen("Save", "", "") }}
+								@modal.Modal(m) {
+									<form>
+										@form.Field(form.FieldProps{Label: "Name", For: "add-task-name"}) {
+											@form.Input(form.InputProps{ID: "add-task-name", Placeholder: "Task name"})
+										}
+										@form.Field(form.FieldProps{Label: "Assigned To", For: "add-task-assigned"}) {
+											@form.Select(form.SelectProps{ID: "add-task-assigned", Empty: "Select person", Options: []form.Option{{Value: "5", Label: "Emmy Levet"},
+												{Value: "6", Label: "Maryjo Lebarree"}, {Value: "2", Label: "Jeffie Lewzey"}, {Value: "3", Label: "Mallory Hulme"}}})
+										}
+										@form.Field(form.FieldProps{Label: "Priority", For: "add-task-priority"}) {
+											@form.Select(form.SelectProps{ID: "add-task-priority", Options: []form.Option{{Value: "Low", Label: "Low"}, {Value: "Medium", Label: "Medium"}, {Value: "High", Label: "High"}}})
+										}
+										@form.Field(form.FieldProps{Label: "Description", For: "add-task-description"}) {
+											@form.Textarea(form.TextareaProps{ID: "add-task-description", Rows: 3, Placeholder: "Task description"})
+										}
+									</form>
+								}
+							</div>
+							<div id="modal-native">
+								<h2>Native dialog</h2>
+								<p class="text-secondary">
+									A native <code>{ "<dialog>" }</code> opened with <code>showModal()</code>. The browser paints the backdrop and Tabler styles it to match the one used by modals, with <code>.modal-blur</code> blurring the page behind it. Buttons inside <code>{ `<form method="dialog">` }</code> close the
+									dialog without any script. The panel uses the card classes on a child element, because the modal classes read CSS variables set on <code>.modal</code>, and a <code>display</code> value on the dialog itself would keep it visible when closed.
+								</p>
+								@button.List() {
+									@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: modal.DialogOpen("native-dialog", false)}) {
+										Open native dialog
+									}
+									@button.Button(button.Props{Type: "button", Attributes: modal.DialogOpen("native-dialog", true)}) {
+										Open with blur
+									}
+								}
+								@modal.Dialog(modal.DialogProps{ID: "native-dialog", Title: "Native dialog", Footer: dialogClose()}) {
+									<p>The browser keeps the page behind this dialog inert, traps focus inside it and closes it on Esc.</p>
+								}
+								@modal.DialogScript()
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		}
+	}
+}
+
+templ dialogClose() {
+	@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary}) {
+		Close
+	}
+}
+
+templ iconOnly(name string) {
+	@icon.Icon(name)
+}

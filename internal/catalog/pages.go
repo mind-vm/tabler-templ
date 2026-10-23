@@ -121,7 +121,7 @@ var Pages = []Page{
 	{Name: "lists", Title: "Lists", Group: "Components and elements", Description: "Vertical lists built from list-group items: media, content, meta and actions in one row."},
 	{Name: "markdown", Title: "markdown", Group: "Components and elements"},
 	{Name: "mockup-browser", Title: "Mockup browser", Group: "Components and elements", Description: "The mockup browser shows a page preview or a screenshot inside a frame that looks like a browser window."},
-	{Name: "modals", Title: "Modals", Group: "Components and elements", Description: "Modals interrupt the page to ask for input, confirmation, or a focused action.", Status: Partial, Note: "simple, large, full width and scrollable; no small modal without header, no forms, status or native dialogs"},
+	{Name: "modals", Title: "Modals", Group: "Components and elements", Description: "Modals interrupt the page to ask for input, confirmation, or a focused action.", Status: Partial, Note: "everything but the plugins: WYSIWYG editor, date picker, select"},
 	{Name: "nav-overflow", Title: "Nav overflow", Group: "Components and elements", Description: "Nav overflow moves nav items that do not fit into a More dropdown."},
 	{Name: "navigation", Title: "Navigation", Group: "Components and elements", Description: "Navbar variants — condensed, dark, colored, and with different logo and search layouts."},
 	{Name: "number-input", Title: "Number input", Group: "Components and elements", Description: "A number input is a field with a decrease and an increase button, for a quantity or any value changed in fixed steps.", Status: Done},

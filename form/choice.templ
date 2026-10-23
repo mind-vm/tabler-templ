@@ -30,8 +30,11 @@ type SelectItemProps struct {
 	Checked    bool
 	Disabled   bool
 	Radio      bool
-	// Box renders the children in a box with a check mark, for a SelectGroup with Boxes.
-	Box bool
+	// Box renders a box with a check mark, for a SelectGroup with Boxes: Title and Description, or
+	// the children.
+	Box         bool
+	Title       string
+	Description string
 }
 
 func choiceInput(radio bool) string {
@@ -53,7 +56,19 @@ templ SelectItem(p SelectItemProps) {
 			disabled?={ p.Disabled }
 			{ p.Attributes... }
 		/>
-		if p.Box {
+		if p.Box && p.Title != "" {
+			<span class="form-selectgroup-label d-flex align-items-center p-3">
+				<span class="me-3">
+					<span class="form-selectgroup-check"></span>
+				</span>
+				<span class="form-selectgroup-label-content">
+					<span class="form-selectgroup-title strong mb-1">{ p.Title }</span>
+					if p.Description != "" {
+						<span class="d-block text-secondary">{ p.Description }</span>
+					}
+				</span>
+			</span>
+		} else if p.Box {
 			<div class="form-selectgroup-label d-flex align-items-center p-3">
 				<div class="me-3">
 					<span class="form-selectgroup-check"></span>

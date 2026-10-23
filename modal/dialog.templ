@@ -1,0 +1,60 @@
+package modal
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type DialogProps struct {
+	ID         string // required
+	Title      string
+	Width      string          // default "28rem"
+	Footer     templ.Component // e.g. a close button (type submit closes the dialog)
+	CloseLabel string          // default kit.T(ctx).Close
+}
+
+// Dialog is a native <dialog> styled as a Tabler card: the browser keeps the page inert, traps focus
+// and closes it on Esc; buttons of type submit inside close it. Open it with DialogOpen and render
+// DialogScript once.
+templ Dialog(p DialogProps) {
+	<dialog id={ p.ID } class="p-0 border-0 bg-transparent" style={ "width: " + kit.Or(p.Width, "28rem") + "; max-width: calc(100% - 2rem)" }>
+		<form method="dialog" class="card">
+			<div class="card-header">
+				<h3 class="card-title">{ p.Title }</h3>
+				<div class="card-actions">
+					<button type="submit" class="btn-close" aria-label={ kit.Or(p.CloseLabel, kit.T(ctx).Close) }></button>
+				</div>
+			</div>
+			<div class="card-body">
+				{ children... }
+			</div>
+			if p.Footer != nil {
+				<div class="card-footer text-end">
+					@p.Footer
+				</div>
+			}
+		</form>
+	</dialog>
+}
+
+// DialogOpen returns the attributes that make a button open a Dialog, with a blurred backdrop if blur.
+func DialogOpen(id string, blur bool) templ.Attributes {
+	a := templ.Attributes{"data-dialog-open": id}
+	if blur {
+		a["data-dialog-blur"] = "true"
+	}
+	return a
+}
+
+// DialogScript opens Dialogs from buttons with DialogOpen.
+templ DialogScript() {
+	<script>
+		if (!window.__kitDialogOpen) {
+			window.__kitDialogOpen = true
+			document.addEventListener("click", (e) => {
+				const btn = e.target.closest("[data-dialog-open]")
+				if (!btn) return
+				const d = document.getElementById(btn.getAttribute("data-dialog-open"))
+				d.classList.toggle("modal-blur", btn.hasAttribute("data-dialog-blur"))
+				d.showModal()
+			})
+		}
+	</script>
+}
