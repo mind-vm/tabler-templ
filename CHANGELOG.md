@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- New package `compress`: gzip middleware for an app's pages (standard library only; streams, websockets
+  and small or binary responses pass through). The demo and `cmd/new` apps use it; the demo's pages are
+  5–6 times smaller on the wire (e.g. `/cards` 196 KB → 31 KB).
+
 - New package `themes`: 13 ready-made looks in the spirit of shadcn/ui.
   - Tabler, Zinc, Slate, Ocean, Forest and Paper combine Tabler's own settings.
   - Rose, Violet, Amber, Emerald, Graphite, Sunset and Midnight bring Tailwind CSS palettes and Fontsource

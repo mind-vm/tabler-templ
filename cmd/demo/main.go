@@ -13,6 +13,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/compress"
+
 	"github.com/mind-vm/tabler-templ/versions"
 
 	"github.com/a-h/templ"
@@ -91,7 +93,7 @@ func handler() http.Handler {
 		}
 		templ.Handler(c).ServeHTTP(w, r)
 	})
-	return mux
+	return compress.Handler(mux)
 }
 
 func main() {

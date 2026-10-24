@@ -126,6 +126,9 @@ templ Customer(c Customer) {
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
 the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself.
+jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
+wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
+in front compresses already.
 
 ## Components
 
