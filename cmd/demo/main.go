@@ -13,6 +13,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/versions"
+
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/internal/catalog"
@@ -20,8 +22,8 @@ import (
 
 // Tabler's CSS and JS and the icon font come from a CDN; the module itself ships none of them.
 const (
-	tablerVersion = "1.7.1"
-	iconsVersion  = "3.49.0"
+	tablerVersion = versions.Tabler
+	iconsVersion  = versions.Icons
 )
 
 // pages maps a preview page name to its rebuild. Keep catalog.Pages' Status in step with it.

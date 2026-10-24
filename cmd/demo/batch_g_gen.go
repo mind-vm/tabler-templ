@@ -16,11 +16,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/mind-vm/tabler-templ/versions"
 )
 
 const (
-	iconsVersion = "3.49.0"
-	tablerCommit = "a23c8417799dfae0a890fac78b03ddcb5e365e87"
+	iconsVersion = versions.Icons
+	tablerCommit = versions.TablerCommit
 )
 
 func get(url string, v any) {

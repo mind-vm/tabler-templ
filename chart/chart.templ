@@ -13,13 +13,14 @@ package chart
 
 import (
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/versions"
 	"strings"
 
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // Version is the ApexCharts version Library loads; Tabler 1.7 is built against it.
-const Version = "7.0.0"
+const Version = versions.ApexCharts
 
 // LibraryURL is ApexCharts on jsDelivr.
 const LibraryURL = "https://cdn.jsdelivr.net/npm/apexcharts@" + Version + "/dist/apexcharts.min.js"

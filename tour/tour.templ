@@ -6,10 +6,13 @@
 //	<button class="btn" { tour.StartAttrs("intro")... }>Show me around</button>
 package tour
 
-import "github.com/mind-vm/tabler-templ/internal/plugin"
+import (
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/versions"
+)
 
 // Version is the Driver.js version Library loads.
-const Version = "1.10.2"
+const Version = versions.Driver
 
 // LibraryURL and StylesheetURL are Driver.js on jsDelivr.
 const (

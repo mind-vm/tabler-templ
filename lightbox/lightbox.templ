@@ -8,10 +8,13 @@
 //	}
 package lightbox
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/versions"
+)
 
 // Version is the fslightbox version Tabler 1.7 is built against.
-const Version = "3.8.0"
+const Version = versions.Fslightbox
 
 // LibraryURL is fslightbox on jsDelivr.
 const LibraryURL = "https://cdn.jsdelivr.net/npm/fslightbox@" + Version + "/index.js"

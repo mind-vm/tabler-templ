@@ -7,10 +7,13 @@
 // Players in content swapped in later (e.g. by htmx) start on htmx:afterSettle.
 package player
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/versions"
+)
 
 // Version is the Plyr version Tabler 1.7 is built against.
-const Version = "3.8.5"
+const Version = versions.Plyr
 
 // Provider is where the video comes from.
 type Provider string

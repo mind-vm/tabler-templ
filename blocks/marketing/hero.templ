@@ -2,6 +2,7 @@ package marketing
 
 import (
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/versions"
 
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
@@ -274,7 +275,7 @@ type TypedProps struct {
 }
 
 // TypedLibraryURL is typed.js on jsDelivr; load it (deferred) for Typed.
-const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@3.0.0/dist/typed.umd.js"
+const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@" + versions.Typed + "/dist/typed.umd.js"
 
 // TypedLibrary loads typed.js; put it in the page's head.
 templ TypedLibrary() {
