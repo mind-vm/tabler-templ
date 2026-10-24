@@ -77,7 +77,7 @@ func TestScripts(t *testing.T) {
 		t.Errorf("Theme: %s", got)
 	}
 	got := render(t, Scripts(f), templ.WithNonce(context.Background(), "n0nce"))
-	if got != `<script src="`+v+`tabler.min.js" nonce="n0nce"></script>` {
+	if got != `<script nonce="n0nce" src="`+v+`tabler.min.js"></script>` {
 		t.Errorf("nonce: %s", got)
 	}
 }

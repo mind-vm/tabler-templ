@@ -17,6 +17,7 @@ import (
 	"github.com/mind-vm/tabler-templ/versions"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -233,7 +234,7 @@ func Toggle(id, serie string) templ.Attributes {
 
 // Library loads ApexCharts; put it in the page's head.
 templ Library() {
-	<script src={ LibraryURL } defer></script>
+	<script { csp.Nonce(ctx)... } src={ LibraryURL } defer></script>
 }
 
 var once = templ.NewOnceHandle()
@@ -242,7 +243,7 @@ var once = templ.NewOnceHandle()
 // charts rendered without this package.
 templ Script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				if (window.tablerCharts) return;
 				var formatters = {

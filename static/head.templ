@@ -1,6 +1,7 @@
 package static
 
 import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/assets"
 	"github.com/mind-vm/tabler-templ/chart"
 )
@@ -67,9 +68,5 @@ templ Scripts(files *Files) {
 
 // script carries templ's nonce, if set (templ.WithNonce), for a Content-Security-Policy with nonces.
 templ script(src string) {
-	if n := templ.GetNonce(ctx); n != "" {
-		<script src={ src } nonce={ n }></script>
-	} else {
-		<script src={ src }></script>
-	}
+	<script { csp.Nonce(ctx)... } src={ src }></script>
 }

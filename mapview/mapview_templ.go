@@ -36,6 +36,7 @@ import (
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -183,7 +184,7 @@ func Map(p Props) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("height: " + p.Height))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 140, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 141, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -350,7 +351,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue("map-" + p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 172, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 173, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -381,7 +382,7 @@ func mapElement(p Props) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Label, "Map"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 176, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 177, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 		if templ_7745c5c3_Err != nil {
@@ -394,7 +395,7 @@ func mapElement(p Props) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Library, LibraryURL))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 178, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 179, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 		if templ_7745c5c3_Err != nil {
@@ -412,7 +413,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Center.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 180, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 181, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
@@ -431,7 +432,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Zoom))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 183, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 184, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 			if templ_7745c5c3_Err != nil {
@@ -450,7 +451,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Style)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 186, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 187, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 			if templ_7745c5c3_Err != nil {
@@ -469,7 +470,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.DarkStyle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 189, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 190, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 			if templ_7745c5c3_Err != nil {
@@ -488,7 +489,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Controls)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 192, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 193, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 			if templ_7745c5c3_Err != nil {
@@ -513,7 +514,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Route))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 198, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 199, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 			if templ_7745c5c3_Err != nil {
@@ -532,7 +533,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(*p.RouteProgress))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 201, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 202, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 			if templ_7745c5c3_Err != nil {
@@ -551,7 +552,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.LayerColor)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 204, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 205, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 			if templ_7745c5c3_Err != nil {
@@ -570,7 +571,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Labels))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 207, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 208, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 			if templ_7745c5c3_Err != nil {
@@ -589,7 +590,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.geojson())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 210, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 211, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
@@ -608,7 +609,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Options))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 213, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 214, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 			if templ_7745c5c3_Err != nil {
@@ -627,7 +628,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(l)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 216, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 217, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 			if templ_7745c5c3_Err != nil {
@@ -729,7 +730,7 @@ func Marker(p MarkerProps) templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Lng))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 252, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 253, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 		if templ_7745c5c3_Err != nil {
@@ -742,7 +743,7 @@ func Marker(p MarkerProps) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Lat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 253, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 254, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 		if templ_7745c5c3_Err != nil {
@@ -772,7 +773,7 @@ func Marker(p MarkerProps) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Popup)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 261, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 262, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
 			if templ_7745c5c3_Err != nil {
@@ -815,7 +816,7 @@ func Marker(p MarkerProps) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 273, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 274, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -931,26 +932,34 @@ func Library() templ.Component {
 		var templ_7745c5c3_Var35 templ.SafeURL
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 308, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 309, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"><script src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"><script")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, " src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue("https://cdn.jsdelivr.net/npm/@tabler/core@" + TablerVersion + "/dist/js/tabler-map.min.js")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 309, Col: 106}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 310, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" defer></script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\" defer></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -995,7 +1004,15 @@ func Script() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<script>\n\t\t\t(function () {\n\t\t\t\tif (window.tablerMapView) return;\n\t\t\t\tfunction features(points, props) {\n\t\t\t\t\treturn { type: 'FeatureCollection', features: points.map(function (p, i) { return { type: 'Feature', properties: props ? props(p, i) : {}, geometry: { type: p.type || 'Point', coordinates: p.coordinates || p } }; }) };\n\t\t\t\t}\n\t\t\t\t// Points along the shortest path between two places on the globe.\n\t\t\t\tfunction arc(from, to, steps) {\n\t\t\t\t\tvar r = Math.PI / 180, l1 = from[0] * r, f1 = from[1] * r, l2 = to[0] * r, f2 = to[1] * r;\n\t\t\t\t\tvar a = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((f2 - f1) / 2), 2) + Math.cos(f1) * Math.cos(f2) * Math.pow(Math.sin((l2 - l1) / 2), 2)));\n\t\t\t\t\tvar out = [];\n\t\t\t\t\tfor (var s = 0; s <= steps; s++) {\n\t\t\t\t\t\tvar A = Math.sin((1 - s / steps) * a) / Math.sin(a), B = Math.sin((s / steps) * a) / Math.sin(a);\n\t\t\t\t\t\tvar x = A * Math.cos(f1) * Math.cos(l1) + B * Math.cos(f2) * Math.cos(l2);\n\t\t\t\t\t\tvar y = A * Math.cos(f1) * Math.sin(l1) + B * Math.cos(f2) * Math.sin(l2);\n\t\t\t\t\t\tvar z = A * Math.sin(f1) + B * Math.sin(f2);\n\t\t\t\t\t\tout.push([Math.atan2(y, x) / r, Math.atan2(z, Math.hypot(x, y)) / r]);\n\t\t\t\t\t}\n\t\t\t\t\treturn out;\n\t\t\t\t}\n\t\t\t\tfunction layers(el) {\n\t\t\t\t\tvar MapView = window.tabler && window.tabler.MapView;\n\t\t\t\t\tvar view = MapView && MapView.getOrCreateInstance(el);\n\t\t\t\t\tif (!view || el.tablerLayers) return;\n\t\t\t\t\tel.tablerLayers = true;\n\t\t\t\t\tvar d = JSON.parse(el.getAttribute('data-map-layers'));\n\t\t\t\t\tview.onStyle(function (map) {\n\t\t\t\t\t\tvar color = MapView.color('--tblr-primary'), border = MapView.color('--tblr-bg-surface');\n\t\t\t\t\t\tif (d.hideLabels) {\n\t\t\t\t\t\t\tmap.getStyle().layers.filter(function (l) { return l.type === 'symbol'; }).forEach(function (l) { map.setLayoutProperty(l.id, 'visibility', 'none'); });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.bubbles) {\n\t\t\t\t\t\t\tmap.addSource('bubbles', { type: 'geojson', data: features(d.bubbles.map(function (b) { return [b.lng, b.lat]; }), function (p, i) { return d.bubbles[i]; }) });\n\t\t\t\t\t\t\tvar max = d.scale || Math.max.apply(null, d.bubbles.map(function (b) { return b.value; }));\n\t\t\t\t\t\t\tvar r = d.radius[1] ? d.radius : [4, 24];\n\t\t\t\t\t\t\tmap.addLayer({ id: 'bubbles', type: 'circle', source: 'bubbles', paint: { 'circle-color': color, 'circle-opacity': 0.6, 'circle-radius': ['interpolate', ['linear'], ['get', 'value'], 0, r[0], max, r[1]] } });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.clusters) {\n\t\t\t\t\t\t\tmap.addSource('clusters', { type: 'geojson', data: features(d.clusters), cluster: true, clusterRadius: 40 });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'clusters', type: 'circle', source: 'clusters', filter: ['has', 'point_count'], paint: { 'circle-color': color, 'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 25, 24], 'circle-stroke-width': 2, 'circle-stroke-color': border } });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'cluster-count', type: 'symbol', source: 'clusters', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12 }, paint: { 'text-color': MapView.color('--tblr-primary-fg') } });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'cluster-point', type: 'circle', source: 'clusters', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': color, 'circle-radius': 6, 'circle-stroke-width': 2, 'circle-stroke-color': border } });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.arcs) {\n\t\t\t\t\t\t\tmap.addSource('arcs', { type: 'geojson', data: features(d.arcs.map(function (a) { return { type: 'LineString', coordinates: arc(a.from, a.to, 64) }; })) });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'arcs', type: 'line', source: 'arcs', paint: { 'line-color': color, 'line-width': 1.5, 'line-dasharray': [2, 2] } });\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\tview.ready(function (map) {\n\t\t\t\t\t\tif (d.bubbles) {\n\t\t\t\t\t\t\tvar tip = new window.maplibregl.Popup({ closeButton: false, offset: 12, className: 'map-tooltip' });\n\t\t\t\t\t\t\tmap.on('mousemove', 'bubbles', function (e) {\n\t\t\t\t\t\t\t\tvar b = e.features[0].properties;\n\t\t\t\t\t\t\t\tmap.getCanvas().style.cursor = 'pointer';\n\t\t\t\t\t\t\t\ttip.setLngLat([b.lng, b.lat]).setText(b.name + ': ' + b.value + (d.unit ? ' ' + d.unit : '')).addTo(map);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\tmap.on('mouseleave', 'bubbles', function () { map.getCanvas().style.cursor = ''; tip.remove(); });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.clusters) {\n\t\t\t\t\t\t\tmap.on('click', 'clusters', function (e) {\n\t\t\t\t\t\t\t\tvar c = e.features[0];\n\t\t\t\t\t\t\t\tmap.getSource('clusters').getClusterExpansionZoom(c.properties.cluster_id).then(function (zoom) { map.easeTo({ center: c.geometry.coordinates, zoom: zoom }); });\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction init(root) {\n\t\t\t\t\tvar MapView = window.tabler && window.tabler.MapView;\n\t\t\t\t\tif (!MapView) return;\n\t\t\t\t\troot = root || document;\n\t\t\t\t\troot.querySelectorAll('[data-bs-toggle=\"map\"]').forEach(function (el) {\n\t\t\t\t\t\tMapView.getOrCreateInstance(el);\n\t\t\t\t\t\tif (el.hasAttribute('data-map-layers')) layers(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\twindow.tablerMapView = { init: init };\n\t\t\t\t// Tabler's map script starts the maps on DOMContentLoaded; the layers need its instances.\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t\tdocument.addEventListener('click', function (e) {\n\t\t\t\t\tvar b = e.target.closest && e.target.closest('[data-map-fly]');\n\t\t\t\t\tvar el = b && document.getElementById('map-' + b.getAttribute('data-map-fly'));\n\t\t\t\t\tvar view = el && window.tabler && window.tabler.MapView.getInstance(el);\n\t\t\t\t\tif (!view || !view.map) return;\n\t\t\t\t\tb.parentElement.querySelectorAll('[data-map-fly]').forEach(function (o) {\n\t\t\t\t\t\to.classList.toggle('btn-primary', o === b);\n\t\t\t\t\t\to.setAttribute('aria-pressed', String(o === b));\n\t\t\t\t\t});\n\t\t\t\t\tview.map.flyTo({ center: b.getAttribute('data-map-fly-to').split(',').map(Number), zoom: Number(b.getAttribute('data-map-fly-zoom')) });\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "<script")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, ">\n\t\t\t(function () {\n\t\t\t\tif (window.tablerMapView) return;\n\t\t\t\tfunction features(points, props) {\n\t\t\t\t\treturn { type: 'FeatureCollection', features: points.map(function (p, i) { return { type: 'Feature', properties: props ? props(p, i) : {}, geometry: { type: p.type || 'Point', coordinates: p.coordinates || p } }; }) };\n\t\t\t\t}\n\t\t\t\t// Points along the shortest path between two places on the globe.\n\t\t\t\tfunction arc(from, to, steps) {\n\t\t\t\t\tvar r = Math.PI / 180, l1 = from[0] * r, f1 = from[1] * r, l2 = to[0] * r, f2 = to[1] * r;\n\t\t\t\t\tvar a = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((f2 - f1) / 2), 2) + Math.cos(f1) * Math.cos(f2) * Math.pow(Math.sin((l2 - l1) / 2), 2)));\n\t\t\t\t\tvar out = [];\n\t\t\t\t\tfor (var s = 0; s <= steps; s++) {\n\t\t\t\t\t\tvar A = Math.sin((1 - s / steps) * a) / Math.sin(a), B = Math.sin((s / steps) * a) / Math.sin(a);\n\t\t\t\t\t\tvar x = A * Math.cos(f1) * Math.cos(l1) + B * Math.cos(f2) * Math.cos(l2);\n\t\t\t\t\t\tvar y = A * Math.cos(f1) * Math.sin(l1) + B * Math.cos(f2) * Math.sin(l2);\n\t\t\t\t\t\tvar z = A * Math.sin(f1) + B * Math.sin(f2);\n\t\t\t\t\t\tout.push([Math.atan2(y, x) / r, Math.atan2(z, Math.hypot(x, y)) / r]);\n\t\t\t\t\t}\n\t\t\t\t\treturn out;\n\t\t\t\t}\n\t\t\t\tfunction layers(el) {\n\t\t\t\t\tvar MapView = window.tabler && window.tabler.MapView;\n\t\t\t\t\tvar view = MapView && MapView.getOrCreateInstance(el);\n\t\t\t\t\tif (!view || el.tablerLayers) return;\n\t\t\t\t\tel.tablerLayers = true;\n\t\t\t\t\tvar d = JSON.parse(el.getAttribute('data-map-layers'));\n\t\t\t\t\tview.onStyle(function (map) {\n\t\t\t\t\t\tvar color = MapView.color('--tblr-primary'), border = MapView.color('--tblr-bg-surface');\n\t\t\t\t\t\tif (d.hideLabels) {\n\t\t\t\t\t\t\tmap.getStyle().layers.filter(function (l) { return l.type === 'symbol'; }).forEach(function (l) { map.setLayoutProperty(l.id, 'visibility', 'none'); });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.bubbles) {\n\t\t\t\t\t\t\tmap.addSource('bubbles', { type: 'geojson', data: features(d.bubbles.map(function (b) { return [b.lng, b.lat]; }), function (p, i) { return d.bubbles[i]; }) });\n\t\t\t\t\t\t\tvar max = d.scale || Math.max.apply(null, d.bubbles.map(function (b) { return b.value; }));\n\t\t\t\t\t\t\tvar r = d.radius[1] ? d.radius : [4, 24];\n\t\t\t\t\t\t\tmap.addLayer({ id: 'bubbles', type: 'circle', source: 'bubbles', paint: { 'circle-color': color, 'circle-opacity': 0.6, 'circle-radius': ['interpolate', ['linear'], ['get', 'value'], 0, r[0], max, r[1]] } });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.clusters) {\n\t\t\t\t\t\t\tmap.addSource('clusters', { type: 'geojson', data: features(d.clusters), cluster: true, clusterRadius: 40 });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'clusters', type: 'circle', source: 'clusters', filter: ['has', 'point_count'], paint: { 'circle-color': color, 'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 25, 24], 'circle-stroke-width': 2, 'circle-stroke-color': border } });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'cluster-count', type: 'symbol', source: 'clusters', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12 }, paint: { 'text-color': MapView.color('--tblr-primary-fg') } });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'cluster-point', type: 'circle', source: 'clusters', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': color, 'circle-radius': 6, 'circle-stroke-width': 2, 'circle-stroke-color': border } });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.arcs) {\n\t\t\t\t\t\t\tmap.addSource('arcs', { type: 'geojson', data: features(d.arcs.map(function (a) { return { type: 'LineString', coordinates: arc(a.from, a.to, 64) }; })) });\n\t\t\t\t\t\t\tmap.addLayer({ id: 'arcs', type: 'line', source: 'arcs', paint: { 'line-color': color, 'line-width': 1.5, 'line-dasharray': [2, 2] } });\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\tview.ready(function (map) {\n\t\t\t\t\t\tif (d.bubbles) {\n\t\t\t\t\t\t\tvar tip = new window.maplibregl.Popup({ closeButton: false, offset: 12, className: 'map-tooltip' });\n\t\t\t\t\t\t\tmap.on('mousemove', 'bubbles', function (e) {\n\t\t\t\t\t\t\t\tvar b = e.features[0].properties;\n\t\t\t\t\t\t\t\tmap.getCanvas().style.cursor = 'pointer';\n\t\t\t\t\t\t\t\ttip.setLngLat([b.lng, b.lat]).setText(b.name + ': ' + b.value + (d.unit ? ' ' + d.unit : '')).addTo(map);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\tmap.on('mouseleave', 'bubbles', function () { map.getCanvas().style.cursor = ''; tip.remove(); });\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (d.clusters) {\n\t\t\t\t\t\t\tmap.on('click', 'clusters', function (e) {\n\t\t\t\t\t\t\t\tvar c = e.features[0];\n\t\t\t\t\t\t\t\tmap.getSource('clusters').getClusterExpansionZoom(c.properties.cluster_id).then(function (zoom) { map.easeTo({ center: c.geometry.coordinates, zoom: zoom }); });\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction init(root) {\n\t\t\t\t\tvar MapView = window.tabler && window.tabler.MapView;\n\t\t\t\t\tif (!MapView) return;\n\t\t\t\t\troot = root || document;\n\t\t\t\t\troot.querySelectorAll('[data-bs-toggle=\"map\"]').forEach(function (el) {\n\t\t\t\t\t\tMapView.getOrCreateInstance(el);\n\t\t\t\t\t\tif (el.hasAttribute('data-map-layers')) layers(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\twindow.tablerMapView = { init: init };\n\t\t\t\t// Tabler's map script starts the maps on DOMContentLoaded; the layers need its instances.\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t\tdocument.addEventListener('click', function (e) {\n\t\t\t\t\tvar b = e.target.closest && e.target.closest('[data-map-fly]');\n\t\t\t\t\tvar el = b && document.getElementById('map-' + b.getAttribute('data-map-fly'));\n\t\t\t\t\tvar view = el && window.tabler && window.tabler.MapView.getInstance(el);\n\t\t\t\t\tif (!view || !view.map) return;\n\t\t\t\t\tb.parentElement.querySelectorAll('[data-map-fly]').forEach(function (o) {\n\t\t\t\t\t\to.classList.toggle('btn-primary', o === b);\n\t\t\t\t\t\to.setAttribute('aria-pressed', String(o === b));\n\t\t\t\t\t});\n\t\t\t\t\tview.map.flyTo({ center: b.getAttribute('data-map-fly-to').split(',').map(Number), zoom: Number(b.getAttribute('data-map-fly-zoom')) });\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

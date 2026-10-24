@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Content-Security-Policy: every `<script>` and `<style>` the packages render carries templ's nonce
+  (`templ.WithNonce`), not only `sidebar` and `blocks/detail`: `modal`, `chart`, `themes`, `icon`, the
+  plugins, `confetti`, `assets`, the blocks (layout settings, tables, modals, maps, marketing, shell …) and
+  the `cmd/new` app. Without a nonce the output is unchanged. See README, Content-Security-Policy.
+- `invoice.PrintButton` prints through a script instead of an inline `onclick`.
+- The demo binary (`demo`, 18 MB) is no longer in the repository; `.gitignore` keeps it and `new` out.
 - New package `static`: serves an app's own static files fast, for apps that serve Tabler themselves
   instead of loading it from jsDelivr (#29).
   - `static.New(prefix, fsys)` is an `http.Handler`; `URL(name)` gives an address with a hash over the

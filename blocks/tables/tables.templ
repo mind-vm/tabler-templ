@@ -16,6 +16,7 @@ import (
 	"github.com/mind-vm/tabler-templ/flag"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/pagination"
 	"github.com/mind-vm/tabler-templ/progress"
@@ -318,7 +319,7 @@ templ Advanced(p AdvancedProps) {
 						}
 						@dropdown.Menu() {
 							for _, n := range perPage(p) {
-								@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onclick": "setPageListItems(this)", "data-value": strconv.Itoa(n)}}) {
+								@dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"data-page-list-items": true, "data-value": strconv.Itoa(n)}}) {
 									{ strconv.Itoa(n) } records
 								}
 							}
@@ -361,7 +362,7 @@ func scriptArgs(p AdvancedProps) scriptData {
 // Tabler's demo.
 templ AdvancedScript(p AdvancedProps) {
 	@templ.JSONScript(p.ID+"-list-config", scriptArgs(p))
-	<script>
+	<script { csp.Nonce(ctx)... }>
 		(function () {
 			const scripts = document.querySelectorAll('script[type="application/json"][id$="-list-config"]');
 			const cfg = JSON.parse(scripts[scripts.length - 1].textContent);
@@ -372,6 +373,13 @@ templ AdvancedScript(p AdvancedProps) {
 				window.tabler_list[id].update();
 				document.querySelector('#' + id + '-page-count').innerHTML = el.dataset.value;
 			};
+			if (!window.__kitPageListItems) {
+				window.__kitPageListItems = true;
+				document.addEventListener('click', (e) => {
+					const el = e.target.closest('[data-page-list-items]');
+					if (el) window.setPageListItems(el);
+				});
+			}
 			function init() {
 				window.tabler_list ??= {};
 				const list = (window.tabler_list[cfg.id] = new List(cfg.id, {

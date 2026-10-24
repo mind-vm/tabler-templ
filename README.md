@@ -376,6 +376,24 @@ templ Layout(r *http.Request) {
   Go, or write an intended space as `{ " " }`.
 - Generated `*_templ.go` files are committed, so the module works with a plain `go get`.
 
+## Content-Security-Policy
+
+Every `<script>` and `<style>` the packages render carries templ's nonce, set with `templ.WithNonce` (e.g. in
+a middleware that also sends the header). Without a nonce they render as before. The packages use no inline
+event handlers (`onclick=` …), so scripts need no `'unsafe-inline'`:
+
+```go
+nonce := newNonce() // random, new per response
+w.Header().Set("Content-Security-Policy", "script-src 'nonce-"+nonce+"' https://cdn.jsdelivr.net; "+
+	"style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'")
+next.ServeHTTP(w, r.WithContext(templ.WithNonce(r.Context(), nonce)))
+```
+
+Styles still need `'unsafe-inline'`: some components and blocks set `style=` attributes (widths, colors,
+images), and Tabler's and ApexCharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
+ignore `'unsafe-inline'`, so leave the nonce out of `style-src` for now.) `csp_test.go` checks that every
+script and style of the packages goes through `internal/csp`.
+
 ## Theming
 
 The kit never hardcodes colors, radii or fonts. All appearance comes from Tabler's CSS:

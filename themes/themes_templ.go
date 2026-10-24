@@ -14,6 +14,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/auth"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
 
@@ -58,7 +59,7 @@ func Head(ts ...Theme) templ.Component {
 					var templ_7745c5c3_Var2 templ.SafeURL
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(f.URL())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 28, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 29, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 					if templ_7745c5c3_Err != nil {
@@ -77,7 +78,7 @@ func Head(ts ...Theme) templ.Component {
 			css.WriteString(t.CSS())
 		}
 		if css.Len() > 0 {
-			templ_7745c5c3_Err = templ.Raw("<style>"+css.String()+"</style>").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = csp.Style(css.String()).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -113,7 +114,15 @@ func Script() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n\t\t(function () {\n\t\t\tvar v = null, p = new URLSearchParams(location.search).get('theme-pack');\n\t\t\ttry { if (p && /^[a-z0-9-]{1,32}$/.test(p)) localStorage.setItem('tabler-theme-pack', p); v = localStorage.getItem('tabler-theme-pack'); } catch (e) {}\n\t\t\tif (v === 'default') document.documentElement.removeAttribute('data-bs-theme-pack');\n\t\t\telse if (v) document.documentElement.setAttribute('data-bs-theme-pack', v);\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ">\n\t\t(function () {\n\t\t\tvar v = null, p = new URLSearchParams(location.search).get('theme-pack');\n\t\t\ttry { if (p && /^[a-z0-9-]{1,32}$/.test(p)) localStorage.setItem('tabler-theme-pack', p); v = localStorage.getItem('tabler-theme-pack'); } catch (e) {}\n\t\t\tif (v === 'default') document.documentElement.removeAttribute('data-bs-theme-pack');\n\t\t\telse if (v) document.documentElement.setAttribute('data-bs-theme-pack', v);\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
