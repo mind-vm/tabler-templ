@@ -15,10 +15,15 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/detail"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/theme"
 )
 
 // AppName is shown in the title, the navigation and the sign-in page.
 const AppName = "[[.Name]]"
+
+// Appearance is the app's look: accent color, gray base, font and corner radius. Users can change it for
+// themselves under Appearance in the user menu; their choice is saved in the browser.
+var Appearance = theme.Settings{Primary: theme.Blue}
 
 // Page is what every page in the frame gets from its handler.
 type Page struct {
@@ -30,13 +35,17 @@ type Page struct {
 
 // head loads Tabler (with ApexCharts for the dashboard) and the CSS of the app blocks in use.
 templ head() {
-	@assets.Head(assets.Props{Charts: true})
+	@assets.Head(assets.Props{Charts: true, Themes: true})
+	@assets.Theme()
 	@listpage.Styles()
 	@create.Styles()
 	@detail.Styles()
 }
 
 templ scripts() {
+	@layout.ThemeSettings(layout.ThemeSettingsProps{NoButton: true, Title: "Appearance",
+		Text: "Pick colors, font and corners. Your choice is saved in this browser.",
+		Sections: []layout.ThemeSection{layout.AppearanceSection()}})
 	@assets.Scripts()
 	@detail.Script(detail.ScriptConfig{})
 }
@@ -70,6 +79,8 @@ func menu(active string) []layout.Entry {
 
 templ userMenu(email string) {
 	@layout.UserMenu(layout.UserProps{Name: email, Avatar: avatar.Props{Initials: strings.ToUpper(email[:min(2, len(email))])}}) {
+		<button type="button" class="dropdown-item" { layout.ThemeSettingsToggle("")... }>Appearance</button>
+		<div class="dropdown-divider"></div>
 		<form method="post" action="/sign-out">
 			<button type="submit" class="dropdown-item">Sign out</button>
 		</form>
@@ -87,7 +98,8 @@ templ actions(p Page) {
 // Actions) and the flash message; the children are the content.
 templ Frame(p Page, headerActions templ.Component) {
 	@layout.Page(layout.PageProps{
-		Title:   p.Title + " · " + AppName,
+		Title:      p.Title + " · " + AppName,
+		Appearance: Appearance,
 		Head:    head(),
 		Scripts: scripts(),
 		Navbar: layout.Navbar(layout.NavbarProps{
@@ -115,12 +127,17 @@ type SignInForm struct {
 
 // SignIn is the sign-in page.
 templ SignIn(f SignInForm) {
-	@auth.Page(auth.PageProps{Title: "Sign in · " + AppName, Head: assets.Head(), Scripts: assets.Scripts(),
+	@auth.Page(auth.PageProps{Title: "Sign in · " + AppName, Head: signInHead(), Scripts: assets.Scripts(), Appearance: Appearance,
 		Brand: signInLogo()}) {
 		@auth.SignInCard(auth.SignInCardProps{Form: auth.SignInFormProps{
 			Action: "/sign-in", Error: f.Error, UserValue: f.Email, Hidden: hidden("next", f.Next),
 		}})
 	}
+}
+
+templ signInHead() {
+	@assets.Head(assets.Props{Themes: true})
+	@assets.Theme()
 }
 
 func hidden(name, value string) []auth.Hidden {

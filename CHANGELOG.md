@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Theming: new package `theme` (accent color, gray base, font, corner radius as typed values).
+  `layout.PageProps.Appearance` and `auth.PageProps.Appearance`/`Theme` render them, and
+  `layout.PageProps.OffcanvasFloating` floats side panels. `assets.Props.Themes` loads `tabler-themes.css`.
+- New block `layout.ThemeSettings`, Tabler's theme panel (also with only the appearance section, translated,
+  or opened from any button via `ThemeSettingsToggle`). The demo shows it on every page, as the preview does.
+- `cmd/new`: the app loads Tabler's theme script, so the dark/light toggle sticks (it did nothing before),
+  and it has Appearance in the user menu. `views.Appearance` sets the app's default look.
+
 - New package `versions`: Tabler, its icons and the plugin libraries are pinned in one place; every
   package's `Version` constant reads from it. `scripts/tabler-update.sh` prepares a Tabler update. It
   updates the pins (`internal/tools/versions`), regenerates the demo data (now also the menu,

@@ -4,6 +4,7 @@ package catalog
 
 // Blocks lists the composed parts of the Tabler preview (shared/components), each a candidate for blocks/.
 var Blocks = []Block{
+	{Source: "demo/ThemeSettings", Status: Done, Package: "blocks/layout"},
 	{Source: "cards/ActivityCard", Status: Done, Package: "blocks/activity"},
 	{Source: "cards/AuthLockCard", Status: Done, Package: "blocks/auth"},
 	{Source: "cards/AuthenticateAccount", Status: Done, Package: "blocks/auth"},

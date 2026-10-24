@@ -18,14 +18,24 @@ templ assets() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-themes.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
 	@chart.Library()
+	// Applies the theme settings saved in the browser before the page paints.
+	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler-theme.min.js" }></script>
 	// Rules of the preview's own demo.scss (not part of Tabler's CSS), e.g. menus shown open in the page.
 	<style>.dropdown-menu-demo{display:inline-block;width:100%;position:relative;top:0;margin-bottom:1rem!important}</style>
 }
 
+// scripts are Tabler's script and, as on every page of the preview, the theme settings panel.
 templ scripts() {
+	@layout.ThemeSettings(layout.ThemeSettingsProps{Title: "Make Tabler your own",
+		Text: "Pick the look and layout of this preview. Your choices are saved in this browser.", Media: settingsIllustration()})
 	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler.min.js" }></script>
+}
+
+templ settingsIllustration() {
+	<img src={ photo("illustrations/light/computer-fix.png") } height="120" style="height:120px" class="mb-3" alt=""/>
 }
 
 // frameProps are the layout settings of a preview page; the layout-* pages change them.

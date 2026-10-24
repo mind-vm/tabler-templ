@@ -30,6 +30,8 @@ type Props struct {
 	Payments  bool // tabler-payments (payment package)
 	Socials   bool // tabler-socials (social package)
 	Marketing bool // tabler-marketing (marketing pages)
+	// Themes styles the theme settings: accent colors, gray bases, fonts and radii (package theme).
+	Themes bool
 	// Vendors styles third-party plugins the Tabler way: ApexCharts tooltips, maps, editors …
 	Vendors bool
 	Charts  bool // loads ApexCharts (chart.Library); implies Vendors
@@ -64,6 +66,9 @@ templ Head(props ...Props) {
 	if p.Marketing {
 		<link rel="stylesheet" href={ css(p, "tabler-marketing") }/>
 	}
+	if p.Themes {
+		<link rel="stylesheet" href={ css(p, "tabler-themes") }/>
+	}
 	if p.Vendors || p.Charts {
 		<link rel="stylesheet" href={ css(p, "tabler-vendors") }/>
 	}
@@ -73,8 +78,9 @@ templ Head(props ...Props) {
 	}
 }
 
-// Theme applies the color mode saved by Tabler's theme switch (?theme=dark|light) before the page paints;
-// put it first in <body>, or in Head.
+// Theme is Tabler's theme script: it applies the settings saved in the browser (color mode, theme and
+// layout settings, also from ?theme=dark and the like) before the page paints. Put it in Head, after the
+// stylesheets; layout.ThemeToggle and layout.ThemeSettings need it.
 templ Theme() {
 	<script src={ CoreURL("js/tabler-theme.min.js") }></script>
 }

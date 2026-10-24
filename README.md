@@ -232,7 +232,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
-| `blocks/layout` | Tabler's page frame: `Page` (sidebar and/or navbar, page header, footer; layout variants vertical, combined, fluid, boxed, sticky, floating, dark or primary navigation, folded sidebar, RTL as props), `Navbar` (condensed, dark, transparent), `Sidebar` (end, transparent, folded), `Menu` from `[]Entry` (sections, dropdowns with columns and submenus, badges, active state), `Brand`, `FoldToggle`, `ThemeToggle`, `NavDropdown`, `Notifications`, `Apps`, `UserMenu`, `SidebarUser`, `Search`, `PageHeader`, `Footer` |
+| `blocks/layout` | Tabler's page frame: `Page` (sidebar and/or navbar, page header, footer; layout variants vertical, combined, fluid, boxed, sticky, floating, dark or primary navigation, folded sidebar, floating offcanvas, RTL, theme `Appearance` as props), `ThemeSettings` (Tabler's theme panel), `Navbar` (condensed, dark, transparent), `Sidebar` (end, transparent, folded), `Menu` from `[]Entry` (sections, dropdowns with columns and submenus, badges, active state), `Brand`, `FoldToggle`, `ThemeToggle`, `NavDropdown`, `Notifications`, `Apps`, `UserMenu`, `SidebarUser`, `Search`, `PageHeader`, `Footer` |
 | `blocks/errorpage` | `Page` (404, 500, maintenance: illustration or code, title, text, button home), `LoaderPage` |
 | `blocks/modals` | Ready-made dialogs: `Status` (success, danger …), `Confirm`, `ConfirmDelete` (items, check box before deleting), `ChangePassword` (strength, match check) |
 | `blocks/auth` | Tabler's sign-in and account pages: `Page` (centered, optional illustration `Aside`), `CoverPage` (form beside a cover image), `OnboardingPage` (top bar with progress); `SignInForm`, `SignInCard` (other providers), `SignUpCard` (password strength, terms), `ForgotPasswordCard`, `LockCard`, `VerifyCard` (OTP code), `FormCard` (own fields), `Card`, `Message`, `Note`, `Logo`. All texts are props (Tabler's English by default) |
@@ -373,12 +373,26 @@ templ Layout(r *http.Request) {
 
 ## Theming
 
-The kit never hardcodes colors, radii or fonts. All appearance comes from CSS:
+The kit never hardcodes colors, radii or fonts. All appearance comes from Tabler's CSS:
 
-1. **Tabler's custom properties.** Override `--tblr-primary`, `--tblr-border-radius`, `--tblr-body-bg`,
+1. **Tabler's themes.** Accent color, gray base, font and corner radius, as in Tabler 1.7's theme settings.
+   Load `tabler-themes.css` (`assets.Props{Themes: true}`) and set them on the page:
+
+   ```go
+   layout.PageProps{Theme: "dark", Appearance: theme.Settings{Primary: theme.Teal, Base: theme.Zinc,
+       Font: theme.Serif, Radius: theme.Radius2}}
+   ```
+
+   `auth.PageProps` takes the same `Theme` and `Appearance`, so sign-in matches the app.
+2. **Let users choose.** `layout.ThemeSettings` is Tabler's settings panel: a floating button (or
+   `ThemeSettingsToggle` on any button, e.g. in the user menu) opens an offcanvas with color scheme, accent
+   color, font, base, radius and, optionally, the layout. Choices apply at once and are saved in the browser.
+   Tabler's theme script (`assets.Theme()`, in the head) applies them on every page before it paints. It also
+   makes `layout.ThemeToggle` (dark/light) stick. Pass your own `Sections` to translate the panel, or only
+   `layout.AppearanceSection()` for an app with one layout.
+3. **Tabler's custom properties.** Override `--tblr-primary`, `--tblr-border-radius`, `--tblr-body-bg`,
    `--tblr-font-sans-serif` … in your own stylesheet loaded after Tabler. This restyles every component.
-2. **Dark mode.** Tabler's `data-bs-theme="dark"` on `<html>` or any container.
-3. **Your own classes.** `Class` on any component (e.g. `card.Card(card.Props{Class: "island"})`) for app
+4. **Your own classes.** `Class` on any component (e.g. `card.Card(card.Props{Class: "island"})`) for app
    specific looks, styled in your CSS.
 
 ## Texts and languages

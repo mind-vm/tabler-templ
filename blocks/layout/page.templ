@@ -13,6 +13,7 @@ package layout
 import (
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/theme"
 )
 
 // Position is where the main menu lives when a page has both a Navbar and a Sidebar.
@@ -49,7 +50,10 @@ type PageProps struct {
 	Scripts templ.Component // end of <body>: Tabler's script and the app's
 	RTL     bool            // dir="rtl"; load Tabler's RTL stylesheet in Head
 	// Theme is "light" or "dark" (data-bs-theme); empty = the browser's preference via Tabler's CSS.
-	Theme     string
+	Theme string
+	// Appearance is the accent color, gray base, font and corner radius (needs tabler-themes.css:
+	// assets.Props{Themes: true}).
+	Appearance theme.Settings
 	BodyClass string
 	// The navigations; either or both.
 	Sidebar templ.Component
@@ -61,6 +65,8 @@ type PageProps struct {
 	Floating    bool   // navbar and sidebar keep a gap from the screen edges
 	NavbarTheme string // "dark" or "primary": colors the navigation
 	SidebarMode SidebarMode
+	// OffcanvasFloating keeps side panels off the screen edges (data-bs-offcanvas-style="floating").
+	OffcanvasFloating bool
 	Header      templ.Component // usually a PageHeader
 	Footer      templ.Component // usually a Footer
 	// Full puts the children into the page body without the container (page-wrapper-full).
@@ -86,6 +92,10 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	set("navbar-style", kit.If(p.Floating, "floating"))
 	set("navbar-theme", p.NavbarTheme)
 	set("sidebar", string(p.SidebarMode))
+	set("offcanvas-style", kit.If(p.OffcanvasFloating, "floating"))
+	for k, v := range p.Appearance.Attrs() {
+		a[k] = v
+	}
 	return a
 }
 

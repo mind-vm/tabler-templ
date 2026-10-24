@@ -31,6 +31,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/theme"
 )
 
 // Position is where the main menu lives when a page has both a Navbar and a Sidebar.
@@ -67,8 +68,11 @@ type PageProps struct {
 	Scripts templ.Component // end of <body>: Tabler's script and the app's
 	RTL     bool            // dir="rtl"; load Tabler's RTL stylesheet in Head
 	// Theme is "light" or "dark" (data-bs-theme); empty = the browser's preference via Tabler's CSS.
-	Theme     string
-	BodyClass string
+	Theme string
+	// Appearance is the accent color, gray base, font and corner radius (needs tabler-themes.css:
+	// assets.Props{Themes: true}).
+	Appearance theme.Settings
+	BodyClass  string
 	// The navigations; either or both.
 	Sidebar templ.Component
 	Navbar  templ.Component
@@ -79,8 +83,10 @@ type PageProps struct {
 	Floating    bool   // navbar and sidebar keep a gap from the screen edges
 	NavbarTheme string // "dark" or "primary": colors the navigation
 	SidebarMode SidebarMode
-	Header      templ.Component // usually a PageHeader
-	Footer      templ.Component // usually a Footer
+	// OffcanvasFloating keeps side panels off the screen edges (data-bs-offcanvas-style="floating").
+	OffcanvasFloating bool
+	Header            templ.Component // usually a PageHeader
+	Footer            templ.Component // usually a Footer
 	// Full puts the children into the page body without the container (page-wrapper-full).
 	Full bool
 	// ContainerClass is added to the body's container, e.g. "my-auto" to center the content.
@@ -104,6 +110,10 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	set("navbar-style", kit.If(p.Floating, "floating"))
 	set("navbar-theme", p.NavbarTheme)
 	set("sidebar", string(p.SidebarMode))
+	set("offcanvas-style", kit.If(p.OffcanvasFloating, "floating"))
+	for k, v := range p.Appearance.Attrs() {
+		a[k] = v
+	}
 	return a
 }
 
@@ -145,7 +155,7 @@ func Page(p PageProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 100, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 110, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -370,7 +380,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(p.Pretitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 160, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 170, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -388,7 +398,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 162, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 172, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -406,7 +416,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 164, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 174, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -492,7 +502,7 @@ func footerLink(l Link) templ.Component {
 		var templ_7745c5c3_Var16 templ.SafeURL
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(l.Href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 197, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 207, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -525,7 +535,7 @@ func footerLink(l Link) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(l.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 207, Col: 10}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 217, Col: 10}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
