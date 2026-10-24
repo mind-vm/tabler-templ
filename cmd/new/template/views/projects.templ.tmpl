@@ -1,0 +1,226 @@
+package views
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/table"
+
+	"[[.Module]]/internal/projects"
+)
+
+func href(p projects.Project) templ.SafeURL {
+	return templ.URL("/projects/" + strconv.Itoa(p.ID))
+}
+
+func due(p projects.Project) string {
+	if p.Due.IsZero() {
+		return ""
+	}
+	return p.Due.Format("Jan 2, 2006")
+}
+
+func budget(p projects.Project) string {
+	if p.Budget == 0 {
+		return ""
+	}
+	return "$" + thousands(p.Budget)
+}
+
+templ status(s projects.Status) {
+	@badge.Badge(badge.Props{Color: s.Color(), Light: true}) {
+		{ s.Label() }
+	}
+}
+
+// projectTable is a table of projects, each linking to its page.
+templ projectTable(ps []projects.Project) {
+	@table.Table(table.Props{Card: true, VCenter: true, Responsive: true}) {
+		<thead>
+			<tr>
+				<th>Project</th>
+				<th>Client</th>
+				<th>Owner</th>
+				<th>Status</th>
+				<th class="text-end">Budget</th>
+				<th>Due</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, p := range ps {
+				<tr>
+					<td>
+						<a href={ href(p) } class="text-reset fw-medium">{ p.Name }</a>
+						<div class="text-secondary small">{ p.Code() }</div>
+					</td>
+					<td>{ p.Client }</td>
+					<td>{ p.Owner }</td>
+					<td>
+						@status(p.Status)
+					</td>
+					<td class="text-end">{ budget(p) }</td>
+					<td class="text-secondary">{ due(p) }</td>
+				</tr>
+			}
+			if len(ps) == 0 {
+				@table.Empty(6, "No projects found.")
+			}
+		</tbody>
+	}
+}
+
+func statusOptions() []listpage.Option {
+	os := make([]listpage.Option, len(projects.Statuses))
+	for i, s := range projects.Statuses {
+		os[i] = listpage.Option{Value: string(s), Label: s.Label()}
+	}
+	return os
+}
+
+// Projects is the list page: search, a status filter and pages, read from the URL.
+templ Projects(p Page, r *http.Request, all []projects.Project) {
+	{{
+		l := listpage.New(r, listpage.Config{Placeholder: "Search projects …", PageSize: 10},
+			listpage.Filter{Name: "status", Label: "All statuses", Options: statusOptions()})
+		rows := listpage.Paginate(l, all, func(x projects.Project) bool {
+			return (l.Filters[0].Value == "" || string(x.Status) == l.Filters[0].Value) &&
+				listpage.Contains(l.Query, x.Name, x.Client, x.Owner, x.Code())
+		})
+	}}
+	@Frame(p, newButton()) {
+		@listpage.Card(l) {
+			@projectTable(rows)
+		}
+	}
+}
+
+templ newButton() {
+	@button.Button(button.Props{Href: "/projects/new", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		New project
+	}
+}
+
+// projectFields are the fields of a project, for the create page and the edit dialog.
+templ projectFields(f projects.Form) {
+	@form.Field(form.FieldProps{Label: "Name", For: "name", Required: true, Error: f.Errors["name"]}) {
+		@form.Input(form.InputProps{ID: "name", Name: "name", Value: f.Name, Required: true, Invalid: f.Errors["name"] != ""})
+	}
+	<div class="row">
+		<div class="col-md-6">
+			@form.Field(form.FieldProps{Label: "Client", For: "client"}) {
+				@form.Input(form.InputProps{ID: "client", Name: "client", Value: f.Client})
+			}
+		</div>
+		<div class="col-md-6">
+			@form.Field(form.FieldProps{Label: "Owner", For: "owner"}) {
+				@form.Input(form.InputProps{ID: "owner", Name: "owner", Value: f.Owner})
+			}
+		</div>
+		<div class="col-md-4">
+			@form.Field(form.FieldProps{Label: "Status", For: "status", Error: f.Errors["status"]}) {
+				@form.Select(form.SelectProps{ID: "status", Name: "status", Options: formStatusOptions(), Selected: f.Status, Invalid: f.Errors["status"] != ""})
+			}
+		</div>
+		<div class="col-md-4">
+			@form.Field(form.FieldProps{Label: "Budget", For: "budget", Error: f.Errors["budget"]}) {
+				@form.Input(form.InputProps{ID: "budget", Name: "budget", Type: "number", Value: f.Budget, Placeholder: "e.g. 12000", Invalid: f.Errors["budget"] != ""})
+			}
+		</div>
+		<div class="col-md-4">
+			@form.Field(form.FieldProps{Label: "Due", For: "due", Error: f.Errors["due"]}) {
+				@form.Input(form.InputProps{ID: "due", Name: "due", Type: "date", Value: f.Due, Invalid: f.Errors["due"] != ""})
+			}
+		</div>
+	</div>
+	@form.Field(form.FieldProps{Label: "Notes", For: "notes"}) {
+		@form.Textarea(form.TextareaProps{ID: "notes", Name: "notes", Value: f.Notes, Rows: 3})
+	}
+}
+
+func formStatusOptions() []form.Option {
+	os := make([]form.Option, len(projects.Statuses))
+	for i, s := range projects.Statuses {
+		os[i] = form.Option{Value: string(s), Label: s.Label()}
+	}
+	return os
+}
+
+// NewProject is the create page; after a failed save it shows the values entered and their errors.
+templ NewProject(p Page, f projects.Form) {
+	@Frame(p, nil) {
+		@create.Form(create.FormProps{Action: "/projects"}) {
+			<div class="row row-cards">
+				<div class="col-lg-8">
+					@detail.Section(detail.SectionProps{Title: "Project"}) {
+						@card.Body() {
+							@projectFields(f)
+						}
+					}
+				</div>
+				<div class="col-lg-8">
+					@create.Footer(create.FooterProps{Cancel: "/projects", Submit: "Create project"})
+				</div>
+			</div>
+		}
+	}
+}
+
+// Project is a project's page: its fields with an edit dialog, and deleting it. f is the dialog's form;
+// with errors (a failed save) the dialog opens again.
+templ Project(p Page, x projects.Project, f projects.Form) {
+	@Frame(p, deleteButton(x)) {
+		<div class="row row-cards">
+			<div class="col-lg-8">
+				@detail.Section(detail.SectionProps{Title: "Project", Extra: x.Code(),
+					Action: detail.EditButton(detail.EditButtonProps{Dialog: "dialog-project"})}) {
+					@card.Body() {
+						@detail.Fields() {
+							@detail.Field("Name", x.Name, "–")
+							@detail.Field("Client", x.Client, "–")
+							@detail.Field("Owner", x.Owner, "–")
+							@detail.Field("Status", x.Status.Label(), "–")
+							@detail.Field("Budget", budget(x), "–")
+							@detail.Field("Due", due(x), "–")
+							@detail.Field("Notes", x.Notes, "–")
+						}
+					}
+				}
+			</div>
+		</div>
+		@detail.Dialog(detail.DialogProps{ID: "dialog-project", Title: "Edit project", Context: x.Code(), Section: true, Error: errorOf(f)}) {
+			<form method="post" action={ href(x) }>
+				@projectFields(f)
+				<div>
+					@button.Button(button.Props{Variant: button.VariantPrimary}) {
+						Save
+					}
+				</div>
+			</form>
+		}
+		if len(f.Errors) > 0 {
+			@dialogState("dialog-project", errorOf(f))
+		}
+	}
+}
+
+func errorOf(f projects.Form) string {
+	if len(f.Errors) == 0 {
+		return ""
+	}
+	return "Please check the marked fields."
+}
+
+templ deleteButton(x projects.Project) {
+	<form method="post" action={ templ.URL("/projects/" + strconv.Itoa(x.ID) + "/delete") } onsubmit="return confirm('Delete this project?')">
+		@button.Button(button.Props{Variant: button.VariantDanger, Outline: true, Icon: "ti-trash"}) {
+			Delete
+		}
+	</form>
+}

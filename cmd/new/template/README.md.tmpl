@@ -1,0 +1,30 @@
+# [[.Name]]
+
+A web app built with [tabler-templ](https://github.com/mind-vm/tabler-templ): Go, [templ](https://templ.guide)
+and [Tabler](https://tabler.io). Created with `go run github.com/mind-vm/tabler-templ/cmd/new`.
+
+```sh
+go tool templ generate   # after changing a .templ file
+go run . -addr localhost:8080
+```
+
+Sign in with `admin@example.com` / `admin`, or set `APP_EMAIL` and `APP_PASSWORD`. Set `SESSION_SECRET` to
+keep sessions across restarts, and `COOKIE_SECURE=1` behind HTTPS.
+
+While developing, `go tool templ generate --watch --proxy="http://localhost:8080" --cmd="go run ."` rebuilds
+and reloads the browser on every change.
+
+## What is in it
+
+| | |
+|---|---|
+| `main.go` | routes and handlers (standard library `net/http`) |
+| `auth.go` | one account from the environment and a signed session cookie; replace with your users |
+| `internal/projects` | the example data: projects in memory, form checks; replace the `Store` with your database |
+| `views/layout.templ` | the page frame (`blocks/layout`: navbar, menu, user menu, theme toggle, page header) and the sign-in page (`blocks/auth`) |
+| `views/dashboard.templ` | metric cards (`blocks/metric`) and charts (`chart`) |
+| `views/projects.templ` | list with search, filter and pages (`blocks/listpage`), create page (`blocks/create`), detail page with an edit dialog that reopens after a failed save (`blocks/detail`) |
+
+Tabler is loaded from jsDelivr (`assets.Head`, `assets.Scripts`). The components and blocks are listed in
+tabler-templ's README; its demo (`go run github.com/mind-vm/tabler-templ/cmd/demo@latest`) rebuilds every
+page of the Tabler preview.

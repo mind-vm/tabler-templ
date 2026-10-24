@@ -1,0 +1,186 @@
+// Command [[.Binary]] is a web app built with tabler-templ: sign-in, a dashboard and a list of projects you
+// can search, filter, create, edit and delete.
+//
+//	go tool templ generate && go run . -addr localhost:8080
+package main
+
+import (
+	"errors"
+	"flag"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"strconv"
+
+	"github.com/a-h/templ"
+
+	"[[.Module]]/internal/projects"
+	"[[.Module]]/views"
+)
+
+type app struct {
+	auth     *auth
+	projects *projects.Store
+}
+
+func main() {
+	addr := flag.String("addr", "localhost:8080", "address to listen on")
+	flag.Parse()
+
+	a := &app{auth: newAuth(), projects: projects.NewStore()}
+	log.Printf("[[.Name]] on http://%s (sign in as %s)", *addr, a.auth.email)
+	log.Fatal(http.ListenAndServe(*addr, a.routes()))
+}
+
+func (a *app) routes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /sign-in", a.signInPage)
+	mux.HandleFunc("POST /sign-in", a.signIn)
+	mux.HandleFunc("POST /sign-out", a.signOut)
+
+	mux.Handle("GET /{$}", a.auth.require(a.dashboard))
+	mux.Handle("GET /projects", a.auth.require(a.listProjects))
+	mux.Handle("GET /projects/new", a.auth.require(a.newProject))
+	mux.Handle("POST /projects", a.auth.require(a.createProject))
+	mux.Handle("GET /projects/{id}", a.auth.require(a.showProject))
+	mux.Handle("POST /projects/{id}", a.auth.require(a.updateProject))
+	mux.Handle("POST /projects/{id}/delete", a.auth.require(a.deleteProject))
+	// Rejects form posts from other sites (CSRF).
+	return http.NewCrossOriginProtection().Handler(mux)
+}
+
+// render writes a page; a failed render is logged, the status is already sent.
+func render(w http.ResponseWriter, r *http.Request, status int, c templ.Component) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	if err := c.Render(r.Context(), w); err != nil {
+		log.Printf("render %s: %v", r.URL.Path, err)
+	}
+}
+
+// page is what every page of the frame needs: the signed-in user and a message from the last action.
+func (a *app) page(r *http.Request, title, active string) views.Page {
+	return views.Page{Title: title, Active: active, User: a.auth.user(r), Flash: r.URL.Query().Get("flash")}
+}
+
+// redirect goes to path with a message for the next page.
+func redirect(w http.ResponseWriter, r *http.Request, path, flash string) {
+	if flash != "" {
+		path += "?flash=" + url.QueryEscape(flash)
+	}
+	http.Redirect(w, r, path, http.StatusSeeOther)
+}
+
+func (a *app) signInPage(w http.ResponseWriter, r *http.Request) {
+	render(w, r, http.StatusOK, views.SignIn(views.SignInForm{Next: r.URL.Query().Get("next")}))
+}
+
+func (a *app) signIn(w http.ResponseWriter, r *http.Request) {
+	f := views.SignInForm{Email: r.FormValue("email"), Next: r.FormValue("next")}
+	if !a.auth.check(f.Email, r.FormValue("password")) {
+		f.Error = "Email or password is wrong."
+		render(w, r, http.StatusUnprocessableEntity, views.SignIn(f))
+		return
+	}
+	a.auth.signIn(w, f.Email)
+	next := f.Next
+	if next == "" || next[0] != '/' || len(next) > 1 && (next[1] == '/' || next[1] == '\\') {
+		next = "/"
+	}
+	http.Redirect(w, r, next, http.StatusSeeOther)
+}
+
+func (a *app) signOut(w http.ResponseWriter, r *http.Request) {
+	a.auth.signOut(w)
+	http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+}
+
+func (a *app) dashboard(w http.ResponseWriter, r *http.Request) {
+	render(w, r, http.StatusOK, views.Dashboard(a.page(r, "Dashboard", "dashboard"), a.projects.All()))
+}
+
+func (a *app) listProjects(w http.ResponseWriter, r *http.Request) {
+	render(w, r, http.StatusOK, views.Projects(a.page(r, "Projects", "projects"), r, a.projects.All()))
+}
+
+func (a *app) newProject(w http.ResponseWriter, r *http.Request) {
+	render(w, r, http.StatusOK, views.NewProject(a.page(r, "New project", "projects"), projects.Form{Status: string(projects.Planned)}))
+}
+
+func formOf(r *http.Request) projects.Form {
+	return projects.Form{Name: r.FormValue("name"), Client: r.FormValue("client"), Owner: r.FormValue("owner"),
+		Status: r.FormValue("status"), Budget: r.FormValue("budget"), Due: r.FormValue("due"), Notes: r.FormValue("notes")}
+}
+
+func (a *app) createProject(w http.ResponseWriter, r *http.Request) {
+	f := formOf(r)
+	var p projects.Project
+	if !f.Apply(&p) {
+		render(w, r, http.StatusUnprocessableEntity, views.NewProject(a.page(r, "New project", "projects"), f))
+		return
+	}
+	p = a.projects.Add(p)
+	redirect(w, r, "/projects/"+strconv.Itoa(p.ID), "Project created.")
+}
+
+// project finds the project of the URL; it answers 404 and returns false when there is none.
+func (a *app) project(w http.ResponseWriter, r *http.Request) (projects.Project, bool) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err == nil {
+		p, err := a.projects.Get(id)
+		if err == nil {
+			return p, true
+		}
+		if !errors.Is(err, projects.ErrNotFound) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return p, false
+		}
+	}
+	http.NotFound(w, r)
+	return projects.Project{}, false
+}
+
+func (a *app) showProject(w http.ResponseWriter, r *http.Request) {
+	if p, ok := a.project(w, r); ok {
+		render(w, r, http.StatusOK, views.Project(a.page(r, p.Name, "projects"), p, projects.FormOf(p)))
+	}
+}
+
+func (a *app) updateProject(w http.ResponseWriter, r *http.Request) {
+	p, ok := a.project(w, r)
+	if !ok {
+		return
+	}
+	f := formOf(r)
+	if !f.Apply(&p) {
+		// The page again, with the edit dialog open on the values entered and their errors.
+		render(w, r, http.StatusUnprocessableEntity, views.Project(a.page(r, p.Name, "projects"), p, f))
+		return
+	}
+	if err := a.projects.Update(p); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	redirect(w, r, "/projects/"+strconv.Itoa(p.ID), "Changes saved.")
+}
+
+func (a *app) deleteProject(w http.ResponseWriter, r *http.Request) {
+	p, ok := a.project(w, r)
+	if !ok {
+		return
+	}
+	if err := a.projects.Delete(p.ID); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	redirect(w, r, "/projects", p.Name+" deleted.")
+}
+
+// env is an environment variable or a default.
+func env(name, fallback string) string {
+	if v := os.Getenv(name); v != "" {
+		return v
+	}
+	return fallback
+}

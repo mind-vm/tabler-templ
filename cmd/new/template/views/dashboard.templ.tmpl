@@ -1,0 +1,112 @@
+package views
+
+import (
+	"strconv"
+	"time"
+
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
+
+	"[[.Module]]/internal/projects"
+)
+
+// thousands formats 12400 as "12,400".
+func thousands(n int) string {
+	s := strconv.Itoa(n)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	return s
+}
+
+type stats struct {
+	total, active, budget, dueSoon int
+	budgetByStatus                 []float64
+	countByStatus                  []float64
+}
+
+func statsOf(ps []projects.Project) stats {
+	s := stats{total: len(ps), budgetByStatus: make([]float64, len(projects.Statuses)), countByStatus: make([]float64, len(projects.Statuses))}
+	soon := time.Now().AddDate(0, 0, 30)
+	for _, p := range ps {
+		s.budget += p.Budget
+		if p.Status == projects.Active {
+			s.active++
+		}
+		if p.Status != projects.Done && !p.Due.IsZero() && p.Due.Before(soon) {
+			s.dueSoon++
+		}
+		for i, st := range projects.Statuses {
+			if p.Status == st {
+				s.budgetByStatus[i] += float64(p.Budget)
+				s.countByStatus[i]++
+			}
+		}
+	}
+	return s
+}
+
+func statusLabels() []string {
+	ls := make([]string, len(projects.Statuses))
+	for i, s := range projects.Statuses {
+		ls[i] = s.Label()
+	}
+	return ls
+}
+
+// Dashboard is the start page: key numbers, two charts and the newest projects.
+templ Dashboard(p Page, ps []projects.Project) {
+	{{ s := statsOf(ps) }}
+	@Frame(p, nil) {
+		<div class="row row-deck row-cards">
+			<div class="col-sm-6 col-lg-3">
+				@metric.Card(metric.Props{Label: "Projects", Value: strconv.Itoa(s.total), Note: "all projects"})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@metric.Card(metric.Props{Label: "Active", Value: strconv.Itoa(s.active), Note: "in progress now"})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@metric.Card(metric.Props{Label: "Budget", Value: "$" + thousands(s.budget), Note: "of all projects"})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@metric.Card(metric.Props{Label: "Due soon", Value: strconv.Itoa(s.dueSoon), Note: "open, due within 30 days or overdue"})
+			</div>
+			<div class="col-lg-8">
+				@metric.ChartCard(metric.ChartCardProps{Title: "Budget by status"}) {
+					@chart.Chart(chart.Props{
+						ID: "budget", Label: "Budget by status", Type: chart.Bar, Height: 15, Categories: statusLabels(),
+						YFormatter: chart.Thousands,
+						Series: []chart.Serie{{Name: "Budget", Color: "primary", Data: s.budgetByStatus}},
+					})
+				}
+			</div>
+			<div class="col-lg-4">
+				@metric.ChartCard(metric.ChartCardProps{Title: "Projects by status"}) {
+					@chart.Chart(chart.Props{
+						ID: "status", Label: "Projects by status", Type: chart.Donut, Height: 15, Legend: true,
+						Series: donut(s.countByStatus),
+					})
+				}
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							Newest projects
+						}
+					}
+					@projectTable(ps[:min(5, len(ps))])
+				}
+			</div>
+		</div>
+	}
+}
+
+func donut(counts []float64) []chart.Serie {
+	ss := make([]chart.Serie, len(counts))
+	for i, st := range projects.Statuses {
+		ss[i] = chart.Serie{Name: st.Label(), Data: []float64{counts[i]}, Color: st.Color()}
+	}
+	return ss
+}

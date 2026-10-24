@@ -1,0 +1,85 @@
+// Package assets loads Tabler from jsDelivr in the versions this module is built against: the stylesheets
+// for a page's Head and the scripts for its Scripts. An app that serves Tabler itself writes its own
+// <link> and <script> tags instead.
+//
+//	@layout.Page(layout.PageProps{Head: assets.Head(assets.Props{Vendors: true, Charts: true}), Scripts: assets.Scripts()})
+package assets
+
+import (
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+// TablerVersion is the version of @tabler/core the components follow.
+const TablerVersion = "1.7.1"
+
+// IconsVersion is the version of @tabler/icons-webfont.
+const IconsVersion = icon.FilledVersion
+
+// CoreURL is the URL of a file in @tabler/core's dist folder, e.g. CoreURL("css/tabler.min.css").
+func CoreURL(file string) string {
+	return "https://cdn.jsdelivr.net/npm/@tabler/core@" + TablerVersion + "/dist/" + file
+}
+
+// IconsURL is the icon webfont's stylesheet.
+const IconsURL = "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + IconsVersion + "/dist/tabler-icons.min.css"
+
+type Props struct {
+	RTL       bool // Tabler's right-to-left stylesheets
+	Flags     bool // tabler-flags (flag package)
+	Payments  bool // tabler-payments (payment package)
+	Socials   bool // tabler-socials (social package)
+	Marketing bool // tabler-marketing (marketing pages)
+	// Vendors styles third-party plugins the Tabler way: ApexCharts tooltips, maps, editors …
+	Vendors bool
+	Charts  bool // loads ApexCharts (chart.Library); implies Vendors
+}
+
+func css(p Props, name string) string {
+	if p.RTL {
+		return CoreURL("css/" + name + ".rtl.min.css")
+	}
+	return CoreURL("css/" + name + ".min.css")
+}
+
+// Head is Tabler's stylesheet, the icon webfont and the extras switched on in Props. layout.Page adds the
+// module's own small CSS (icon.Styles) after it.
+templ Head(props ...Props) {
+	{{
+		var p Props
+		if len(props) > 0 {
+			p = props[0]
+		}
+	}}
+	<link rel="stylesheet" href={ css(p, "tabler") }/>
+	if p.Flags {
+		<link rel="stylesheet" href={ css(p, "tabler-flags") }/>
+	}
+	if p.Payments {
+		<link rel="stylesheet" href={ css(p, "tabler-payments") }/>
+	}
+	if p.Socials {
+		<link rel="stylesheet" href={ css(p, "tabler-socials") }/>
+	}
+	if p.Marketing {
+		<link rel="stylesheet" href={ css(p, "tabler-marketing") }/>
+	}
+	if p.Vendors || p.Charts {
+		<link rel="stylesheet" href={ css(p, "tabler-vendors") }/>
+	}
+	<link rel="stylesheet" href={ IconsURL }/>
+	if p.Charts {
+		@chart.Library()
+	}
+}
+
+// Theme applies the color mode saved by Tabler's theme switch (?theme=dark|light) before the page paints;
+// put it first in <body>, or in Head.
+templ Theme() {
+	<script src={ CoreURL("js/tabler-theme.min.js") }></script>
+}
+
+// Scripts is Tabler's script (dropdowns, modals, tooltips …); put it at the end of <body>.
+templ Scripts() {
+	<script src={ CoreURL("js/tabler.min.js") }></script>
+}

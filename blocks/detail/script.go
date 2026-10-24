@@ -83,8 +83,9 @@ const css = `.kit-section{container-type:inline-size}
 .kit-dialog-hint{margin-right:auto!important;font-size:.8125rem;color:var(--tblr-secondary)}
 form.kit-dialog-invalid{outline:2px solid rgba(var(--tblr-danger-rgb),.25);outline-offset:-2px;border-radius:var(--tblr-border-radius)}`
 
-// script is the body of function(cfg){…}. Tabler's script (window.bootstrap) opens and closes the modals.
-const script = `"use strict";var bs=window.bootstrap;
+// script is the body of function(cfg){…}. Tabler's script opens and closes the modals: window.tabler since
+// Tabler 1.x, window.bootstrap with Bootstrap's own script.
+const script = `"use strict";var bs=window.tabler&&window.tabler.Modal?window.tabler:window.bootstrap;
 function hidden(f,n,v){if(f.elements.namedItem(n))return;var h=document.createElement("input");h.type="hidden";h.name=n;h.value=v;f.appendChild(h)}
 document.querySelectorAll(".modal[data-kit-dialog]").forEach(function(d){
 var forms=d.querySelectorAll("form");

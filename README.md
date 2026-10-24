@@ -80,6 +80,22 @@ page) with Playwright (the only place that
 uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
 next to the Tabler original to check it by eye.
 
+## Start a new app
+
+```sh
+go run github.com/mind-vm/tabler-templ/cmd/new@latest -module example.com/acme -name Acme acme
+cd acme && go run .
+```
+
+`cmd/new` creates a running app: Tabler's page frame with menu, user menu and theme toggle, sign-in, a
+dashboard with metric cards and charts, and a list of projects with search, filter and pages, a create page
+and a detail page whose edit dialog reopens with the errors after a failed save. Only the standard library
+besides tabler-templ and templ; the account comes from the environment and the data lives in memory, both
+marked as the places to replace. It runs `go get`, `go tool templ generate` and `go mod tidy` for you
+(`-no-setup` skips that; `-replace <dir>` uses a local tabler-templ checkout).
+
+![The dashboard of a new app](docs/screenshots/new-app.png)
+
 ## Use
 
 ```go
@@ -107,8 +123,8 @@ templ Customer(c Customer) {
 ```
 
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
-(the blocks' pages include it). The kit
-does not ship or link them: serve them yourself (embedded in your binary or from a CDN, as you prefer).
+(the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
+the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself.
 
 ## Components
 
