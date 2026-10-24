@@ -1,0 +1,287 @@
+// Package metric holds the small cards of Tabler's dashboards that show one number: a label, the value
+// with its trend, and a chart or progress bar under it (shared/components/cards/charts). Overview is the
+// larger card with a total and a chart of several series, ChartCard a titled card around any chart.
+//
+//	@metric.Card(metric.Props{
+//		Label: "Revenue", Action: metric.Range(metric.RangeProps{ID: "revenue"}),
+//		Value: "$4,300", Trend: metric.Trend(8),
+//		Bottom: chart.Chart(chart.Props{ID: "revenue", Size: chart.SizeSmall, Class: "rounded-bottom-3", ...}),
+//	})
+package metric
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/legend"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+// Trend is a change in percent for Props.Trend.
+func Trend(v float64) *trending.Props {
+	return &trending.Props{Value: v}
+}
+
+type Props struct {
+	Class  string
+	Label  string          // the subheader
+	Action templ.Component // at the right of the label, e.g. a Range
+	Value  string
+	Trend  *trending.Props // after the value; with ProgressLabel, at the right of it
+	Note   string          // a muted line below the value, e.g. "24,635 users increased from last month"
+	// Chart is shown in the body below the value, e.g. a small chart.Chart or a chart.Radial.
+	Chart templ.Component
+	// Progress shows a small progress bar below the value, with ProgressLabel above it.
+	Progress      *progress.Props
+	ProgressLabel string
+	// Bottom is shown below the body across the whole card, e.g. a chart with Class "rounded-bottom-3".
+	Bottom templ.Component
+	// Tight leaves a small gap below the value instead of a large one, e.g. above a chart.Radial.
+	Tight bool
+}
+
+// Card is a metric card: Tabler's Revenue, Active subscriptions, Conversion rate, Sales and Total users.
+templ Card(p Props) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			if p.Action != nil {
+				<div class="d-flex align-items-center">
+					@typography.Subheader() {
+						{ p.Label }
+					}
+					<div class="ms-auto lh-1">
+						@p.Action
+					</div>
+				</div>
+			} else if p.Label != "" {
+				@typography.Subheader() {
+					{ p.Label }
+				}
+			}
+			if p.ProgressLabel != "" {
+				<div class="h1 mb-3">{ p.Value }</div>
+				<div class="d-flex mb-2">
+					<div>{ p.ProgressLabel }</div>
+					if p.Trend != nil {
+						<div class="ms-auto">
+							@trending.Trending(*p.Trend)
+						</div>
+					}
+				</div>
+			} else if p.Value != "" {
+				<div class={ "d-flex align-items-baseline", kit.If(p.Tight, "mb-2") }>
+					<div class={ "h1 me-2", kit.If(!p.Tight && (p.Chart != nil || p.Progress != nil), "mb-3"), kit.If(p.Tight || p.Chart == nil && p.Progress == nil, "mb-0") }>{ p.Value }</div>
+					if p.Trend != nil {
+						<div class="me-auto">
+							@trending.Trending(*p.Trend)
+						</div>
+					}
+				</div>
+			}
+			if p.Note != "" {
+				<div class="text-secondary mt-2">{ p.Note }</div>
+			}
+			if p.Chart != nil {
+				@p.Chart
+			}
+			if p.Progress != nil {
+				@progress.Progress(progressProps(*p.Progress))
+			}
+		</div>
+		if p.Bottom != nil {
+			@p.Bottom
+		}
+	</div>
+}
+
+func progressProps(p progress.Props) progress.Props {
+	if p.Size == "" {
+		p.Size = progress.SizeSmall
+	}
+	return p
+}
+
+// Series is an entry of an Overview's legend.
+type Series struct {
+	Text  string
+	Color string
+}
+
+type OverviewProps struct {
+	Class  string
+	Label  string
+	Value  string
+	Change string // after the value in green, e.g. "+12.4%"
+	Legend []Series
+	Chart  templ.Component
+}
+
+// Overview is a card with a total, its change and a chart of several series with their legend at the
+// right: Tabler's Sales overview and Monthly recurring revenue.
+templ Overview(p OverviewProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			<div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+				<div class="mb-3">
+					@typography.Subheader() {
+						{ p.Label }
+					}
+					<div class="d-flex align-items-baseline gap-2 mt-1">
+						<div class="h1 mb-0">{ p.Value }</div>
+						if p.Change != "" {
+							<div class="text-green fw-medium">{ p.Change }</div>
+						}
+					</div>
+				</div>
+				if len(p.Legend) > 0 {
+					@legend.List(legend.ListProps{}) {
+						for _, s := range p.Legend {
+							@legend.Legend(legend.Props{Color: s.Color, Text: s.Text})
+						}
+					}
+				}
+			</div>
+			if p.Chart != nil {
+				@p.Chart
+			}
+		</div>
+	</div>
+}
+
+type ChartCardProps struct {
+	Class string
+	// Title is a card title (Social referrals); Label a subheader instead (Traffic sources, Weekly
+	// activity).
+	Title  string
+	Label  string
+	Action templ.Component // at the right of the title, e.g. a Range
+	// Side is a column at the right of the chart on md screens and up, e.g. a Values list.
+	Side templ.Component
+}
+
+// ChartCard is a card with a title and a chart; the children are the chart.
+templ ChartCard(p ChartCardProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			if p.Title != "" {
+				<div class="d-flex">
+					<h3 class="card-title">{ p.Title }</h3>
+					if p.Action != nil {
+						<div class="ms-auto">
+							@p.Action
+						</div>
+					}
+				</div>
+			} else if p.Label != "" {
+				@typography.Subheader() {
+					{ p.Label }
+				}
+			}
+			if p.Side != nil {
+				<div class="row">
+					<div class="col">
+						{ children... }
+					</div>
+					<div class="col-md-auto">
+						@p.Side
+					</div>
+				</div>
+			} else {
+				{ children... }
+			}
+		</div>
+	</div>
+}
+
+// Value is an entry of Values.
+type Value struct {
+	Text  string
+	Color string // of the status dot
+	Value string
+}
+
+// Values are the totals of a chart's series, one below the other with a status dot, for the Side of a
+// ChartCard.
+templ Values(vs []Value) {
+	<div class="divide-y divide-y-fill">
+		for _, v := range vs {
+			<div class="px-3">
+				<div class="text-secondary">
+					<span class={ "status-dot bg-" + v.Color }></span> { v.Text }
+				</div>
+				<div class="h2">{ v.Value }</div>
+			</div>
+		}
+	</div>
+}
+
+type RangeProps struct {
+	ID    string // prefix of the toggle's id
+	Label string // the toggle's title, default "Select time range"
+	// Options default to "Last 7 days", "Last 30 days", "Last 3 months"; Active is the selected one.
+	Options []string
+	Active  int
+	// Links renders the toggle and the ranges as links to "#" instead of buttons (Status monitoring).
+	Links bool
+}
+
+// Range is the time range picker of a metric card: the selected range as a muted text that opens a menu
+// of ranges.
+templ Range(p RangeProps) {
+	{{
+		opts := p.Options
+		if opts == nil {
+			opts = []string{"Last 7 days", "Last 30 days", "Last 3 months"}
+		}
+		id := ""
+		if p.ID != "" {
+			id = p.ID + "-dropdown"
+		}
+	}}
+	if p.Links {
+		<div class="dropdown">
+			<a class="dropdown-toggle text-secondary" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				if p.Active < len(opts) {
+					{ opts[p.Active] }
+				}
+			</a>
+			<div class="dropdown-menu dropdown-menu-end">
+				for i, o := range opts {
+					<a class={ kit.Classes("dropdown-item", kit.If(i == p.Active, "active")) } href="#">{ o }</a>
+				}
+			</div>
+		</div>
+	} else {
+		<div class="dropdown">
+			<button
+				type="button"
+				class="dropdown-toggle text-secondary border-0 bg-transparent p-0"
+				if id != "" {
+					id={ id }
+				}
+				data-bs-toggle="dropdown"
+				aria-haspopup="true"
+				aria-expanded="false"
+				title={ kit.Or(p.Label, "Select time range") }
+			>
+				if p.Active < len(opts) {
+					{ opts[p.Active] }
+				}
+			</button>
+			<div
+				class="dropdown-menu dropdown-menu-end"
+				if id != "" {
+					aria-labelledby={ id }
+				}
+			>
+				for i, o := range opts {
+					if i == p.Active {
+						<button type="button" class="dropdown-item active" aria-current="true">{ o }</button>
+					} else {
+						<button type="button" class="dropdown-item">{ o }</button>
+					}
+				}
+			</div>
+		</div>
+	}
+}

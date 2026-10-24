@@ -13,3 +13,9 @@ cards
 tables
 layout-vertical
 error-404
+dashboard-crm
+dashboard-crypto
+charts-advanced
+tasks
+email-inbox
+widgets

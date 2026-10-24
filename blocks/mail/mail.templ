@@ -1,0 +1,351 @@
+// Package mail is Tabler's email inbox (the preview's email-inbox page): a card with the folders and
+// labels at the start (an offcanvas on smaller screens), a toolbar, the list of messages and a pager; and
+// the dialog to write a new message.
+//
+//	@mail.Inbox(mail.InboxProps{Folders: mail.Folders(mail.FoldersProps{...}), Toolbar: toolbar,
+//		Footer: mail.Pager(mail.PagerProps{Text: "Showing 1 - 20 of 20"})}) {
+//		@mail.List(messages)
+//	}
+package mail
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+type InboxProps struct {
+	Class string
+	// SidebarID is the id of the folders' offcanvas, default "emailSidebaroffcanvas".
+	SidebarID string
+	Folders   templ.Component // usually Folders
+	// Toolbar is the row of actions above the list (e.g. button groups); a button that shows the
+	// folders on smaller screens comes first.
+	Toolbar     templ.Component
+	FoldersLabel string // of that button, default "Show folders"
+	Footer      templ.Component // below the list, usually a Pager
+}
+
+func sidebarID(id string) string { return kit.Or(id, "emailSidebaroffcanvas") }
+
+// Inbox is the inbox card; the children are the messages, usually a List.
+templ Inbox(p InboxProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="row g-0">
+			<div class="col-xxl-3 border-end">
+				<div class="offcanvas-xxl offcanvas-start h-100" tabindex="-1" role="dialog" id={ sidebarID(p.SidebarID) }>
+					<div class="card-body h-100">
+						if p.Folders != nil {
+							@p.Folders
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-xxl-9">
+				<div class="card-body">
+					<div class="d-flex flex-wrap align-items-center gap-2">
+						<div class="d-xxl-none d-inline-flex">
+							<button class="btn btn-icon" type="button" data-bs-toggle="offcanvas" data-bs-target={ "#" + sidebarID(p.SidebarID) } aria-controls={ sidebarID(p.SidebarID) } aria-label={ kit.Or(p.FoldersLabel, "Show folders") }>
+								@icon.Icon("ti-menu-2")
+							</button>
+						</div>
+						if p.Toolbar != nil {
+							@p.Toolbar
+						}
+					</div>
+				</div>
+				<div class="card-body p-0">
+					{ children... }
+				</div>
+				if p.Footer != nil {
+					<div class="card-body">
+						@p.Footer
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Folder is a mailbox in the folder list.
+type Folder struct {
+	Text       string
+	Icon       string
+	Href       string // default "#"
+	Active     bool
+	Badge      string // e.g. the number of messages
+	BadgeColor string // default "primary"; the badge is light (bg-{color}-lt)
+}
+
+// Label is a mail label: a name and its color.
+type Label struct {
+	Text  string
+	Color string
+	Href  string // default "#"
+}
+
+type FoldersProps struct {
+	// Compose is the button above the folders, e.g. ComposeButton.
+	Compose     templ.Component
+	Folders     []Folder
+	LabelsTitle string // default "Labels"
+	Labels      []Label
+	// Storage shows the used space as a progress bar with StorageText below it.
+	StorageTitle string // default "Storage"
+	Storage      *progress.Props
+	StorageText  string
+}
+
+// Folders is the content of the inbox's sidebar: the compose button, the folders, the labels and the
+// used storage.
+templ Folders(p FoldersProps) {
+	if p.Compose != nil {
+		<div>
+			@p.Compose
+		</div>
+	}
+	<div class="mt-3 nav nav-vertical nav-pills">
+		for _, f := range p.Folders {
+			<a href={ templ.SafeURL(kit.Or(f.Href, "#")) } class={ kit.Classes("nav-link", kit.If(f.Active, "active")) }>
+				@icon.Icon(f.Icon, icon.Props{Class: "me-2"})
+				{ f.Text }
+				if f.Badge != "" {
+					<span class={ "badge bg-" + kit.Or(f.BadgeColor, "primary") + "-lt ms-auto" }>{ f.Badge }</span>
+				}
+			</a>
+		}
+	</div>
+	if len(p.Labels) > 0 {
+		<div class="mt-4">
+			@typography.Subheader(typography.SubheaderProps{Level: 6}) {
+				{ kit.Or(p.LabelsTitle, "Labels") }
+			}
+			<div class="mt-2 nav nav-vertical nav-pills">
+				for _, l := range p.Labels {
+					<a href={ templ.SafeURL(kit.Or(l.Href, "#")) } class="nav-link">
+						<span class={ "badge bg-" + l.Color + " me-2" }></span> { l.Text }
+					</a>
+				}
+			</div>
+		</div>
+	}
+	if p.Storage != nil {
+		<div class="mt-5">
+			@typography.Subheader(typography.SubheaderProps{Level: 6}) {
+				{ kit.Or(p.StorageTitle, "Storage") }
+			}
+			@progress.Progress(storage(*p.Storage))
+			if p.StorageText != "" {
+				<p class="text-muted mb-0">{ p.StorageText }</p>
+			}
+		</div>
+	}
+}
+
+func storage(p progress.Props) progress.Props {
+	p.Class = kit.Classes("my-2", p.Class)
+	return p
+}
+
+// ComposeButton is the primary button that opens the dialog with that id (Compose).
+templ ComposeButton(modalID string, text ...string) {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-pencil", Block: true, Class: "d-none d-sm-block",
+		Attributes: modal.Trigger(modalID)}) {
+		{ kit.Or(kit.First(text), "Compose") }
+	}
+}
+
+// Message is a message in the List.
+type Message struct {
+	Sender  string
+	Subject string
+	Preview string // the start of the text, after the subject
+	Href    string // default "#"
+	Starred bool
+	Labels  []Label
+	Date    string // e.g. "27 Aug"
+	// Actions replace the default actions shown on hover (archive, delete, mark as read, snooze).
+	Actions templ.Component
+}
+
+type ListProps struct {
+	Empty string // shown without messages, default "No emails"
+	// Name of the selection check boxes (value: the message's index), e.g. for a form around the list.
+	Name string
+}
+
+// List is the list of messages: a check box, a star, sender, subject with the start of the text, label
+// dots, actions on hover and the date.
+templ List(ms []Message, props ...ListProps) {
+	{{ p := kit.First(props) }}
+	<div class="list-group list-group-flush list-group-hoverable">
+		if len(ms) == 0 {
+			<div class="list-group-item text-secondary">{ kit.Or(p.Empty, "No emails") }</div>
+		}
+		for _, m := range ms {
+			<div class="list-group-item">
+				<div class="row align-items-center g-2">
+					<div class="col-auto">
+						<input
+							type="checkbox"
+							class="form-check-input m-0"
+							if p.Name != "" {
+								name={ p.Name }
+							}
+							aria-label={ "Select \"" + m.Subject + "\"" }
+						/>
+					</div>
+					<div class="col-auto">
+						<a href="#" class={ kit.Classes("list-group-item-actions", kit.If(m.Starred, "show")) } aria-label={ starLabel(m.Starred) }>
+							@icon.Icon("ti-star", icon.Props{Color: starColor(m.Starred)})
+						</a>
+					</div>
+					<div class="col-3 col-lg-2 text-truncate">
+						<a href={ templ.SafeURL(kit.Or(m.Href, "#")) } class="text-body">{ m.Sender }</a>
+					</div>
+					<div class="col text-truncate">
+						<a href={ templ.SafeURL(kit.Or(m.Href, "#")) } class="text-body">{ m.Subject }</a>
+						if m.Preview != "" {
+							<span class="text-secondary">{ " – " + m.Preview }</span>
+						}
+					</div>
+					<div class="col-auto d-none d-lg-block">
+						for _, l := range m.Labels {
+							<span class={ "badge bg-" + kit.Or(l.Color, "secondary") } title={ l.Text } aria-label={ l.Text }></span>
+						}
+					</div>
+					<div class="col-auto d-none d-md-block">
+						<div class="list-group-item-actions d-flex gap-2">
+							if m.Actions != nil {
+								@m.Actions
+							} else {
+								for _, a := range defaultActions {
+									<a href="#" class="text-secondary" aria-label={ a[1] }>
+										@icon.Icon(a[0])
+									</a>
+								}
+							}
+						</div>
+					</div>
+					<div class="col-auto text-secondary text-end">{ m.Date }</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+var defaultActions = [][2]string{{"ti-archive", "Archive"}, {"ti-trash", "Delete"}, {"ti-mail-opened", "Mark as read"}, {"ti-clock", "Snooze"}}
+
+func starLabel(on bool) string {
+	if on {
+		return "Remove star"
+	}
+	return "Add star"
+}
+
+func starColor(on bool) string {
+	if on {
+		return "yellow"
+	}
+	return "muted"
+}
+
+type PagerProps struct {
+	Text      string // e.g. "Showing 1 - 20 of 20"
+	PrevHref  string // links instead of buttons when set
+	NextHref  string
+	PrevLabel string // default "Previous page"
+	NextLabel string // default "Next page"
+}
+
+// Pager is the line below the list: what is shown, and previous and next buttons.
+templ Pager(p PagerProps) {
+	<div class="row align-items-center">
+		<div class="col-7 mt-1">{ p.Text }</div>
+		<div class="col-5">
+			@button.Group(button.GroupProps{Class: "float-end"}) {
+				@pageButton(p.PrevHref, "ti-chevron-left", kit.Or(p.PrevLabel, "Previous page"))
+				@pageButton(p.NextHref, "ti-chevron-right", kit.Or(p.NextLabel, "Next page"))
+			}
+		</div>
+	</div>
+}
+
+templ pageButton(href, ic, label string) {
+	if href != "" {
+		<a href={ templ.SafeURL(href) } class="btn btn-icon" aria-label={ label }>
+			@icon.Icon(ic)
+		</a>
+	} else {
+		<button type="button" class="btn btn-icon" aria-label={ label }>
+			@icon.Icon(ic)
+		</button>
+	}
+}
+
+type ComposeProps struct {
+	ID     string // of the dialog, default "modal-new-email"
+	Action string // the form's action; without it the dialog only closes
+	Title  string // default "New Message"
+	// Message is the editor of the text, default a textarea (Tabler loads its WYSIWYG editor, HugeRTE, on
+	// it in the preview).
+	Message templ.Component
+	Value   string // the textarea's text
+	Send    string // default "Send Message"
+	Cancel  string // default "Cancel"
+}
+
+// Compose is the dialog to write a new message: To, Subject and Message.
+templ Compose(p ComposeProps) {
+	{{ id := kit.Or(p.ID, "modal-new-email") }}
+	<div class="modal modal-blur fade" id={ id } tabindex="-1" role="dialog" aria-modal="true" aria-labelledby={ id + "-title" } aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<form
+				class="modal-content"
+				if p.Action != "" {
+					method="post"
+					action={ templ.SafeURL(p.Action) }
+				}
+			>
+				<div class="modal-header">
+					<h2 class="modal-title" id={ id + "-title" }>{ kit.Or(p.Title, "New Message") }</h2>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					@form.Field(form.FieldProps{Label: "To", For: id + "-to"}) {
+						@form.Input(form.InputProps{ID: id + "-to", Name: "to", Placeholder: "Example@email.com"})
+					}
+					@form.Field(form.FieldProps{Label: "Subject", For: id + "-subject"}) {
+						@form.Input(form.InputProps{ID: id + "-subject", Name: "subject", Placeholder: "Your subject"})
+					}
+					@form.Field(form.FieldProps{Label: "Message", For: id + "-message", Class: "-"}) {
+						if p.Message != nil {
+							@p.Message
+						} else {
+							@form.Textarea(form.TextareaProps{ID: id + "-message", Name: "message", Value: p.Value})
+						}
+					}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-bs-dismiss="modal">{ kit.Or(p.Cancel, "Cancel") }</button>
+					<button
+						if p.Action != "" {
+							type="submit"
+						} else {
+							type="button"
+							data-bs-dismiss="modal"
+						}
+						class="btn btn-primary ms-auto"
+					>
+						@icon.Icon("ti-send")
+						{ kit.Or(p.Send, "Send Message") }
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}

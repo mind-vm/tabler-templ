@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/mind-vm/tabler-templ/blocks/layout"
-	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/chart"
 )
 
 // layoutVariant is the frame of one of the preview's layout-* pages.
@@ -49,11 +49,10 @@ func variantProps(name string) layout.PageProps {
 	return p
 }
 
-// layoutPage rebuilds a layout-* page: the frame matches the preview; the dashboard in it comes with
-// the dashboard page.
+// layoutPage rebuilds a layout-* page: the preview's dashboard in one of its frames.
 templ layoutPage(name string) {
 	@layout.Page(variantProps(name)) {
-		@empty.Empty(empty.Props{Icon: "ti-layout-dashboard", Title: "Dashboard", Subtitle: "The preview shows its dashboard in this frame; it follows with the dashboard page."})
+		@dashboardContent(layoutVariants[name].RTL)
 	}
 }
 
@@ -61,5 +60,8 @@ templ layoutPage(name string) {
 templ rtlAssets() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.rtl.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.rtl.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.rtl.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.rtl.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+	@chart.Library()
 }

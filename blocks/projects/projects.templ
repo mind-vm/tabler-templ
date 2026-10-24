@@ -1,0 +1,133 @@
+// Package projects holds Tabler's project cards: a project with its image and progress, a summary with
+// due date, stage and team, and a kanban card with progress bar, team and task count.
+package projects
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+)
+
+type ProgressProps struct {
+	Class    string
+	Image    string // e.g. a screenshot of the project
+	Title    string
+	Href     string // the title's link, default "#"
+	Updated  string // e.g. "Updated 2 days ago"
+	Progress float64
+	Actions  templ.Component // at the end, e.g. a card.Dropdown
+}
+
+// Progress is a card with a project's image, title, last update and progress (Tabler's ProjectProgress).
+templ Progress(p ProgressProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body">
+			<div class="row align-items-center">
+				<div class="col-3">
+					<img src={ p.Image } alt={ p.Title } class="rounded"/>
+				</div>
+				<div class="col">
+					<h2 class="card-title mb-1">
+						<a href={ templ.URL(kit.Or(p.Href, "#")) } class="text-reset">{ p.Title }</a>
+					</h2>
+					<div class="text-secondary">{ p.Updated }</div>
+					<div class="mt-3">
+						<div class="row g-2 align-items-center">
+							<div class="col-auto">{ strconv.FormatFloat(p.Progress, 'f', -1, 64) }%</div>
+							<div class="col">
+								@progress.Progress(progress.Props{Value: p.Progress, Size: progress.SizeSmall})
+							</div>
+						</div>
+					</div>
+				</div>
+				if p.Actions != nil {
+					<div class="col-auto">
+						@p.Actions
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+type SummaryProps struct {
+	Class      string
+	Avatar     avatar.Props // e.g. the project's initial; shown extra large
+	Title      string
+	Due        string // e.g. "Due to: 28 Aug 2019"
+	Stage      string // a badge, e.g. "Waiting"
+	StageColor string // default "green"
+	Team       []avatar.Props
+	Progress   float64 // a bar at the bottom of the card
+}
+
+// Summary is a centered project card: avatar, title, due date, stage badge, team and a progress bar at
+// the bottom (Tabler's ProjectSummary).
+templ Summary(p SummaryProps) {
+	{{ a := p.Avatar }}
+	{{ a.Size, a.Class = avatar.SizeXL, kit.Classes(a.Class, "mb-4") }}
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-body p-4 py-5 text-center">
+			@avatar.Avatar(a)
+			<h3 class="mb-0">{ p.Title }</h3>
+			<p class="text-secondary">{ p.Due }</p>
+			if p.Stage != "" {
+				<p class="mb-3">
+					<span class={ "badge bg-" + kit.Or(p.StageColor, "green") + "-lt" }>{ p.Stage }</span>
+				</p>
+			}
+			<div>
+				@team(p.Team, "")
+			</div>
+		</div>
+		@progress.Progress(progress.Props{Value: p.Progress, Class: "card-progress"})
+	</div>
+}
+
+templ team(people []avatar.Props, class string) {
+	@avatar.List(avatar.ListProps{Stacked: true, Class: class}) {
+		for _, a := range people {
+			@avatar.Avatar(a)
+		}
+	}
+}
+
+type KanbanProps struct {
+	Class    string
+	Title    string
+	Href     string // the title's link, default "#"
+	Badge    string // after the title, e.g. a version
+	Progress float64
+	Color    string // of the progress bar, default "green"
+	Team     []avatar.Props
+	Tasks    string // e.g. "5/10"
+	Due      string // e.g. "Due 2 days"
+}
+
+// Kanban is a project card for a board: a progress bar on top, title, team, tasks done and due date
+// (Tabler's ProjectKanban).
+templ Kanban(p KanbanProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@progress.Progress(progress.Props{Value: p.Progress, Class: "card-progress", Color: kit.Or(p.Color, "green")})
+		<div class="card-body">
+			<h2 class="card-title">
+				<a href={ templ.URL(kit.Or(p.Href, "#")) }>{ p.Title }</a>
+				if p.Badge != "" {
+					{ " " }
+					<span class="badge ms-2">{ p.Badge }</span>
+				}
+			</h2>
+			@team(p.Team, "mb-3")
+			<div class="card-meta d-flex justify-content-between">
+				<div class="d-flex align-items-center">
+					@icon.Icon("ti-check", icon.Props{Class: "me-2"})
+					<span>{ p.Tasks }</span>
+				</div>
+				<span>{ p.Due }</span>
+			</div>
+		</div>
+	</div>
+}

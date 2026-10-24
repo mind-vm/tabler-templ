@@ -1,0 +1,103 @@
+// Package vectormap renders Tabler's vector map: a world (or other) map whose regions are shaded by value,
+// with optional markers, lines, zoom, a legend and selectable regions. Tabler's vector map script draws
+// it (data-bs-toggle="vector-map"); load it once with Library, plus the maps you use.
+//
+//	@vectormap.Library("world")
+//	@vectormap.Map(vectormap.Props{Map: "world", Label: "Visitors by country", Values: map[string]float64{"US": 10, "DE": 8}})
+package vectormap
+
+import (
+	"encoding/json"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the Tabler version whose vector map script Library loads.
+const Version = "1.7.1"
+
+// Marker is a point on the map.
+type Marker struct {
+	Name string  `json:"name"`
+	Lat  float64 `json:"lat"`
+	Lng  float64 `json:"lng"`
+}
+
+// Line connects two markers by name.
+type Line struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+}
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Map        string // e.g. "world"
+	Label      string // what the map shows, for screen readers
+	Zoom       bool   // zoom buttons and scroll zoom
+	Legend     bool   // the scale as a bar under the map
+	// Select makes regions selectable: "single" or "multiple"; Selected are the codes selected at first.
+	Select   string
+	Selected []string
+	Colors   []string           // the scale's colors, light to dark
+	Values   map[string]float64 // by region code, e.g. "US"
+	Markers  []Marker
+	Lines    []Line
+	Color    string // the map's color, a Tabler color; default primary
+}
+
+func js(v any) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+// Map is a vector map.
+templ Map(p Props) {
+	<div
+		class={ kit.Classes("vector-map", p.Class) }
+		data-bs-toggle="vector-map"
+		data-bs-map={ p.Map }
+		if p.Label != "" {
+			data-bs-label={ p.Label }
+		}
+		if p.Zoom {
+			data-bs-zoom="true"
+		}
+		if p.Legend {
+			data-bs-legend="true"
+		}
+		if p.Select != "" {
+			data-bs-select={ p.Select }
+		}
+		if p.Selected != nil {
+			data-bs-selected={ js(p.Selected) }
+		}
+		if p.Colors != nil {
+			data-bs-colors={ js(p.Colors) }
+		}
+		if p.Values != nil {
+			data-bs-values={ js(p.Values) }
+		}
+		if p.Markers != nil {
+			data-bs-markers={ js(p.Markers) }
+		}
+		if p.Lines != nil {
+			data-bs-lines={ js(p.Lines) }
+		}
+		if p.Color != "" && p.Color != "primary" {
+			style={ templ.SafeCSS("--tblr-vector-map-color: var(--tblr-" + p.Color + ")") }
+		}
+		{ p.Attributes... }
+	></div>
+}
+
+// Library loads Tabler's vector map script and the given maps (default "world"); put it in the page's
+// head.
+templ Library(maps ...string) {
+	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/tabler-vector-map.min.js" } defer></script>
+	if len(maps) == 0 {
+		<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/world.js" } defer></script>
+	}
+	for _, m := range maps {
+		<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/" + m + ".js" } defer></script>
+	}
+}

@@ -66,8 +66,14 @@ go run ./cmd/demo -addr localhost:8080
 | ![Settings](docs/screenshots/settings.png) | ![Invoice](docs/screenshots/invoice.png) |
 | **Profile** | **Pricing table** |
 | ![Profile](docs/screenshots/profile.png) | ![Pricing table](docs/screenshots/pricing-table.png) |
-| **Vertical layout** | **Tables** |
-| ![Vertical layout](docs/screenshots/layout-vertical.png) | ![Tables](docs/screenshots/tables.png) |
+| **CRM dashboard** | **Crypto dashboard** |
+| ![CRM dashboard](docs/screenshots/dashboard-crm.png) | ![Crypto dashboard](docs/screenshots/dashboard-crypto.png) |
+| **Charts** | **Widgets** |
+| ![Charts](docs/screenshots/charts-advanced.png) | ![Widgets](docs/screenshots/widgets.png) |
+| **Tasks** | **Mail** |
+| ![Tasks](docs/screenshots/tasks.png) | ![Mail](docs/screenshots/email-inbox.png) |
+| **Dashboard (vertical layout)** | **Tables** |
+| ![Dashboard in the vertical layout](docs/screenshots/layout-vertical.png) | ![Tables](docs/screenshots/tables.png) |
 
 `scripts/screenshots.sh` takes the screenshots listed in `docs/screenshots/pages.txt` (`--all`: every rebuilt
 page) with Playwright (the only place that
@@ -138,6 +144,8 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `iconlist` | `List` (inline, marker color, size, row gap), `Item` (icon, color) |
 | `accordion` | `Accordion(Props, []Item)`: chevron or plus toggle, icons, flush, inverted, tabs, several open |
 | `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
+| `vectormap` | Tabler's vector map: `Map` (world and other maps, values, selected regions, markers, lines, legend, zoom), `Library` |
+| `chart` | ApexCharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ApexCharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
 | `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
@@ -191,6 +199,18 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/pricing` | `Table`: plan comparison with groups of features |
 | `blocks/invoice` | `Invoice` (from, to, lines, totals, note), `PrintButton` |
 | `blocks/billing` | `Card`, `Plan` (usage), `Invoices`, `Methods`, `Cancel`, `CheckoutPage`, `CardForm` |
+| `blocks/metric` | Dashboard cards: `Card` (label, time `Range`, value, trend, note, chart, progress), `Overview` (total with a multi-series chart and legend), `ChartCard` (titled chart, side `Values`), `Small` (icon or avatar with a number), `Tile` (CRM stat), `IconCard` (stat with icon, count-up), `Gauge`, `Ticker` |
+| `blocks/dashboard` | Cards of Tabler's dashboard: `Welcome`, `Usage` (storage), `ChartTable` with `Goal` and `Commits`, `Banner`, `Visits` (pages with sparklines), `Bars` (traffic by source), `Tasks`, `Checklist`, `Leaderboard`, `Sponsor` |
+| `blocks/crm` | `Deals`, `Funnel` (pipeline), `Activity`, `Risks` (churn) |
+| `blocks/crypto` | `Markets` (coin table), `Orders` (order book), `OrderForm` (buy/sell), `ChartCard` with a time-frame `Switch` |
+| `blocks/activity` | `Feed` (avatar, text, time, unread), `Card` (scrolling activity card) |
+| `blocks/uptime` | Monitor page: `Header`, `SystemStatus` (services with history), `Incidents`, `Availability` |
+| `blocks/tasks` | `Board` (kanban columns of task `Card`s: status, image, people, due date, subtasks, comments), `Table` (tasks with priority) |
+| `blocks/projects` | Project cards: `Progress`, `Summary`, `Kanban` |
+| `blocks/messenger` | Chat app: `App` (contacts, search, conversation, `Composer`), `Contacts`, `SearchField` |
+| `blocks/mail` | Mail app: `Inbox` (folders as offcanvas on small screens), `Folders` (labels, storage), `List`, `Pager`, `Compose` dialog, `ComposeButton` |
+| `blocks/music` | `Tracks` (track list with like and menu), `Info` |
+| `blocks/wizard` | `Step`: a wizard step with media, progress and actions around its fields |
 | `blocks/legal` | `Card` and `Page` around prose (license, terms), `LicenseSummary` |
 | `blocks/faq` | `FAQ`: sections of questions in accordions |
 | `blocks/profile` | `Header` (avatar, name, bio, facts, actions), `Info` |

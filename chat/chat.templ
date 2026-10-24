@@ -21,6 +21,9 @@ type MessageProps struct {
 	Time   string
 	Avatar string // URL of the author's photo; empty = no avatar
 	Me     bool   // the own message: on the end side, colored
+	// Col is the bubble's column, default "col-auto" (as wide as the text); "col col-lg-6" gives the
+	// bubbles of a wide chat a fixed width.
+	Col string
 }
 
 // Message is one bubble; the children are its body (paragraphs, images).
@@ -32,7 +35,7 @@ templ Message(p MessageProps) {
 					@avatar.Avatar(avatar.Props{Src: p.Avatar})
 				</div>
 			}
-			<div class="col-auto">
+			<div class={ kit.Or(p.Col, "col-auto") }>
 				@Bubble(p) {
 					{ children... }
 				}
@@ -44,6 +47,15 @@ templ Message(p MessageProps) {
 			}
 		</div>
 	</div>
+}
+
+// Typing is the body of a bubble that tells that someone is writing: "typing" with animated dots. Put it
+// in a Message without Author and Time.
+templ Typing(text ...string) {
+	<p class="text-secondary fst-italic">
+		{ kit.Or(kit.First(text), "typing") }
+		<span class="animated-dots"></span>
+	</p>
 }
 
 // Bubble is the bubble alone, e.g. "Alice is typing…".

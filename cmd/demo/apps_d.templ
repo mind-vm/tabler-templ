@@ -1,0 +1,329 @@
+package main
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/auth"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/mail"
+	"github.com/mind-vm/tabler-templ/blocks/messenger"
+	"github.com/mind-vm/tabler-templ/blocks/music"
+	"github.com/mind-vm/tabler-templ/blocks/wizard"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chat"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/prose"
+)
+
+// appFrame is preview with the page title of the original (when it differs from the catalog's) and a
+// class for the body's container.
+templ appFrame(name, title, containerClass string) {
+	{{ fp := frameProps(name, title) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: title, Actions: originalLink(name)}) }}
+	{{ fp.ContainerClass = containerClass }}
+	@layout.Page(fp) {
+		{ children... }
+	}
+}
+
+// ---- chat
+
+func chatContacts() []messenger.Contact {
+	var cs []messenger.Contact
+	for i, p := range adPeople {
+		c := messenger.Contact{Name: p.Name, Avatar: avatar.Props{Src: photo(p.Photo)}, Active: i == 0,
+			PreviewContent: templ.Raw(adChats[i+1].Message)}
+		if i == 6 {
+			c.Extra = "🌴"
+		}
+		cs = append(cs, c)
+	}
+	return cs
+}
+
+func chatMessage(c adChat) chat.MessageProps {
+	p := adPeople[c.Person]
+	m := chat.MessageProps{Avatar: photo(p.Photo), Me: c.Person == 0, Col: "col col-lg-6"}
+	if c.Loading {
+		m.Col = "col-auto"
+	} else {
+		m.Author, m.Time = p.Name, c.Time
+	}
+	return m
+}
+
+templ chatPage() {
+	@appFrame("chat", "Chat", "flex-fill d-flex flex-column") {
+		@messenger.App(messenger.Props{Class: "flex-fill", Contacts: chatContacts()}) {
+			@chat.Chat() {
+				for _, c := range adChats {
+					@chat.Message(chatMessage(c)) {
+						if c.Loading {
+							@chat.Typing()
+						} else {
+							<p>
+								@templ.Raw(c.Message)
+							</p>
+							if c.GIF != "" {
+								<div class="mt-2">
+									<img src={ c.GIF } alt="" class="rounded img-fluid"/>
+								</div>
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// ---- email inbox
+
+var mailLabelColors = map[string]string{"Updates": "info", "Friends": "warning", "Family": "success", "Social": "primary", "Important": "danger", "Promotions": "purple"}
+
+var mailLabels = []mail.Label{{Text: "Updates", Color: "info"}, {Text: "Friends", Color: "warning"}, {Text: "Family", Color: "success"},
+	{Text: "Social", Color: "primary"}, {Text: "Important", Color: "danger"}, {Text: "Promotions", Color: "purple"}}
+
+func mailMessages() []mail.Message {
+	var ms []mail.Message
+	for _, m := range adMails {
+		msg := mail.Message{Sender: m.Sender, Subject: m.Subject, Preview: m.Preview, Starred: m.Starred, Date: m.Date}
+		for _, l := range m.Labels {
+			msg.Labels = append(msg.Labels, mail.Label{Text: l, Color: mailLabelColors[l]})
+		}
+		ms = append(ms, msg)
+	}
+	return ms
+}
+
+func mailFolders() templ.Component {
+	return mail.Folders(mail.FoldersProps{
+		Compose: mail.ComposeButton("modal-new-email"),
+		Folders: []mail.Folder{{Text: "Inbox", Icon: "ti-inbox", Active: true, Badge: strconv.Itoa(len(adMails))}, {Text: "Starred", Icon: "ti-star"},
+			{Text: "Snoozed", Icon: "ti-clock"}, {Text: "Draft", Icon: "ti-file", Badge: "32", BadgeColor: "info"}, {Text: "Sent Mail", Icon: "ti-mail-up"},
+			{Text: "Trash", Icon: "ti-trash"}, {Text: "Important", Icon: "ti-tag"}, {Text: "Spam", Icon: "ti-alert-octagon"}},
+		Labels:      mailLabels,
+		Storage:     &progress.Props{Value: 46},
+		StorageText: "7.02 GB (46%) of 15 GB used",
+	})
+}
+
+templ mailMenu(icon_, label, header string, items []string, more bool) {
+	@button.Group(button.GroupProps{Class: kit.If(more, "ms-auto")}) {
+		<button
+			type="button"
+			class="btn dropdown-toggle"
+			data-bs-toggle="dropdown"
+			aria-expanded="false"
+			if label != "" {
+				aria-label={ label }
+			}
+		>
+			@icon.Icon(icon_)
+			if more {
+				More
+			}
+		</button>
+		<div class={ "dropdown-menu", templ.KV("dropdown-menu-end", more) }>
+			if header != "" {
+				<span class="dropdown-header">{ header }</span>
+			}
+			for _, it := range items {
+				@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+					{ it }
+				}
+			}
+		</div>
+	}
+}
+
+templ mailToolbar() {
+	@button.Group() {
+		@button.Button(button.Props{Type: "button", Icon: "ti-archive", IconOnly: true, Label: "Archive"})
+		@button.Button(button.Props{Type: "button", Icon: "ti-alert-octagon", IconOnly: true, Label: "Report spam"})
+		@button.Button(button.Props{Type: "button", Icon: "ti-trash", IconOnly: true, Label: "Delete"})
+	}
+	@mailMenu("ti-folder", "Move to folder", "Move to", []string{"Social", "Promotions", "Updates", "Forums"}, false)
+	@mailMenu("ti-tag", "Add label", "Label as:", []string{"Updates", "Social", "Promotions", "Forums"}, false)
+	@mailMenu("ti-dots", "", "", []string{"Mark as Unread", "Add to Tasks", "Add Star", "Mute"}, true)
+}
+
+templ emailInboxPage() {
+	@appFrame("email-inbox", "Inbox", "") {
+		@mail.Inbox(mail.InboxProps{Folders: mailFolders(), Toolbar: mailToolbar(),
+			Footer: mail.Pager(mail.PagerProps{Text: "Showing 1 - " + strconv.Itoa(len(adMails)) + " of " + strconv.Itoa(len(adMails))})}) {
+			@mail.List(mailMessages())
+		}
+		@mail.Compose(mail.ComposeProps{Value: "Hello, <b>Tabler</b>!"})
+	}
+}
+
+// ---- emails (Tabler's email templates, a product page)
+
+templ emailsPage() {
+	@appFrame("emails", "Email templates", "") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@card.Card(card.Props{Class: "card-md"}) {
+					@card.Stamp(card.StampProps{Large: true, Icon: "ti-mail", Color: "primary"})
+					@card.Body() {
+						<div class="row align-items-center">
+							<div class="col-10">
+								<h2 class="h1">Tabler Emails</h2>
+								@prose.Prose(prose.Props{Class: "text-secondary fs-3"}) {
+									{ strconv.Itoa(len(adEmails)) } eye-catching, customizable and responsive email templates to improve your email communication. No coding skills needed.
+								}
+								<div class="mt-3">
+									<a href="https://r.tabler.io/buy-emails" class="btn btn-primary" target="_blank">Buy all emails for $29</a>
+								</div>
+							</div>
+						</div>
+					}
+				}
+			</div>
+			<div class="col-12">
+				<div class="row row-cards" data-masonry='{"percentPosition": true }'>
+					for _, e := range adEmails {
+						<div class="col-4">
+							<a href={ templ.SafeURL(photo("emails/" + e.Key + ".jpg")) } data-bs-toggle="modal" data-bs-target="#email-modal" data-bs-title={ e.Short } data-bs-description={ e.Long } data-bs-image={ photo("emails/" + e.Key + ".jpg") }>
+								<img src={ photo("emails/" + e.Key + ".jpg") } class="img-fluid rounded" alt={ e.Short } width={ strconv.Itoa(e.Width) } height={ strconv.Itoa(e.Height) }/>
+							</a>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="email-modal" aria-hidden="true" aria-labelledby="email-modal-label" tabindex="-1">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					<div class="modal-body p-0">
+						<div class="row g-0">
+							<div class="col-6">
+								<div class="p-6 bg-surface-secondary rounded-start">
+									<img class="img-fluid rounded-start" alt="" data-email-image/>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="p-7">
+									@prose.Prose() {
+										<h3 id="email-modal-label" data-email-title></h3>
+										<p data-email-description></p>
+									}
+									<div class="mt-6">
+										<a href="https://r.tabler.io/buy-emails" class="btn btn-primary w-100" target="_blank">Buy all emails for $29</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		// Masonry lays out the screenshots (a plugin, as in Tabler's preview); the modal shows the one clicked.
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js" defer></script>
+		<script>
+			document.getElementById('email-modal').addEventListener('show.bs.modal', function (e) {
+				var b = e.relatedTarget;
+				if (!(b instanceof HTMLElement)) return;
+				this.querySelector('[data-email-title]').textContent = b.getAttribute('data-bs-title');
+				this.querySelector('[data-email-description]').textContent = b.getAttribute('data-bs-description');
+				this.querySelector('[data-email-image]').src = b.getAttribute('data-bs-image');
+			});
+		</script>
+	}
+}
+
+// ---- music
+
+func musicTrack(t adTrack) music.Track {
+	return music.Track{Name: t.Name, Artists: t.Artists, Cover: photo(t.Image), Duration: t.Duration}
+}
+
+func musicTracks() []music.Track {
+	var ts []music.Track
+	for _, t := range adTracks[:12] {
+		mt := musicTrack(t)
+		mt.Menu = trackMenu()
+		ts = append(ts, mt)
+	}
+	return ts
+}
+
+templ trackMenu() {
+	@dropdown.Item() {
+		Action
+	}
+	@dropdown.Item() {
+		Another action
+	}
+}
+
+templ musicPage() {
+	@appFrame("music", "Music components", "") {
+		<div class="row">
+			<div class="col-lg-8">
+				@music.Tracks(musicTracks())
+			</div>
+			<div class="col-lg-4">
+				<h2 class="mb-3">Top tracks</h2>
+				<div class="row row-cards">
+					for _, i := range []int{8, 9, 10, 11, 12, 13} {
+						<div class="col-md-6 col-lg-12">
+							@music.Info(musicTrack(adTracks[i]))
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// ---- wizard
+
+templ wizardActions() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantLink, Class: "link-secondary"}) {
+		Set up later
+	}
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary}) {
+		Continue
+	}
+}
+
+templ wizardPicture() {
+	<img src={ photo("illustrations/light/boy-girl.png") } height="200" style="height:200px" class="mb-n2" alt=""/>
+}
+
+templ wizardPage() {
+	@auth.Page(authPage("wizard")) {
+		@wizard.Step(wizard.Props{
+			Media:    wizardPicture(),
+			Title:    "Welcome to Tabler!",
+			Text:     "Tabler is packed with beautifully crafted components and powerful features. Jump in and start building a stunning dashboard — all for free!",
+			Divider:  "your data",
+			Progress: 25,
+			Actions:  wizardActions(),
+		}) {
+			@form.Field(form.FieldProps{Label: "Create your Tabler URL", For: "wizard-url"}) {
+				<div class="input-group input-group-flat">
+					<span class="input-group-text">https://tabler.io/</span>
+					<input type="text" class="form-control ps-1" id="wizard-url" aria-describedby="wizard-url-hint"/>
+				</div>
+				<div id="wizard-url-hint" class="form-text">Choose a URL that describes you or your business in a concise way. Make it short and easy to remember so you can share links with ease.</div>
+			}
+			@form.Field(form.FieldProps{Label: "Timezone", For: "wizard-timezone", Class: "-"}) {
+				<select class="form-select mb-0" id="wizard-timezone">
+					for _, t := range adTimezones {
+						<option value={ t.Abbr } selected?={ t.Abbr == "CEDT" }>{ t.Text }</option>
+					}
+				</select>
+			}
+		}
+	}
+}

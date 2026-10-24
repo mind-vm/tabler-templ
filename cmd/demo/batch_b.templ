@@ -4,6 +4,7 @@ import (
 	"github.com/mind-vm/tabler-templ/typography"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/hovergallery"
 	"github.com/mind-vm/tabler-templ/imagelabel"
@@ -126,7 +127,7 @@ templ legendPage() {
 					@legend.List(legend.ListProps{Divided: true, Class: "mb-3"}) {
 						@legends(append(latency3, lg{"yellow", "P50", "10", "ms"}), legend.Props{Large: true})
 					}
-					<div id="chart-legend-latency" class="position-relative" role="img" aria-label="Read latency by percentile"></div>
+					@chart.Chart(tc("legend-latency", "Read latency by percentile", 12))
 				}
 			</div>
 			<div class="col-md-6 col-lg-4">
@@ -176,7 +177,7 @@ templ legendPage() {
 						}
 						@legend.List(legend.ListProps{Class: "ms-auto"}) {
 							for _, it := range []lg{{"yellow", "Total visits", "63.0k", ""}, {"green", "Unique visitors", "43.0k", ""}, {"primary", "New users", "13.5k", ""}} {
-								@legend.Legend(legend.Props{Button: true, Color: it.Color, Text: it.Text, Value: it.Value, Attributes: templ.Attributes{"data-series": it.Text}})
+								@legend.Legend(legend.Props{Button: true, Color: it.Color, Text: it.Text, Value: it.Value, Attributes: chart.Toggle("legend-page-chart", it.Text)})
 							}
 						}
 					}
@@ -184,7 +185,7 @@ templ legendPage() {
 						@card.Subtitle() {
 							@withCode("Button items call `toggleSeries()` on the chart and toggle `legend-off`.")
 						}
-						<div id="chart-legend-page-chart" class="position-relative" role="img" aria-label="Site traffic"></div>
+						@chart.Chart(as(tc("legend-demo", "Site traffic", 15), "legend-page-chart"))
 					}
 				}
 			</div>
@@ -192,7 +193,7 @@ templ legendPage() {
 				@section("Next to a donut", "A vertical list beside a chart with its own legend hidden.") {
 					<div class="d-flex align-items-center gap-4">
 						<div class="w-50">
-							<div id="chart-legend-donut" class="position-relative" role="img" aria-label="Traffic sources"></div>
+							@chart.Chart(tc("legend-donut", "Traffic sources", 10))
 						</div>
 						@legend.List(legend.ListProps{Vertical: true}) {
 							@legends(trafficSplit, legend.Props{})

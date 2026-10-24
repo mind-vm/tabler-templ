@@ -61,6 +61,17 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   content and component pages, checked against the
   preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
+- New package `chart`: Tabler's ApexCharts setup ported to Go (all chart types of the preview, sparklines,
+  annotations, brush, synced groups, legend toggles); one script per page starts every chart, also after
+  htmx swaps. New block `blocks/metric` with the dashboards' metric, overview and chart cards. The demo
+  loads `tabler-vendors.css` (ApexCharts tooltips) and rebuilds the charts pages and the legend charts.
+- App pages with charts and apps: the dashboard (also inside every layout-* page), CRM and crypto
+  dashboards, widgets, uptime, activity, tracking, tasks, task list, chat, mail inbox, emails, music, wizard.
+  New blocks `blocks/dashboard`, `blocks/crm`, `blocks/crypto`, `blocks/activity`, `blocks/uptime`,
+  `blocks/tasks`, `blocks/projects`, `blocks/messenger`, `blocks/mail`, `blocks/music`, `blocks/wizard`; more
+  cards in `blocks/metric`, `blocks/users` (`Link`, `Profile`, `Cover`, `Follow`) and `blocks/cards` (`Code`,
+  `Definitions`). New component `vectormap`. `chat`: `MessageProps.Col`, `Typing`. `chart`: `RawProps`,
+  `Props.SerieColor`.
 
 ## v0.8.0
 

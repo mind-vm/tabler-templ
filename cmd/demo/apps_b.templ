@@ -1,0 +1,271 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/cards"
+	"github.com/mind-vm/tabler-templ/blocks/crypto"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/blocks/profile"
+	"github.com/mind-vm/tabler-templ/blocks/projects"
+	userblocks "github.com/mind-vm/tabler-templ/blocks/users"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/sparkline"
+)
+
+templ cryptoTickers() {
+	<div class="col-12">
+		<div class="row row-cards">
+			for _, t := range []metric.TickerProps{
+				{Title: "Total balance", Icon: "ti-currency-dollar", Value: "$253,545", Extra: "2.3 BTC", Trend: metric.Trend(0), Note: "Since last week"},
+				{Title: "USD/BTC", Icon: "ti-currency-bitcoin", Value: "0.00000907", Extra: "$110,237", Note: "Volume: $34,042,670,971"},
+				{Title: "LTC/BTC", Icon: "ti-currency-litecoin", Value: "0.00089444", Extra: "$98.6", Note: "Volume: 618,605,108"},
+				{Title: "ETH/BTC", Icon: "ti-currency-ethereum", Value: "0.03528906", Extra: "$3,890.16", Note: "Volume: 18,899,881,132"},
+				{Title: "XMR/BTC", Icon: "ti-currency-monero", Value: "0.00310313", Extra: "$342.08", Note: "Volume: 151,720,448"},
+			} {
+				<div class="col-12 col-md-6 col-xxl">
+					@metric.Ticker(t)
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ cryptoViewAll() {
+	<button class="btn btn-sm">View all</button>
+}
+
+templ dashboardCryptoPage() {
+	@preview("dashboard-crypto") {
+		<div class="row row-cards">
+			@cryptoTickers()
+			<div class="col-12">
+				<div class="row row-cards">
+					<div class="col-12 col-lg-5">
+						@crypto.Markets(crypto.MarketsProps{Actions: bfMoreMenu()}, cryptoMarkets)
+					</div>
+					<div class="col-12 col-lg-7">
+						@crypto.ChartCard(crypto.ChartCardProps{Title: "LTC/BTC", Switch: crypto.SwitchProps{Name: "timeframe", Options: []string{"1m", "5m", "30m", "1h", "1d"}, Active: 1}}) {
+							@chart.Chart(tc("dashboard-crypto-candlestick", "LTC/BTC", 28))
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-12">
+				<div class="row row-cards">
+					<div class="col-12 col-lg-12 col-xxl-3">
+						@crypto.OrderForm(crypto.OrderFormProps{
+							Operations: crypto.SwitchProps{Name: "operations", Options: []string{"Buy", "Sell", "Send"}},
+							Currencies: cryptoSymbols, Amount: "0.25", Price: "23,077.05", Total: "5,769.27",
+							Note: "The final amount could change depending on current market conditions.",
+						})
+					</div>
+					<div class="col-12 col-lg-6 col-xxl">
+						@crypto.Orders(crypto.OrdersProps{Title: "Sell Orders", Actions: cryptoViewAll()}, cryptoSellOrders)
+					</div>
+					<div class="col-12 col-lg-6 col-xxl">
+						@crypto.Orders(crypto.OrdersProps{Title: "Buy Orders", Actions: cryptoViewAll()}, cryptoBuyOrders)
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+func team(names ...string) []avatar.Props {
+	out := make([]avatar.Props, len(names))
+	for i, n := range names {
+		out[i] = avatar.Props{Src: avatarURL(n)}
+	}
+	return out
+}
+
+func circle(id, value, color, label string) templ.Component {
+	v := []float64{12}
+	if value == "56" {
+		v = []float64{56}
+	}
+	return sparkline.Sparkline(sparkline.Props{Attributes: templ.Attributes{"id": id}, Values: v, Type: sparkline.Circle, Color: color, Size: "lg", Label: "auto", AriaLabel: label})
+}
+
+func personAvatar(name string) *avatar.Props {
+	return &avatar.Props{Src: avatarURL(name)}
+}
+
+templ editConfiguration() {
+	<a href="#">
+		Edit configuration
+		@icon.Icon("ti-edit", icon.Props{Inline: true, Class: "ms-1"})
+	</a>
+}
+
+templ countryFlag(code, size, name string) {
+	@flag.Flag(code, flag.Props{Size: flag.Size(size)})
+	{ " " + name }
+}
+
+templ subscribeButton() {
+	<a href="#" class="btn">Subscribe </a>
+}
+
+const cardCode = `.card-footer {
+  background: transparent;
+
+  &:last-child {
+    border-radius: 0 0 4px 4px;
+  }
+}`
+
+templ widgetsPage() {
+	@preview("widgets") {
+		<div class="row row-cards">
+			<div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+				@metric.IconCard(metric.IconCardProps{Label: "Earned", Value: "$2,847", Icon: "ti-credit-card", Countup: `{"prefix":"$"}`})
+			</div>
+			<div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+				@metric.IconCard(metric.IconCardProps{Label: "Hours logged", Value: "42.7 hrs", Icon: "ti-clock", Countup: `{"suffix":" hrs","decimalPlaces":1}`})
+			</div>
+			<div class="col-12 col-md-6 col-xxl-3 mb-4 mb-md-0">
+				@metric.IconCard(metric.IconCardProps{Label: "Avg. time", Value: "3:28 hrs", Icon: "ti-slideshow", Countup: `{"format":"time","suffix":" hrs"}`})
+			</div>
+			<div class="col-12 col-md-6 col-xxl-3">
+				@metric.IconCard(metric.IconCardProps{Label: "Weekly growth", Value: "18.4%", Icon: "ti-discount", Countup: `{"suffix":"%","decimalPlaces":1}`})
+			</div>
+			<div class="col-md-4">
+				@metric.Gauge(metric.GaugeProps{ID: "deliverability", Title: "Deliverability", Value: 96, Label: "delivered", Count: 48210, Total: 50219, Color: "green",
+					Description: "Share of sent emails accepted by the receiving server. Anything above 95% is healthy."})
+			</div>
+			<div class="col-md-4">
+				@metric.Gauge(metric.GaugeProps{ID: "storage", Title: "Storage used", Value: 82, Label: "used", Count: 410, Total: 500, Color: "yellow",
+					Description: "Disk space taken by uploads and backups, in GB. Consider an upgrade once it passes 80%."})
+			</div>
+			<div class="col-md-4">
+				@metric.Gauge(metric.GaugeProps{ID: "onboarding", Title: "Onboarding", Value: 58, Label: "completed", Count: 1392, Total: 2400,
+					Description: "New accounts that finished every setup step. There is no target for this metric yet."})
+			</div>
+			<div class="col-lg-6">
+				@projects.Progress(projects.ProgressProps{Image: "https://cdn.dribbble.com/users/844826/screenshots/14553706/media/2be9a4847b939e02702648d058cf2df8.png",
+					Title: "Food Deliver UI dashboards", Updated: "Updated 2 days ago", Progress: 25, Actions: bfMoreMenu()})
+			</div>
+			<div class="col-lg-6">
+				@projects.Progress(projects.ProgressProps{Image: "https://cdn.dribbble.com/users/844826/screenshots/14547977/media/e7749bd1b09d9415b8dc265a7dbe81f6.png",
+					Title: "Projects Dashboards", Updated: "Updated 7 days ago", Progress: 76, Actions: bfMoreMenu()})
+			</div>
+			for i, p := range []userblocks.Person{
+				{Avatar: avatarURL("001f"), Name: "Maryjo Lebarree", Detail: "Civil Engineer"},
+				{Avatar: avatarURL("004m"), Name: "Egan Poetz", Detail: "Research Nurse"},
+				{Avatar: avatarURL("002f"), Name: "Kellie Skingley", Detail: "Teacher"},
+				{Avatar: avatarURL("003f"), Name: "Christabel Charlwood", Detail: "Tax Accountant"},
+			} {
+				<div class="col-md-6 col-xl-3">
+					@userblocks.Link(p, i >= 2)
+				</div>
+			}
+			for _, p := range []userblocks.Person{
+				{Avatar: avatarURL("010m"), Name: "Thatcher Keel", Detail: "VP Sales"},
+				{Avatar: avatarURL("005f"), Name: "Dyann Escala", Detail: "Mechanical Systems Engineer"},
+				{Avatar: avatarURL("006f"), Name: "Avivah Mugleston", Detail: "Actuary"},
+				{Initials: "AA", Name: "Arlie Armstead", Detail: "VP Quality Control"},
+			} {
+				<div class="col-md-6 col-xl-3">
+					@userblocks.Profile(p, "")
+				</div>
+			}
+			for i, p := range []userblocks.Person{
+				{Avatar: avatarURL("012f"), Name: "Marsha Labat", Detail: "Research Associate"},
+				{Avatar: avatarURL("013m"), Name: "Elston Muffett", Detail: "Account Coordinator"},
+				{Avatar: avatarURL("013f"), Name: "Leigha Gorce", Detail: "Geologist II"},
+				{Initials: "TB", Name: "Tallie Bettis", Detail: "Director of Sales"},
+			} {
+				<div class="col-md-6 col-xl-3">
+					@userblocks.Cover(p, photo("photos/"+[]string{"blond-using-her-laptop-at-her-bedroom.jpg", "tropical-palm-leaves-floral-pattern-background.jpg",
+						"woman-read-book-and-drink-coffee.jpg", "book-on-the-grass.jpg"}[i]), i >= 2)
+				</div>
+			}
+			<div class="col-md-6">
+				@userblocks.Follow(userblocks.Person{Avatar: avatarURL("000m"), Name: "Paweł Kuna", Detail: "Working in Tabler"}, userblocks.FollowProps{Status: "Online", Action: subscribeButton(), Actions: bfMoreMenu()})
+			</div>
+			<div class="col-md-6">
+				@userblocks.Follow(userblocks.Person{Avatar: avatarURL("002m"), Name: "Mallory Hulme", Detail: "Working in Kare"}, userblocks.FollowProps{Status: "Online", Action: subscribeButton(), Actions: bfMoreMenu()})
+			</div>
+			for _, s := range []metric.SmallProps{
+				{Icon: "ti-currency-dollar", Color: "primary", Title: "132 Sales", Text: "12 waiting payments"},
+				{Icon: "ti-shopping-cart", Color: "green", Title: "78 Orders", Text: "32 shipped"},
+				{Icon: "ti-user", Color: "red", Title: "1352 Members", Text: "163 registered today"},
+				{Icon: "ti-message", Color: "yellow", Title: "132 Comments", Text: "16 waitings"},
+				{ChartStart: true, Chart: circle("sales", "56", "primary", "12 waiting payments"), Title: "132 Sales", Text: "12 waiting payments"},
+				{ChartStart: true, Chart: circle("orders", "56", "green", "32 shipped"), Title: "78 Orders", Text: "32 shipped"},
+				{ChartStart: true, Chart: circle("members", "56", "red", "163 registered today"), Title: "1352 Members", Text: "163 registered today"},
+				{ChartStart: true, Chart: circle("comments", "56", "yellow", "16 waitings"), Title: "132 Comments", Text: "16 waitings"},
+				{Icon: "ti-arrow-up", Color: "green", Light: true, Title: "$5,256.99", Text: "Revenue last 30 days", Value: "+4%"},
+				{Icon: "ti-arrow-down", Color: "red", Light: true, Title: "342", Text: "Sales last 30 days", Value: "-4.3%", ValueColor: "red"},
+				{Icon: "ti-arrow-up", Color: "green", Light: true, Title: "132", Text: "Customers last 30 days", Value: "+6.8%"},
+				{Icon: "ti-arrow-down", Color: "red", Light: true, Title: "78", Text: "Members registered today", Value: "-2%", ValueColor: "red"},
+			} {
+				<div class="col-md-6 col-xl-3">
+					@metric.Small(s)
+				</div>
+			}
+			<div class="col-md-6 col-lg-4">
+				<div class="row row-cards">
+					for _, s := range []metric.SmallProps{
+						{Title: "1700", Text: "Users", Chart: sparkline.Sparkline(sparkline.Props{Attributes: templ.Attributes{"id": "widget-line"}, Values: []float64{20, 0, 40, 30, 40, 30, 80, 60}, Color: "primary", Fill: true, AriaLabel: "Trend"})},
+						{Icon: "ti-heart", Color: "red", Title: "1700", Text: "Users", Chart: sparkline.Sparkline(sparkline.Props{Attributes: templ.Attributes{"id": "widget-bar-red"}, Type: sparkline.Bar, Values: []float64{20, 40, 30, 10, 40, 60, 80, 70}, Color: "red", AriaLabel: "Trend"})},
+						{Icon: "ti-brand-github", Color: "green", Title: "1700", Text: "Users", Chart: sparkline.Sparkline(sparkline.Props{Attributes: templ.Attributes{"id": "widget-bar-green"}, Type: sparkline.Bar, Values: []float64{20, 40, 20, -10, -30, 10, 40, 60, 80, 70}, Color: "green", AriaLabel: "Trend"})},
+						{Avatar: personAvatar("063m"), Title: "1700", Text: "Users", Chart: circle("widget-donut-10", "12", "primary", "Trend")},
+						{Avatar: personAvatar("006m"), Title: "1700", Text: "Users", Chart: circle("widget-donut-11", "12", "primary", "Trend")},
+						{Avatar: personAvatar("000m"), Title: "1700", Text: "Users", Chart: circle("widget-donut-1", "56", "primary", "Trend")},
+						{Avatar: personAvatar("003m"), Title: "1700", Text: "Users"},
+						{Avatar: personAvatar("002m"), Title: "1700", Text: "Users", TitleIcon: "ti-trending-down", Color: "red"},
+					} {
+						<div class="col-12">
+							@metric.Small(s)
+						</div>
+					}
+					<div class="col-12">
+						@cards.Code("Card with code", cardCode)
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6 col-lg-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@projects.Summary(projects.SummaryProps{Avatar: avatar.Props{Initials: "W"}, Title: "New website", Due: "Due to: 28 Aug 2019",
+							Stage: "Waiting", StageColor: "red", Team: team("000m", "052f", "002m", "003m", "000f"), Progress: 38})
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6 col-lg-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@projects.Kanban(projects.KanbanProps{Title: "Tabler UI", Badge: "v1.0", Progress: 30, Color: "red", Team: team("000m", "052f", "002m", "003m"), Tasks: "5/10", Due: "Due 72 days"})
+					</div>
+					<div class="col-12">
+						@projects.Kanban(projects.KanbanProps{Title: "Tabler React", Progress: 80, Team: team("009f", "010f", "011m", "012m", "011f", "012f", "013m"), Tasks: "5/10", Due: "Due 2 days"})
+					</div>
+					<div class="col-12">
+						@profile.Info("Basic info", []profile.Item{
+							{Icon: "ti-book", Label: "Went to:", Value: "University of Ljubljana"},
+							{Icon: "ti-briefcase", Label: "Worked at:", Value: "Devpulse"},
+							{Icon: "ti-home", Label: "Lives in:", Value: "Šentilj v Slov. Goricah, Slovenia"},
+							{Icon: "ti-map-pin", Label: "From:", Content: countryFlag("si", "xs", "Slovenia")},
+							{Icon: "ti-calendar", Label: "Birth date:", Value: "13/01/1985"},
+							{Icon: "ti-clock", Label: "Time zone:", Value: "Europe/Ljubljana"},
+						})
+					</div>
+					<div class="col-12">
+						@cards.Definitions(cards.DefinitionsProps{Title: "Configuration", Actions: editConfiguration()}, []cards.Term{
+							{Term: "Date:", Value: "2020-01-05 16:42:29 UTC"},
+							{Term: "Account:", Value: "tabler"},
+							{Term: "Location:", Content: countryFlag("pl", "xxs", "Poland")},
+							{Term: "IP Address:", Value: "46.113.11.3"},
+							{Term: "Operating system:", Value: "OS X 10.15.2 64-bit"},
+							{Term: "Browser:", Value: "Chrome"},
+						})
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

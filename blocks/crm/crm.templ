@@ -1,0 +1,270 @@
+// Package crm holds the cards of Tabler's CRM dashboard: top deals, the pipeline funnel, recent activity
+// and accounts at risk of churning. The KPI tiles and the revenue overview are in blocks/metric, the
+// tasks due and the leaderboard in blocks/dashboard.
+package crm
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/activity"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+)
+
+// Deal is a row of Deals.
+type Deal struct {
+	Company     string
+	Contact     string
+	Stage       string
+	StageColor  string // of the stage badge, e.g. "yellow"
+	Value       string
+	Probability float64 // percent
+	// ProbabilityColor colors the bar; default green from 70%, yellow from 50%, else primary.
+	ProbabilityColor string
+	Owner            avatar.Props
+}
+
+type DealsProps struct {
+	Class   string
+	Title   string          // default "Top deals"
+	Actions templ.Component // in the header, e.g. "Filter" and "Add deal" buttons
+	// Column headers, default "Company", "Stage", "Value", "Probability", "Owner", "Actions".
+	Headings []string
+	// RowActions is the content of each row's last cell; default a "Deal actions" icon button.
+	RowActions func(Deal) templ.Component
+}
+
+func barColor(d Deal) string {
+	switch {
+	case d.ProbabilityColor != "":
+		return d.ProbabilityColor
+	case d.Probability >= 70:
+		return "green"
+	case d.Probability >= 50:
+		return "yellow"
+	}
+	return "primary"
+}
+
+templ dealButton(Deal) {
+	<button type="button" class="btn btn-icon btn-sm" aria-label="Deal actions">
+		@icon.Icon("ti-dots")
+	</button>
+}
+
+// Deals is a card with a table of open deals: company and contact, stage, value, probability as a bar,
+// owner and actions.
+templ Deals(p DealsProps, deals []Deal) {
+	{{
+		h := []string{"Company", "Stage", "Value", "Probability", "Owner", "Actions"}
+		copy(h, p.Headings)
+		actions := p.RowActions
+		if actions == nil {
+			actions = dealButton
+		}
+	}}
+	<div class={ kit.Classes("card", p.Class) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Top deals") }</h2>
+			if p.Actions != nil {
+				<div class="card-actions d-flex gap-2">
+					@p.Actions
+				</div>
+			}
+		</div>
+		<div class="table-responsive" tabindex="0">
+			<table class="table table-vcenter card-table text-nowrap">
+				<thead>
+					<tr>
+						<th>{ h[0] }</th>
+						<th>{ h[1] }</th>
+						<th>{ h[2] }</th>
+						<th>{ h[3] }</th>
+						<th>{ h[4] }</th>
+						<th class="w-1">
+							<span class="visually-hidden">{ h[5] }</span>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, d := range deals {
+						<tr>
+							<td>
+								<div class="fw-medium">{ d.Company }</div>
+								<div class="small text-secondary">{ d.Contact }</div>
+							</td>
+							<td>
+								<span class={ "badge bg-" + d.StageColor + "-lt text-" + d.StageColor }>{ d.Stage }</span>
+							</td>
+							<td class="fw-semibold">{ d.Value }</td>
+							<td>
+								<div class="d-flex align-items-center gap-2">
+									<div class="w-100">
+										@progress.Progress(progress.Props{Value: d.Probability, Color: barColor(d), Size: progress.SizeSmall})
+									</div>
+									<span class="small text-secondary">{ pct(d.Probability) }</span>
+								</div>
+							</td>
+							<td>
+								@avatar.Avatar(small(d.Owner))
+							</td>
+							<td>
+								@actions(d)
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+func small(a avatar.Props) avatar.Props {
+	if a.Size == "" {
+		a.Size = avatar.SizeSmall
+	}
+	return a
+}
+
+// Stage is a step of a Funnel.
+type Stage struct {
+	Label   string
+	Percent float64 // width of the bar
+	Color   string
+	Count   string // on the bar, e.g. "1240"
+	Amount  string // at the right, e.g. "$2.4M"
+}
+
+type FunnelProps struct {
+	Class           string
+	Title           string // e.g. "Pipeline funnel"
+	Period          string // at the right of the title, e.g. "This quarter"
+	Stages          []Stage
+	ConversionLabel string // below the stages, e.g. "Conversion rate"
+	ConversionValue string // in green, e.g. "5.97%"
+}
+
+// Funnel shows how many leads reach each stage of a pipeline as bars, with the overall conversion.
+templ Funnel(p FunnelProps) {
+	<div class={ kit.Classes("card h-100", p.Class) }>
+		<div class="card-body">
+			<h2 class="card-title">
+				<div class="d-flex align-items-center justify-content-between">
+					<div class="fw-medium">{ p.Title }</div>
+					<div class="text-secondary">{ p.Period }</div>
+				</div>
+			</h2>
+			<div class="d-flex flex-column gap-2">
+				for _, s := range p.Stages {
+					<div class="row g-2 align-items-center">
+						<div class="col-3 text-secondary">{ s.Label }</div>
+						<div class="col">
+							<div class="position-relative">
+								@progress.Progress(progress.Props{Value: s.Percent, Color: s.Color, Class: "h-4"})
+								<div class="position-absolute top-50 start-0 translate-middle-y px-2 small fw-semibold text-white">{ s.Count }</div>
+							</div>
+						</div>
+						<div class="col-2 fw-medium text-end text-nowrap">{ s.Amount }</div>
+					</div>
+				}
+			</div>
+			if p.ConversionLabel != "" {
+				<div class="d-flex justify-content-between mt-4">
+					<div class="text-secondary">{ p.ConversionLabel }</div>
+					<div class="fw-semibold text-green">{ p.ConversionValue }</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type ActivityProps struct {
+	Class   string
+	Title   string          // default "Recent activity"
+	Actions templ.Component // e.g. a "View all" link
+	Height  string          // default "28rem"
+}
+
+// Activity is a card of recent events that scrolls: an icon or avatar, a line in medium weight and its
+// time per entry (the Unread mark of activity.Item is not shown).
+templ Activity(p ActivityProps, items []activity.Item) {
+	<div class={ kit.Classes("card", p.Class) } style={ templ.SafeCSS("height: " + kit.Or(p.Height, "28rem")) }>
+		<div class="card-header">
+			<h2 class="card-title">{ kit.Or(p.Title, "Recent activity") }</h2>
+			if p.Actions != nil {
+				<div class="card-actions">
+					@p.Actions
+				</div>
+			}
+		</div>
+		<div class="card-body card-body-scrollable" tabindex="0">
+			<div class="divide-y">
+				for _, it := range items {
+					<div class="py-3">
+						<div class="row align-items-center">
+							<div class="col-auto">
+								@avatar.Avatar(it.Avatar)
+							</div>
+							<div class="col">
+								<div class="fw-medium">
+									if it.Text != nil {
+										@it.Text
+									}
+								</div>
+								<div class="small text-secondary">{ it.Time }</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Risk is an account of Risks.
+type Risk struct {
+	Name  string
+	Note  string // e.g. "Last contact: 18 days ago"
+	Level string // e.g. "High"
+	Color string // of the level badge, e.g. "red"
+	Value string // e.g. "$24K"
+}
+
+type RisksProps struct {
+	Class string
+	Title string // default "Churn risk"
+	Count string // the red badge at the right, e.g. "5 accounts"
+}
+
+// Risks is a card of accounts at risk of churning: name, a note, the risk level and the revenue at stake.
+templ Risks(p RisksProps, risks []Risk) {
+	<div class={ kit.Classes("card h-100", p.Class) }>
+		<div class="card-header">
+			<div class="d-flex align-items-center gap-2">
+				@icon.Icon("ti-alert-triangle", icon.Props{Class: "text-red"})
+				<h2 class="card-title mb-0">{ kit.Or(p.Title, "Churn risk") }</h2>
+			</div>
+			if p.Count != "" {
+				<div class="card-actions">
+					<span class="badge bg-red text-red-fg">{ p.Count }</span>
+				</div>
+			}
+		</div>
+		<div class="list-group list-group-flush">
+			for _, r := range risks {
+				<div class="list-group-item">
+					<div class="row align-items-center g-2">
+						<div class="col">
+							<div class="fw-medium">{ r.Name }</div>
+							<div class="small text-secondary">{ r.Note }</div>
+						</div>
+						<div class="col-auto">
+							<span class={ "badge bg-" + r.Color + "-lt" }>{ r.Level }</span>
+						</div>
+						<div class="col-auto fw-semibold">{ r.Value }</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}

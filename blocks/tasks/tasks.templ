@@ -1,0 +1,297 @@
+// Package tasks renders Tabler's task views: a kanban Board of columns with task cards, and a Table of
+// the tasks of one column in a card, with assignee, due date and priority.
+//
+//	@tasks.Board([]tasks.Column{{Name: "Upcoming", Tasks: upcoming}, {Name: "Done", Tasks: done}})
+//	@tasks.Table(tasks.TableProps{Title: "Upcoming", Action: newTaskButton}, upcoming)
+package tasks
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/ribbon"
+	"github.com/mind-vm/tabler-templ/switchicon"
+)
+
+// Subtask is a step of a Task.
+type Subtask struct {
+	Name string
+	Done bool
+}
+
+// Task is a task of a Board or a Table; the card uses some fields, the table others.
+type Task struct {
+	Name string
+	// Description is a muted text below the name; DescriptionContent replaces it, e.g. with a link.
+	Description        string
+	DescriptionContent templ.Component
+	Image              string // a 16:9 picture below the name
+	Color              string // a colored line at the top of the card (card-status-top)
+	Starred            bool   // a yellow bookmark with a star
+	Users              []avatar.Props
+	Due                string // e.g. "August 1, 2023"
+	Favorite           bool   // the heart is on
+	Likes              int
+	Comments           int
+	Subtasks           []Subtask
+	Href               string // of the due date, subtask, comment and share links; default "#"
+	// For the Table: who works on it (Assignee with AssigneeName) and the priority.
+	Assignee     *avatar.Props
+	AssigneeName string
+	Priority     string // e.g. "High"; colored red, yellow or blue for High, Medium or Low
+	// PriorityColor overrides the color of the priority badge.
+	PriorityColor string
+}
+
+// Column is a column of a Board.
+type Column struct {
+	Name  string
+	Tasks []Task
+}
+
+type BoardProps struct {
+	Class string
+	// FavoriteLabel and ShareLabel are the read-out texts of the icon buttons, default "Mark as favorite"
+	// and "Share".
+	FavoriteLabel, ShareLabel string
+}
+
+// Board is a kanban board: one column per state with its task cards.
+templ Board(columns []Column, props ...BoardProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("row", p.Class) }>
+		for _, c := range columns {
+			<div class="col-12 col-md-6 col-lg">
+				<h2 class="mb-3">{ c.Name }</h2>
+				<div class="mb-4">
+					<div class="row row-cards">
+						for _, t := range c.Tasks {
+							<div class="col-12">
+								@Card(t, p)
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+func done(ss []Subtask) int {
+	n := 0
+	for _, s := range ss {
+		if s.Done {
+			n++
+		}
+	}
+	return n
+}
+
+// Card is a task card of a Board.
+templ Card(t Task, props ...BoardProps) {
+	{{
+		p := kit.First(props)
+		href := templ.SafeURL(kit.Or(t.Href, "#"))
+	}}
+	<div class="card card-sm">
+		if t.Color != "" {
+			<div class={ "card-status-top bg-" + t.Color }></div>
+		}
+		if t.Starred {
+			@ribbon.Ribbon(ribbon.Props{Top: true, Bookmark: true, Color: "yellow"})
+		}
+		<div class="card-body">
+			<h2 class="card-title">{ t.Name }</h2>
+			if t.DescriptionContent != nil {
+				<div class="text-secondary">
+					@t.DescriptionContent
+				</div>
+			} else if t.Description != "" {
+				<div class="text-secondary">{ t.Description }</div>
+			}
+			if t.Image != "" {
+				<div class="ratio ratio-16x9">
+					<img src={ t.Image } class="rounded object-cover" alt={ t.Name }/>
+				</div>
+			}
+			<div class="mt-4">
+				<div class="row">
+					<div class="col">
+						if len(t.Users) > 0 {
+							@avatar.List(avatar.ListProps{Stacked: true, Size: avatar.SizeXS}) {
+								for _, u := range t.Users {
+									{{ u.Size = avatar.SizeXS }}
+									@avatar.Avatar(u)
+								}
+							}
+						}
+					</div>
+					if t.Due != "" {
+						<div class="col-auto">
+							<a href={ href } class="link-warning">
+								@icon.Icon("ti-calendar", icon.Props{Inline: true})
+								{ t.Due }
+							</a>
+						</div>
+					}
+					<div class="col-auto text-secondary">
+						@switchicon.SwitchIcon(switchicon.Props{Variant: switchicon.Scale, Active: t.Favorite, Label: kit.Or(p.FavoriteLabel, "Mark as favorite")})
+						if t.Likes > 0 {
+							{ strconv.Itoa(t.Likes) }
+						}
+					</div>
+					if len(t.Subtasks) > 0 {
+						<div class="col-auto">
+							<a href={ href } class="link-secondary">
+								@icon.Icon("ti-activity", icon.Props{Inline: true})
+								{ strconv.Itoa(done(t.Subtasks)) }/{ strconv.Itoa(len(t.Subtasks)) }
+							</a>
+						</div>
+					}
+					if t.Comments > 0 {
+						<div class="col-auto">
+							<a href={ href } class="link-secondary">
+								@icon.Icon("ti-message", icon.Props{Inline: true})
+								{ strconv.Itoa(t.Comments) }
+							</a>
+						</div>
+					}
+					<div class="col-auto">
+						<a href={ href } class="link-secondary" aria-label={ kit.Or(p.ShareLabel, "Share") }>
+							@icon.Icon("ti-share", icon.Props{Inline: true})
+						</a>
+					</div>
+				</div>
+			</div>
+			if len(t.Subtasks) > 0 {
+				<div class="divide-y-2 mt-4">
+					for _, s := range t.Subtasks {
+						<div>
+							if s.Done {
+								@icon.Icon("ti-check", icon.Props{Inline: true, Color: "muted"})
+								{ " " }
+								<span class="text-secondary text-decoration-line-through">{ s.Name }</span>
+							} else {
+								@icon.Icon("ti-check", icon.Props{Inline: true, Color: "green"})
+								{ s.Name }
+							}
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type TableProps struct {
+	Class  string // on the card, default "mb-4"
+	Title  string
+	Action templ.Component // in the card header, e.g. a "New Task" button
+	// View is a component for the actions cell of a task, e.g. a "View" button; default a small "View"
+	// button.
+	View func(Task) templ.Component
+	// Headings default to "Name", "Assigned To", "Due Date", "Priority", "Actions"; texts to "Select
+	// all", "Select task", "Unassigned".
+	Headings                                   []string
+	SelectAllLabel, SelectLabel, UnassignedText string
+}
+
+func priorityColor(t Task) string {
+	if t.PriorityColor != "" {
+		return t.PriorityColor
+	}
+	switch t.Priority {
+	case "High":
+		return "red"
+	case "Medium":
+		return "yellow"
+	case "Low":
+		return "blue"
+	}
+	return ""
+}
+
+templ viewButton(t Task) {
+	<button type="button" class="btn btn-sm">View</button>
+}
+
+// Table is a card with a table of tasks: a check box to select each, the name, assignee, due date and
+// priority, and an action.
+templ Table(p TableProps, ts []Task) {
+	{{
+		h := []string{"Name", "Assigned To", "Due Date", "Priority", "Actions"}
+		copy(h, p.Headings)
+		view := p.View
+		if view == nil {
+			view = viewButton
+		}
+	}}
+	<div class={ kit.Classes("card", kit.Or(p.Class, "mb-4")) }>
+		<div class="card-header">
+			<h2 class="card-title mb-0">{ p.Title }</h2>
+			if p.Action != nil {
+				<div class="card-actions">
+					@p.Action
+				</div>
+			}
+		</div>
+		<div class="table-responsive">
+			<table class="table table-vcenter card-table table-selectable">
+				<thead>
+					<tr>
+						<th class="w-1">
+							<input type="checkbox" class="form-check-input align-middle table-selectable-check" aria-label={ kit.Or(p.SelectAllLabel, "Select all") }/>
+						</th>
+						<th class="w-50">{ h[0] }</th>
+						<th class="d-none d-xl-table-cell">{ h[1] }</th>
+						<th class="d-none d-xxl-table-cell">{ h[2] }</th>
+						<th>{ h[3] }</th>
+						<th class="text-end">{ h[4] }</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, t := range ts {
+						<tr>
+							<td>
+								<input type="checkbox" class="form-check-input align-middle table-selectable-check" aria-label={ kit.Or(p.SelectLabel, "Select task") + " " + t.Name }/>
+							</td>
+							<td>{ t.Name }</td>
+							<td>
+								if t.Assignee != nil {
+									<div class="d-flex align-items-center">
+										{{ a := *t.Assignee }}
+										{{ a.Size, a.Class = avatar.SizeXS, kit.Classes(a.Class, "me-2") }}
+										@avatar.Avatar(a)
+										<span>{ t.AssigneeName }</span>
+									</div>
+								} else {
+									<span class="text-secondary">{ kit.Or(p.UnassignedText, "Unassigned") }</span>
+								}
+							</td>
+							<td class="text-secondary">
+								if t.Due != "" {
+									@icon.Icon("ti-calendar", icon.Props{Inline: true, Class: "me-1"})
+									{ t.Due }
+								} else {
+									<span class="text-muted">—</span>
+								}
+							</td>
+							<td>
+								if c := priorityColor(t); c != "" {
+									<span class={ "badge bg-" + c + "-lt" }>{ t.Priority }</span>
+								} else {
+									<span class="badge">{ kit.Or(t.Priority, "—") }</span>
+								}
+							</td>
+							<td class="text-end">
+								@view(t)
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}

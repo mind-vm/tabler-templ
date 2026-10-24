@@ -1,0 +1,112 @@
+package users
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Person is a person on one of the small user cards.
+type Person struct {
+	Avatar   string
+	Initials string
+	Name     string
+	Detail   string // e.g. the job title
+	Href     string // default "#"
+}
+
+func (p Person) avatar(size avatar.Size, class string) avatar.Props {
+	return avatar.Props{Src: p.Avatar, Initials: p.Initials, Size: size, Class: class}
+}
+
+// Link is a card that links to a person: avatar, name and detail in a row; End puts the avatar at the
+// end (Tabler's UserCard).
+templ Link(p Person, end bool) {
+	<a class="card card-link" href={ templ.URL(kit.Or(p.Href, "#")) }>
+		<div class="card-body">
+			<div class="row">
+				if !end {
+					<div class="col-auto">
+						@avatar.Avatar(p.avatar("", "rounded"))
+					</div>
+				}
+				<div class="col">
+					<div class="fw-medium">{ p.Name }</div>
+					<div class="text-secondary">{ p.Detail }</div>
+				</div>
+				if end {
+					<div class="col-auto">
+						@avatar.Avatar(p.avatar("", "rounded"))
+					</div>
+				}
+			</div>
+		</div>
+	</a>
+}
+
+// Profile is a centered person card with a button at the bottom, e.g. "View full profile" (Tabler's
+// UserCardBig).
+templ Profile(p Person, button string) {
+	<div class="card">
+		<div class="card-body text-center">
+			<div class="mb-3">
+				@avatar.Avatar(p.avatar(avatar.SizeXL, ""))
+			</div>
+			<h2 class="card-title mb-1">{ p.Name }</h2>
+			<div class="text-secondary">{ p.Detail }</div>
+		</div>
+		<a href={ templ.URL(kit.Or(p.Href, "#")) } class="card-btn">{ kit.Or(button, "View full profile") }</a>
+	</div>
+}
+
+// Cover is a person card with the avatar on a cover photo; Blurred blurs the photo (Tabler's
+// UserCardBg).
+templ Cover(p Person, cover string, blurred bool) {
+	<a class="card card-link" href={ templ.URL(kit.Or(p.Href, "#")) }>
+		<div class={ kit.Classes("card-cover text-center", kit.If(blurred, "card-cover-blurred")) } style={ templ.SafeCSS("background-image: url(" + cover + ")") }>
+			@avatar.Avatar(p.avatar(avatar.SizeXL, ""))
+		</div>
+		<div class="card-body text-center">
+			<h2 class="card-title mb-1">{ p.Name }</h2>
+			<div class="text-secondary">{ p.Detail }</div>
+		</div>
+	</a>
+}
+
+type FollowProps struct {
+	Status      string          // e.g. "Online"
+	StatusColor string          // of the dot, default "green"
+	Action      templ.Component // e.g. a "Subscribe" button
+	Actions     templ.Component // at the end, e.g. a card.Dropdown
+}
+
+// Follow is a person card with a status and a subscribe button (Tabler's Subscribe card).
+templ Follow(p Person, f FollowProps) {
+	<div class="card">
+		<div class="card-body">
+			<div class="row g-2 align-items-center">
+				<div class="col-auto">
+					@avatar.Avatar(p.avatar(avatar.SizeLarge, ""))
+				</div>
+				<div class="col">
+					<h2 class="card-title m-0">
+						<a href={ templ.URL(kit.Or(p.Href, "#")) }>{ p.Name }</a>
+					</h2>
+					<div class="text-secondary">{ p.Detail }</div>
+					if f.Status != "" {
+						<div class="small mt-1"><span class={ "badge bg-" + kit.Or(f.StatusColor, "green") }></span> { f.Status }</div>
+					}
+				</div>
+				if f.Action != nil {
+					<div class="col-auto">
+						@f.Action
+					</div>
+				}
+				if f.Actions != nil {
+					<div class="col-auto">
+						@f.Actions
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
