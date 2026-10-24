@@ -7,6 +7,7 @@ import (
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/pagination"
 )
@@ -34,7 +35,7 @@ templ Search(l *List) {
 		</div>
 		for _, f := range l.Filters {
 			@form.Select(form.SelectProps{Name: f.Name, Empty: f.Label, Options: options(f.Options), Selected: f.Value,
-				Attributes: templ.Attributes{"aria-label": f.Label, "onchange": "this.form.requestSubmit()"}})
+				Attributes: templ.Attributes{"aria-label": f.Label, "data-kit-list-submit": true}})
 		}
 		@button.Button() {
 			{ m.Search }
@@ -45,7 +46,19 @@ templ Search(l *List) {
 			}
 		}
 	</form>
+	if len(l.Filters) > 0 {
+		@submitOnce.Once() {
+			<script { csp.Nonce(ctx)... }>
+				document.addEventListener('change', function (e) {
+					if (e.target.matches('[data-kit-list-submit]')) e.target.form.requestSubmit();
+				});
+			</script>
+		}
+	}
 }
+
+// submitOnce renders the script that submits the search form when a filter changes, once per page.
+var submitOnce = templ.NewOnceHandle()
 
 func options(os []Option) []form.Option {
 	fs := make([]form.Option, len(os))
@@ -68,7 +81,7 @@ templ Footer(l *List) {
 // Styles is the block's small layout CSS (Tabler variables only); put it in <head>. The shell block
 // includes it.
 templ Styles() {
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 const css = `.kit-list-search{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}

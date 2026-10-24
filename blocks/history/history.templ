@@ -8,6 +8,7 @@ package history
 import (
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -62,7 +63,7 @@ templ Timeline(entries []Entry, props ...Props) {
 
 // Styles renders the block's CSS; the shell block includes it.
 templ Styles() {
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 const css = `.kit-history{margin:0;padding:.5rem 1.25rem .75rem;list-style:none}

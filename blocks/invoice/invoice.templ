@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -112,10 +113,20 @@ templ Invoice(p Props) {
 	</div>
 }
 
-// PrintButton prints the page (window.print), for the page header; the children are its text.
+// PrintButton prints the page (window.print), for the page header; the children are its text. Its script
+// (once per page, with templ's nonce) needs no inline handler, so it works under a Content-Security-Policy.
 templ PrintButton() {
-	<button type="button" class="btn btn-primary" onclick="window.print()">
+	<button type="button" class="btn btn-primary" data-kit-print>
 		@icon.Icon("ti-printer")
 		{ children... }
 	</button>
+	@printOnce.Once() {
+		<script { csp.Nonce(ctx)... }>
+			document.addEventListener('click', function (e) {
+				if (e.target.closest('[data-kit-print]')) window.print();
+			});
+		</script>
+	}
 }
+
+var printOnce = templ.NewOnceHandle()

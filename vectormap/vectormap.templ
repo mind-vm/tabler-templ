@@ -10,6 +10,7 @@ import (
 	"github.com/mind-vm/tabler-templ/versions"
 	"encoding/json"
 
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -94,11 +95,11 @@ templ Map(p Props) {
 // Library loads Tabler's vector map script and the given maps (default "world"); put it in the page's
 // head.
 templ Library(maps ...string) {
-	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/tabler-vector-map.min.js" } defer></script>
+	<script { csp.Nonce(ctx)... } src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/tabler-vector-map.min.js" } defer></script>
 	if len(maps) == 0 {
-		<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/world.js" } defer></script>
+		<script { csp.Nonce(ctx)... } src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/world.js" } defer></script>
 	}
 	for _, m := range maps {
-		<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/" + m + ".js" } defer></script>
+		<script { csp.Nonce(ctx)... } src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + Version + "/dist/js/maps/" + m + ".js" } defer></script>
 	}
 }

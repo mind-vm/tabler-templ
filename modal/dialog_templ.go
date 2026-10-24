@@ -8,7 +8,10 @@ package modal
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
 
 type DialogProps struct {
 	ID         string // required
@@ -49,7 +52,7 @@ func Dialog(p DialogProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 17, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 20, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -62,7 +65,7 @@ func Dialog(p DialogProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + kit.Or(p.Width, "28rem") + "; max-width: calc(100% - 2rem)")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 17, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 20, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -75,7 +78,7 @@ func Dialog(p DialogProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 20, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 23, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -88,7 +91,7 @@ func Dialog(p DialogProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.CloseLabel, kit.T(ctx).Close))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 22, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `modal/dialog.templ`, Line: 25, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -159,7 +162,15 @@ func DialogScript() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<script>\n\t\tif (!window.__kitDialogOpen) {\n\t\t\twindow.__kitDialogOpen = true\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tconst btn = e.target.closest(\"[data-dialog-open]\")\n\t\t\t\tif (!btn) return\n\t\t\t\tconst d = document.getElementById(btn.getAttribute(\"data-dialog-open\"))\n\t\t\t\td.classList.toggle(\"modal-blur\", btn.hasAttribute(\"data-dialog-blur\"))\n\t\t\t\td.showModal()\n\t\t\t})\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<script")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">\n\t\tif (!window.__kitDialogOpen) {\n\t\t\twindow.__kitDialogOpen = true\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tconst btn = e.target.closest(\"[data-dialog-open]\")\n\t\t\t\tif (!btn) return\n\t\t\t\tconst d = document.getElementById(btn.getAttribute(\"data-dialog-open\"))\n\t\t\t\td.classList.toggle(\"modal-blur\", btn.hasAttribute(\"data-dialog-blur\"))\n\t\t\t\td.showModal()\n\t\t\t})\n\t\t}\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

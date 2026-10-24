@@ -5,6 +5,7 @@ import (
 	"github.com/mind-vm/tabler-templ/versions"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -279,7 +280,7 @@ const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@" + versions.Type
 
 // TypedLibrary loads typed.js; put it in the page's head.
 templ TypedLibrary() {
-	<script src={ TypedLibraryURL } defer></script>
+	<script { csp.Nonce(ctx)... } src={ TypedLibraryURL } defer></script>
 }
 
 func typedConfig(p TypedProps) string {
@@ -310,7 +311,7 @@ var typedOnce = templ.NewOnceHandle()
 
 templ typedScript() {
 	@typedOnce.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				function init() {
 					if (!window.Typed) return;

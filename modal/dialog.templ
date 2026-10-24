@@ -1,6 +1,9 @@
 package modal
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
 
 type DialogProps struct {
 	ID         string // required
@@ -45,7 +48,7 @@ func DialogOpen(id string, blur bool) templ.Attributes {
 
 // DialogScript opens Dialogs from buttons with DialogOpen.
 templ DialogScript() {
-	<script>
+	<script { csp.Nonce(ctx)... }>
 		if (!window.__kitDialogOpen) {
 			window.__kitDialogOpen = true
 			document.addEventListener("click", (e) => {

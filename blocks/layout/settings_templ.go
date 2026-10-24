@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -89,7 +90,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.ButtonLabel, "Customize"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 46, Col: 153}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 47, Col: 153}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -115,7 +116,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.id())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 50, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 51, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.id() + "-title")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 50, Col: 156}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 51, Col: 156}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -141,7 +142,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(themeConfig(sections))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 50, Col: 202}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 51, Col: 202}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -154,7 +155,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.CloseLabel, "Close"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 51, Col: 151}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 52, Col: 151}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
@@ -177,7 +178,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.id() + "-title")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 57, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 58, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -190,7 +191,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Title, "Make it your own"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 57, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 58, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -203,7 +204,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Text, "Pick the look and layout. Your choices are saved in this browser."))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 58, Col: 120}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 59, Col: 120}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -239,7 +240,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(sec.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 62, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 63, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -275,7 +276,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Reset, "Reset changes"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 74, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 75, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -288,7 +289,7 @@ func ThemeSettings(p ThemeSettingsProps) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Save, "Save"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 76, Col: 108}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 77, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -334,7 +335,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(id + "-" + s.Key)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 84, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 85, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 		if templ_7745c5c3_Err != nil {
@@ -347,7 +348,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 84, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 85, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 		if templ_7745c5c3_Err != nil {
@@ -360,7 +361,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(id + "-" + s.Key)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 85, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 86, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
@@ -373,7 +374,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(s.Legend)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 85, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 86, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -391,7 +392,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(s.Hint)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 87, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 88, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -416,7 +417,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 95, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 96, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 				if templ_7745c5c3_Err != nil {
@@ -429,7 +430,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 95, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 96, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 				if templ_7745c5c3_Err != nil {
@@ -452,7 +453,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 95, Col: 143}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 96, Col: 143}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 				if templ_7745c5c3_Err != nil {
@@ -502,7 +503,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 106, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 107, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 				if templ_7745c5c3_Err != nil {
@@ -515,7 +516,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 106, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 107, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 				if templ_7745c5c3_Err != nil {
@@ -560,7 +561,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 109, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 110, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -588,7 +589,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 120, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 121, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
 				if templ_7745c5c3_Err != nil {
@@ -601,7 +602,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 120, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 121, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var32)
 				if templ_7745c5c3_Err != nil {
@@ -644,7 +645,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 129, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 130, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -672,7 +673,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 139, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 140, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
 				if templ_7745c5c3_Err != nil {
@@ -685,7 +686,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 139, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 140, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var35)
 				if templ_7745c5c3_Err != nil {
@@ -708,7 +709,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var36 string
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 140, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 141, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -769,7 +770,15 @@ func themeSettingsScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\t\tdocument.querySelectorAll('form[data-theme-settings]').forEach(function (form) {\n\t\t\t\t\tvar cfg = JSON.parse(form.getAttribute('data-theme-settings'));\n\t\t\t\t\tvar defaults = cfg.defaults, presets = cfg.presets, links = cfg.links || {};\n\t\t\t\t\tvar url = new URL(window.location);\n\t\t\t\t\tvar store = {\n\t\t\t\t\t\tget: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },\n\t\t\t\t\t\tset: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },\n\t\t\t\t\t\tremove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },\n\t\t\t\t\t};\n\t\t\t\t\t// The default state is the absence of the attribute, as in the theme script.\n\t\t\t\t\tfunction apply(key, value) {\n\t\t\t\t\t\tvar applied = value;\n\t\t\t\t\t\tif (key === 'theme' && value === 'auto') applied = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t\t\t\t\tif (applied !== defaults[key]) document.documentElement.setAttribute('data-bs-' + key, applied);\n\t\t\t\t\t\telse document.documentElement.removeAttribute('data-bs-' + key);\n\t\t\t\t\t}\n\t\t\t\t\t// A stored choice wins, then what the page rendered, then the default. data-bs-theme holds the\n\t\t\t\t\t// resolved mode, so it is not read back.\n\t\t\t\t\tfunction current(key) {\n\t\t\t\t\t\tvar rendered = key === 'theme' ? null : document.documentElement.getAttribute('data-bs-' + key);\n\t\t\t\t\t\treturn store.get('tabler-' + key) || rendered || defaults[key];\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleGroups() {\n\t\t\t\t\t\tvar vertical = current('navbar-position') === 'vertical';\n\t\t\t\t\t\tvar hide = function (keys, hidden) {\n\t\t\t\t\t\t\t(keys || []).forEach(function (k) { var g = form.querySelector('[data-theme-setting=\"' + k + '\"]'); if (g) g.hidden = hidden; });\n\t\t\t\t\t\t};\n\t\t\t\t\t\thide(cfg.sidebarOnly, !vertical);\n\t\t\t\t\t\thide(cfg.navbarOnly, vertical);\n\t\t\t\t\t}\n\t\t\t\t\tfunction set(key, value) { apply(key, value); store.set('tabler-' + key, value); url.searchParams.set(key, value); }\n\t\t\t\t\tfunction matches(values) { return Object.keys(values).every(function (k) { return current(k) === values[k]; }); }\n\t\t\t\t\tfunction check() {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) {\n\t\t\t\t\t\t\tvar value = current(key);\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + key + '\"]').forEach(function (r) { r.checked = r.value === value; });\n\t\t\t\t\t\t});\n\t\t\t\t\t\tObject.keys(presets).forEach(function (name) {\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + name + '\"]').forEach(function (r) { r.checked = matches(presets[name][r.value]); });\n\t\t\t\t\t\t});\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t}\n\t\t\t\t\tform.addEventListener('change', function (e) {\n\t\t\t\t\t\tvar name = e.target.name, value = e.target.value;\n\t\t\t\t\t\tif (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });\n\t\t\t\t\t\telse if (name in defaults) set(name, value);\n\t\t\t\t\t\t// An option that brings other settings along, e.g. a theme's colors and font.\n\t\t\t\t\t\tif (links[name] && links[name][value]) Object.keys(links[name][value]).forEach(function (k) { set(k, links[name][value][k]); });\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t\t// Plugins that measured the old width (charts, maps) need a nudge.\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tform.querySelector('[data-theme-reset]').addEventListener('click', function () {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) { apply(key, defaults[key]); store.remove('tabler-' + key); url.searchParams.delete(key); });\n\t\t\t\t\t\tcheck();\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tcheck();\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<script")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, ">\n\t\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\t\tdocument.querySelectorAll('form[data-theme-settings]').forEach(function (form) {\n\t\t\t\t\tvar cfg = JSON.parse(form.getAttribute('data-theme-settings'));\n\t\t\t\t\tvar defaults = cfg.defaults, presets = cfg.presets, links = cfg.links || {};\n\t\t\t\t\tvar url = new URL(window.location);\n\t\t\t\t\tvar store = {\n\t\t\t\t\t\tget: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },\n\t\t\t\t\t\tset: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },\n\t\t\t\t\t\tremove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },\n\t\t\t\t\t};\n\t\t\t\t\t// The default state is the absence of the attribute, as in the theme script.\n\t\t\t\t\tfunction apply(key, value) {\n\t\t\t\t\t\tvar applied = value;\n\t\t\t\t\t\tif (key === 'theme' && value === 'auto') applied = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t\t\t\t\tif (applied !== defaults[key]) document.documentElement.setAttribute('data-bs-' + key, applied);\n\t\t\t\t\t\telse document.documentElement.removeAttribute('data-bs-' + key);\n\t\t\t\t\t}\n\t\t\t\t\t// A stored choice wins, then what the page rendered, then the default. data-bs-theme holds the\n\t\t\t\t\t// resolved mode, so it is not read back.\n\t\t\t\t\tfunction current(key) {\n\t\t\t\t\t\tvar rendered = key === 'theme' ? null : document.documentElement.getAttribute('data-bs-' + key);\n\t\t\t\t\t\treturn store.get('tabler-' + key) || rendered || defaults[key];\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleGroups() {\n\t\t\t\t\t\tvar vertical = current('navbar-position') === 'vertical';\n\t\t\t\t\t\tvar hide = function (keys, hidden) {\n\t\t\t\t\t\t\t(keys || []).forEach(function (k) { var g = form.querySelector('[data-theme-setting=\"' + k + '\"]'); if (g) g.hidden = hidden; });\n\t\t\t\t\t\t};\n\t\t\t\t\t\thide(cfg.sidebarOnly, !vertical);\n\t\t\t\t\t\thide(cfg.navbarOnly, vertical);\n\t\t\t\t\t}\n\t\t\t\t\tfunction set(key, value) { apply(key, value); store.set('tabler-' + key, value); url.searchParams.set(key, value); }\n\t\t\t\t\tfunction matches(values) { return Object.keys(values).every(function (k) { return current(k) === values[k]; }); }\n\t\t\t\t\tfunction check() {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) {\n\t\t\t\t\t\t\tvar value = current(key);\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + key + '\"]').forEach(function (r) { r.checked = r.value === value; });\n\t\t\t\t\t\t});\n\t\t\t\t\t\tObject.keys(presets).forEach(function (name) {\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + name + '\"]').forEach(function (r) { r.checked = matches(presets[name][r.value]); });\n\t\t\t\t\t\t});\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t}\n\t\t\t\t\tform.addEventListener('change', function (e) {\n\t\t\t\t\t\tvar name = e.target.name, value = e.target.value;\n\t\t\t\t\t\tif (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });\n\t\t\t\t\t\telse if (name in defaults) set(name, value);\n\t\t\t\t\t\t// An option that brings other settings along, e.g. a theme's colors and font.\n\t\t\t\t\t\tif (links[name] && links[name][value]) Object.keys(links[name][value]).forEach(function (k) { set(k, links[name][value][k]); });\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t\t// Plugins that measured the old width (charts, maps) need a nudge.\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tform.querySelector('[data-theme-reset]').addEventListener('click', function () {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) { apply(key, defaults[key]); store.remove('tabler-' + key); url.searchParams.delete(key); });\n\t\t\t\t\t\tcheck();\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tcheck();\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

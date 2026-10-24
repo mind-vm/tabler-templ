@@ -8,6 +8,7 @@
 package player
 
 import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -79,7 +80,7 @@ templ Player(p Props) {
 // Library loads Plyr and its stylesheet; put it in the head.
 templ Library() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.css" }/>
-	<script src={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.min.js" } defer></script>
+	<script { csp.Nonce(ctx)... } src={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.min.js" } defer></script>
 }
 
 var once = templ.NewOnceHandle()
@@ -88,7 +89,7 @@ var once = templ.NewOnceHandle()
 // window.tabler_player by element id.
 templ Script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				if (window.tablerPlayers) return;
 				function init(root) {

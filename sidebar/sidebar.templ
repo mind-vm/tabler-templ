@@ -24,6 +24,7 @@ import (
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -39,17 +40,13 @@ func collapsed(ctx context.Context) bool {
 
 // Styles renders the sidebar's CSS; put it in <head>.
 templ Styles() {
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 // Script renders the toggle script; put it at the end of <body>. It carries templ's nonce, if set.
 func Script() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		open := "<script>"
-		if n := templ.GetNonce(ctx); n != "" {
-			open = `<script nonce="` + templ.EscapeString(n) + `">`
-		}
-		_, err := io.WriteString(w, open+script+"</script>")
+		_, err := io.WriteString(w, csp.Open(ctx, "script")+script+"</script>")
 		return err
 	})
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/auth"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
 
@@ -31,7 +32,7 @@ templ Head(ts ...Theme) {
 		{{ css.WriteString(t.CSS()) }}
 	}
 	if css.Len() > 0 {
-		@templ.Raw("<style>" + css.String() + "</style>")
+		@csp.Style(css.String())
 	}
 	@Script()
 }
@@ -39,7 +40,7 @@ templ Head(ts ...Theme) {
 // Script restores the theme saved by the panel (localStorage tabler-theme-pack, or ?theme-pack=), the way
 // Tabler's theme script restores its own settings. Head includes it.
 templ Script() {
-	<script>
+	<script { csp.Nonce(ctx)... }>
 		(function () {
 			var v = null, p = new URLSearchParams(location.search).get('theme-pack');
 			try { if (p && /^[a-z0-9-]{1,32}$/.test(p)) localStorage.setItem('tabler-theme-pack', p); v = localStorage.getItem('tabler-theme-pack'); } catch (e) {}

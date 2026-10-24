@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 )
 
@@ -70,7 +71,7 @@ func Burst(p Props) templ.Component {
 		if p.Target != "" {
 			target = "document.querySelector(" + plugin.JSON(p.Target) + ")"
 		}
-		_, err := io.WriteString(w, "<script>(function () {\n\tvar burst = function () { window.tabler && tabler.Confetti.getOrCreateInstance("+target+", "+
+		_, err := io.WriteString(w, csp.Open(ctx, "script")+"(function () {\n\tvar burst = function () { window.tabler && tabler.Confetti.getOrCreateInstance("+target+", "+
 			plugin.JSON(p.config())+").burst(); };\n\tdocument.readyState !== 'loading' ? burst() : document.addEventListener('DOMContentLoaded', burst, { once: true });\n})();</script>")
 		return err
 	})

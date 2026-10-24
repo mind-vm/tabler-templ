@@ -10,6 +10,8 @@ import (
 	"sync"
 
 	"github.com/a-h/templ"
+
+	"github.com/mind-vm/tabler-templ/internal/csp"
 )
 
 var (
@@ -33,7 +35,7 @@ func handle(name string) *templ.OnceHandle {
 // htmx swap. setup must skip elements it has set up already.
 func Start(name, setup string) templ.Component {
 	script := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		_, err := io.WriteString(w, "<script>(function () {\n\tvar setup = "+setup+";\n"+
+		_, err := io.WriteString(w, csp.Open(ctx, "script")+"(function () {\n\tvar setup = "+setup+";\n"+
 			"\tdocument.readyState !== 'loading' ? setup(document) : document.addEventListener('DOMContentLoaded', function () { setup(document); }, { once: true });\n"+
 			"\tdocument.addEventListener('htmx:afterSettle', function (e) { setup(e.target); });\n})();</script>")
 		return err
@@ -62,7 +64,7 @@ func JSON(v any) string {
 // components when it runs and needs the plugins loaded by then.
 func Script(src string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		_, err := io.WriteString(w, `<script src="`+templ.EscapeString(src)+`"></script>`)
+		_, err := io.WriteString(w, `<script`+csp.Attr(ctx)+` src="`+templ.EscapeString(src)+`"></script>`)
 		return err
 	})
 }

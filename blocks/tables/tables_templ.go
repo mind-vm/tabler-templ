@@ -30,6 +30,7 @@ import (
 	"github.com/mind-vm/tabler-templ/flag"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/pagination"
 	"github.com/mind-vm/tabler-templ/progress"
@@ -112,7 +113,7 @@ func Ranking(p RankingProps, rows []RankingRow) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 45, Col: 13}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 46, Col: 13}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -143,7 +144,7 @@ func Ranking(p RankingProps, rows []RankingRow) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 50, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 51, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -156,7 +157,7 @@ func Ranking(p RankingProps, rows []RankingRow) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(p.ValueLabel)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 51, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 52, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -182,7 +183,7 @@ func Ranking(p RankingProps, rows []RankingRow) templ.Component {
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(r.Value)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 60, Col: 51}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 61, Col: 51}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
@@ -308,7 +309,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Title, "Invoices"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 102, Col: 33}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 103, Col: 33}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -391,7 +392,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(" ")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 129, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 130, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -421,7 +422,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(r.No)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 147, Col: 45}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 148, Col: 45}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -434,7 +435,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var19 templ.SafeURL
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(kit.Or(r.Href, "#")))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 148, Col: 50}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 149, Col: 50}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 					if templ_7745c5c3_Err != nil {
@@ -447,7 +448,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var20 string
 					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(r.Subject)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 148, Col: 83}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 149, Col: 83}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 					if templ_7745c5c3_Err != nil {
@@ -468,7 +469,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var21 string
 					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(r.Client)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 151, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 152, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 					if templ_7745c5c3_Err != nil {
@@ -481,7 +482,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(r.VAT)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 153, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 154, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
@@ -494,7 +495,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var23 string
 					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(r.Created)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 154, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 155, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 					if templ_7745c5c3_Err != nil {
@@ -515,7 +516,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var24 string
 					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(r.Status)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 157, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 158, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 					if templ_7745c5c3_Err != nil {
@@ -528,7 +529,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 					var templ_7745c5c3_Var25 string
 					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(r.Price)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 159, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 160, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 					if templ_7745c5c3_Err != nil {
@@ -576,7 +577,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(max(p.From, 1)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 171, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 172, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -589,7 +590,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(max(p.From, 1) + len(rows) - 1))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 171, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 172, Col: 104}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -602,7 +603,7 @@ func Invoices(p InvoicesProps, rows []Invoice) templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(p.Total))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 171, Col: 150}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 172, Col: 150}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -847,7 +848,7 @@ func Advanced(p AdvancedProps) templ.Component {
 					var templ_7745c5c3_Var38 string
 					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 256, Col: 16}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 257, Col: 16}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 					if templ_7745c5c3_Err != nil {
@@ -867,7 +868,7 @@ func Advanced(p AdvancedProps) templ.Component {
 					var templ_7745c5c3_Var39 string
 					templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 259, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 260, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 					if templ_7745c5c3_Err != nil {
@@ -945,7 +946,7 @@ func Advanced(p AdvancedProps) templ.Component {
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 282, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 283, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
 			if templ_7745c5c3_Err != nil {
@@ -991,7 +992,7 @@ func Advanced(p AdvancedProps) templ.Component {
 						var templ_7745c5c3_Var44 string
 						templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(c.Label)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 290, Col: 19}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 291, Col: 19}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 						if templ_7745c5c3_Err != nil {
@@ -1117,7 +1118,7 @@ func Advanced(p AdvancedProps) templ.Component {
 						var templ_7745c5c3_Var50 string
 						templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID + "-page-count")
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 316, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 317, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var50)
 						if templ_7745c5c3_Err != nil {
@@ -1130,7 +1131,7 @@ func Advanced(p AdvancedProps) templ.Component {
 						var templ_7745c5c3_Var51 string
 						templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(count(p)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 316, Col: 78}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 317, Col: 78}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 						if templ_7745c5c3_Err != nil {
@@ -1174,7 +1175,7 @@ func Advanced(p AdvancedProps) templ.Component {
 								var templ_7745c5c3_Var54 string
 								templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(n))
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 322, Col: 26}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 323, Col: 26}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 								if templ_7745c5c3_Err != nil {
@@ -1186,7 +1187,7 @@ func Advanced(p AdvancedProps) templ.Component {
 								}
 								return nil
 							})
-							templ_7745c5c3_Err = dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"onclick": "setPageListItems(this)", "data-value": strconv.Itoa(n)}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var53), templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = dropdown.Item(dropdown.ItemProps{Attributes: templ.Attributes{"data-page-list-items": true, "data-value": strconv.Itoa(n)}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var53), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1256,7 +1257,7 @@ func OnChecked(text string, actions templ.Component) templ.Component {
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 336, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/tables/tables.templ`, Line: 337, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
@@ -1321,7 +1322,15 @@ func AdvancedScript(p AdvancedProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<script>\n\t\t(function () {\n\t\t\tconst scripts = document.querySelectorAll('script[type=\"application/json\"][id$=\"-list-config\"]');\n\t\t\tconst cfg = JSON.parse(scripts[scripts.length - 1].textContent);\n\t\t\twindow.setPageListItems = function (el) {\n\t\t\t\tconst id = el.closest('[data-table-id]')?.dataset.tableId;\n\t\t\t\tif (!id || !window.tabler_list?.[id]) return;\n\t\t\t\twindow.tabler_list[id].page = parseInt(el.dataset.value);\n\t\t\t\twindow.tabler_list[id].update();\n\t\t\t\tdocument.querySelector('#' + id + '-page-count').innerHTML = el.dataset.value;\n\t\t\t};\n\t\t\tfunction init() {\n\t\t\t\twindow.tabler_list ??= {};\n\t\t\t\tconst list = (window.tabler_list[cfg.id] = new List(cfg.id, {\n\t\t\t\t\tsortClass: 'table-sort',\n\t\t\t\t\tlistClass: 'table-tbody',\n\t\t\t\t\tpage: cfg.perPage,\n\t\t\t\t\tpagination: {\n\t\t\t\t\t\titem: (value) => `<li class=\"page-item\"><a class=\"page-link cursor-pointer\">${value.page}</a></li>`,\n\t\t\t\t\t\tinnerWindow: 1,\n\t\t\t\t\t\touterWindow: 1,\n\t\t\t\t\t\tleft: 0,\n\t\t\t\t\t\tright: 0,\n\t\t\t\t\t},\n\t\t\t\t\tvalueNames: cfg.keys,\n\t\t\t\t}));\n\t\t\t\tconst search = document.querySelector('#' + cfg.id + '-search');\n\t\t\t\tsearch?.addEventListener('input', () => list.search(search.value));\n\t\t\t}\n\t\t\tif (document.readyState !== 'loading') {\n\t\t\t\tinit();\n\t\t\t} else {\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', init, { once: true });\n\t\t\t}\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<script")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, ">\n\t\t(function () {\n\t\t\tconst scripts = document.querySelectorAll('script[type=\"application/json\"][id$=\"-list-config\"]');\n\t\t\tconst cfg = JSON.parse(scripts[scripts.length - 1].textContent);\n\t\t\twindow.setPageListItems = function (el) {\n\t\t\t\tconst id = el.closest('[data-table-id]')?.dataset.tableId;\n\t\t\t\tif (!id || !window.tabler_list?.[id]) return;\n\t\t\t\twindow.tabler_list[id].page = parseInt(el.dataset.value);\n\t\t\t\twindow.tabler_list[id].update();\n\t\t\t\tdocument.querySelector('#' + id + '-page-count').innerHTML = el.dataset.value;\n\t\t\t};\n\t\t\tif (!window.__kitPageListItems) {\n\t\t\t\twindow.__kitPageListItems = true;\n\t\t\t\tdocument.addEventListener('click', (e) => {\n\t\t\t\t\tconst el = e.target.closest('[data-page-list-items]');\n\t\t\t\t\tif (el) window.setPageListItems(el);\n\t\t\t\t});\n\t\t\t}\n\t\t\tfunction init() {\n\t\t\t\twindow.tabler_list ??= {};\n\t\t\t\tconst list = (window.tabler_list[cfg.id] = new List(cfg.id, {\n\t\t\t\t\tsortClass: 'table-sort',\n\t\t\t\t\tlistClass: 'table-tbody',\n\t\t\t\t\tpage: cfg.perPage,\n\t\t\t\t\tpagination: {\n\t\t\t\t\t\titem: (value) => `<li class=\"page-item\"><a class=\"page-link cursor-pointer\">${value.page}</a></li>`,\n\t\t\t\t\t\tinnerWindow: 1,\n\t\t\t\t\t\touterWindow: 1,\n\t\t\t\t\t\tleft: 0,\n\t\t\t\t\t\tright: 0,\n\t\t\t\t\t},\n\t\t\t\t\tvalueNames: cfg.keys,\n\t\t\t\t}));\n\t\t\t\tconst search = document.querySelector('#' + cfg.id + '-search');\n\t\t\t\tsearch?.addEventListener('input', () => list.search(search.value));\n\t\t\t}\n\t\t\tif (document.readyState !== 'loading') {\n\t\t\t\tinit();\n\t\t\t} else {\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', init, { once: true });\n\t\t\t}\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
