@@ -40,7 +40,7 @@ func TestNewApp(t *testing.T) {
 		t.Skip("set TABLER_NEW_E2E=1")
 	}
 	dir := filepath.Join(t.TempDir(), "acme")
-	d := data{Module: "example.com/acme", Name: "Acme", Binary: "acme", Theme: "Violet"}
+	d := data{Module: "example.com/acme", Name: "Acme", Binary: "acme", Theme: "Violet", SelfHost: true, VendorGroups: "tabler chart theme:violet"}
 	if err := create(dir, d); err != nil {
 		t.Fatal(err)
 	}

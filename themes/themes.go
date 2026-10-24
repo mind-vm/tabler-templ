@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/theme"
 )
 
@@ -26,15 +27,16 @@ const Attribute = "data-bs-theme-pack"
 // FontsVersion is the version of the Fontsource packages the fonts load from (jsDelivr).
 const FontsVersion = "5.3.0"
 
-// Font is a web font from Fontsource (@fontsource-variable/<Package>), self-hosted on jsDelivr.
+// Font is a web font from Fontsource (@fontsource-variable/<Package>), loaded from cdn.Base (jsDelivr or
+// the app's own copy).
 type Font struct {
 	Family  string // the CSS family, e.g. "Inter Variable"
 	Package string // e.g. "inter"
 }
 
-// URL is the font's stylesheet; the browser downloads a font file only when the font is used.
+// URL is the font's stylesheet on cdn.Base; the browser downloads a font file only when the font is used.
 func (f Font) URL() string {
-	return "https://cdn.jsdelivr.net/npm/@fontsource-variable/" + f.Package + "@" + FontsVersion + "/index.min.css"
+	return cdn.URL("@fontsource-variable/"+f.Package, FontsVersion, "index.css")
 }
 
 // Fonts the themes use.
@@ -214,6 +216,14 @@ var (
 		Mode: "dark", Settings: theme.Settings{Base: theme.Slate}, Primary: Tailwind("indigo", 600), PrimaryDark: Tailwind("indigo", 400),
 		Font: ptr(Manrope), Mono: ptr(JetBrainsMono)}
 )
+
+func init() {
+	for _, t := range All {
+		for _, f := range t.fonts() {
+			cdn.Register("theme:"+strings.ToLower(t.Label), "@fontsource-variable/"+f.Package, FontsVersion, "index.css")
+		}
+	}
+}
 
 // All are the themes in the order the panel shows them.
 var All = []Theme{Tabler, Zinc, Slate, Ocean, Forest, Paper, Rose, Violet, Amber, Emerald, Graphite, Sunset, Midnight}

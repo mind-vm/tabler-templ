@@ -25,6 +25,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -33,8 +34,8 @@ import (
 // Version is the List.js version Library loads.
 const Version = versions.ListJS
 
-// LibraryURL is List.js on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/list.js@" + Version + "/dist/list.min.js"
+// LibraryURL is List.js (on cdn.Base).
+func LibraryURL() string { return cdn.URL("list.js", Version, "dist/list.min.js") }
 
 // Field is a column to sort and search by: the class of its cells, and optionally the attribute of the
 // cell that holds the value to sort by.
@@ -109,7 +110,7 @@ func Table(p Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 64, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 65, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -135,7 +136,7 @@ func Table(p Props) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(config(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 64, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 65, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -198,7 +199,7 @@ func SortButton(field, text string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(field)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 72, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 73, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +212,7 @@ func SortButton(field, text string) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 72, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `datatable/datatable.templ`, Line: 73, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -250,7 +251,11 @@ func Script() templ.Component {
 
 // Library loads List.js and starts every table on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("datatable", "list.js", Version, "dist/list.min.js")
 }
 
 var _ = templruntime.GeneratedTemplate

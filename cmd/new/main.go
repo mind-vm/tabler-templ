@@ -2,7 +2,7 @@
 // and a list of records with search, filter, pages, a create page and a detail page with an edit dialog.
 // It writes the files, adds the modules and generates the templ code, so `go run .` starts the app.
 //
-//	go run github.com/mind-vm/tabler-templ/cmd/new@latest [-module example.com/myapp] [-name "My app"] [-theme rose] myapp
+//	go run github.com/mind-vm/tabler-templ/cmd/new@latest [-module example.com/myapp] [-name "My app"] [-theme rose] [-self-host] myapp
 package main
 
 import (
@@ -16,10 +16,12 @@ import (
 	"path"
 	"path/filepath"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"text/template"
 	"unicode"
 
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/themes"
 )
 
@@ -36,6 +38,9 @@ type data struct {
 	Name   string // the app's name, e.g. "My app"
 	Binary string // the directory's name
 	Theme  string // the variable of the theme in package themes, e.g. "Rose"
+	// SelfHost serves Tabler and the rest from the app (cmd/vendor) instead of jsDelivr.
+	SelfHost     bool
+	VendorGroups string // the cmd/vendor groups the app needs
 }
 
 func main() {
@@ -45,6 +50,7 @@ func main() {
 	replace := flag.String("replace", "", "use a local copy of tabler-templ (a replace directive), e.g. for developing tabler-templ")
 	noSetup := flag.Bool("no-setup", false, "only write the files; skip go get and templ generate")
 	themeName := flag.String("theme", "tabler", "the app's look, one of tabler-templ's themes: "+themeNames())
+	selfHost := flag.Bool("self-host", false, "serve Tabler, the icons, ApexCharts and the fonts from the app (embedded) instead of jsDelivr")
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "usage: new [flags] <directory>")
 		flag.PrintDefaults()
@@ -68,6 +74,12 @@ func main() {
 		fail(fmt.Errorf("no theme %q; choose one of %s", *themeName, themeNames()))
 	}
 	d.Theme = t.Label
+	d.SelfHost = *selfHost
+	groups := []string{"tabler", "chart"}
+	if g := "theme:" + strings.ToLower(t.Label); slices.Contains(cdn.Groups(), g) {
+		groups = append(groups, g)
+	}
+	d.VendorGroups = strings.Join(groups, " ")
 	if err := create(dir, d); err != nil {
 		fail(err)
 	}
@@ -172,8 +184,11 @@ func setup(dir string, d data, version, replace string) error {
 	steps = append(steps,
 		[]string{"go", "get", "-tool", "github.com/a-h/templ/cmd/templ@" + templ},
 		[]string{"go", "tool", "templ", "generate"},
-		[]string{"go", "mod", "tidy"},
 	)
+	if d.SelfHost {
+		steps = append(steps, append([]string{"go", "run", module + "/cmd/vendor", "-out", "static/npm"}, strings.Fields(d.VendorGroups)...))
+	}
+	steps = append(steps, []string{"go", "mod", "tidy"})
 	for _, s := range steps {
 		fmt.Println("$ " + strings.Join(s, " "))
 		cmd := exec.Command(s[0], s[1:]...)

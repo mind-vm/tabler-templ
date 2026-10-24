@@ -19,6 +19,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -27,11 +28,12 @@ import (
 // Version is the Dropzone version Library loads.
 const Version = versions.Dropzone
 
-// LibraryURL and StylesheetURL are Dropzone on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/dropzone@" + Version + "/dist/dropzone-min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/dropzone@" + Version + "/dist/dropzone.css"
-)
+// LibraryURL and StylesheetURL() are Dropzone (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("dropzone", Version, "dist/dropzone-min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("dropzone", Version, "dist/dropzone.css") }
 
 type Props struct {
 	ID         string
@@ -89,7 +91,7 @@ func title(p Props) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 52, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 55, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +109,7 @@ func title(p Props) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 54, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 57, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -125,7 +127,7 @@ func title(p Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 56, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 59, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -143,7 +145,7 @@ func title(p Props) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 58, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 61, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -210,7 +212,7 @@ func Dropzone(p Props) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 67, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 70, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
@@ -228,7 +230,7 @@ func Dropzone(p Props) templ.Component {
 		var templ_7745c5c3_Var10 templ.SafeURL
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(kit.Or(p.Action, "./")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 69, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 72, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -241,7 +243,7 @@ func Dropzone(p Props) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(options(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 72, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 75, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 		if templ_7745c5c3_Err != nil {
@@ -267,7 +269,7 @@ func Dropzone(p Props) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID + "-file")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 79, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 82, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -285,7 +287,7 @@ func Dropzone(p Props) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Label, "Upload file"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 81, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 84, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -303,7 +305,7 @@ func Dropzone(p Props) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID + "-file")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 84, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 87, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
@@ -321,7 +323,7 @@ func Dropzone(p Props) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Name, "file"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 86, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 89, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 		if templ_7745c5c3_Err != nil {
@@ -357,7 +359,7 @@ func Dropzone(p Props) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(p.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 94, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `dropzone/dropzone.templ`, Line: 97, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -432,11 +434,11 @@ func Library() templ.Component {
 			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = plugin.Script(LibraryURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Script(LibraryURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -446,6 +448,10 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("dropzone", "dropzone", Version, "dist/dropzone-min.js", "dist/dropzone.css")
 }
 
 var _ = templruntime.GeneratedTemplate

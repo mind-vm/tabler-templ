@@ -13,6 +13,7 @@
 package chart
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"encoding/json"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strings"
@@ -23,8 +24,8 @@ import (
 // Version is the ApexCharts version Library loads; Tabler 1.7 is built against it.
 const Version = versions.ApexCharts
 
-// LibraryURL is ApexCharts on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/apexcharts@" + Version + "/dist/apexcharts.min.js"
+// LibraryURL is ApexCharts (on cdn.Base).
+func LibraryURL() string { return cdn.URL("apexcharts", Version, "dist/apexcharts.min.js") }
 
 // Type is the kind of chart, ApexCharts' chart.type.
 type Type string
@@ -233,7 +234,7 @@ func Toggle(id, serie string) templ.Attributes {
 
 // Library loads ApexCharts; put it in the page's head.
 templ Library() {
-	<script src={ LibraryURL } defer></script>
+	<script src={ LibraryURL() } defer></script>
 }
 
 var once = templ.NewOnceHandle()
@@ -406,4 +407,8 @@ templ Script() {
 			})();
 		</script>
 	}
+}
+
+func init() {
+	cdn.Register("chart", "apexcharts", Version, "dist/apexcharts.min.js")
 }

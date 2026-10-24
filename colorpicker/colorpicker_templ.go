@@ -17,6 +17,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -25,11 +26,12 @@ import (
 // Version is the Coloris version Library loads.
 const Version = versions.Coloris
 
-// LibraryURL and StylesheetURL are Coloris on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/@melloware/coloris@" + Version + "/dist/umd/coloris.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/@melloware/coloris@" + Version + "/dist/coloris.min.css"
-)
+// LibraryURL and StylesheetURL() are Coloris (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("@melloware/coloris", Version, "dist/umd/coloris.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("@melloware/coloris", Version, "dist/coloris.min.css") }
 
 // Swatches are Tabler's colors (Coloris reads hex, rgb and hsl only, not Tabler's oklch tokens).
 var Swatches = []string{"#066fd1", "#4299e1", "#4263eb", "#ae3ec9", "#d6336c", "#d63939", "#f76707", "#f59f00", "#74b816", "#2fb344", "#0ca678", "#17a2b8"}
@@ -106,7 +108,7 @@ func Input(p Props) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 55, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 58, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -124,7 +126,7 @@ func Input(p Props) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 57, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 60, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -143,7 +145,7 @@ func Input(p Props) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 60, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 63, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
@@ -161,7 +163,7 @@ func Input(p Props) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Label, "Color value"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 62, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 65, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -174,7 +176,7 @@ func Input(p Props) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(settings(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 63, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `colorpicker/colorpicker.templ`, Line: 66, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -238,11 +240,11 @@ func Library() templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = plugin.Script(LibraryURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Script(LibraryURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -252,6 +254,10 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("colorpicker", "@melloware/coloris", Version, "dist/umd/coloris.min.js", "dist/coloris.min.css")
 }
 
 var _ = templruntime.GeneratedTemplate

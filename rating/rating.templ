@@ -6,6 +6,7 @@
 package rating
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"context"
 	"strconv"
@@ -18,11 +19,13 @@ import (
 // Version is the star-rating.js version Library loads.
 const Version = versions.StarRating
 
-// LibraryURL and StylesheetURL are star-rating.js on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.css"
-)
+// LibraryURL and StylesheetURL() are star-rating.js (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("star-rating.js", Version, "dist/star-rating.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("star-rating.js", Version, "dist/star-rating.min.css") }
+
 
 type Props struct {
 	ID         string
@@ -103,7 +106,11 @@ func Script() templ.Component {
 // Library loads star-rating.js and its stylesheet and starts every rating on the page; put it in the
 // head, before Tabler's stylesheet.
 templ Library() {
-	@plugin.Stylesheet(StylesheetURL)
-	@plugin.Script(LibraryURL)
+	@plugin.Stylesheet(StylesheetURL())
+	@plugin.Script(LibraryURL())
 	@Script()
+}
+
+func init() {
+	cdn.Register("rating", "star-rating.js", Version, "dist/star-rating.min.js", "dist/star-rating.min.css")
 }

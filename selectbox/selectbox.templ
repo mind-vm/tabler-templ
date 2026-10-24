@@ -8,6 +8,7 @@
 package selectbox
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
@@ -16,11 +17,13 @@ import (
 // Version is the Tom Select version Library loads.
 const Version = versions.TomSelect
 
-// LibraryURL and StylesheetURL are Tom Select on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/js/tom-select.base.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/css/tom-select.bootstrap5.min.css"
-)
+// LibraryURL and StylesheetURL() are Tom Select (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("tom-select", Version, "dist/js/tom-select.base.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("tom-select", Version, "dist/css/tom-select.bootstrap5.min.css") }
+
 
 // Option is an option of a Select.
 type Option struct {
@@ -150,7 +153,11 @@ func Script() templ.Component {
 // Library loads Tom Select and its stylesheet and starts every advanced select on the page; put it in
 // the head, before Tabler's stylesheet (Tabler's vendor styles override the plugin's).
 templ Library() {
-	@plugin.Stylesheet(StylesheetURL)
-	@plugin.Script(LibraryURL)
+	@plugin.Stylesheet(StylesheetURL())
+	@plugin.Script(LibraryURL())
 	@Script()
+}
+
+func init() {
+	cdn.Register("selectbox", "tom-select", Version, "dist/js/tom-select.base.min.js", "dist/css/tom-select.bootstrap5.min.css")
 }

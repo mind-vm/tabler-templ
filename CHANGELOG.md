@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- Self-hosting without a CDN:
+  - New package `cdn`: `cdn.Base` (default jsDelivr) is where every file loaded in the browser comes from.
+    This covers Tabler, its icons, ApexCharts, the plugins, the theme fonts and Plyr's icons.
+  - New command `cmd/vendor` downloads the files of the groups an app needs into a folder, along with
+    the fonts and images their stylesheets refer to.
+  - `cmd/new -self-host` embeds them in the app.
+  - The demo takes `-vendor <dir>`.
+- **Breaking:** the URL constants are functions now, so they follow `cdn.Base`:
+  - `<plugin>.LibraryURL()` and `StylesheetURL()`;
+  - `chart.LibraryURL()`, `mapview.LibraryURL()`;
+  - `assets.IconsURL()`;
+  - `marketing.TypedLibraryURL()`.
+
+  `icon.FilledFontURL` is empty by default; set it only to override `cdn.Base`. Theme fonts load
+  Fontsource's `index.css`.
+
 ## v0.9.0
 
 All of Tabler 1.7 in Go and templ. Every component of the Tabler docs is now a package (66 of 67), and the

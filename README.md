@@ -92,7 +92,7 @@ and a detail page whose edit dialog reopens with the errors after a failed save.
 besides tabler-templ and templ; the account comes from the environment and the data lives in memory, both
 marked as the places to replace. It runs `go get`, `go tool templ generate` and `go mod tidy` for you
 (`-no-setup` skips that; `-replace <dir>` uses a local tabler-templ checkout). `-theme rose` picks one of the
-ready-made themes.
+ready-made themes; `-self-host` serves Tabler and the fonts from the app instead of jsDelivr.
 
 ![The dashboard of a new app](docs/screenshots/new-app.png)
 
@@ -125,7 +125,26 @@ templ Customer(c Customer) {
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
 the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself.
-jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
+jsDelivr sends them minified, compressed and cached for a year.
+
+**Without a CDN.** To load nothing from outside at runtime, download the files and point `cdn.Base` at
+them; every package (Tabler, icons, charts, plugins, theme fonts) builds its URLs from there:
+
+```sh
+go run github.com/mind-vm/tabler-templ/cmd/vendor -out static/npm tabler chart theme:graphite   # -list shows the groups
+```
+
+```go
+//go:embed static
+var static embed.FS
+
+cdn.Base = "/static/npm/"                                  // before serving pages
+mux.Handle("GET /static/", http.FileServerFS(static))
+```
+
+`cmd/vendor` also fetches what the stylesheets refer to (icon and theme fonts, flags). It takes the
+versions the module pins, so run it again after updating tabler-templ. `cmd/new -self-host` sets all of this
+up. Map tiles (`mapview`) and video embeds (`player`) still come from their providers. The pages themselves are your server's:
 wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
 in front compresses already.
 

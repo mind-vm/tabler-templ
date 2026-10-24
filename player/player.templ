@@ -8,6 +8,7 @@
 package player
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -49,6 +50,7 @@ templ Player(p Props) {
 				data-poster={ p.Poster }
 			}
 			data-tabler-player
+			data-plyr-icons={ iconURL() }
 			if p.Options != nil {
 				data-plyr-config={ templ.JSONString(p.Options) }
 			}
@@ -67,6 +69,7 @@ templ Player(p Props) {
 			data-plyr-provider={ kit.Or(string(p.Provider), string(YouTube)) }
 			data-plyr-embed-id={ p.EmbedID }
 			data-tabler-player
+			data-plyr-icons={ iconURL() }
 			if p.Options != nil {
 				data-plyr-config={ templ.JSONString(p.Options) }
 			}
@@ -76,10 +79,17 @@ templ Player(p Props) {
 	@Script()
 }
 
-// Library loads Plyr and its stylesheet; put it in the head.
+// Library loads Plyr and its stylesheet (from cdn.Base); put it in the head.
 templ Library() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.css" }/>
-	<script src={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.min.js" } defer></script>
+	<link rel="stylesheet" href={ cdn.URL("plyr", Version, "dist/plyr.css") }/>
+	<script src={ cdn.URL("plyr", Version, "dist/plyr.min.js") } defer></script>
+}
+
+// iconURL is Plyr's icon sprite, which Plyr would otherwise load from cdn.plyr.io.
+func iconURL() string { return cdn.URL("plyr", Version, "dist/plyr.svg") }
+
+func init() {
+	cdn.Register("player", "plyr", Version, "dist/plyr.css", "dist/plyr.min.js", "dist/plyr.svg")
 }
 
 var once = templ.NewOnceHandle()
@@ -96,7 +106,7 @@ templ Script() {
 					window.tabler_player = window.tabler_player || {};
 					(root || document).querySelectorAll('[data-tabler-player]').forEach(function (el) {
 						if (el.plyr) return;
-						el.plyr = new Plyr(el);
+						el.plyr = new Plyr(el, el.dataset.plyrIcons ? { iconUrl: el.dataset.plyrIcons } : {});
 						if (el.id) window.tabler_player[el.id] = el.plyr;
 					});
 				}

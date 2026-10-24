@@ -19,6 +19,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -30,8 +31,8 @@ import (
 // Version is the Signature Pad version Library loads.
 const Version = versions.SignaturePad
 
-// LibraryURL is Signature Pad on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/signature_pad@" + Version + "/dist/signature_pad.umd.min.js"
+// LibraryURL is Signature Pad (on cdn.Base).
+func LibraryURL() string { return cdn.URL("signature_pad", Version, "dist/signature_pad.umd.min.js") }
 
 type Props struct {
 	ID         string // the canvas
@@ -114,7 +115,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.ClearLabel, "Clear signature"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 49, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 50, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -127,7 +128,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.ClearLabel, "Clear signature"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 49, Col: 149}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 50, Col: 149}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -148,7 +149,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(" ")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 51, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 52, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -171,7 +172,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 57, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 58, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -189,7 +190,7 @@ func Pad(p Props) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(size(p.Width))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 59, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 60, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +203,7 @@ func Pad(p Props) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(size(p.Height))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 60, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 61, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -215,7 +216,7 @@ func Pad(p Props) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 62, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 63, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 		if templ_7745c5c3_Err != nil {
@@ -233,7 +234,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 65, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 66, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -246,7 +247,7 @@ func Pad(p Props) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 65, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `signature/signature.templ`, Line: 66, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -305,7 +306,11 @@ func Script() templ.Component {
 
 // Library loads Signature Pad and starts every pad on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("signature", "signature_pad", Version, "dist/signature_pad.umd.min.js")
 }
 
 var _ = templruntime.GeneratedTemplate

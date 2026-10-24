@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/avatar"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/plans"
@@ -341,7 +342,7 @@ templ termsPage() {
 // paymentsCSS loads Tabler's payment provider logos.
 // TODO(parent): move into assets() in layout.templ.
 templ paymentsCSS() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css" }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.min.css") }/>
 }
 
 templ providerGrid(title, subtitle string, dark bool) {

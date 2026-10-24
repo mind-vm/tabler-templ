@@ -32,6 +32,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -46,7 +47,7 @@ const TablerVersion = versions.Tabler
 const MapLibreVersion = versions.MapLibre
 
 // LibraryURL is MapLibre GL JS as a module on jsDelivr; Tabler's map script imports it on first use.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.mjs"
+func LibraryURL() string { return cdn.URL("maplibre-gl", MapLibreVersion, "dist/maplibre-gl.mjs") }
 
 // LngLat is a position: longitude first, as in GeoJSON.
 type LngLat struct {
@@ -99,7 +100,7 @@ type Props struct {
 	GeoJSON    any
 	LayerColor string         // color of the route and the shapes, e.g. "--tblr-green"; default primary
 	Options    map[string]any // any MapLibre map option
-	// Library is the URL MapLibre GL JS is imported from; default LibraryURL.
+	// Library is the URL MapLibre GL JS is imported from; default LibraryURL().
 	Library string
 
 	// Ratio puts the map in a box of that aspect ratio, e.g. "16x9" (ratio-16x9); Height in a box of
@@ -183,7 +184,7 @@ func Map(p Props) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("height: " + p.Height))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 140, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 141, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -350,7 +351,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue("map-" + p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 172, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 173, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -381,7 +382,7 @@ func mapElement(p Props) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Label, "Map"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 176, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 177, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 		if templ_7745c5c3_Err != nil {
@@ -392,9 +393,9 @@ func mapElement(p Props) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Library, LibraryURL))
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Library, LibraryURL()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 178, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 179, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 		if templ_7745c5c3_Err != nil {
@@ -412,7 +413,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Center.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 180, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 181, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
@@ -431,7 +432,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Zoom))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 183, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 184, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 			if templ_7745c5c3_Err != nil {
@@ -450,7 +451,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Style)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 186, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 187, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 			if templ_7745c5c3_Err != nil {
@@ -469,7 +470,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.DarkStyle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 189, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 190, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 			if templ_7745c5c3_Err != nil {
@@ -488,7 +489,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Controls)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 192, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 193, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 			if templ_7745c5c3_Err != nil {
@@ -513,7 +514,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Route))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 198, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 199, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 			if templ_7745c5c3_Err != nil {
@@ -532,7 +533,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(*p.RouteProgress))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 201, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 202, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 			if templ_7745c5c3_Err != nil {
@@ -551,7 +552,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.LayerColor)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 204, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 205, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 			if templ_7745c5c3_Err != nil {
@@ -570,7 +571,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Labels))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 207, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 208, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 			if templ_7745c5c3_Err != nil {
@@ -589,7 +590,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.geojson())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 210, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 211, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
@@ -608,7 +609,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(js(p.Options))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 213, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 214, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 			if templ_7745c5c3_Err != nil {
@@ -627,7 +628,7 @@ func mapElement(p Props) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(l)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 216, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 217, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 			if templ_7745c5c3_Err != nil {
@@ -729,7 +730,7 @@ func Marker(p MarkerProps) templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Lng))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 252, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 253, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 		if templ_7745c5c3_Err != nil {
@@ -742,7 +743,7 @@ func Marker(p MarkerProps) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Lat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 253, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 254, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 		if templ_7745c5c3_Err != nil {
@@ -772,7 +773,7 @@ func Marker(p MarkerProps) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Popup)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 261, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 262, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
 			if templ_7745c5c3_Err != nil {
@@ -815,7 +816,7 @@ func Marker(p MarkerProps) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 273, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 274, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -929,9 +930,9 @@ func Library() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var35 templ.SafeURL
-		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.css")
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("maplibre-gl", MapLibreVersion, "dist/maplibre-gl.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 308, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 309, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -942,9 +943,9 @@ func Library() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
-		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue("https://cdn.jsdelivr.net/npm/@tabler/core@" + TablerVersion + "/dist/js/tabler-map.min.js")
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue(cdn.URL("@tabler/core", TablerVersion, "dist/js/tabler-map.min.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 309, Col: 106}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `mapview/mapview.templ`, Line: 310, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
 		if templ_7745c5c3_Err != nil {
@@ -956,6 +957,12 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	// maplibre-gl.mjs imports the shared and worker modules from next to it.
+	cdn.Register("mapview", "maplibre-gl", MapLibreVersion, "dist/maplibre-gl.mjs", "dist/maplibre-gl-shared.mjs", "dist/maplibre-gl-worker.mjs", "dist/maplibre-gl.css")
+	cdn.Register("mapview", "@tabler/core", TablerVersion, "dist/js/tabler-map.min.js")
 }
 
 var once = templ.NewOnceHandle()

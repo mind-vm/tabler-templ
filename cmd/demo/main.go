@@ -13,6 +13,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/compress"
 
 	"github.com/mind-vm/tabler-templ/versions"
@@ -75,6 +76,9 @@ func init() {
 	}
 }
 
+// vendorDir is the folder of -vendor.
+var vendorDir string
+
 func handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /{$}", templ.Handler(index()))
@@ -85,6 +89,9 @@ func handler() http.Handler {
 		json.NewEncoder(w).Encode(names)
 	})
 	themesRoutes(mux)
+	if vendorDir != "" {
+		mux.Handle("GET /npm/", http.StripPrefix("/npm/", http.FileServer(http.Dir(vendorDir))))
+	}
 	mux.HandleFunc("GET /{name...}", func(w http.ResponseWriter, r *http.Request) {
 		c, ok := pages[strings.TrimSuffix(r.PathValue("name"), ".html")]
 		if !ok {
@@ -98,7 +105,12 @@ func handler() http.Handler {
 
 func main() {
 	addr := flag.String("addr", "localhost:8080", "listen address")
+	vendored := flag.String("vendor", "", "serve Tabler and the plugins from this folder (made by cmd/vendor) instead of jsDelivr")
 	flag.Parse()
+	if *vendored != "" {
+		cdn.Base = "/npm/"
+		vendorDir = *vendored
+	}
 	log.Printf("tabler-templ demo on http://%s (%d of %d preview pages)", *addr, len(pages), len(catalog.Pages))
 	log.Fatal(http.ListenAndServe(*addr, handler()))
 }

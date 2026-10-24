@@ -20,6 +20,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -31,11 +32,12 @@ import (
 // Version is the star-rating.js version Library loads.
 const Version = versions.StarRating
 
-// LibraryURL and StylesheetURL are star-rating.js on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.css"
-)
+// LibraryURL and StylesheetURL() are star-rating.js (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("star-rating.js", Version, "dist/star-rating.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("star-rating.js", Version, "dist/star-rating.min.css") }
 
 type Props struct {
 	ID         string
@@ -135,7 +137,7 @@ func Rating(p Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 65, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 68, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -154,7 +156,7 @@ func Rating(p Props) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 68, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 71, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -191,7 +193,7 @@ func Rating(p Props) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Label, "Rating"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 73, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 76, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -204,7 +206,7 @@ func Rating(p Props) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(settings(ctx, p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 74, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 77, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -225,7 +227,7 @@ func Rating(p Props) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Placeholder, "Select a rating"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 77, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 80, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -243,7 +245,7 @@ func Rating(p Props) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(len(ls) - i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 79, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 82, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -266,7 +268,7 @@ func Rating(p Props) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(l)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 79, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `rating/rating.templ`, Line: 82, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -330,11 +332,11 @@ func Library() templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = plugin.Script(LibraryURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Script(LibraryURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -344,6 +346,10 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("rating", "star-rating.js", Version, "dist/star-rating.min.js", "dist/star-rating.min.css")
 }
 
 var _ = templruntime.GeneratedTemplate

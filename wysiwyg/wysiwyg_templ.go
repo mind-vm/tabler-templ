@@ -19,6 +19,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -27,8 +28,8 @@ import (
 // Version is the HugeRTE version Library loads.
 const Version = versions.HugeRTE
 
-// LibraryURL is HugeRTE on jsDelivr; it loads its theme, skins and plugins from next to it.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/hugerte@" + Version + "/hugerte.min.js"
+// LibraryURL is HugeRTE (on cdn.Base); it loads its theme, skins and plugins from next to it.
+func LibraryURL() string { return cdn.URL("hugerte", Version, "hugerte.min.js") }
 
 type Props struct {
 	ID         string
@@ -100,7 +101,7 @@ func Editor(p Props) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 55, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 56, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -119,7 +120,7 @@ func Editor(p Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 58, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 59, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -156,7 +157,7 @@ func Editor(p Props) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(settings(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 63, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 64, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
@@ -177,7 +178,7 @@ func Editor(p Props) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 65, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `wysiwyg/wysiwyg.templ`, Line: 66, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +217,12 @@ func Script() templ.Component {
 
 // Library loads HugeRTE and starts every editor on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	// HugeRTE loads its theme, model, icons, skin and plugins from next to hugerte.min.js.
+	cdn.Register("wysiwyg", "hugerte", Version, "hugerte.min.js", "themes/**", "models/**", "icons/**", "skins/**", "plugins/**")
 }
 
 var _ = templruntime.GeneratedTemplate

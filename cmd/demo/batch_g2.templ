@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"strconv"
 	"strings"
 
@@ -31,12 +32,12 @@ const demoIconsCSS = `.demo-icons-list{display:flex;flex-wrap:wrap;padding:0;mar
 
 // socialsCSS is the stylesheet of Tabler's social icons plugin.
 templ socialsCSS() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-socials.min.css" }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-socials.min.css") }/>
 }
 
 // marketingCSS is Tabler's marketing stylesheet, which also has the larger spacing utilities (px-12, mb-7).
 templ marketingCSS() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-marketing.min.css" }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-marketing.min.css") }/>
 }
 
 // iconGrid is the preview's grid of icons or flags: square cells, filled up with empty cells so the
@@ -627,7 +628,7 @@ templ screenshotPage() {
 			@templ.Raw("<style>" + screenshotCSS + "</style>")
 		</head>
 		<body>
-			<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler-theme.min.js" }></script>
+			<script src={ cdn.URL("@tabler/core", tablerVersion, "dist/js/tabler-theme.min.js") }></script>
 			<main id="content" class="page page-center align-items-center">
 				<h1 class="visually-hidden">Screenshot</h1>
 				<div class="screenshot d-flex flex-column justify-content-center align-items-center px-12">

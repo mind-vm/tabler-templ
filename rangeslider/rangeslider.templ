@@ -6,6 +6,7 @@
 package rangeslider
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -16,11 +17,13 @@ import (
 // Version is the noUiSlider version Library loads.
 const Version = versions.NoUiSlider
 
-// LibraryURL and StylesheetURL are noUiSlider on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/nouislider@" + Version + "/dist/nouislider.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/nouislider@" + Version + "/dist/nouislider.min.css"
-)
+// LibraryURL and StylesheetURL() are noUiSlider (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("nouislider", Version, "dist/nouislider.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("nouislider", Version, "dist/nouislider.min.css") }
+
 
 type Props struct {
 	ID         string
@@ -121,7 +124,11 @@ func Script() templ.Component {
 // Library loads noUiSlider and its stylesheet and starts every slider on the page; put it in the head, before
 // Tabler's stylesheet (Tabler's vendor styles override the plugin's).
 templ Library() {
-	@plugin.Stylesheet(StylesheetURL)
-	@plugin.Script(LibraryURL)
+	@plugin.Stylesheet(StylesheetURL())
+	@plugin.Script(LibraryURL())
 	@Script()
+}
+
+func init() {
+	cdn.Register("rangeslider", "nouislider", Version, "dist/nouislider.min.js", "dist/nouislider.min.css")
 }

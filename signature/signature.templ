@@ -6,6 +6,7 @@
 package signature
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -17,8 +18,8 @@ import (
 // Version is the Signature Pad version Library loads.
 const Version = versions.SignaturePad
 
-// LibraryURL is Signature Pad on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/signature_pad@" + Version + "/dist/signature_pad.umd.min.js"
+// LibraryURL is Signature Pad (on cdn.Base).
+func LibraryURL() string { return cdn.URL("signature_pad", Version, "dist/signature_pad.umd.min.js") }
 
 type Props struct {
 	ID         string // the canvas
@@ -104,5 +105,9 @@ func Script() templ.Component {
 
 // Library loads Signature Pad and starts every pad on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("signature", "signature_pad", Version, "dist/signature_pad.umd.min.js")
 }
