@@ -167,7 +167,11 @@ func hidden(name, value string) []auth.Hidden {
 func dialogState(id, err string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		b, _ := json.Marshal(map[string]any{"id": id, "error": err}) // escapes <, > and &
-		_, e := io.WriteString(w, "<script>window.kitDialogState="+string(b)+";</script>")
+		open := "<script>"
+		if n := templ.GetNonce(ctx); n != "" { // templ.WithNonce, for a Content-Security-Policy
+			open = `<script nonce="` + templ.EscapeString(n) + `">`
+		}
+		_, e := io.WriteString(w, open+"window.kitDialogState="+string(b)+";</script>")
 		return e
 	})
 }

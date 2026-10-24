@@ -12,6 +12,7 @@ import (
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -49,7 +50,7 @@ templ Page(p Props) {
 				}
 			</title>
 			@icon.Styles()
-			@templ.Raw("<style>" + css + "</style>")
+			@csp.Style(css)
 			if p.Head != nil {
 				@p.Head
 			}

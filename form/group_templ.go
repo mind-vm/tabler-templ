@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -183,7 +184,7 @@ func AddonButton(p AddonButtonProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 44, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 45, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
@@ -196,7 +197,7 @@ func AddonButton(p AddonButtonProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 45, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 46, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
@@ -262,7 +263,7 @@ func AddonLink(href string) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 57, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 58, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -441,7 +442,7 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(show)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 106, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 107, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 		if templ_7745c5c3_Err != nil {
@@ -454,7 +455,7 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(show)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 107, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 108, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
@@ -467,7 +468,7 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Target)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 110, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 111, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 		if templ_7745c5c3_Err != nil {
@@ -480,7 +481,7 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(show)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 111, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 112, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
@@ -493,7 +494,7 @@ func PasswordToggle(p PasswordToggleProps) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.HideLabel, kit.T(ctx).HidePassword))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 112, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `form/group.templ`, Line: 113, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
@@ -542,7 +543,15 @@ func PasswordToggleScript() templ.Component {
 			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<script>\n\t\tif (!window.__tablerPasswordToggleInit) {\n\t\t\twindow.__tablerPasswordToggleInit = true\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tconst btn = e.target.closest(\"[data-password-toggle]\")\n\t\t\t\tif (!btn) return\n\t\t\t\tconst input = document.getElementById(btn.getAttribute(\"data-password-toggle\"))\n\t\t\t\tif (!input) return\n\t\t\t\tconst showing = input.type === \"password\"\n\t\t\t\tinput.type = showing ? \"text\" : \"password\"\n\t\t\t\tconst label = showing ? btn.dataset.labelHide : btn.dataset.labelShow\n\t\t\t\tbtn.setAttribute(\"aria-pressed\", showing ? \"true\" : \"false\")\n\t\t\t\tbtn.setAttribute(\"aria-label\", label)\n\t\t\t\tbtn.setAttribute(\"title\", label)\n\t\t\t\tbtn.setAttribute(\"data-bs-original-title\", label)\n\t\t\t\tbtn.querySelector(\".icon-toggle-show\")?.classList.toggle(\"d-none\", showing)\n\t\t\t\tbtn.querySelector(\".icon-toggle-hide\")?.classList.toggle(\"d-none\", !showing)\n\t\t\t})\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<script")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, ">\n\t\tif (!window.__tablerPasswordToggleInit) {\n\t\t\twindow.__tablerPasswordToggleInit = true\n\t\t\tdocument.addEventListener(\"click\", (e) => {\n\t\t\t\tconst btn = e.target.closest(\"[data-password-toggle]\")\n\t\t\t\tif (!btn) return\n\t\t\t\tconst input = document.getElementById(btn.getAttribute(\"data-password-toggle\"))\n\t\t\t\tif (!input) return\n\t\t\t\tconst showing = input.type === \"password\"\n\t\t\t\tinput.type = showing ? \"text\" : \"password\"\n\t\t\t\tconst label = showing ? btn.dataset.labelHide : btn.dataset.labelShow\n\t\t\t\tbtn.setAttribute(\"aria-pressed\", showing ? \"true\" : \"false\")\n\t\t\t\tbtn.setAttribute(\"aria-label\", label)\n\t\t\t\tbtn.setAttribute(\"title\", label)\n\t\t\t\tbtn.setAttribute(\"data-bs-original-title\", label)\n\t\t\t\tbtn.querySelector(\".icon-toggle-show\")?.classList.toggle(\"d-none\", showing)\n\t\t\t\tbtn.querySelector(\".icon-toggle-hide\")?.classList.toggle(\"d-none\", !showing)\n\t\t\t})\n\t\t}\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

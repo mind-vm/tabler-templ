@@ -7,6 +7,7 @@ import (
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/modal"
 )
@@ -191,7 +192,7 @@ templ ConfirmDelete(p ConfirmDeleteProps) {
 
 // enableScript enables the button named in a check box's data-enables while the box is ticked.
 templ enableScript() {
-	<script>
+	<script { csp.Nonce(ctx)... }>
 		if (!window.__kitEnables) {
 			window.__kitEnables = true
 			document.addEventListener("change", (e) => {
@@ -266,7 +267,7 @@ templ passwordGroup(id, name, placeholder, autofill string) {
 
 // matchScript shows the mismatch message and blocks submitting while the new passwords differ.
 templ matchScript() {
-	<script>
+	<script { csp.Nonce(ctx)... }>
 		if (!window.__kitPasswordMatch) {
 			window.__kitPasswordMatch = true
 			const check = (f) => {

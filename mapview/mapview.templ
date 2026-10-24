@@ -18,6 +18,7 @@ import (
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -307,7 +308,7 @@ func FlyTo(id string, to LngLat, zoom float64) templ.Attributes {
 // Tabler's own script (tabler.js) must be on the page as well.
 templ Library() {
 	<link rel="stylesheet" href={ cdn.URL("maplibre-gl", MapLibreVersion, "dist/maplibre-gl.css") }/>
-	<script src={ cdn.URL("@tabler/core", TablerVersion, "dist/js/tabler-map.min.js") } defer></script>
+	<script { csp.Nonce(ctx)... } src={ cdn.URL("@tabler/core", TablerVersion, "dist/js/tabler-map.min.js") } defer></script>
 }
 
 func init() {
@@ -322,7 +323,7 @@ var once = templ.NewOnceHandle()
 // by htmx. Map renders it once per page.
 templ Script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				if (window.tablerMapView) return;
 				function features(points, props) {

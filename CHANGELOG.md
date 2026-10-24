@@ -9,6 +9,8 @@
     the fonts and images their stylesheets refer to.
   - `cmd/new -self-host` embeds them in the app.
   - The demo takes `-vendor <dir>`.
+  - With package `static`, `cmd/vendor` writes into the same bundle and `cdn.Base = files.Dir("npm/")`
+    serves the plugins and fonts versioned, cached and compressed like Tabler (new `Files.Dir`).
 - **Breaking:** the URL constants are functions now, so they follow `cdn.Base`:
   - `<plugin>.LibraryURL()` and `StylesheetURL()`;
   - `chart.LibraryURL()`, `mapview.LibraryURL()`;
@@ -17,6 +19,27 @@
 
   `icon.FilledFontURL` is empty by default; set it only to override `cdn.Base`. Theme fonts load
   Fontsource's `index.css`.
+- Content-Security-Policy: every `<script>` and `<style>` the packages render carries templ's nonce
+  (`templ.WithNonce`), not only `sidebar` and `blocks/detail`: `modal`, `chart`, `themes`, `icon`, the
+  plugins, `confetti`, `assets`, the blocks (layout settings, tables, modals, maps, marketing, shell …) and
+  the `cmd/new` app. Without a nonce the output is unchanged. See README, Content-Security-Policy.
+- `invoice.PrintButton` prints through a script instead of an inline `onclick`.
+- The demo binary (`demo`, 18 MB) is no longer in the repository; `.gitignore` keeps it and `new` out.
+- New package `static`: serves an app's own static files fast, for apps that serve Tabler themselves
+  instead of loading it from jsDelivr (#29).
+  - `static.New(prefix, fsys)` is an `http.Handler`; `URL(name)` gives an address with a hash over the
+    bundle in the path, sent with `Cache-Control: public, max-age=31536000, immutable`. Other versions
+    get `no-cache`, addresses without version a short cache (or a year with `?v=<hash>`). ETag and 304, HEAD.
+  - Text is compressed once in memory: gzip at once, brotli in the background (new dependency
+    `github.com/andybalholm/brotli`, templ's already). woff2 is sent as it is.
+  - `static.Head`, `Theme` and `Scripts` are `assets.Head`, `Theme` and `Scripts` from the bundle;
+    `Scripts` and `Theme` carry templ's nonce.
+- New command `cmd/static` (`go get -tool …/cmd/static`, `go tool static`): fetches Tabler's CSS and JS
+  for package `static` and cuts the icon webfont down to the icons the app's packages use (in Go, new
+  dependency `github.com/tdewolff/font` for the command only): 35 icons for a `cmd/new` app, 5 KB of font
+  and 2 KB of CSS instead of 500 KB and 210 KB. `-check` fails when a used icon is missing.
+- Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s): the first visit of a
+  page went from 1.9 MB in 4.3 s to 185 KB in 0.7 s, a repeat visit to 12–17 KB in 0.2 s.
 
 ## v0.9.0
 

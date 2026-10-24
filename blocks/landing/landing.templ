@@ -16,6 +16,7 @@ import (
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -247,7 +248,7 @@ templ Footer(p FooterProps) {
 // Styles renders the block's CSS; Page includes it.
 templ Styles() {
 	@icon.Styles()
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 const css = `.kit-landing{min-height:100vh;display:flex;flex-direction:column;background:var(--tblr-bg-surface)}

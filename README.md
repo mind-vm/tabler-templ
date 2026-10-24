@@ -124,27 +124,9 @@ templ Customer(c Customer) {
 
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
-the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself.
-jsDelivr sends them minified, compressed and cached for a year.
-
-**Without a CDN.** To load nothing from outside at runtime, download the files and point `cdn.Base` at
-them; every package (Tabler, icons, charts, plugins, theme fonts) builds its URLs from there:
-
-```sh
-go run github.com/mind-vm/tabler-templ/cmd/vendor -out static/npm tabler chart theme:graphite   # -list shows the groups
-```
-
-```go
-//go:embed static
-var static embed.FS
-
-cdn.Base = "/static/npm/"                                  // before serving pages
-mux.Handle("GET /static/", http.FileServerFS(static))
-```
-
-`cmd/vendor` also fetches what the stylesheets refer to (icon and theme fonts, flags). It takes the
-versions the module pins, so run it again after updating tabler-templ. `cmd/new -self-host` sets all of this
-up. Map tiles (`mapview`) and video embeds (`player`) still come from their providers. The pages themselves are your server's:
+the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself
+([Serve Tabler yourself](#serve-tabler-yourself)).
+jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
 wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
 in front compresses already.
 
@@ -394,6 +376,24 @@ templ Layout(r *http.Request) {
   Go, or write an intended space as `{ " " }`.
 - Generated `*_templ.go` files are committed, so the module works with a plain `go get`.
 
+## Content-Security-Policy
+
+Every `<script>` and `<style>` the packages render carries templ's nonce, set with `templ.WithNonce` (e.g. in
+a middleware that also sends the header). Without a nonce they render as before. The packages use no inline
+event handlers (`onclick=` …), so scripts need no `'unsafe-inline'`:
+
+```go
+nonce := newNonce() // random, new per response
+w.Header().Set("Content-Security-Policy", "script-src 'nonce-"+nonce+"' https://cdn.jsdelivr.net; "+
+	"style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'")
+next.ServeHTTP(w, r.WithContext(templ.WithNonce(r.Context(), nonce)))
+```
+
+Styles still need `'unsafe-inline'`: some components and blocks set `style=` attributes (widths, colors,
+images), and Tabler's and ApexCharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
+ignore `'unsafe-inline'`, so leave the nonce out of `style-src` for now.) `csp_test.go` checks that every
+script and style of the packages goes through `internal/csp`.
+
 ## Theming
 
 The kit never hardcodes colors, radii or fonts. All appearance comes from Tabler's CSS:
@@ -454,6 +454,80 @@ ctx = kit.WithMessages(r.Context(), kit.German) // or your own kit.Messages{…}
 
 There are no translation files in the kit. An app with several languages picks the `Messages` for the
 request's language (and translates its own texts with whatever it uses, e.g. go-i18n).
+
+## Serve Tabler yourself
+
+An app that should not depend on jsDelivr (offline, privacy, an intranet, a strict Content-Security-Policy)
+serves Tabler itself. Done naively that is slow: Tabler's CSS is 670 KB, the icon webfont 500 KB plus 210 KB of
+CSS for 5,000 icons, and without cache headers a phone loads all of it again on every page. Package `static`
+and `cmd/static` do it fast:
+
+```sh
+go get -tool github.com/mind-vm/tabler-templ/cmd/static  # once: the tool at your tabler-templ version
+go tool static -css tabler,tabler-vendors                # writes static/core/… and static/icons/…
+```
+
+`cmd/static` fetches Tabler's CSS and JS in the versions the module is built against and cuts the icon
+webfont down to the `ti-…` classes your packages and the tabler-templ packages they import name (in Go):
+a new app from `cmd/new` has 35 icons, a 5 KB font and 2 KB of CSS. Icons named elsewhere come in with
+`-dir templates`, icons put together at run time with `-keep ti-user,ti-star`; `-icons=all` keeps the
+whole webfont. Run it again after using a new icon; `go tool static -check` fails when a used icon is
+missing (CI).
+
+```go
+//go:embed all:static
+var embedded embed.FS
+
+var files = static.New("/static/", must(fs.Sub(embedded, "static"))) // Tabler (core/, icons/) and your files
+
+mux.Handle("/static/", files)
+```
+
+```templ
+@layout.Page(layout.PageProps{
+	Head:    static.Head(files, assets.Props{Vendors: true}), // like assets.Head, from files
+	Scripts: static.Scripts(files),
+}) { … }
+
+<link rel="stylesheet" href={ files.URL("app.css") }/>
+```
+
+- `files.URL("app.css")` is `/static/v<hash>/app.css`: the hash covers all files of the bundle, so the
+  addresses change with any file, and the files are sent with `Cache-Control: public, max-age=31536000,
+  immutable`. A repeat visit loads only the page.
+- Another version (an old page after a deploy) gets the current file with `no-cache`; an address without
+  version (`/static/app.css`) a short cache (5 minutes), or a year with `?v=<hash of the file>`.
+- ETag and 304, HEAD, 404 for directories.
+- Text is compressed once in memory, gzip at once and brotli in the background: Tabler's CSS goes out as
+  60 KB, its JS as 37 KB. Fonts (woff2) are sent as they are. `compress.Handler` leaves the files alone.
+
+Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s, 100 ms RTT): the first
+visit went from 1.9 MB in 4.3 s (served without compression or cache headers, the whole webfont) to 185 KB
+in 0.7 s, a repeat visit to 12–17 KB (the page) in 0.2 s.
+
+**Plugins, charts and theme fonts.** Everything else the packages load in the browser comes from
+`cdn.Base` (default jsDelivr):
+- ApexCharts;
+- the plugins (date picker, select, editor, maps …);
+- the theme fonts;
+- the filled icon font;
+- Plyr's icons.
+
+`cmd/vendor` puts these files into the same bundle, so they are cached and compressed like Tabler:
+
+```sh
+go run github.com/mind-vm/tabler-templ/cmd/vendor -out static/npm chart theme:graphite   # -list shows the groups
+```
+
+```go
+cdn.Base = files.Dir("npm/") // before serving pages: /static/v<hash>/npm/
+```
+
+`cmd/vendor` also fetches what the stylesheets refer to (fonts, flags), in the versions the module pins; run it
+again after updating tabler-templ. Without package `static`, any file server works:
+`cmd/vendor -out static/npm tabler chart` fetches Tabler and the full icon font too, and `cdn.Base =
+"/static/npm/"`. `cmd/new -self-host` sets that up. Map tiles (`mapview`) and video embeds (`player`) still
+come from their providers.
 
 ## Develop
 

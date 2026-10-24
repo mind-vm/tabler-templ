@@ -9,6 +9,7 @@ package player
 
 import (
 	"github.com/mind-vm/tabler-templ/cdn"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -82,7 +83,7 @@ templ Player(p Props) {
 // Library loads Plyr and its stylesheet (from cdn.Base); put it in the head.
 templ Library() {
 	<link rel="stylesheet" href={ cdn.URL("plyr", Version, "dist/plyr.css") }/>
-	<script src={ cdn.URL("plyr", Version, "dist/plyr.min.js") } defer></script>
+	<script { csp.Nonce(ctx)... } src={ cdn.URL("plyr", Version, "dist/plyr.min.js") } defer></script>
 }
 
 // iconURL is Plyr's icon sprite, which Plyr would otherwise load from cdn.plyr.io.
@@ -98,7 +99,7 @@ var once = templ.NewOnceHandle()
 // window.tabler_player by element id.
 templ Script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				if (window.tablerPlayers) return;
 				function init(root) {
