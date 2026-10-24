@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## v0.10.0
+
+Serving Tabler yourself, with nothing loaded from a CDN at runtime:
+- **Package `static` and `cmd/static`:** Tabler and the icon webfont, cut down to the icons the app uses,
+  with versioned addresses, a one-year cache and gzip/brotli.
+- **`cdn.Base` and `cmd/vendor`:** the same for charts, plugins and theme fonts.
+- **`cmd/new -self-host`:** a starter app set up this way.
+- **CSP nonces:** every script and style carries templ's nonce, for a Content-Security-Policy without
+  `'unsafe-inline'`.
+
+**Breaking:** the URL constants of the plugin packages are functions now (see below).
 
 - Self-hosting without a CDN:
   - New package `cdn`: `cdn.Base` (default jsDelivr) is where every file loaded in the browser comes from.
