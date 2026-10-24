@@ -62,7 +62,8 @@ go run ./cmd/demo -addr localhost:8080
 | ![Buttons](docs/screenshots/buttons.png) | ![Modals](docs/screenshots/modals.png) |
 
 `scripts/screenshots.sh` takes the screenshots in `docs/screenshots/` with Playwright (the only place that
-uses Node; set `CHROMIUM` to use an installed Chromium).
+uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
+next to the Tabler original to check it by eye.
 
 ## Use
 
@@ -97,16 +98,16 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 
 | Package | Components |
 |---|---|
-| `button` | `Button` (`<button>` or `<a>` with `Href`), variants, outline, sizes, leading icon, icon-only; `Classes(p)` |
-| `card` | `Card`, `Header`, `Title`, `Actions`, `Body`, `Footer` |
+| `button` | `Button` (`<button>` or `<a>` with `Href`), colors, outline, ghost, pill, square, sizes up to xl, icon at start or end, icon-only, action, block, loading, animated icons; `List`, `Actions`; `Classes(p)` |
+| `card` | `Card` (sizes, link with hover effect, borderless, dashed, transparent, stacked, active, inactive, status line), `Header` (light), `Title`, `Subtitle`, `Actions`, `Body` (scrollable), `Footer` (transparent), `Stamp`, `Progress`, `Image` |
 | `modal` | `Modal` (sizes, centered, scrollable, custom header, footer, `<form>` as content); `Trigger(id)` attributes for any button |
 | `form` | `Field` (label, hint, error), `Input`, `Select`, `Textarea`, `Check` (checkbox, radio, switch); `AriaLabel` for controls without a visible label |
 | `table` | `Table` (optionally responsive, wrapper classes), `Empty` row |
-| `pagination` | `Pagination` with first/last/neighbour pages; `Numbers(page, pages)` |
-| `alert` | `Alert` (variant, icon, dismissible) |
-| `badge` | `Badge` (Tabler color, light) |
+| `pagination` | `Pagination` with first/last/neighbour pages, arrows or text labels, first/last links, named previous/next pages; `Numbers(page, pages)` |
+| `alert` | `Alert` (variant with its default icon, heading and description, important, minor, dismissible), `Action`, `Link`, `List` |
+| `badge` | `Badge` (color, light, outline, sizes, pill, icons, icon-only, dot, notification, blink), `List` |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
-| `icon` | `Icon("ti-…")` – full class name, so icon-font subsetters can find it in the source |
+| `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
 Everything else in Tabler is listed in [ROADMAP.md](ROADMAP.md).

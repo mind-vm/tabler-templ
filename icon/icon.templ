@@ -1,13 +1,32 @@
-// Package icon renders a Tabler icon from the webfont (tabler-icons).
+// Package icon renders a Tabler icon from the webfont (tabler-icons) with Tabler's .icon sizing.
 package icon
 
 import "github.com/mind-vm/tabler-templ/kit"
+
+// Size is one of Tabler's .icon-{size} modifiers; the zero value is the default 1.25rem.
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeMedium  Size = "md"
+	SizeLarge   Size = "lg"
+)
 
 type Props struct {
 	Class      string
 	Attributes templ.Attributes
 	// Label makes the icon meaningful for screen readers; without it the icon is decorative (aria-hidden).
-	Label string
+	Label  string
+	Size   Size
+	Color  string // text-{color}, e.g. "red" or "primary"
+	Inline bool   // icon-inline: sized and aligned to the surrounding text
+}
+
+// Classes returns the class string of an icon.
+func Classes(name string, p Props) string {
+	return kit.Classes("ti", name, "icon", p.Class, kit.If(p.Color != "", "text-"+p.Color), kit.If(p.Inline, "icon-inline"),
+		kit.If(p.Size != SizeDefault, "icon-"+string(p.Size)))
 }
 
 // Icon takes the full class name ("ti-pencil", not "pencil") so that build tools which subset the
@@ -15,8 +34,8 @@ type Props struct {
 templ Icon(name string, props ...Props) {
 	{{ p := kit.First(props) }}
 	if p.Label != "" {
-		<i class={ kit.Classes("ti", name, p.Class) } role="img" aria-label={ p.Label } { p.Attributes... }></i>
+		<i class={ Classes(name, p) } role="img" aria-label={ p.Label } { p.Attributes... }></i>
 	} else {
-		<i class={ kit.Classes("ti", name, p.Class) } aria-hidden="true" { p.Attributes... }></i>
+		<i class={ Classes(name, p) } aria-hidden="true" { p.Attributes... }></i>
 	}
 }

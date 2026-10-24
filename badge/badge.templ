@@ -1,7 +1,19 @@
-// Package badge renders Tabler badges.
+// Package badge renders Tabler badges: colors, light and outline styles, sizes, icons, and the
+// notification dots and counters that sit on the corner of a button.
 package badge
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+)
 
 type Props struct {
 	Class      string
@@ -10,22 +22,65 @@ type Props struct {
 	Color string
 	// Light uses the soft "-lt" background with colored text.
 	Light bool
+	// Outline draws a colored border on a transparent background (badge-outline text-{color}).
+	Outline bool
+	Size    Size
+	Pill    bool   // badge-pill
+	Icon    string // leading icon, e.g. "ti-check"
+	IconEnd string // trailing icon
+	// IconOnly is a square badge holding just Icon (badge-icononly).
+	IconOnly bool
+	// Dot is an empty dot instead of a label (badge-dot).
+	Dot bool
+	// Notification pins the badge to the top right corner of its parent, e.g. a button (badge-notification).
+	Notification bool
+	Blink        bool // badge-blink: pulsing, for unread activity
 }
 
 func Classes(p Props) string {
 	c := ""
 	if p.Color != "" {
-		c = "bg-" + p.Color + kit.If(p.Light, "-lt")
-		if !p.Light {
-			c += " text-" + p.Color + "-fg"
+		switch {
+		case p.Outline:
+			c = "text-" + p.Color
+		case p.Light:
+			c = "bg-" + p.Color + "-lt"
+		case p.Dot || p.Blink:
+			c = "bg-" + p.Color
+		default:
+			c = "bg-" + p.Color + " text-" + p.Color + "-fg"
 		}
 	}
-	return kit.Classes("badge", c, p.Class)
+	s := ""
+	if p.Size != SizeDefault {
+		s = "badge-" + string(p.Size)
+	}
+	return kit.Classes("badge", kit.If(p.Outline, "badge-outline"), kit.If(p.IconOnly, "badge-icononly"), kit.If(p.Dot, "badge-dot"), s, c,
+		kit.If(p.Notification, "badge-notification"), kit.If(p.Pill, "badge-pill"), kit.If(p.Blink, "badge-blink"), p.Class)
 }
 
 templ Badge(props ...Props) {
 	{{ p := kit.First(props) }}
 	<span class={ Classes(p) } { p.Attributes... }>
+		if p.Icon != "" {
+			@icon.Icon(p.Icon)
+		}
 		{ children... }
+		if p.IconEnd != "" {
+			@icon.Icon(p.IconEnd)
+		}
 	</span>
+}
+
+type ListProps struct {
+	Class      string
+	Attributes templ.Attributes
+}
+
+// List lays out badges in a row with Tabler's gaps (.badge-list).
+templ List(props ...ListProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("badge-list", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
 }

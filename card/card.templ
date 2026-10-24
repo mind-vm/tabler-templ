@@ -1,7 +1,40 @@
-// Package card renders Tabler cards: Card, Header with Title and Actions, Body, Footer.
+// Package card renders Tabler cards: Card (sizes, surfaces, states, status, link), Header with Title,
+// Subtitle and Actions, Body, Footer, and the parts a card can hold: Stamp, Progress, Image.
 package card
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeMedium  Size = "md"
+	SizeLarge   Size = "lg"
+)
+
+// Edge is where a card's status line sits.
+type Edge string
+
+const (
+	EdgeTop    Edge = "top"
+	EdgeBottom Edge = "bottom"
+	EdgeStart  Edge = "start"
+)
+
+// Hover is the hover effect of a card that is a link.
+type Hover string
+
+const (
+	HoverNone   Hover = ""
+	HoverPop    Hover = "pop"
+	HoverRotate Hover = "rotate"
+)
 
 type Props struct {
 	ID         string
@@ -9,6 +42,24 @@ type Props struct {
 	Attributes templ.Attributes
 	// Section renders <section> instead of <div>, for cards that form a page region.
 	Section bool
+	// Href makes the whole card a link (card-link).
+	Href  string
+	Hover Hover
+	Size  Size // body padding (card-sm, card-md, card-lg)
+	// Surfaces and states.
+	Borderless  bool
+	Dashed      bool
+	Transparent bool // no background either; on Footer: card-footer-transparent
+	Stacked     bool // a second edge behind the card: more items of the kind
+	Active      bool
+	Inactive    bool // faded until hovered
+	// Status is a color line at StatusEdge (default top), e.g. "primary", "red".
+	Status     string
+	StatusEdge Edge
+	// Light tints a Header (card-header-light).
+	Light bool
+	// Scrollable keeps a long Body inside the card (card-body-scrollable); give it a height.
+	Scrollable bool
 }
 
 func attrs(p Props) templ.Attributes {
@@ -18,14 +69,38 @@ func attrs(p Props) templ.Attributes {
 	return kit.Default(kit.Attrs(p.Attributes), "id", p.ID)
 }
 
+// Classes returns the class string of a card.
+func Classes(p Props) string {
+	s := ""
+	if p.Size != SizeDefault {
+		s = "card-" + string(p.Size)
+	}
+	return kit.Classes("card", s, kit.If(p.Href != "", "card-link"), kit.If(p.Href != "" && p.Hover != HoverNone, "card-link-"+string(p.Hover)),
+		kit.If(p.Borderless, "card-borderless"), kit.If(p.Dashed, "card-dashed"), kit.If(p.Transparent, "card-transparent"),
+		kit.If(p.Stacked, "card-stacked"), kit.If(p.Active, "card-active"), kit.If(p.Inactive, "card-inactive"), p.Class)
+}
+
+templ status(p Props) {
+	if p.Status != "" {
+		<div class={ "card-status-" + string(kit.Or(string(p.StatusEdge), string(EdgeTop))), "bg-" + p.Status }></div>
+	}
+}
+
 templ Card(props ...Props) {
 	{{ p := kit.First(props) }}
-	if p.Section {
-		<section class={ kit.Classes("card", p.Class) } { attrs(p)... }>
+	if p.Href != "" {
+		<a href={ templ.URL(p.Href) } class={ Classes(p) } { attrs(p)... }>
+			@status(p)
+			{ children... }
+		</a>
+	} else if p.Section {
+		<section class={ Classes(p) } { attrs(p)... }>
+			@status(p)
 			{ children... }
 		</section>
 	} else {
-		<div class={ kit.Classes("card", p.Class) } { attrs(p)... }>
+		<div class={ Classes(p) } { attrs(p)... }>
+			@status(p)
 			{ children... }
 		</div>
 	}
@@ -33,7 +108,7 @@ templ Card(props ...Props) {
 
 templ Header(props ...Props) {
 	{{ p := kit.First(props) }}
-	<div class={ kit.Classes("card-header", p.Class) } { attrs(p)... }>
+	<div class={ kit.Classes("card-header", kit.If(p.Light, "card-header-light"), p.Class) } { attrs(p)... }>
 		{ children... }
 	</div>
 }
@@ -43,6 +118,14 @@ templ Title(props ...Props) {
 	<h3 class={ kit.Classes("card-title", p.Class) } { attrs(p)... }>
 		{ children... }
 	</h3>
+}
+
+// Subtitle is a muted line below the Title (card-subtitle).
+templ Subtitle(props ...Props) {
+	{{ p := kit.First(props) }}
+	<p class={ kit.Classes("card-subtitle", p.Class) } { attrs(p)... }>
+		{ children... }
+	</p>
 }
 
 // Actions sits at the right end of a Header.
@@ -55,14 +138,72 @@ templ Actions(props ...Props) {
 
 templ Body(props ...Props) {
 	{{ p := kit.First(props) }}
-	<div class={ kit.Classes("card-body", p.Class) } { attrs(p)... }>
+	<div class={ kit.Classes("card-body", kit.If(p.Scrollable, "card-body-scrollable"), p.Class) } { attrs(p)... }>
 		{ children... }
 	</div>
 }
 
 templ Footer(props ...Props) {
 	{{ p := kit.First(props) }}
-	<div class={ kit.Classes("card-footer", p.Class) } { attrs(p)... }>
+	<div class={ kit.Classes("card-footer", kit.If(p.Transparent, "card-footer-transparent"), p.Class) } { attrs(p)... }>
 		{ children... }
 	</div>
+}
+
+type StampProps struct {
+	Class     string
+	Icon      string // default "ti-star"; children replace the icon
+	Large     bool   // card-stamp-lg
+	Color     string // background of the circle, e.g. "yellow"
+	TextColor string // color of the icon, e.g. "primary" on a white circle
+}
+
+// Stamp is a large, faded icon in the card's top corner; put it before the Body.
+templ Stamp(p StampProps) {
+	<div class={ kit.Classes("card-stamp", kit.If(p.Large, "card-stamp-lg"), p.Class) }>
+		<div class={ kit.Classes("card-stamp-icon", kit.If(p.Color != "", "bg-"+p.Color), kit.If(p.TextColor != "", "text-"+p.TextColor)) }>
+			if p.Icon != "" {
+				@icon.Icon(p.Icon)
+			} else {
+				@icon.Icon("ti-star")
+			}
+			{ children... }
+		</div>
+	</div>
+}
+
+type ProgressProps struct {
+	Class string
+	Value int    // percent, 0–100
+	Label string // aria-label, e.g. "94% used"
+	Color string // bar color, e.g. "red"
+}
+
+// Progress is a progress bar along the card's edge; make it the first or the last child.
+templ Progress(p ProgressProps) {
+	<div class={ kit.Classes("progress card-progress", p.Class) }>
+		<div
+			class={ kit.Classes("progress-bar", kit.If(p.Color != "", "bg-"+p.Color)) }
+			style={ "width: " + strconv.Itoa(p.Value) + "%" }
+			role="progressbar"
+			aria-valuenow={ strconv.Itoa(p.Value) }
+			aria-valuemin="0"
+			aria-valuemax="100"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+		></div>
+	</div>
+}
+
+type ImageProps struct {
+	Class string
+	Src   string
+	Alt   string
+	// Bottom places the image below the body (card-img-bottom); default top.
+	Bottom bool
+}
+
+templ Image(p ImageProps) {
+	<img src={ p.Src } alt={ p.Alt } class={ kit.Classes(kit.If(p.Bottom, "card-img-bottom"), kit.If(!p.Bottom, "card-img-top"), p.Class) }/>
 }

@@ -1,4 +1,5 @@
-// Package alert renders Tabler alerts.
+// Package alert renders Tabler alerts: an icon, a message or a heading with a description, an optional
+// action link and close button; important (filled) and minor (borderless) styles.
 package alert
 
 import (
@@ -15,11 +16,23 @@ const (
 	VariantDanger  Variant = "danger"
 )
 
+// DefaultIcons are the icons Tabler shows for each variant.
+var DefaultIcons = map[Variant]string{
+	VariantSuccess: "ti-check",
+	VariantWarning: "ti-alert-triangle",
+	VariantDanger:  "ti-alert-circle",
+	VariantInfo:    "ti-info-circle",
+}
+
 type Props struct {
 	Class       string
 	Attributes  templ.Attributes
 	Variant     Variant // default info
-	Icon        string  // e.g. "ti-alert-triangle"; empty = no icon
+	Icon        string  // e.g. "ti-alert-triangle"; default DefaultIcons[Variant]
+	NoIcon      bool
+	Important   bool   // alert-important: filled, stands out from the page
+	Minor       bool   // alert-minor: quieter, fits inline with other content
+	Title       string // heading (alert-heading); the children become the description
 	Dismissible bool
 	CloseLabel  string // aria-label of the close button; default kit.T(ctx).Close
 }
@@ -30,15 +43,19 @@ templ Alert(props ...Props) {
 		if p.Variant == "" {
 			p.Variant = VariantInfo
 		}
+		p.Icon = kit.Or(p.Icon, DefaultIcons[p.Variant])
 		p.CloseLabel = kit.Or(p.CloseLabel, kit.T(ctx).Close)
 	}}
-	<div class={ kit.Classes("alert", "alert-"+string(p.Variant), kit.If(p.Dismissible, "alert-dismissible"), p.Class) } role="alert" { p.Attributes... }>
-		if p.Icon != "" {
-			<div class="d-flex">
-				<div>
-					@icon.Icon(p.Icon, icon.Props{Class: "me-2"})
-				</div>
-				<div>
+	<div class={ kit.Classes("alert", kit.If(p.Important, "alert-important"), kit.If(p.Minor, "alert-minor"), "alert-"+string(p.Variant), kit.If(p.Dismissible, "alert-dismissible"), p.Class) } role="alert" { p.Attributes... }>
+		if !p.NoIcon && p.Icon != "" {
+			<div class="alert-icon">
+				@icon.Icon(p.Icon, icon.Props{Class: "alert-icon"})
+			</div>
+		}
+		if p.Title != "" {
+			<div>
+				<h3 class="alert-heading">{ p.Title }</h3>
+				<div class="alert-description">
 					{ children... }
 				</div>
 			</div>
@@ -46,7 +63,33 @@ templ Alert(props ...Props) {
 			{ children... }
 		}
 		if p.Dismissible {
-			<a class="btn-close" data-bs-dismiss="alert" aria-label={ p.CloseLabel }></a>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label={ p.CloseLabel }></button>
 		}
 	</div>
+}
+
+// Action is a link to act on the alert, shown after the message (alert-action). It brings the space
+// that separates it from the message.
+templ Action(href string) {
+	{ " " }
+	<a href={ templ.URL(href) } class="alert-action">
+		{ children... }
+	</a>
+}
+
+// Link is a plain link in the alert's color (alert-link), with a space before it like Action.
+templ Link(href string) {
+	{ " " }
+	<a href={ templ.URL(href) } class="alert-link">
+		{ children... }
+	</a>
+}
+
+// List renders items as the alert's list (alert-list), e.g. the unmet rules of a password.
+templ List(items []string) {
+	<ul class="alert-list">
+		for _, it := range items {
+			<li>{ it }</li>
+		}
+	</ul>
 }
