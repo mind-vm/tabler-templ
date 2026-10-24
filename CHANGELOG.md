@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- New package `themes`: 13 ready-made looks in the spirit of shadcn/ui.
+  - Tabler, Zinc, Slate, Ocean, Forest and Paper combine Tabler's own settings.
+  - Rose, Violet, Amber, Emerald, Graphite, Sunset and Midnight bring Tailwind CSS palettes and Fontsource
+    variable fonts.
+  - `Theme.Apply`/`ApplyAuth` give a page a theme; `Head` loads their CSS and fonts and restores a user's
+    pick; `Section()` puts them in the settings panel.
+  - Your own themes are `themes.Theme` values.
+  - The demo has a gallery at `/themes`, and `cmd/new -theme <name>` starts an app with a theme.
+- `layout.PageProps.HTMLAttributes` and `auth.PageProps.HTMLAttributes` add attributes to `<html>`.
+  `layout.ThemeOption` takes `SVG` and `Values` for any setting, `layout.ThemeSetting` a `Default`.
+- `scripts/screenshots/pages.txt` lines take a viewport width (`themes 1600`).
+
 - Theming: new package `theme` (accent color, gray base, font, corner radius as typed values).
   `layout.PageProps.Appearance` and `auth.PageProps.Appearance`/`Theme` render them, and
   `layout.PageProps.OffcanvasFloating` floats side panels. `assets.Props.Themes` loads `tabler-themes.css`.

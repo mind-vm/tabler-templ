@@ -54,6 +54,8 @@ type PageProps struct {
 	// Appearance is the accent color, gray base, font and corner radius (needs tabler-themes.css:
 	// assets.Props{Themes: true}).
 	Appearance theme.Settings
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.Apply sets them).
+	HTMLAttributes templ.Attributes
 	BodyClass string
 	// The navigations; either or both.
 	Sidebar templ.Component
@@ -94,6 +96,9 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	set("sidebar", string(p.SidebarMode))
 	set("offcanvas-style", kit.If(p.OffcanvasFloating, "floating"))
 	for k, v := range p.Appearance.Attrs() {
+		a[k] = v
+	}
+	for k, v := range p.HTMLAttributes {
 		a[k] = v
 	}
 	return a

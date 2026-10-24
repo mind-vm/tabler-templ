@@ -72,7 +72,9 @@ type PageProps struct {
 	// Appearance is the accent color, gray base, font and corner radius (needs tabler-themes.css:
 	// assets.Props{Themes: true}).
 	Appearance theme.Settings
-	BodyClass  string
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.Apply sets them).
+	HTMLAttributes templ.Attributes
+	BodyClass      string
 	// The navigations; either or both.
 	Sidebar templ.Component
 	Navbar  templ.Component
@@ -112,6 +114,9 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	set("sidebar", string(p.SidebarMode))
 	set("offcanvas-style", kit.If(p.OffcanvasFloating, "floating"))
 	for k, v := range p.Appearance.Attrs() {
+		a[k] = v
+	}
+	for k, v := range p.HTMLAttributes {
 		a[k] = v
 	}
 	return a
@@ -155,7 +160,7 @@ func Page(p PageProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 110, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 115, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -380,7 +385,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(p.Pretitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 170, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 175, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -398,7 +403,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 172, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 177, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -416,7 +421,7 @@ func PageHeader(p PageHeaderProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 174, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 179, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -502,7 +507,7 @@ func footerLink(l Link) templ.Component {
 		var templ_7745c5c3_Var16 templ.SafeURL
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(l.Href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 207, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 212, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -535,7 +540,7 @@ func footerLink(l Link) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(l.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 217, Col: 10}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/page.templ`, Line: 222, Col: 10}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {

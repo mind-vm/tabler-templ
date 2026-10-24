@@ -48,6 +48,8 @@ type PageProps struct {
 	// usually the same as the app's other pages.
 	Theme      string
 	Appearance theme.Settings
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.ApplyAuth sets them).
+	HTMLAttributes templ.Attributes
 }
 
 func htmlAttrs(p PageProps) templ.Attributes {
@@ -55,6 +57,9 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	a["lang"] = kit.Or(p.Lang, "en")
 	if p.Theme != "" {
 		a["data-bs-theme"] = p.Theme
+	}
+	for k, v := range p.HTMLAttributes {
+		a[k] = v
 	}
 	return a
 }
@@ -95,7 +100,7 @@ func document(p PageProps, bodyClass string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 50, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 55, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -362,7 +367,7 @@ func CoverPage(p PageProps, c CoverProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("background-image: url(" + c.Image + ")")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 122, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 127, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -423,7 +428,7 @@ func Logo(p LogoProps) templ.Component {
 		var templ_7745c5c3_Var13 templ.SafeURL
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(kit.Or(p.Href, ".")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 138, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 143, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -441,7 +446,7 @@ func Logo(p LogoProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 140, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/auth/page.templ`, Line: 145, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {

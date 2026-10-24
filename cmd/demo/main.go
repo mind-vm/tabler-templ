@@ -82,6 +82,7 @@ func handler() http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(names)
 	})
+	themesRoutes(mux)
 	mux.HandleFunc("GET /{name...}", func(w http.ResponseWriter, r *http.Request) {
 		c, ok := pages[strings.TrimSuffix(r.PathValue("name"), ".html")]
 		if !ok {

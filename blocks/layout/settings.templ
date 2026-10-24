@@ -119,7 +119,9 @@ templ themeSetting(id string, s ThemeSetting) {
 							<label class="form-imagecheck">
 								<input type="radio" name={ s.Key } value={ o.Value } class="form-imagecheck-input" checked?={ themeChecked(s, o) }/>
 								<span class="form-imagecheck-figure p-1">
-									if s.Control == ControlPreset {
+									if o.SVG != "" {
+										@templ.Raw(o.SVG)
+									} else if s.Control == ControlPreset {
 										@templ.Raw(presetSVG(o.Values))
 									} else {
 										@templ.Raw(tileSVG(s.Key, o.Value))
@@ -153,7 +155,7 @@ templ themeSettingsScript() {
 			document.addEventListener('DOMContentLoaded', function () {
 				document.querySelectorAll('form[data-theme-settings]').forEach(function (form) {
 					var cfg = JSON.parse(form.getAttribute('data-theme-settings'));
-					var defaults = cfg.defaults, presets = cfg.presets;
+					var defaults = cfg.defaults, presets = cfg.presets, links = cfg.links || {};
 					var url = new URL(window.location);
 					var store = {
 						get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -197,6 +199,8 @@ templ themeSettingsScript() {
 						var name = e.target.name, value = e.target.value;
 						if (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });
 						else if (name in defaults) set(name, value);
+						// An option that brings other settings along, e.g. a theme's colors and font.
+						if (links[name] && links[name][value]) Object.keys(links[name][value]).forEach(function (k) { set(k, links[name][value][k]); });
 						toggleGroups();
 						// Plugins that measured the old width (charts, maps) need a nudge.
 						window.dispatchEvent(new Event('resize'));

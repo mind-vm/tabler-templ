@@ -30,6 +30,8 @@ type PageProps struct {
 	// usually the same as the app's other pages.
 	Theme      string
 	Appearance theme.Settings
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.ApplyAuth sets them).
+	HTMLAttributes templ.Attributes
 }
 
 func htmlAttrs(p PageProps) templ.Attributes {
@@ -37,6 +39,9 @@ func htmlAttrs(p PageProps) templ.Attributes {
 	a["lang"] = kit.Or(p.Lang, "en")
 	if p.Theme != "" {
 		a["data-bs-theme"] = p.Theme
+	}
+	for k, v := range p.HTMLAttributes {
+		a[k] = v
 	}
 	return a
 }

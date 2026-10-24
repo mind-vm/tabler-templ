@@ -19,3 +19,4 @@ charts-advanced
 tasks
 email-inbox
 widgets
+themes 1600

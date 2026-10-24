@@ -621,7 +621,12 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if s.Control == ControlPreset {
+				if o.SVG != "" {
+					templ_7745c5c3_Err = templ.Raw(o.SVG).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else if s.Control == ControlPreset {
 					templ_7745c5c3_Err = templ.Raw(presetSVG(o.Values)).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -639,7 +644,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 127, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 129, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -667,7 +672,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 137, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 139, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
 				if templ_7745c5c3_Err != nil {
@@ -680,7 +685,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 137, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 139, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var35)
 				if templ_7745c5c3_Err != nil {
@@ -703,7 +708,7 @@ func themeSetting(id string, s ThemeSetting) templ.Component {
 				var templ_7745c5c3_Var36 string
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 138, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/layout/settings.templ`, Line: 140, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -764,7 +769,7 @@ func themeSettingsScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\t\tdocument.querySelectorAll('form[data-theme-settings]').forEach(function (form) {\n\t\t\t\t\tvar cfg = JSON.parse(form.getAttribute('data-theme-settings'));\n\t\t\t\t\tvar defaults = cfg.defaults, presets = cfg.presets;\n\t\t\t\t\tvar url = new URL(window.location);\n\t\t\t\t\tvar store = {\n\t\t\t\t\t\tget: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },\n\t\t\t\t\t\tset: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },\n\t\t\t\t\t\tremove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },\n\t\t\t\t\t};\n\t\t\t\t\t// The default state is the absence of the attribute, as in the theme script.\n\t\t\t\t\tfunction apply(key, value) {\n\t\t\t\t\t\tvar applied = value;\n\t\t\t\t\t\tif (key === 'theme' && value === 'auto') applied = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t\t\t\t\tif (applied !== defaults[key]) document.documentElement.setAttribute('data-bs-' + key, applied);\n\t\t\t\t\t\telse document.documentElement.removeAttribute('data-bs-' + key);\n\t\t\t\t\t}\n\t\t\t\t\t// A stored choice wins, then what the page rendered, then the default. data-bs-theme holds the\n\t\t\t\t\t// resolved mode, so it is not read back.\n\t\t\t\t\tfunction current(key) {\n\t\t\t\t\t\tvar rendered = key === 'theme' ? null : document.documentElement.getAttribute('data-bs-' + key);\n\t\t\t\t\t\treturn store.get('tabler-' + key) || rendered || defaults[key];\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleGroups() {\n\t\t\t\t\t\tvar vertical = current('navbar-position') === 'vertical';\n\t\t\t\t\t\tvar hide = function (keys, hidden) {\n\t\t\t\t\t\t\t(keys || []).forEach(function (k) { var g = form.querySelector('[data-theme-setting=\"' + k + '\"]'); if (g) g.hidden = hidden; });\n\t\t\t\t\t\t};\n\t\t\t\t\t\thide(cfg.sidebarOnly, !vertical);\n\t\t\t\t\t\thide(cfg.navbarOnly, vertical);\n\t\t\t\t\t}\n\t\t\t\t\tfunction set(key, value) { apply(key, value); store.set('tabler-' + key, value); url.searchParams.set(key, value); }\n\t\t\t\t\tfunction matches(values) { return Object.keys(values).every(function (k) { return current(k) === values[k]; }); }\n\t\t\t\t\tfunction check() {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) {\n\t\t\t\t\t\t\tvar value = current(key);\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + key + '\"]').forEach(function (r) { r.checked = r.value === value; });\n\t\t\t\t\t\t});\n\t\t\t\t\t\tObject.keys(presets).forEach(function (name) {\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + name + '\"]').forEach(function (r) { r.checked = matches(presets[name][r.value]); });\n\t\t\t\t\t\t});\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t}\n\t\t\t\t\tform.addEventListener('change', function (e) {\n\t\t\t\t\t\tvar name = e.target.name, value = e.target.value;\n\t\t\t\t\t\tif (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });\n\t\t\t\t\t\telse if (name in defaults) set(name, value);\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t\t// Plugins that measured the old width (charts, maps) need a nudge.\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tform.querySelector('[data-theme-reset]').addEventListener('click', function () {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) { apply(key, defaults[key]); store.remove('tabler-' + key); url.searchParams.delete(key); });\n\t\t\t\t\t\tcheck();\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tcheck();\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\t\tdocument.querySelectorAll('form[data-theme-settings]').forEach(function (form) {\n\t\t\t\t\tvar cfg = JSON.parse(form.getAttribute('data-theme-settings'));\n\t\t\t\t\tvar defaults = cfg.defaults, presets = cfg.presets, links = cfg.links || {};\n\t\t\t\t\tvar url = new URL(window.location);\n\t\t\t\t\tvar store = {\n\t\t\t\t\t\tget: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },\n\t\t\t\t\t\tset: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },\n\t\t\t\t\t\tremove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },\n\t\t\t\t\t};\n\t\t\t\t\t// The default state is the absence of the attribute, as in the theme script.\n\t\t\t\t\tfunction apply(key, value) {\n\t\t\t\t\t\tvar applied = value;\n\t\t\t\t\t\tif (key === 'theme' && value === 'auto') applied = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t\t\t\t\tif (applied !== defaults[key]) document.documentElement.setAttribute('data-bs-' + key, applied);\n\t\t\t\t\t\telse document.documentElement.removeAttribute('data-bs-' + key);\n\t\t\t\t\t}\n\t\t\t\t\t// A stored choice wins, then what the page rendered, then the default. data-bs-theme holds the\n\t\t\t\t\t// resolved mode, so it is not read back.\n\t\t\t\t\tfunction current(key) {\n\t\t\t\t\t\tvar rendered = key === 'theme' ? null : document.documentElement.getAttribute('data-bs-' + key);\n\t\t\t\t\t\treturn store.get('tabler-' + key) || rendered || defaults[key];\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleGroups() {\n\t\t\t\t\t\tvar vertical = current('navbar-position') === 'vertical';\n\t\t\t\t\t\tvar hide = function (keys, hidden) {\n\t\t\t\t\t\t\t(keys || []).forEach(function (k) { var g = form.querySelector('[data-theme-setting=\"' + k + '\"]'); if (g) g.hidden = hidden; });\n\t\t\t\t\t\t};\n\t\t\t\t\t\thide(cfg.sidebarOnly, !vertical);\n\t\t\t\t\t\thide(cfg.navbarOnly, vertical);\n\t\t\t\t\t}\n\t\t\t\t\tfunction set(key, value) { apply(key, value); store.set('tabler-' + key, value); url.searchParams.set(key, value); }\n\t\t\t\t\tfunction matches(values) { return Object.keys(values).every(function (k) { return current(k) === values[k]; }); }\n\t\t\t\t\tfunction check() {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) {\n\t\t\t\t\t\t\tvar value = current(key);\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + key + '\"]').forEach(function (r) { r.checked = r.value === value; });\n\t\t\t\t\t\t});\n\t\t\t\t\t\tObject.keys(presets).forEach(function (name) {\n\t\t\t\t\t\t\tform.querySelectorAll('[name=\"' + name + '\"]').forEach(function (r) { r.checked = matches(presets[name][r.value]); });\n\t\t\t\t\t\t});\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t}\n\t\t\t\t\tform.addEventListener('change', function (e) {\n\t\t\t\t\t\tvar name = e.target.name, value = e.target.value;\n\t\t\t\t\t\tif (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });\n\t\t\t\t\t\telse if (name in defaults) set(name, value);\n\t\t\t\t\t\t// An option that brings other settings along, e.g. a theme's colors and font.\n\t\t\t\t\t\tif (links[name] && links[name][value]) Object.keys(links[name][value]).forEach(function (k) { set(k, links[name][value][k]); });\n\t\t\t\t\t\ttoggleGroups();\n\t\t\t\t\t\t// Plugins that measured the old width (charts, maps) need a nudge.\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tform.querySelector('[data-theme-reset]').addEventListener('click', function () {\n\t\t\t\t\t\tObject.keys(defaults).forEach(function (key) { apply(key, defaults[key]); store.remove('tabler-' + key); url.searchParams.delete(key); });\n\t\t\t\t\t\tcheck();\n\t\t\t\t\t\twindow.dispatchEvent(new Event('resize'));\n\t\t\t\t\t\thistory.pushState({}, '', url);\n\t\t\t\t\t});\n\t\t\t\t\tcheck();\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

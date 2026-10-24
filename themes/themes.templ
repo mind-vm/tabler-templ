@@ -1,0 +1,163 @@
+package themes
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/blocks/auth"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/theme"
+)
+
+// Head loads what the themes need: their fonts' stylesheets, their CSS and the script that restores the
+// theme a user picked before the page paints. Put it in the head after Tabler's stylesheets (with
+// tabler-themes.css: assets.Props{Themes: true}); without arguments it covers All, so the panel can
+// switch between them.
+templ Head(ts ...Theme) {
+	{{
+		if len(ts) == 0 {
+			ts = All
+		}
+		seen := map[string]bool{}
+		var css strings.Builder
+	}}
+	for _, t := range ts {
+		for _, f := range t.fonts() {
+			if !seen[f.Package] {
+				{{ seen[f.Package] = true }}
+				<link rel="stylesheet" href={ f.URL() }/>
+			}
+		}
+		{{ css.WriteString(t.CSS()) }}
+	}
+	if css.Len() > 0 {
+		@templ.Raw("<style>" + css.String() + "</style>")
+	}
+	@Script()
+}
+
+// Script restores the theme saved by the panel (localStorage tabler-theme-pack, or ?theme-pack=), the way
+// Tabler's theme script restores its own settings. Head includes it.
+templ Script() {
+	<script>
+		(function () {
+			var v = null, p = new URLSearchParams(location.search).get('theme-pack');
+			try { if (p && /^[a-z0-9-]{1,32}$/.test(p)) localStorage.setItem('tabler-theme-pack', p); v = localStorage.getItem('tabler-theme-pack'); } catch (e) {}
+			if (v === 'default') document.documentElement.removeAttribute('data-bs-theme-pack');
+			else if (v) document.documentElement.setAttribute('data-bs-theme-pack', v);
+		})();
+	</script>
+}
+
+func (t Theme) head(prev templ.Component) templ.Component {
+	if prev == nil {
+		return Head()
+	}
+	return templ.Join(prev, Head())
+}
+
+func (t Theme) attrs(prev templ.Attributes) templ.Attributes {
+	a := templ.Attributes{}
+	for k, v := range prev {
+		a[k] = v
+	}
+	if t.Name != "" {
+		a[Attribute] = t.Name
+	}
+	return a
+}
+
+// Apply gives a page the theme: its settings, its color mode (unless the page sets one), its attribute,
+// and Head with all themes after the page's own head.
+func (t Theme) Apply(p *layout.PageProps) {
+	p.Appearance = merge(t.Settings, p.Appearance)
+	if p.Theme == "" {
+		p.Theme = t.Mode
+	}
+	p.HTMLAttributes = t.attrs(p.HTMLAttributes)
+	p.Head = t.head(p.Head)
+}
+
+// ApplyAuth gives a sign-in page (blocks/auth) the theme, like Apply.
+func (t Theme) ApplyAuth(p *auth.PageProps) {
+	p.Appearance = merge(t.Settings, p.Appearance)
+	if p.Theme == "" {
+		p.Theme = t.Mode
+	}
+	p.HTMLAttributes = t.attrs(p.HTMLAttributes)
+	p.Head = t.head(p.Head)
+}
+
+// merge keeps the page's own settings over the theme's.
+func merge(t, page theme.Settings) theme.Settings {
+	if page.Primary != "" {
+		t.Primary = page.Primary
+	}
+	if page.Base != "" {
+		t.Base = page.Base
+	}
+	if page.Font != "" {
+		t.Font = page.Font
+	}
+	if page.Radius != "" {
+		t.Radius = page.Radius
+	}
+	return t
+}
+
+func or[T ~string](v, def T) string {
+	if v == "" {
+		return string(def)
+	}
+	return string(v)
+}
+
+// Section is the panel section where users pick a theme (layout.ThemeSettingsProps.Sections); picking one
+// also sets the accent color, base, font and radius it brings, which the user can still change after.
+func Section(ts ...Theme) layout.ThemeSection {
+	if len(ts) == 0 {
+		ts = All
+	}
+	var os []layout.ThemeOption
+	for _, t := range ts {
+		os = append(os, layout.ThemeOption{Value: or(t.Name, "default"), Label: t.Label, SVG: t.Swatch(), Values: map[string]string{
+			"theme-primary": or(t.Settings.Primary, theme.Blue), "theme-base": or(t.Settings.Base, theme.Neutral),
+			"theme-font": or(t.Settings.Font, theme.SansSerif), "theme-radius": or(t.Settings.Radius, theme.Radius1),
+		}})
+	}
+	return layout.ThemeSection{Title: "Theme", Settings: []layout.ThemeSetting{{
+		Key: "theme-pack", Legend: "Theme", Hint: "A ready-made look: colors, font and corners.",
+		Control: layout.ControlTile, Default: "default", Options: os,
+	}}}
+}
+
+// Swatch is the theme's tile: its page, a card and its accent color, in light mode.
+func (t Theme) Swatch() string {
+	gray := func(shade int) string {
+		if len(t.Grays) == 11 {
+			return t.Grays[map[int]int{50: 0, 100: 1, 200: 2, 300: 3, 500: 5, 900: 9}[shade]]
+		}
+		return fmt.Sprintf("var(--tblr-gray-%d)", shade)
+	}
+	primary := t.Primary
+	switch {
+	case primary != "":
+	case t.Settings.Primary == theme.Inverted:
+		primary = "var(--tblr-gray-800)"
+	default:
+		primary = "var(--tblr-" + or(t.Settings.Primary, theme.Blue) + ")"
+	}
+	r := map[string]string{"0": "0", "0.5": "2", "1": "4", "1.5": "6", "2": "8"}[or(t.Settings.Radius, theme.Radius1)]
+	base := ""
+	if len(t.Grays) != 11 {
+		base = ` data-bs-theme-base="` + or(t.Settings.Base, theme.Neutral) + `"`
+	}
+	return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64" class="form-imagecheck-image w-100" aria-hidden="true" focusable="false"` + base + `>` +
+		`<rect x="0.5" y="0.5" width="95" height="63" rx="6" fill="` + gray(100) + `" stroke="` + gray(200) + `"/>` +
+		`<rect x="12" y="10" width="72" height="44" rx="` + r + `" fill="#fff" stroke="` + gray(200) + `"/>` +
+		`<rect x="20" y="18" width="34" height="5" rx="2.5" fill="` + gray(900) + `"/>` +
+		`<rect x="20" y="28" width="52" height="4" rx="2" fill="` + gray(300) + `"/>` +
+		`<rect x="20" y="39" width="24" height="9" rx="` + r + `" fill="` + primary + `"/>` +
+		`<rect x="48" y="39" width="16" height="9" rx="` + r + `" fill="none" stroke="` + gray(300) + `"/>` +
+		`</svg>`
+}
