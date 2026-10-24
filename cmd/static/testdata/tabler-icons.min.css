@@ -1,0 +1,4 @@
+/*!
+ * Tabler Icons 3.49.0 by tabler - https://tabler.io
+ * License - https://github.com/tabler/tabler-icons/blob/main/LICENSE
+ */@font-face{font-family:"tabler-icons";font-style:normal;font-weight:400;src:url("./fonts/tabler-icons.woff2?v3.49.0") format("woff2"),url("./fonts/tabler-icons.woff?") format("woff"),url("./fonts/tabler-icons.ttf?v3.49.0") format("truetype")}.ti{font-family:"tabler-icons" !important;speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.ti-home:before{content:"\eac1"}.ti-pencil:before{content:"\eb04"}.ti-settings:before{content:"\eb20"}.ti-star:before{content:"\eb2e"}.ti-trash:before{content:"\eb41"}.ti-user:before{content:"\eb4d"}
