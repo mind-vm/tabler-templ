@@ -11,6 +11,8 @@ const page = await browser.newPage({ viewport: { width: 1700, height: 900 } });
 for (const [label, url] of [["ours", `${base}/${name}`], ["tabler", `${orig}/${name}.html`]]) {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
+  // Charts are drawn as they come into view; draw all of them for the picture.
+  await page.evaluate(() => window.tablerCharts?.flush?.());
   const path = join(out, `${name.replaceAll("/", "-")}.${label}.png`);
   // The page body of pages with a frame; the whole main element of single pages (sign-in, onboarding …).
   const body = page.locator(".page-body .container-xl")
