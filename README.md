@@ -31,18 +31,17 @@ script does the rest (modals, dropdowns, dismissible alerts).
 
 ## Status
 
-Early (v0.x); the API may still change between minor versions until v1, breaking changes are listed in
-[CHANGELOG.md](CHANGELOG.md). Today the module has the components and blocks the apps using it needed;
-[ROADMAP.md](ROADMAP.md) is the checklist of everything in Tabler, with the status of each component, block
-and preview page. Next steps, one pull request each:
+v0.x: the API may still change between minor versions until v1; breaking changes are listed in
+[CHANGELOG.md](CHANGELOG.md). Since v0.9.0 the module covers Tabler 1.7:
+- every component of the Tabler docs is a package;
+- the composed parts of the preview are blocks;
+- 143 of 146 preview pages are rebuilt in the demo and checked against the original by screenshot.
 
-1. Navigation and overlays: dropdown, tabs, nav, breadcrumb, offcanvas, toast, tooltip, popover
-2. Showing data: avatar, list group, timeline, datagrid, progress, steps, status, ribbon, empty, tracking
-3. Forms: input group, select group, image check, color check, OTP, password strength, validation, floating labels
-4. Sign-in and account blocks: sign-in variants, sign-up, forgot password, 2FA, auth lock, onboarding
-5. Blocks from Tabler's cards, modals and navbars, and the app pages: settings, profile, pricing, invoice, error pages, wizard; the layouts
-6. The remaining preview pages in the demo, with screenshots here
-7. A starter kit (`cmd/new`) that creates a running app with layout, sign-in and a list page
+[ROADMAP.md](ROADMAP.md) is the checklist with the status of each. The rest of the module:
+- the plugins as packages;
+- ready-made themes;
+- a starter kit (`cmd/new`);
+- a script for Tabler updates.
 
 ```sh
 go get github.com/mind-vm/tabler-templ@latest
