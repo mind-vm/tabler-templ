@@ -9,6 +9,7 @@
 package lightbox
 
 import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -48,7 +49,7 @@ templ Link(p Props) {
 
 // Library loads fslightbox; put it in the head. Its styles are in Tabler's tabler-vendors.css.
 templ Library() {
-	<script src={ LibraryURL } defer></script>
+	<script { csp.Nonce(ctx)... } src={ LibraryURL } defer></script>
 }
 
 var once = templ.NewOnceHandle()
@@ -56,7 +57,7 @@ var once = templ.NewOnceHandle()
 // script picks up links swapped in by htmx.
 templ script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			document.addEventListener('htmx:afterSettle', function () { window.refreshFsLightbox && window.refreshFsLightbox(); });
 		</script>
 	}

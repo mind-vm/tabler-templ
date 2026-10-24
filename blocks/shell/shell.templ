@@ -26,6 +26,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/stats"
 	"github.com/mind-vm/tabler-templ/breadcrumb"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/sidebar"
 )
@@ -182,7 +183,7 @@ templ Styles() {
 	@create.Styles()
 	@history.Styles()
 	@stats.Styles()
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 const css = `.kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}

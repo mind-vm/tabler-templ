@@ -24,6 +24,7 @@ import (
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/flag"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/mapview"
 	"github.com/mind-vm/tabler-templ/progress"
@@ -61,7 +62,7 @@ func header(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 26, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 27, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -160,7 +161,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID + "-search")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 63, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 64, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
@@ -173,7 +174,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.SearchPlaceholder, "Search stores…"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 63, Col: 137}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 64, Col: 137}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -186,7 +187,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.SearchLabel, "Search stores"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 63, Col: 191}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 64, Col: 191}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -199,7 +200,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID + "-list")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 63, Col: 230}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 64, Col: 230}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -212,7 +213,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID + "-list")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 66, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 67, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 		if templ_7745c5c3_Err != nil {
@@ -225,7 +226,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("height: " + kit.Or(p.ListHeight, "24rem")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 66, Col: 150}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 67, Col: 150}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -238,7 +239,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 66, Col: 177}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 67, Col: 177}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 		if templ_7745c5c3_Err != nil {
@@ -274,7 +275,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(s.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 70, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 71, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -300,7 +301,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 					var templ_7745c5c3_Var17 string
 					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.OpenLabel, "Open"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 73, Col: 39}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 74, Col: 39}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 					if templ_7745c5c3_Err != nil {
@@ -328,7 +329,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 					var templ_7745c5c3_Var19 string
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.ClosedLabel, "Closed"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 77, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 78, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 					if templ_7745c5c3_Err != nil {
@@ -348,7 +349,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(s.Address)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 81, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 82, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -369,7 +370,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(s.Distance)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 84, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 85, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -428,7 +429,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 						var templ_7745c5c3_Var25 string
 						templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(s.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 95, Col: 39}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 96, Col: 39}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 						if templ_7745c5c3_Err != nil {
@@ -441,7 +442,7 @@ func StoreLocator(p LocatorProps, stores []Store) templ.Component {
 						var templ_7745c5c3_Var26 string
 						templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(s.Address)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 96, Col: 47}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 97, Col: 47}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 						if templ_7745c5c3_Err != nil {
@@ -620,7 +621,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 161, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 162, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -633,7 +634,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Role, "Your courier"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 162, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 163, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -646,7 +647,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(p.Distance)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 165, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 166, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -659,7 +660,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Left, "left to go"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 166, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 167, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -672,7 +673,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var35 templ.SafeURL
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(kit.Or(p.CallHref, "#")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 169, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 170, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -685,7 +686,7 @@ func Delivery(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.CallLabel, "Call the courier"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 169, Col: 129}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 170, Col: 129}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
 		if templ_7745c5c3_Err != nil {
@@ -747,7 +748,7 @@ func deliveryStatus(p DeliveryProps) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(p.Order)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 182, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 183, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -766,7 +767,7 @@ func deliveryStatus(p DeliveryProps) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(p.Status)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 184, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 185, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -872,7 +873,7 @@ func LiveUsers(p LiveProps) templ.Component {
 				var templ_7745c5c3_Var44 string
 				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(s.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 221, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 222, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
@@ -885,7 +886,7 @@ func LiveUsers(p LiveProps) templ.Component {
 				var templ_7745c5c3_Var45 string
 				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(s.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 222, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 223, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 				if templ_7745c5c3_Err != nil {
@@ -949,7 +950,7 @@ func liveTotal(p LiveProps) templ.Component {
 			var templ_7745c5c3_Var48 string
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 235, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 236, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {
@@ -968,7 +969,7 @@ func liveTotal(p LiveProps) templ.Component {
 		var templ_7745c5c3_Var49 string
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 237, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 238, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
@@ -991,7 +992,7 @@ func liveTotal(p LiveProps) templ.Component {
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(" " + p.Note)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 242, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 243, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
@@ -1079,7 +1080,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID + "-list")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 273, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 274, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var54)
 		if templ_7745c5c3_Err != nil {
@@ -1092,7 +1093,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("height: " + kit.Or(p.ListHeight, "26rem")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 273, Col: 150}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 274, Col: 150}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
@@ -1105,7 +1106,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Map.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 273, Col: 177}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 274, Col: 177}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var56)
 		if templ_7745c5c3_Err != nil {
@@ -1141,7 +1142,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var59 string
 			templ_7745c5c3_Var59, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("background-image: url(" + h.Photo + ")"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 278, Col: 103}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 279, Col: 103}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 			if templ_7745c5c3_Err != nil {
@@ -1154,7 +1155,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var60 string
 			templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(h.Price)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 281, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 282, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 			if templ_7745c5c3_Err != nil {
@@ -1167,7 +1168,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(h.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 282, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 283, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
@@ -1188,7 +1189,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var62 string
 			templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(h.Beds))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 285, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 286, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 			if templ_7745c5c3_Err != nil {
@@ -1205,7 +1206,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var63 string
 			templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(h.Baths))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 287, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 288, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 			if templ_7745c5c3_Err != nil {
@@ -1222,7 +1223,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 			var templ_7745c5c3_Var64 string
 			templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(h.Area)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 289, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 290, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 			if templ_7745c5c3_Err != nil {
@@ -1265,7 +1266,7 @@ func Homes(p HomesProps, homes []Home) templ.Component {
 					var templ_7745c5c3_Var67 string
 					templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(h.Price)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 301, Col: 16}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 302, Col: 16}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 					if templ_7745c5c3_Err != nil {
@@ -1531,7 +1532,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 		var templ_7745c5c3_Var76 string
 		templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.RegionLabel, "Region"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 398, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 399, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 		if templ_7745c5c3_Err != nil {
@@ -1544,7 +1545,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 		var templ_7745c5c3_Var77 string
 		templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.StatusLabel, "Status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 399, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 400, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 		if templ_7745c5c3_Err != nil {
@@ -1557,7 +1558,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 		var templ_7745c5c3_Var78 string
 		templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.LatencyLabel, "Latency"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 400, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 401, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 		if templ_7745c5c3_Err != nil {
@@ -1570,7 +1571,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 		var templ_7745c5c3_Var79 string
 		templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.UptimeLabel, "Uptime"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 401, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 402, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 		if templ_7745c5c3_Err != nil {
@@ -1588,7 +1589,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 			var templ_7745c5c3_Var80 string
 			templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(r.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 408, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 409, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 			if templ_7745c5c3_Err != nil {
@@ -1601,7 +1602,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 			var templ_7745c5c3_Var81 string
 			templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinStringErrs(r.Code)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 408, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 409, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 			if templ_7745c5c3_Err != nil {
@@ -1622,7 +1623,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 			var templ_7745c5c3_Var82 string
 			templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(r.State.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 412, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 413, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 			if templ_7745c5c3_Err != nil {
@@ -1635,7 +1636,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 			var templ_7745c5c3_Var83 string
 			templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinStringErrs(r.Latency)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 414, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 415, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 			if templ_7745c5c3_Err != nil {
@@ -1648,7 +1649,7 @@ func ServerStatus(p StatusProps, regions []Region) templ.Component {
 			var templ_7745c5c3_Var84 string
 			templ_7745c5c3_Var84, templ_7745c5c3_Err = templ.JoinStringErrs(r.Uptime)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 415, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 416, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var84))
 			if templ_7745c5c3_Err != nil {
@@ -1746,7 +1747,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 		var templ_7745c5c3_Var88 string
 		templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.CountryLabel, "Country"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 455, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 456, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 		if templ_7745c5c3_Err != nil {
@@ -1759,7 +1760,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 		var templ_7745c5c3_Var89 string
 		templ_7745c5c3_Var89, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.UsersLabel, "Users"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 456, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 457, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var89))
 		if templ_7745c5c3_Err != nil {
@@ -1772,7 +1773,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 		var templ_7745c5c3_Var90 string
 		templ_7745c5c3_Var90, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.ShareLabel, "Share"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 457, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 458, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var90))
 		if templ_7745c5c3_Err != nil {
@@ -1798,7 +1799,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 			var templ_7745c5c3_Var91 string
 			templ_7745c5c3_Var91, templ_7745c5c3_Err = templ.JoinStringErrs(c.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 465, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 466, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var91))
 			if templ_7745c5c3_Err != nil {
@@ -1811,7 +1812,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 			var templ_7745c5c3_Var92 string
 			templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(c.Users)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 467, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 468, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var92))
 			if templ_7745c5c3_Err != nil {
@@ -1824,7 +1825,7 @@ func UsersByCountry(p CountriesProps, countries []Country) templ.Component {
 			var templ_7745c5c3_Var93 string
 			templ_7745c5c3_Var93, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatFloat(c.Share, 'f', -1, 64))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 470, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/maps/maps.templ`, Line: 471, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var93))
 			if templ_7745c5c3_Err != nil {
@@ -1888,7 +1889,15 @@ func Script() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<script>\n\t\t\t(function () {\n\t\t\t\tif (window.tablerMapBlocks) return;\n\t\t\t\twindow.tablerMapBlocks = true;\n\t\t\t\tfunction view(id) {\n\t\t\t\t\tvar el = document.getElementById('map-' + id);\n\t\t\t\t\treturn el && window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(el);\n\t\t\t\t}\n\t\t\t\tfunction list(el) {\n\t\t\t\t\tvar v = view(el.getAttribute('data-map-list'));\n\t\t\t\t\tif (!v || el.tablerList) return;\n\t\t\t\t\tel.tablerList = true;\n\t\t\t\t\tvar popups = el.hasAttribute('data-map-popups');\n\t\t\t\t\tvar on = el.getAttribute('data-map-marker-active'), off = el.getAttribute('data-map-marker-idle');\n\t\t\t\t\tv.ready(function (map) {\n\t\t\t\t\t\t// The markers are in the same order as the items of the list\n\t\t\t\t\t\tvar items = Array.prototype.slice.call(el.querySelectorAll('.list-group-item'));\n\t\t\t\t\t\tvar markers = v.markers;\n\t\t\t\t\t\tfunction select(index, move) {\n\t\t\t\t\t\t\titems.forEach(function (item, i) { item.classList.toggle('active', i === index); });\n\t\t\t\t\t\t\tmarkers.forEach(function (m, i) {\n\t\t\t\t\t\t\t\tif (popups && m.getPopup() && m.getPopup().isOpen() !== (i === index)) m.togglePopup();\n\t\t\t\t\t\t\t\tif (on) m.getElement().classList.toggle(on, i === index);\n\t\t\t\t\t\t\t\tif (off) m.getElement().classList.toggle(off, i !== index);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\tif (move) map.flyTo({ center: markers[index].getLngLat(), zoom: 13 });\n\t\t\t\t\t\t}\n\t\t\t\t\t\titems.forEach(function (item, i) { item.addEventListener('click', function () { select(i, true); }); });\n\t\t\t\t\t\tmarkers.forEach(function (m, i) {\n\t\t\t\t\t\t\tm.getElement().addEventListener('click', function (e) {\n\t\t\t\t\t\t\t\tif (popups) e.stopPropagation();\n\t\t\t\t\t\t\t\tselect(i, false);\n\t\t\t\t\t\t\t\titems[i].scrollIntoView({ block: 'nearest' });\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\tdocument.querySelectorAll('[data-map-search=\"' + el.id + '\"]').forEach(function (input) {\n\t\t\t\t\t\t\tinput.addEventListener('input', function () {\n\t\t\t\t\t\t\t\tvar q = input.value.trim().toLowerCase();\n\t\t\t\t\t\t\t\titems.forEach(function (item, i) {\n\t\t\t\t\t\t\t\t\tvar hidden = item.textContent.toLowerCase().indexOf(q) < 0;\n\t\t\t\t\t\t\t\t\titem.hidden = hidden;\n\t\t\t\t\t\t\t\t\tmarkers[i].getElement().hidden = hidden;\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\tif (popups) select(0, false);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction picker(mapEl) {\n\t\t\t\t\tvar v = window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(mapEl);\n\t\t\t\t\tif (!v || mapEl.tablerPicker) return;\n\t\t\t\t\tmapEl.tablerPicker = true;\n\t\t\t\t\tv.ready(function () {\n\t\t\t\t\t\tv.markers.forEach(function (m) {\n\t\t\t\t\t\t\tvar field = document.getElementById(m.getElement().getAttribute('data-map-position') || '');\n\t\t\t\t\t\t\tif (!field) return;\n\t\t\t\t\t\t\tm.on('drag', function () {\n\t\t\t\t\t\t\t\tvar p = m.getLngLat();\n\t\t\t\t\t\t\t\tfield.value = p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction init(root) {\n\t\t\t\t\troot = root || document;\n\t\t\t\t\troot.querySelectorAll('[data-map-list]').forEach(list);\n\t\t\t\t\troot.querySelectorAll('[data-bs-toggle=\"map\"]').forEach(function (el) {\n\t\t\t\t\t\tif (el.querySelector('[data-map-position]')) picker(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<script")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, csp.Nonce(ctx))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, ">\n\t\t\t(function () {\n\t\t\t\tif (window.tablerMapBlocks) return;\n\t\t\t\twindow.tablerMapBlocks = true;\n\t\t\t\tfunction view(id) {\n\t\t\t\t\tvar el = document.getElementById('map-' + id);\n\t\t\t\t\treturn el && window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(el);\n\t\t\t\t}\n\t\t\t\tfunction list(el) {\n\t\t\t\t\tvar v = view(el.getAttribute('data-map-list'));\n\t\t\t\t\tif (!v || el.tablerList) return;\n\t\t\t\t\tel.tablerList = true;\n\t\t\t\t\tvar popups = el.hasAttribute('data-map-popups');\n\t\t\t\t\tvar on = el.getAttribute('data-map-marker-active'), off = el.getAttribute('data-map-marker-idle');\n\t\t\t\t\tv.ready(function (map) {\n\t\t\t\t\t\t// The markers are in the same order as the items of the list\n\t\t\t\t\t\tvar items = Array.prototype.slice.call(el.querySelectorAll('.list-group-item'));\n\t\t\t\t\t\tvar markers = v.markers;\n\t\t\t\t\t\tfunction select(index, move) {\n\t\t\t\t\t\t\titems.forEach(function (item, i) { item.classList.toggle('active', i === index); });\n\t\t\t\t\t\t\tmarkers.forEach(function (m, i) {\n\t\t\t\t\t\t\t\tif (popups && m.getPopup() && m.getPopup().isOpen() !== (i === index)) m.togglePopup();\n\t\t\t\t\t\t\t\tif (on) m.getElement().classList.toggle(on, i === index);\n\t\t\t\t\t\t\t\tif (off) m.getElement().classList.toggle(off, i !== index);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\tif (move) map.flyTo({ center: markers[index].getLngLat(), zoom: 13 });\n\t\t\t\t\t\t}\n\t\t\t\t\t\titems.forEach(function (item, i) { item.addEventListener('click', function () { select(i, true); }); });\n\t\t\t\t\t\tmarkers.forEach(function (m, i) {\n\t\t\t\t\t\t\tm.getElement().addEventListener('click', function (e) {\n\t\t\t\t\t\t\t\tif (popups) e.stopPropagation();\n\t\t\t\t\t\t\t\tselect(i, false);\n\t\t\t\t\t\t\t\titems[i].scrollIntoView({ block: 'nearest' });\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\tdocument.querySelectorAll('[data-map-search=\"' + el.id + '\"]').forEach(function (input) {\n\t\t\t\t\t\t\tinput.addEventListener('input', function () {\n\t\t\t\t\t\t\t\tvar q = input.value.trim().toLowerCase();\n\t\t\t\t\t\t\t\titems.forEach(function (item, i) {\n\t\t\t\t\t\t\t\t\tvar hidden = item.textContent.toLowerCase().indexOf(q) < 0;\n\t\t\t\t\t\t\t\t\titem.hidden = hidden;\n\t\t\t\t\t\t\t\t\tmarkers[i].getElement().hidden = hidden;\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\tif (popups) select(0, false);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction picker(mapEl) {\n\t\t\t\t\tvar v = window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(mapEl);\n\t\t\t\t\tif (!v || mapEl.tablerPicker) return;\n\t\t\t\t\tmapEl.tablerPicker = true;\n\t\t\t\t\tv.ready(function () {\n\t\t\t\t\t\tv.markers.forEach(function (m) {\n\t\t\t\t\t\t\tvar field = document.getElementById(m.getElement().getAttribute('data-map-position') || '');\n\t\t\t\t\t\t\tif (!field) return;\n\t\t\t\t\t\t\tm.on('drag', function () {\n\t\t\t\t\t\t\t\tvar p = m.getLngLat();\n\t\t\t\t\t\t\t\tfield.value = p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction init(root) {\n\t\t\t\t\troot = root || document;\n\t\t\t\t\troot.querySelectorAll('[data-map-list]').forEach(list);\n\t\t\t\t\troot.querySelectorAll('[data-bs-toggle=\"map\"]').forEach(function (el) {\n\t\t\t\t\t\tif (el.querySelector('[data-map-position]')) picker(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

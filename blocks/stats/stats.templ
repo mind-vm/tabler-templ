@@ -10,6 +10,7 @@ package stats
 
 import (
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -61,7 +62,7 @@ templ Tile(s Stat) {
 
 // Styles renders the block's CSS; the shell block includes it.
 templ Styles() {
-	@templ.Raw("<style>" + css + "</style>")
+	@csp.Style(css)
 }
 
 const css = `.kit-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));margin-bottom:1rem;overflow:hidden;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}

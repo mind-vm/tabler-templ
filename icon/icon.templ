@@ -4,6 +4,7 @@ package icon
 import (
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -74,5 +75,5 @@ templ Icon(name string, props ...Props) {
 
 // Styles renders CSS and FilledCSS in a <style> element.
 templ Styles() {
-	@templ.Raw("<style>" + CSS + FilledCSS() + "</style>")
+	@csp.Style(CSS + FilledCSS())
 }

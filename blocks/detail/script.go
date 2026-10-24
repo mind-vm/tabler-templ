@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -50,18 +51,14 @@ func Script(c ScriptConfig) templ.Component {
 		if err != nil {
 			return err
 		}
-		open := "<script>"
-		if n := templ.GetNonce(ctx); n != "" {
-			open = `<script nonce="` + templ.EscapeString(n) + `">`
-		}
-		_, err = io.WriteString(w, open+"(function(cfg){"+script+"})("+string(cfg)+");</script>")
+		_, err = io.WriteString(w, csp.Open(ctx, "script")+"(function(cfg){"+script+"})("+string(cfg)+");</script>")
 		return err
 	})
 }
 
 // Styles renders the block's CSS (Tabler variables only); the shell block includes it.
 func Styles() templ.Component {
-	return templ.Raw("<style>" + css + "</style>")
+	return csp.Style(css)
 }
 
 const css = `.kit-section{container-type:inline-size}

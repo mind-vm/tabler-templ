@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Content-Security-Policy: every `<script>` and `<style>` the packages render carries templ's nonce
+  (`templ.WithNonce`), not only `sidebar` and `blocks/detail`: `modal`, `chart`, `themes`, `icon`, the
+  plugins, `confetti`, `assets`, the blocks (layout settings, tables, modals, maps, marketing, shell …) and
+  the `cmd/new` app. Without a nonce the output is unchanged. See README, Content-Security-Policy.
+- `invoice.PrintButton` prints through a script instead of an inline `onclick`.
+- The demo binary (`demo`, 18 MB) is no longer in the repository; `.gitignore` keeps it and `new` out.
+
 ## v0.9.0
 
 All of Tabler 1.7 in Go and templ. Every component of the Tabler docs is now a package (66 of 67), and the

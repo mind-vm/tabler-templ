@@ -2,6 +2,7 @@ package layout
 
 import (
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -151,7 +152,7 @@ var themeSettingsOnce = templ.NewOnceHandle()
 // Tabler's theme script reads it (localStorage tabler-<key>) and keeps the URL in step.
 templ themeSettingsScript() {
 	@themeSettingsOnce.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			document.addEventListener('DOMContentLoaded', function () {
 				document.querySelectorAll('form[data-theme-settings]').forEach(function (form) {
 					var cfg = JSON.parse(form.getAttribute('data-theme-settings'));

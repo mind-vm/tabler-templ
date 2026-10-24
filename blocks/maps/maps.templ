@@ -12,6 +12,7 @@ import (
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/flag"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/mapview"
 	"github.com/mind-vm/tabler-templ/progress"
@@ -487,7 +488,7 @@ var once = templ.NewOnceHandle()
 // pin of an AddressPicker to its field. The blocks render it once per page.
 templ Script() {
 	@once.Once() {
-		<script>
+		<script { csp.Nonce(ctx)... }>
 			(function () {
 				if (window.tablerMapBlocks) return;
 				window.tablerMapBlocks = true;
