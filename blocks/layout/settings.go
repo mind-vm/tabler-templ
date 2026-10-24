@@ -20,10 +20,13 @@ const (
 	ControlPreset ThemeControl = "preset" // thumbnails that set several keys at once
 )
 
-// ThemeOption is one choice of a ThemeSetting. A preset's Values are the keys and values it sets.
+// ThemeOption is one choice of a ThemeSetting. A preset's Values are the keys and values it sets; on
+// another setting they are set along with the option itself (e.g. a theme's colors and font). SVG
+// replaces a tile's drawing.
 type ThemeOption struct {
 	Value, Label string
 	Values       map[string]string
+	SVG          string
 }
 
 // ThemeSetting is one setting of the panel. Key is the switcher's key (it becomes data-bs-<key> on <html>
@@ -34,6 +37,9 @@ type ThemeSetting struct {
 	Options           []ThemeOption
 	SidebarOnly       bool // hidden while the navigation is horizontal
 	NavbarOnly        bool // hidden while the navigation is vertical
+	// Default is the value of a setting Tabler's theme script does not know (ThemeDefaults has the
+	// others); the script then restores it itself, e.g. themes.Script.
+	Default string
 }
 
 // ThemeSection is a titled group of settings.
@@ -110,6 +116,9 @@ func themeChecked(s ThemeSetting, o ThemeOption) bool {
 		}
 		return true
 	}
+	if s.Default != "" {
+		return s.Default == o.Value
+	}
 	return ThemeDefaults[s.Key] == o.Value
 }
 
@@ -117,13 +126,30 @@ func themeChecked(s ThemeSetting, o ThemeOption) bool {
 // navigation only.
 func themeConfig(sections []ThemeSection) string {
 	presets := map[string]map[string]map[string]string{}
+	links := map[string]map[string]map[string]string{}
+	defaults := map[string]string{}
+	for k, v := range ThemeDefaults {
+		defaults[k] = v
+	}
 	var sidebarOnly, navbarOnly []string
 	for _, sec := range sections {
 		for _, s := range sec.Settings {
+			if s.Default != "" {
+				defaults[s.Key] = s.Default
+			}
 			if s.Control == ControlPreset {
 				presets[s.Key] = map[string]map[string]string{}
 				for _, o := range s.Options {
 					presets[s.Key][o.Value] = o.Values
+				}
+			} else {
+				for _, o := range s.Options {
+					if o.Values != nil {
+						if links[s.Key] == nil {
+							links[s.Key] = map[string]map[string]string{}
+						}
+						links[s.Key][o.Value] = o.Values
+					}
 				}
 			}
 			if s.SidebarOnly {
@@ -134,7 +160,7 @@ func themeConfig(sections []ThemeSection) string {
 			}
 		}
 	}
-	b, _ := json.Marshal(map[string]any{"defaults": ThemeDefaults, "presets": presets, "sidebarOnly": sidebarOnly, "navbarOnly": navbarOnly})
+	b, _ := json.Marshal(map[string]any{"defaults": defaults, "presets": presets, "links": links, "sidebarOnly": sidebarOnly, "navbarOnly": navbarOnly})
 	return string(b)
 }
 

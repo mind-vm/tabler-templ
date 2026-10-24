@@ -2,7 +2,7 @@
 // and a list of records with search, filter, pages, a create page and a detail page with an edit dialog.
 // It writes the files, adds the modules and generates the templ code, so `go run .` starts the app.
 //
-//	go run github.com/mind-vm/tabler-templ/cmd/new@latest [-module example.com/myapp] [-name "My app"] myapp
+//	go run github.com/mind-vm/tabler-templ/cmd/new@latest [-module example.com/myapp] [-name "My app"] [-theme rose] myapp
 package main
 
 import (
@@ -19,6 +19,8 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+
+	"github.com/mind-vm/tabler-templ/themes"
 )
 
 //go:embed all:template
@@ -33,6 +35,7 @@ type data struct {
 	Module string // the new app's module path
 	Name   string // the app's name, e.g. "My app"
 	Binary string // the directory's name
+	Theme  string // the variable of the theme in package themes, e.g. "Rose"
 }
 
 func main() {
@@ -41,6 +44,7 @@ func main() {
 	version := flag.String("version", "", "tabler-templ version to use (default: the version of this command, or latest)")
 	replace := flag.String("replace", "", "use a local copy of tabler-templ (a replace directive), e.g. for developing tabler-templ")
 	noSetup := flag.Bool("no-setup", false, "only write the files; skip go get and templ generate")
+	themeName := flag.String("theme", "tabler", "the app's look, one of tabler-templ's themes: "+themeNames())
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "usage: new [flags] <directory>")
 		flag.PrintDefaults()
@@ -59,6 +63,11 @@ func main() {
 	if d.Name == "" {
 		d.Name = title(base)
 	}
+	t, ok := themes.Find(*themeName)
+	if !ok {
+		fail(fmt.Errorf("no theme %q; choose one of %s", *themeName, themeNames()))
+	}
+	d.Theme = t.Label
 	if err := create(dir, d); err != nil {
 		fail(err)
 	}
@@ -68,6 +77,14 @@ func main() {
 		}
 	}
 	fmt.Printf("\nCreated %s in %s. Start it with\n\n\tcd %s && go run .\n\nand sign in with admin@example.com / admin.\n", d.Name, dir, dir)
+}
+
+func themeNames() string {
+	var ns []string
+	for _, t := range themes.All {
+		ns = append(ns, strings.ToLower(t.Label))
+	}
+	return strings.Join(ns, ", ")
 }
 
 func fail(err error) {

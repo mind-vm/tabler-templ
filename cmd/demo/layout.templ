@@ -10,6 +10,7 @@ import (
 	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/internal/catalog"
+	"github.com/mind-vm/tabler-templ/themes"
 )
 
 // assets are Tabler's stylesheet and the icon font.
@@ -21,6 +22,8 @@ templ assets() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-themes.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
 	@chart.Library()
+	// The ready-made themes, so the settings panel can switch between them.
+	@themes.Head()
 	// Applies the theme settings saved in the browser before the page paints.
 	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler-theme.min.js" }></script>
 	// Rules of the preview's own demo.scss (not part of Tabler's CSS), e.g. menus shown open in the page.
@@ -30,7 +33,8 @@ templ assets() {
 // scripts are Tabler's script and, as on every page of the preview, the theme settings panel.
 templ scripts() {
 	@layout.ThemeSettings(layout.ThemeSettingsProps{Title: "Make Tabler your own",
-		Text: "Pick the look and layout of this preview. Your choices are saved in this browser.", Media: settingsIllustration()})
+		Text: "Pick the look and layout of this preview. Your choices are saved in this browser.", Media: settingsIllustration(),
+		Sections: []layout.ThemeSection{themes.Section(), layout.AppearanceSection(), layout.LayoutSection()}})
 	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler.min.js" }></script>
 }
 

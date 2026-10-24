@@ -16,14 +16,19 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/theme"
+	"github.com/mind-vm/tabler-templ/themes"
 )
 
 // AppName is shown in the title, the navigation and the sign-in page.
 const AppName = "[[.Name]]"
 
-// Appearance is the app's look: accent color, gray base, font and corner radius. Users can change it for
-// themselves under Appearance in the user menu; their choice is saved in the browser.
-var Appearance = theme.Settings{Primary: theme.Blue}
+// Theme is the app's look, one of tabler-templ's ready-made themes (themes.All) or your own
+// themes.Theme. Appearance adjusts it: accent color, gray base, font and corner radius. Users can change
+// both for themselves under Appearance in the user menu; their choice is saved in the browser.
+var (
+	Theme      = themes.[[.Theme]]
+	Appearance = theme.Settings{}
+)
 
 // Page is what every page in the frame gets from its handler.
 type Page struct {
@@ -45,7 +50,7 @@ templ head() {
 templ scripts() {
 	@layout.ThemeSettings(layout.ThemeSettingsProps{NoButton: true, Title: "Appearance",
 		Text: "Pick colors, font and corners. Your choice is saved in this browser.",
-		Sections: []layout.ThemeSection{layout.AppearanceSection()}})
+		Sections: []layout.ThemeSection{themes.Section(), layout.AppearanceSection()}})
 	@assets.Scripts()
 	@detail.Script(detail.ScriptConfig{})
 }
@@ -96,19 +101,25 @@ templ actions(p Page) {
 
 // Frame is the app's page frame: Tabler's horizontal layout with the menu, the page header (title and
 // Actions) and the flash message; the children are the content.
-templ Frame(p Page, headerActions templ.Component) {
-	@layout.Page(layout.PageProps{
+func frame(p Page, headerActions templ.Component) layout.PageProps {
+	props := layout.PageProps{
 		Title:      p.Title + " · " + AppName,
 		Appearance: Appearance,
-		Head:    head(),
-		Scripts: scripts(),
+		Head:       head(),
+		Scripts:    scripts(),
 		Navbar: layout.Navbar(layout.NavbarProps{
 			Brand:   brand(),
 			Actions: actions(p),
 		}, menu(p.Active)),
 		Header: layout.PageHeader(layout.PageHeaderProps{Title: p.Title, Actions: headerActions}),
 		Footer: layout.Footer(layout.FooterProps{Links: []layout.Link{{Text: "tabler-templ", Href: "https://github.com/mind-vm/tabler-templ", External: true}}}),
-	}) {
+	}
+	Theme.Apply(&props)
+	return props
+}
+
+templ Frame(p Page, headerActions templ.Component) {
+	@layout.Page(frame(p, headerActions)) {
 		if p.Flash != "" {
 			@alert.Alert(alert.Props{Variant: alert.VariantSuccess, Dismissible: true}) {
 				{ p.Flash }
@@ -127,12 +138,17 @@ type SignInForm struct {
 
 // SignIn is the sign-in page.
 templ SignIn(f SignInForm) {
-	@auth.Page(auth.PageProps{Title: "Sign in · " + AppName, Head: signInHead(), Scripts: assets.Scripts(), Appearance: Appearance,
-		Brand: signInLogo()}) {
+	@auth.Page(signInProps()) {
 		@auth.SignInCard(auth.SignInCardProps{Form: auth.SignInFormProps{
 			Action: "/sign-in", Error: f.Error, UserValue: f.Email, Hidden: hidden("next", f.Next),
 		}})
 	}
+}
+
+func signInProps() auth.PageProps {
+	p := auth.PageProps{Title: "Sign in · " + AppName, Head: signInHead(), Scripts: assets.Scripts(), Appearance: Appearance, Brand: signInLogo()}
+	Theme.ApplyAuth(&p)
+	return p
 }
 
 templ signInHead() {

@@ -13,7 +13,7 @@ import (
 // TestCreate writes the app and checks that its Go files parse and carry the module path.
 func TestCreate(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "my-app")
-	if err := create(dir, data{Module: "example.com/my-app", Name: "My app", Binary: "my-app"}); err != nil {
+	if err := create(dir, data{Module: "example.com/my-app", Name: "My app", Binary: "my-app", Theme: "Rose"}); err != nil {
 		t.Fatal(err)
 	}
 	for _, f := range []string{"main.go", "auth.go", "main_test.go", "internal/projects/projects.go"} {
@@ -40,7 +40,7 @@ func TestNewApp(t *testing.T) {
 		t.Skip("set TABLER_NEW_E2E=1")
 	}
 	dir := filepath.Join(t.TempDir(), "acme")
-	d := data{Module: "example.com/acme", Name: "Acme", Binary: "acme"}
+	d := data{Module: "example.com/acme", Name: "Acme", Binary: "acme", Theme: "Violet"}
 	if err := create(dir, d); err != nil {
 		t.Fatal(err)
 	}
