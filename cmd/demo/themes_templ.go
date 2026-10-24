@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"net/http"
 
 	"github.com/mind-vm/tabler-templ/badge"
@@ -140,7 +141,7 @@ func themesPage() templ.Component {
 							var templ_7745c5c3_Var6 string
 							templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 61, Col: 18}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 62, Col: 18}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 							if templ_7745c5c3_Err != nil {
@@ -167,7 +168,7 @@ func themesPage() templ.Component {
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(t.Description)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 64, Col: 24}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 65, Col: 24}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -241,7 +242,7 @@ func themesPage() templ.Component {
 						var templ_7745c5c3_Var11 string
 						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue("/themes/" + themeName(t) + "?mode=" + mode)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 76, Col: 66}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 77, Col: 66}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 						if templ_7745c5c3_Err != nil {
@@ -254,7 +255,7 @@ func themesPage() templ.Component {
 						var templ_7745c5c3_Var12 string
 						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(t.Label + ", " + mode)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 76, Col: 98}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 77, Col: 98}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 						if templ_7745c5c3_Err != nil {
@@ -288,7 +289,7 @@ func themesPage() templ.Component {
 						var templ_7745c5c3_Var14 string
 						templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(themeCode(t))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 81, Col: 27}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 82, Col: 27}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 						if templ_7745c5c3_Err != nil {
@@ -370,7 +371,7 @@ func themeSample(t themes.Theme, mode string) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 112, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 113, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -381,9 +382,9 @@ func themeSample(t themes.Theme, mode string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 templ.SafeURL
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.min.css")
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 113, Col: 122}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 114, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -394,9 +395,9 @@ func themeSample(t themes.Theme, mode string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 templ.SafeURL
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-themes.min.css")
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-themes.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 114, Col: 129}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 115, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -407,9 +408,9 @@ func themeSample(t themes.Theme, mode string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 templ.SafeURL
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.min.css")
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-vendors.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 115, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 116, Col: 106}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -420,9 +421,9 @@ func themeSample(t themes.Theme, mode string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 templ.SafeURL
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css")
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/icons-webfont", iconsVersion, "dist/tabler-icons.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 116, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/themes.templ`, Line: 117, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {

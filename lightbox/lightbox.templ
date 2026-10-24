@@ -9,6 +9,7 @@
 package lightbox
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -17,8 +18,8 @@ import (
 // Version is the fslightbox version Tabler 1.7 is built against.
 const Version = versions.Fslightbox
 
-// LibraryURL is fslightbox on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/fslightbox@" + Version + "/index.js"
+// LibraryURL is fslightbox (on cdn.Base).
+func LibraryURL() string { return cdn.URL("fslightbox", Version, "index.js") }
 
 type Props struct {
 	Class      string
@@ -49,7 +50,7 @@ templ Link(p Props) {
 
 // Library loads fslightbox; put it in the head. Its styles are in Tabler's tabler-vendors.css.
 templ Library() {
-	<script { csp.Nonce(ctx)... } src={ LibraryURL } defer></script>
+	<script { csp.Nonce(ctx)... } src={ LibraryURL() } defer></script>
 }
 
 var once = templ.NewOnceHandle()
@@ -61,4 +62,8 @@ templ script() {
 			document.addEventListener('htmx:afterSettle', function () { window.refreshFsLightbox && window.refreshFsLightbox(); });
 		</script>
 	}
+}
+
+func init() {
+	cdn.Register("lightbox", "fslightbox", Version, "index.js")
 }

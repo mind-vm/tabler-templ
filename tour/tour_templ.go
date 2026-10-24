@@ -21,6 +21,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -28,11 +29,12 @@ import (
 // Version is the Driver.js version Library loads.
 const Version = versions.Driver
 
-// LibraryURL and StylesheetURL are Driver.js on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/driver.js@" + Version + "/dist/driver.js.iife.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/driver.js@" + Version + "/dist/driver.css"
-)
+// LibraryURL and StylesheetURL() are Driver.js (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("driver.js", Version, "dist/driver.js.iife.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string { return cdn.URL("driver.js", Version, "dist/driver.css") }
 
 // Step is a step of a tour.
 type Step struct {
@@ -115,7 +117,7 @@ func Tour(p Props) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `tour/tour.templ`, Line: 77, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `tour/tour.templ`, Line: 80, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -128,7 +130,7 @@ func Tour(p Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(config(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `tour/tour.templ`, Line: 77, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `tour/tour.templ`, Line: 80, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -190,11 +192,11 @@ func Library() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = plugin.Script(LibraryURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Script(LibraryURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -204,6 +206,10 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("tour", "driver.js", Version, "dist/driver.js.iife.js", "dist/driver.css")
 }
 
 var _ = templruntime.GeneratedTemplate

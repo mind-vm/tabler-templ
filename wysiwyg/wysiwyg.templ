@@ -6,6 +6,7 @@
 package wysiwyg
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
@@ -14,8 +15,8 @@ import (
 // Version is the HugeRTE version Library loads.
 const Version = versions.HugeRTE
 
-// LibraryURL is HugeRTE on jsDelivr; it loads its theme, skins and plugins from next to it.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/hugerte@" + Version + "/hugerte.min.js"
+// LibraryURL is HugeRTE (on cdn.Base); it loads its theme, skins and plugins from next to it.
+func LibraryURL() string { return cdn.URL("hugerte", Version, "hugerte.min.js") }
 
 type Props struct {
 	ID         string
@@ -87,5 +88,10 @@ func Script() templ.Component {
 
 // Library loads HugeRTE and starts every editor on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	// HugeRTE loads its theme, model, icons, skin and plugins from next to hugerte.min.js.
+	cdn.Register("wysiwyg", "hugerte", Version, "hugerte.min.js", "themes/**", "models/**", "icons/**", "skins/**", "plugins/**")
 }

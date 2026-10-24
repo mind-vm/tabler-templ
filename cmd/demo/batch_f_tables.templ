@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -524,7 +525,7 @@ templ tablesPage() {
 			</div>
 		</div>
 		// List.js sorts, searches and pages the advanced table (a plugin, as in Tabler's preview).
-		<script src={ "https://cdn.jsdelivr.net/npm/list.js@" + versions.ListJS + "/dist/list.min.js" } defer></script>
+		<script src={ cdn.URL("list.js", versions.ListJS, "dist/list.min.js") } defer></script>
 		@tables.AdvancedScript(bfEmployeeTable())
 	}
 }

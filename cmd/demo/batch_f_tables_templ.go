@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -68,7 +69,7 @@ func bfPairs(pairs []bfPair, list bool) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 29, Col: 12}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 30, Col: 12}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -124,7 +125,7 @@ func bfPersonCell(av, name string) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 40, Col: 8}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 41, Col: 8}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -166,7 +167,7 @@ func bfUsage(pct float64, color string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(itoaPct(pct))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 45, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 46, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -212,7 +213,7 @@ func bfCopy(id, value, label string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 51, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 52, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -225,7 +226,7 @@ func bfCopy(id, value, label string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 51, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 52, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -307,7 +308,7 @@ func bfGridCard(title, subtitle string) templ.Component {
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 60, Col: 11}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 61, Col: 11}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -1515,7 +1516,7 @@ func datagridPage() templ.Component {
 							var templ_7745c5c3_Var72 string
 							templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(" ")
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 232, Col: 23}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 233, Col: 23}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 							if templ_7745c5c3_Err != nil {
@@ -1946,7 +1947,7 @@ func bfStaffTable(rows []bfStaff, striped bool) templ.Component {
 				var templ_7745c5c3_Var88 string
 				templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinStringErrs(r.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 346, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 347, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 				if templ_7745c5c3_Err != nil {
@@ -1959,7 +1960,7 @@ func bfStaffTable(rows []bfStaff, striped bool) templ.Component {
 				var templ_7745c5c3_Var89 string
 				templ_7745c5c3_Var89, templ_7745c5c3_Err = templ.JoinStringErrs(r.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 347, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 348, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var89))
 				if templ_7745c5c3_Err != nil {
@@ -1972,7 +1973,7 @@ func bfStaffTable(rows []bfStaff, striped bool) templ.Component {
 				var templ_7745c5c3_Var90 string
 				templ_7745c5c3_Var90, templ_7745c5c3_Err = templ.JoinStringErrs(r.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 348, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 349, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var90))
 				if templ_7745c5c3_Err != nil {
@@ -1985,7 +1986,7 @@ func bfStaffTable(rows []bfStaff, striped bool) templ.Component {
 				var templ_7745c5c3_Var91 string
 				templ_7745c5c3_Var91, templ_7745c5c3_Err = templ.JoinStringErrs(r.Role)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 349, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 350, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var91))
 				if templ_7745c5c3_Err != nil {
@@ -2055,7 +2056,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var94 string
 				templ_7745c5c3_Var94, templ_7745c5c3_Err = templ.ResolveAttributeValue(pickStr(mobile, "Name"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 370, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 371, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var94)
 				if templ_7745c5c3_Err != nil {
@@ -2076,7 +2077,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var95 string
 				templ_7745c5c3_Var95, templ_7745c5c3_Err = templ.JoinStringErrs(r.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 374, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 375, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var95))
 				if templ_7745c5c3_Err != nil {
@@ -2089,7 +2090,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var96 string
 				templ_7745c5c3_Var96, templ_7745c5c3_Err = templ.JoinStringErrs(r.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 375, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 376, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var96))
 				if templ_7745c5c3_Err != nil {
@@ -2102,7 +2103,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var97 string
 				templ_7745c5c3_Var97, templ_7745c5c3_Err = templ.ResolveAttributeValue(pickStr(mobile, "Title"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 379, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 380, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var97)
 				if templ_7745c5c3_Err != nil {
@@ -2115,7 +2116,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var98 string
 				templ_7745c5c3_Var98, templ_7745c5c3_Err = templ.JoinStringErrs(r.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 380, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 381, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var98))
 				if templ_7745c5c3_Err != nil {
@@ -2128,7 +2129,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var99 string
 				templ_7745c5c3_Var99, templ_7745c5c3_Err = templ.JoinStringErrs(r.Dept)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 381, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 382, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var99))
 				if templ_7745c5c3_Err != nil {
@@ -2141,7 +2142,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var100 string
 				templ_7745c5c3_Var100, templ_7745c5c3_Err = templ.ResolveAttributeValue(pickStr(mobile, "Role"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 383, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 384, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var100)
 				if templ_7745c5c3_Err != nil {
@@ -2154,7 +2155,7 @@ func bfMemberTable(rows []bfMember, mobile bool) templ.Component {
 				var templ_7745c5c3_Var101 string
 				templ_7745c5c3_Var101, templ_7745c5c3_Err = templ.JoinStringErrs(r.Role)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 383, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 384, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var101))
 				if templ_7745c5c3_Err != nil {
@@ -2365,7 +2366,7 @@ func bfEmployeeName(a avatar.Props, name string) templ.Component {
 		var templ_7745c5c3_Var108 string
 		templ_7745c5c3_Var108, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 443, Col: 7}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 444, Col: 7}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var108))
 		if templ_7745c5c3_Err != nil {
@@ -2411,7 +2412,7 @@ func bfEmployeeStatus(text, color string) templ.Component {
 			var templ_7745c5c3_Var111 string
 			templ_7745c5c3_Var111, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 448, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 449, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var111))
 			if templ_7745c5c3_Err != nil {
@@ -2476,7 +2477,7 @@ func bfTags(tags []string) templ.Component {
 					var templ_7745c5c3_Var115 string
 					templ_7745c5c3_Var115, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 456, Col: 7}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 457, Col: 7}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var115))
 					if templ_7745c5c3_Err != nil {
@@ -2885,9 +2886,9 @@ func tablesPage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var131 string
-			templ_7745c5c3_Var131, templ_7745c5c3_Err = templ.ResolveAttributeValue("https://cdn.jsdelivr.net/npm/list.js@" + versions.ListJS + "/dist/list.min.js")
+			templ_7745c5c3_Var131, templ_7745c5c3_Err = templ.ResolveAttributeValue(cdn.URL("list.js", versions.ListJS, "dist/list.min.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 527, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_tables.templ`, Line: 528, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var131)
 			if templ_7745c5c3_Err != nil {

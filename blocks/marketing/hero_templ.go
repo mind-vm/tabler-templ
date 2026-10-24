@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 
 	"github.com/mind-vm/tabler-templ/icon"
@@ -190,7 +191,7 @@ func heroTitle(title string, html templ.Component) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 48, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 49, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -260,7 +261,7 @@ func heroInner(p HeroProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 57, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 58, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -379,7 +380,7 @@ func Browser(p BrowserProps) templ.Component {
 		var templ_7745c5c3_Var16 templ.SafeURL
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(p.URL))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 100, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 101, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -397,7 +398,7 @@ func Browser(p BrowserProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Tooltip)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 107, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 108, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 			if templ_7745c5c3_Err != nil {
@@ -423,7 +424,7 @@ func Browser(p BrowserProps) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(p.URL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 111, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 112, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -521,7 +522,7 @@ func screenshot(src, src2x, alt string, w, h int, class string) templ.Component 
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(src)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 137, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 138, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 		if templ_7745c5c3_Err != nil {
@@ -539,7 +540,7 @@ func screenshot(src, src2x, alt string, w, h int, class string) templ.Component 
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(src + " 1x, " + src2x + " 2x")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 139, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 140, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
@@ -557,7 +558,7 @@ func screenshot(src, src2x, alt string, w, h int, class string) templ.Component 
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(alt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 141, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 142, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 		if templ_7745c5c3_Err != nil {
@@ -588,7 +589,7 @@ func screenshot(src, src2x, alt string, w, h int, class string) templ.Component 
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(itoa(w))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 144, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 145, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 			if templ_7745c5c3_Err != nil {
@@ -601,7 +602,7 @@ func screenshot(src, src2x, alt string, w, h int, class string) templ.Component 
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(itoa(h))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 145, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 146, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 			if templ_7745c5c3_Err != nil {
@@ -683,7 +684,7 @@ func SideHero(p SideHeroProps) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(p.Subheader)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 169, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 170, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -706,7 +707,7 @@ func SideHero(p SideHeroProps) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 173, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 174, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -815,7 +816,7 @@ func CoverHero(p CoverHeroProps) templ.Component {
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("background-image: url(" + p.Image + ")"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 210, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 211, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -850,7 +851,7 @@ func CoverHero(p CoverHeroProps) templ.Component {
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 213, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 214, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
@@ -868,7 +869,7 @@ func CoverHero(p CoverHeroProps) templ.Component {
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 215, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 216, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -937,7 +938,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 			var templ_7745c5c3_Var42 templ.SafeURL
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(p.Action))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 243, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 244, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -950,7 +951,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Method, "get"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 244, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 245, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var43)
 			if templ_7745c5c3_Err != nil {
@@ -973,7 +974,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 250, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 251, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var44)
 			if templ_7745c5c3_Err != nil {
@@ -992,7 +993,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 			var templ_7745c5c3_Var45 string
 			templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Name, "q"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 253, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 254, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
 			if templ_7745c5c3_Err != nil {
@@ -1015,7 +1016,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 			var templ_7745c5c3_Var46 string
 			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 257, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 258, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var46)
 			if templ_7745c5c3_Err != nil {
@@ -1033,7 +1034,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Placeholder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 259, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 260, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var47)
 		if templ_7745c5c3_Err != nil {
@@ -1046,7 +1047,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Placeholder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 261, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 262, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var48)
 		if templ_7745c5c3_Err != nil {
@@ -1081,7 +1082,7 @@ func SearchForm(p SearchFormProps) templ.Component {
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Button, "Search"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 264, Col: 139}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 265, Col: 139}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
@@ -1103,8 +1104,12 @@ type TypedProps struct {
 	TypeSpeed, BackSpeed, BackDelay, StartDelay int
 }
 
-// TypedLibraryURL is typed.js on jsDelivr; load it (deferred) for Typed.
-const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@" + versions.Typed + "/dist/typed.umd.js"
+// TypedLibraryURL is typed.js on cdn.Base; load it (deferred) for Typed.
+func TypedLibraryURL() string { return cdn.URL("typed.js", versions.Typed, "dist/typed.umd.js") }
+
+func init() {
+	cdn.Register("marketing", "typed.js", versions.Typed, "dist/typed.umd.js")
+}
 
 // TypedLibrary loads typed.js; put it in the page's head.
 func TypedLibrary() templ.Component {
@@ -1141,9 +1146,9 @@ func TypedLibrary() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var53 string
-		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.ResolveAttributeValue(TypedLibraryURL)
+		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.ResolveAttributeValue(TypedLibraryURL())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 283, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 288, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var53)
 		if templ_7745c5c3_Err != nil {
@@ -1218,7 +1223,7 @@ func Typed(p TypedProps) templ.Component {
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 302, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 307, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var57)
 		if templ_7745c5c3_Err != nil {
@@ -1231,7 +1236,7 @@ func Typed(p TypedProps) templ.Component {
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.ResolveAttributeValue(typedConfig(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 302, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 307, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var58)
 		if templ_7745c5c3_Err != nil {
@@ -1245,7 +1250,7 @@ func Typed(p TypedProps) templ.Component {
 			var templ_7745c5c3_Var59 string
 			templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(p.Strings[0])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 304, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/marketing/hero.templ`, Line: 309, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 			if templ_7745c5c3_Err != nil {

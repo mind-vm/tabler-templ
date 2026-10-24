@@ -20,6 +20,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/settings"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/datagrid"
 	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/form"
@@ -358,7 +359,7 @@ func settingsPage() templ.Component {
 							var templ_7745c5c3_Var15 string
 							templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(f.ID)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 98, Col: 44}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 99, Col: 44}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 							if templ_7745c5c3_Err != nil {
@@ -371,7 +372,7 @@ func settingsPage() templ.Component {
 							var templ_7745c5c3_Var16 string
 							templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(f.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 98, Col: 56}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 99, Col: 56}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 							if templ_7745c5c3_Err != nil {
@@ -588,7 +589,7 @@ func users(n string) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(n)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 138, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 139, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -944,7 +945,7 @@ func getStarted(text string, primary bool) templ.Component {
 				var templ_7745c5c3_Var37 string
 				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 201, Col: 9}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 202, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 				if templ_7745c5c3_Err != nil {
@@ -972,7 +973,7 @@ func getStarted(text string, primary bool) templ.Component {
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 205, Col: 9}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 206, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -1510,9 +1511,9 @@ func paymentsCSS() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var57 templ.SafeURL
-		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css")
+		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 344, Col: 129}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 345, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
@@ -1590,7 +1591,7 @@ func providerGrid(title, subtitle string, dark bool) templ.Component {
 					var templ_7745c5c3_Var62 string
 					templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 352, Col: 12}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 353, Col: 12}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 					if templ_7745c5c3_Err != nil {
@@ -1617,7 +1618,7 @@ func providerGrid(title, subtitle string, dark bool) templ.Component {
 					var templ_7745c5c3_Var64 string
 					templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(subtitle)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 355, Col: 15}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 356, Col: 15}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 					if templ_7745c5c3_Err != nil {
@@ -1671,7 +1672,7 @@ func providerGrid(title, subtitle string, dark bool) templ.Component {
 					var templ_7745c5c3_Var66 string
 					templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(pr.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 368, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 369, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 					if templ_7745c5c3_Err != nil {
@@ -1684,7 +1685,7 @@ func providerGrid(title, subtitle string, dark bool) templ.Component {
 					var templ_7745c5c3_Var67 string
 					templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(pr.Code + kitIf(dark, "-dark"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 370, Col: 47}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 371, Col: 47}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 					if templ_7745c5c3_Err != nil {
@@ -2080,7 +2081,7 @@ func smallButton(text, ic string) templ.Component {
 			var templ_7745c5c3_Var83 string
 			templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 435, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 436, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 			if templ_7745c5c3_Err != nil {
@@ -2515,7 +2516,7 @@ func billingPage() templ.Component {
 								var templ_7745c5c3_Var102 string
 								templ_7745c5c3_Var102, templ_7745c5c3_Err = templ.JoinStringErrs(d[1])
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 521, Col: 17}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_d.templ`, Line: 522, Col: 17}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var102))
 								if templ_7745c5c3_Err != nil {

@@ -7,6 +7,7 @@ package sortable
 
 import (
 	"github.com/a-h/templ"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/versions"
 )
@@ -14,8 +15,8 @@ import (
 // Version is the SortableJS version Library loads.
 const Version = versions.SortableJS
 
-// LibraryURL is SortableJS on jsDelivr (with the MultiDrag and Swap plugins).
-const LibraryURL = "https://cdn.jsdelivr.net/npm/sortablejs@" + Version + "/Sortable.min.js"
+// LibraryURL is SortableJS (on cdn.Base) (with the MultiDrag and Swap plugins).
+func LibraryURL() string { return cdn.URL("sortablejs", Version, "Sortable.min.js") }
 
 // Options are SortableJS options, e.g. "group", "animation", "handle", "filter", "direction".
 type Options map[string]any
@@ -36,5 +37,9 @@ func Script() templ.Component {
 
 // Library loads SortableJS; put it in the head, before Tabler's script.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("sortable", "sortablejs", Version, "Sortable.min.js")
 }

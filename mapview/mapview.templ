@@ -12,6 +12,7 @@
 package mapview
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"encoding/json"
 	"strconv"
@@ -28,7 +29,7 @@ const TablerVersion = versions.Tabler
 const MapLibreVersion = versions.MapLibre
 
 // LibraryURL is MapLibre GL JS as a module on jsDelivr; Tabler's map script imports it on first use.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.mjs"
+func LibraryURL() string { return cdn.URL("maplibre-gl", MapLibreVersion, "dist/maplibre-gl.mjs") }
 
 // LngLat is a position: longitude first, as in GeoJSON.
 type LngLat struct {
@@ -81,7 +82,7 @@ type Props struct {
 	GeoJSON    any
 	LayerColor string // color of the route and the shapes, e.g. "--tblr-green"; default primary
 	Options    map[string]any // any MapLibre map option
-	// Library is the URL MapLibre GL JS is imported from; default LibraryURL.
+	// Library is the URL MapLibre GL JS is imported from; default LibraryURL().
 	Library string
 
 	// Ratio puts the map in a box of that aspect ratio, e.g. "16x9" (ratio-16x9); Height in a box of
@@ -176,7 +177,7 @@ templ mapElement(p Props) {
 		role="region"
 		aria-label={ kit.Or(p.Label, "Map") }
 		data-bs-toggle="map"
-		data-bs-library={ kit.Or(p.Library, LibraryURL) }
+		data-bs-library={ kit.Or(p.Library, LibraryURL()) }
 		if p.Center != nil {
 			data-bs-center={ p.Center.String() }
 		}
@@ -306,8 +307,14 @@ func FlyTo(id string, to LngLat, zoom float64) templ.Attributes {
 // so Tabler's map styles (tabler-vendors.css) win.
 // Tabler's own script (tabler.js) must be on the page as well.
 templ Library() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.css" }/>
-	<script { csp.Nonce(ctx)... } src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + TablerVersion + "/dist/js/tabler-map.min.js" } defer></script>
+	<link rel="stylesheet" href={ cdn.URL("maplibre-gl", MapLibreVersion, "dist/maplibre-gl.css") }/>
+	<script { csp.Nonce(ctx)... } src={ cdn.URL("@tabler/core", TablerVersion, "dist/js/tabler-map.min.js") } defer></script>
+}
+
+func init() {
+	// maplibre-gl.mjs imports the shared and worker modules from next to it.
+	cdn.Register("mapview", "maplibre-gl", MapLibreVersion, "dist/maplibre-gl.mjs", "dist/maplibre-gl-shared.mjs", "dist/maplibre-gl-worker.mjs", "dist/maplibre-gl.css")
+	cdn.Register("mapview", "@tabler/core", TablerVersion, "dist/js/tabler-map.min.js")
 }
 
 var once = templ.NewOnceHandle()

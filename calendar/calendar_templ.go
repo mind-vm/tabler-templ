@@ -17,6 +17,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"time"
 
@@ -27,8 +28,8 @@ import (
 // Version is the FullCalendar version Library loads.
 const Version = versions.FullCalendar
 
-// LibraryURL is FullCalendar (all standard plugins) on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/fullcalendar@" + Version + "/index.global.min.js"
+// LibraryURL is FullCalendar (all standard plugins) (on cdn.Base).
+func LibraryURL() string { return cdn.URL("fullcalendar", Version, "index.global.min.js") }
 
 // Event is an event of a Calendar.
 type Event struct {
@@ -138,7 +139,7 @@ func Calendar(p Props) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `calendar/calendar.templ`, Line: 94, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `calendar/calendar.templ`, Line: 95, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -175,7 +176,7 @@ func Calendar(p Props) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(options(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `calendar/calendar.templ`, Line: 99, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `calendar/calendar.templ`, Line: 100, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -217,7 +218,11 @@ func Script() templ.Component {
 
 // Library loads FullCalendar and starts every calendar on the page; put it in the head.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("calendar", "fullcalendar", Version, "index.global.min.js")
 }
 
 var _ = templruntime.GeneratedTemplate

@@ -5,6 +5,9 @@
 package main
 
 import (
+[[- if .SelfHost]]
+	"embed"
+[[- end]]
 	"errors"
 	"flag"
 	"log"
@@ -14,6 +17,9 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
+[[- if .SelfHost]]
+	"github.com/mind-vm/tabler-templ/cdn"
+[[- end]]
 	"github.com/mind-vm/tabler-templ/compress"
 
 	"[[.Module]]/internal/projects"
@@ -25,9 +31,23 @@ type app struct {
 	projects *projects.Store
 }
 
+[[- if .SelfHost]]
+
+// static holds Tabler, its icons, ApexCharts and the theme's fonts (cmd/vendor wrote static/npm), so the
+// app loads nothing from a CDN. After updating tabler-templ, run vendor again:
+//
+//	go run github.com/mind-vm/tabler-templ/cmd/vendor -out static/npm [[.VendorGroups]]
+//
+//go:embed static
+var static embed.FS
+[[- end]]
+
 func main() {
 	addr := flag.String("addr", "localhost:8080", "address to listen on")
 	flag.Parse()
+[[- if .SelfHost]]
+	cdn.Base = "/static/npm/"
+[[- end]]
 
 	a := &app{auth: newAuth(), projects: projects.NewStore()}
 	log.Printf("[[.Name]] on http://%s (sign in as %s)", *addr, a.auth.email)
@@ -36,6 +56,9 @@ func main() {
 
 func (a *app) routes() http.Handler {
 	mux := http.NewServeMux()
+[[- if .SelfHost]]
+	mux.Handle("GET /static/", http.FileServerFS(static))
+[[- end]]
 	mux.HandleFunc("GET /sign-in", a.signInPage)
 	mux.HandleFunc("POST /sign-in", a.signIn)
 	mux.HandleFunc("POST /sign-out", a.signOut)

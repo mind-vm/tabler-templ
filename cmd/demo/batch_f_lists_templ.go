@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -113,7 +114,7 @@ func bfListCard(title, subtitle string, props listgroup.Props) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 52, Col: 11}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 53, Col: 11}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -335,7 +336,7 @@ func bfText(s string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(s)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 84, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 85, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -534,7 +535,7 @@ func bfStar(label string) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 110, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 111, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
@@ -786,7 +787,7 @@ func bfAmount(amount string, positive bool) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(amount)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 150, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 151, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -804,7 +805,7 @@ func bfAmount(amount string, positive bool) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(amount)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 152, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 153, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -1040,7 +1041,7 @@ func bfBadge(color, text string) templ.Component {
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 187, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 188, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -1150,7 +1151,7 @@ func listsPage() templ.Component {
 						var templ_7745c5c3_Var47 string
 						templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(f.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 202, Col: 16}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 203, Col: 16}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 						if templ_7745c5c3_Err != nil {
@@ -1532,7 +1533,7 @@ func listsPage() templ.Component {
 						var templ_7745c5c3_Var61 string
 						templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(r.Role)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 301, Col: 66}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 302, Col: 66}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 						if templ_7745c5c3_Err != nil {
@@ -1603,7 +1604,7 @@ func listsPage() templ.Component {
 							var templ_7745c5c3_Var65 string
 							templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 312, Col: 11}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 313, Col: 11}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 							if templ_7745c5c3_Err != nil {
@@ -1654,7 +1655,7 @@ func listsPage() templ.Component {
 							var templ_7745c5c3_Var68 string
 							templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 320, Col: 11}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 321, Col: 11}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 							if templ_7745c5c3_Err != nil {
@@ -2167,9 +2168,9 @@ func listsPage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var86 string
-			templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.ResolveAttributeValue("https://cdn.jsdelivr.net/npm/sortablejs@" + versions.SortableJS + "/Sortable.min.js")
+			templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.ResolveAttributeValue(cdn.URL("sortablejs", versions.SortableJS, "Sortable.min.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 443, Col: 101}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_f_lists.templ`, Line: 444, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var86)
 			if templ_7745c5c3_Err != nil {

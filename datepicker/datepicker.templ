@@ -6,6 +6,7 @@
 package datepicker
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 	"strings"
@@ -18,8 +19,8 @@ import (
 // Version is the Vanilla Calendar Pro version Library loads.
 const Version = versions.VanillaCalendar
 
-// LibraryURL is Vanilla Calendar Pro on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@" + Version + "/index.js"
+// LibraryURL is Vanilla Calendar Pro (on cdn.Base).
+func LibraryURL() string { return cdn.URL("vanilla-calendar-pro", Version, "index.js") }
 
 // Mode is what can be picked.
 type Mode string
@@ -165,5 +166,9 @@ func Script() templ.Component {
 
 // Library loads Vanilla Calendar Pro; put it in the head, before Tabler's script.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("datepicker", "vanilla-calendar-pro", Version, "index.js")
 }

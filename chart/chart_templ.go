@@ -34,6 +34,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strings"
 
@@ -44,8 +45,8 @@ import (
 // Version is the ApexCharts version Library loads; Tabler 1.7 is built against it.
 const Version = versions.ApexCharts
 
-// LibraryURL is ApexCharts on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/apexcharts@" + Version + "/dist/apexcharts.min.js"
+// LibraryURL is ApexCharts (on cdn.Base).
+func LibraryURL() string { return cdn.URL("apexcharts", Version, "dist/apexcharts.min.js") }
 
 // Type is the kind of chart, ApexCharts' chart.type.
 type Type string
@@ -225,7 +226,7 @@ func Chart(p Props) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue("chart-" + p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 177, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 178, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -256,7 +257,7 @@ func Chart(p Props) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 181, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 182, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -275,7 +276,7 @@ func Chart(p Props) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(s))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 184, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 185, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -293,7 +294,7 @@ func Chart(p Props) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.json())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 186, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 187, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -422,9 +423,9 @@ func Library() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(LibraryURL)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(LibraryURL())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 237, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 238, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 		if templ_7745c5c3_Err != nil {
@@ -495,6 +496,10 @@ func Script() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("chart", "apexcharts", Version, "dist/apexcharts.min.js")
 }
 
 var _ = templruntime.GeneratedTemplate

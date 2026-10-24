@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"net/http"
 
 	"github.com/mind-vm/tabler-templ/badge"
@@ -110,10 +111,10 @@ templ themeSample(t themes.Theme, mode string) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ t.Label }</title>
-			<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.min.css" }/>
-			<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-themes.min.css" }/>
-			<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.min.css" }/>
-			<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+			<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler.min.css") }/>
+			<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-themes.min.css") }/>
+			<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-vendors.min.css") }/>
+			<link rel="stylesheet" href={ cdn.URL("@tabler/icons-webfont", iconsVersion, "dist/tabler-icons.min.css") }/>
 			@chart.Library()
 			@themes.Head(t)
 		</head>

@@ -184,6 +184,18 @@ func (d *Files) URL(name string) string {
 	return d.prefix + "v" + d.version + "/" + name
 }
 
+// Dir is the versioned address of a folder of the bundle, e.g. Dir("npm/") = "/static/v3f…/npm/". Point
+// cdn.Base at it when cmd/vendor wrote the plugins and fonts there, so they are cached and compressed like
+// the other files.
+func (d *Files) Dir(dir string) string {
+	d.load()
+	dir = strings.Trim(dir, "/")
+	if dir != "" {
+		dir += "/"
+	}
+	return d.prefix + "v" + d.version + "/" + dir
+}
+
 // Has reports whether the bundle has the file.
 func (d *Files) Has(name string) bool {
 	d.load()

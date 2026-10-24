@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/chart"
 )
@@ -58,10 +59,10 @@ templ layoutPage(name string) {
 
 // rtlAssets are Tabler's right-to-left stylesheets.
 templ rtlAssets() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.rtl.min.css" }/>
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.rtl.min.css" }/>
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.rtl.min.css" }/>
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.rtl.min.css" }/>
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler.rtl.min.css") }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-flags.rtl.min.css") }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.rtl.min.css") }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-vendors.rtl.min.css") }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/icons-webfont", iconsVersion, "dist/tabler-icons.min.css") }/>
 	@chart.Library()
 }

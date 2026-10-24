@@ -1,6 +1,7 @@
 package marketing
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"encoding/json"
 	"github.com/mind-vm/tabler-templ/versions"
 
@@ -275,12 +276,16 @@ type TypedProps struct {
 	TypeSpeed, BackSpeed, BackDelay, StartDelay int
 }
 
-// TypedLibraryURL is typed.js on jsDelivr; load it (deferred) for Typed.
-const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@" + versions.Typed + "/dist/typed.umd.js"
+// TypedLibraryURL is typed.js on cdn.Base; load it (deferred) for Typed.
+func TypedLibraryURL() string { return cdn.URL("typed.js", versions.Typed, "dist/typed.umd.js") }
+
+func init() {
+	cdn.Register("marketing", "typed.js", versions.Typed, "dist/typed.umd.js")
+}
 
 // TypedLibrary loads typed.js; put it in the page's head.
 templ TypedLibrary() {
-	<script { csp.Nonce(ctx)... } src={ TypedLibraryURL } defer></script>
+	<script { csp.Nonce(ctx)... } src={ TypedLibraryURL() } defer></script>
 }
 
 func typedConfig(p TypedProps) string {

@@ -23,6 +23,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/versions"
@@ -31,11 +32,14 @@ import (
 // Version is the Tom Select version Library loads.
 const Version = versions.TomSelect
 
-// LibraryURL and StylesheetURL are Tom Select on jsDelivr.
-const (
-	LibraryURL    = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/js/tom-select.base.min.js"
-	StylesheetURL = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/css/tom-select.bootstrap5.min.css"
-)
+// LibraryURL and StylesheetURL() are Tom Select (on cdn.Base).
+// LibraryURL is the file on cdn.Base.
+func LibraryURL() string { return cdn.URL("tom-select", Version, "dist/js/tom-select.base.min.js") }
+
+// StylesheetURL is the file on cdn.Base.
+func StylesheetURL() string {
+	return cdn.URL("tom-select", Version, "dist/css/tom-select.bootstrap5.min.css")
+}
 
 // Option is an option of a Select.
 type Option struct {
@@ -126,7 +130,7 @@ func option(o Option) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 87, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 90, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -139,7 +143,7 @@ func option(o Option) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(string(html))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 87, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 90, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -162,7 +166,7 @@ func option(o Option) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(o.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 87, Col: 101}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 90, Col: 101}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -180,7 +184,7 @@ func option(o Option) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 89, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 92, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -203,7 +207,7 @@ func option(o Option) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(o.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 89, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 92, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -270,7 +274,7 @@ func Select(p Props) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 98, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 101, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -289,7 +293,7 @@ func Select(p Props) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 101, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 104, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -308,7 +312,7 @@ func Select(p Props) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 104, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 107, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -327,7 +331,7 @@ func Select(p Props) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 107, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 110, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
@@ -363,7 +367,7 @@ func Select(p Props) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(settings(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 112, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 115, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 		if templ_7745c5c3_Err != nil {
@@ -389,7 +393,7 @@ func Select(p Props) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(g.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 116, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `selectbox/selectbox.templ`, Line: 119, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 			if templ_7745c5c3_Err != nil {
@@ -472,11 +476,11 @@ func Library() templ.Component {
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Stylesheet(StylesheetURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = plugin.Script(LibraryURL).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = plugin.Script(LibraryURL()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -486,6 +490,10 @@ func Library() templ.Component {
 		}
 		return nil
 	})
+}
+
+func init() {
+	cdn.Register("selectbox", "tom-select", Version, "dist/js/tom-select.base.min.js", "dist/css/tom-select.bootstrap5.min.css")
 }
 
 var _ = templruntime.GeneratedTemplate

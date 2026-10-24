@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/avatar"
@@ -167,7 +168,7 @@ const zipHelp = "<p>ZIP Code must be US or CDN format. You can use an extended Z
 
 // ---------------------------------------------------------------- form elements
 templ paymentStyles() {
-	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css" }/>
+	<link rel="stylesheet" href={ cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.min.css") }/>
 }
 
 templ moreActions() {

@@ -92,7 +92,7 @@ and a detail page whose edit dialog reopens with the errors after a failed save.
 besides tabler-templ and templ; the account comes from the environment and the data lives in memory, both
 marked as the places to replace. It runs `go get`, `go tool templ generate` and `go mod tidy` for you
 (`-no-setup` skips that; `-replace <dir>` uses a local tabler-templ checkout). `-theme rose` picks one of the
-ready-made themes.
+ready-made themes; `-self-host` serves Tabler and the fonts from the app instead of jsDelivr.
 
 ![The dashboard of a new app](docs/screenshots/new-app.png)
 
@@ -505,7 +505,29 @@ Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s,
 visit went from 1.9 MB in 4.3 s (served without compression or cache headers, the whole webfont) to 185 KB
 in 0.7 s, a repeat visit to 12–17 KB (the page) in 0.2 s.
 
-Plugins (`chart`, `mapview` …) and the filled icon font (`icon.FilledFontURL`) still come from jsDelivr.
+**Plugins, charts and theme fonts.** Everything else the packages load in the browser comes from
+`cdn.Base` (default jsDelivr):
+- ApexCharts;
+- the plugins (date picker, select, editor, maps …);
+- the theme fonts;
+- the filled icon font;
+- Plyr's icons.
+
+`cmd/vendor` puts these files into the same bundle, so they are cached and compressed like Tabler:
+
+```sh
+go run github.com/mind-vm/tabler-templ/cmd/vendor -out static/npm chart theme:graphite   # -list shows the groups
+```
+
+```go
+cdn.Base = files.Dir("npm/") // before serving pages: /static/v<hash>/npm/
+```
+
+`cmd/vendor` also fetches what the stylesheets refer to (fonts, flags), in the versions the module pins; run it
+again after updating tabler-templ. Without package `static`, any file server works:
+`cmd/vendor -out static/npm tabler chart` fetches Tabler and the full icon font too, and `cdn.Base =
+"/static/npm/"`. `cmd/new -self-host` sets that up. Map tiles (`mapview`) and video embeds (`player`) still
+come from their providers.
 
 ## Develop
 

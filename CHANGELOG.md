@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Self-hosting without a CDN:
+  - New package `cdn`: `cdn.Base` (default jsDelivr) is where every file loaded in the browser comes from.
+    This covers Tabler, its icons, ApexCharts, the plugins, the theme fonts and Plyr's icons.
+  - New command `cmd/vendor` downloads the files of the groups an app needs into a folder, along with
+    the fonts and images their stylesheets refer to.
+  - `cmd/new -self-host` embeds them in the app.
+  - The demo takes `-vendor <dir>`.
+  - With package `static`, `cmd/vendor` writes into the same bundle and `cdn.Base = files.Dir("npm/")`
+    serves the plugins and fonts versioned, cached and compressed like Tabler (new `Files.Dir`).
+- **Breaking:** the URL constants are functions now, so they follow `cdn.Base`:
+  - `<plugin>.LibraryURL()` and `StylesheetURL()`;
+  - `chart.LibraryURL()`, `mapview.LibraryURL()`;
+  - `assets.IconsURL()`;
+  - `marketing.TypedLibraryURL()`.
+
+  `icon.FilledFontURL` is empty by default; set it only to override `cdn.Base`. Theme fonts load
+  Fontsource's `index.css`.
 - Content-Security-Policy: every `<script>` and `<style>` the packages render carries templ's nonce
   (`templ.WithNonce`), not only `sidebar` and `blocks/detail`: `modal`, `chart`, `themes`, `icon`, the
   plugins, `confetti`, `assets`, the blocks (layout settings, tables, modals, maps, marketing, shell …) and

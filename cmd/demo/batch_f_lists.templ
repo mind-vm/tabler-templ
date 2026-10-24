@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strconv"
 
@@ -440,7 +441,7 @@ templ listsPage() {
 			</div>
 		</div>
 		// Sortable lets the items of a data-sortable list be dragged (a plugin, as in Tabler's preview).
-		<script src={ "https://cdn.jsdelivr.net/npm/sortablejs@" + versions.SortableJS + "/Sortable.min.js" } defer></script>
+		<script src={ cdn.URL("sortablejs", versions.SortableJS, "Sortable.min.js") } defer></script>
 	}
 }
 

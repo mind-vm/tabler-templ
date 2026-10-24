@@ -12,13 +12,14 @@
 package marketing
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // MarketingCSS is Tabler's marketing stylesheet on jsDelivr for a Tabler version, e.g. "1.7.1".
 func MarketingCSS(tablerVersion string) string {
-	return "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-marketing.min.css"
+	return cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-marketing.min.css")
 }
 
 type PageProps struct {

@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/avatar"
@@ -200,9 +201,9 @@ func paymentStyles() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 templ.SafeURL
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 170, Col: 129}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 171, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -376,7 +377,7 @@ func otherMenu() templ.Component {
 						var templ_7745c5c3_Var11 string
 						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(o)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 192, Col: 8}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 193, Col: 8}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 						if templ_7745c5c3_Err != nil {
@@ -1326,7 +1327,7 @@ func formElementsColumn2() templ.Component {
 					var templ_7745c5c3_Var52 string
 					templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs("@")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 335, Col: 10}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 336, Col: 10}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 					if templ_7745c5c3_Err != nil {
@@ -2636,7 +2637,7 @@ func formElementsColumn4() templ.Component {
 							var templ_7745c5c3_Var108 string
 							templ_7745c5c3_Var108, templ_7745c5c3_Err = templ.JoinStringErrs(pm.End)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 530, Col: 33}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 531, Col: 33}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var108))
 							if templ_7745c5c3_Err != nil {
@@ -2718,7 +2719,7 @@ func formElementsColumn4() templ.Component {
 						var templ_7745c5c3_Var112 string
 						templ_7745c5c3_Var112, templ_7745c5c3_Err = templ.JoinStringErrs(pm.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 543, Col: 40}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 544, Col: 40}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var112))
 						if templ_7745c5c3_Err != nil {
@@ -2731,7 +2732,7 @@ func formElementsColumn4() templ.Component {
 						var templ_7745c5c3_Var113 string
 						templ_7745c5c3_Var113, templ_7745c5c3_Err = templ.JoinStringErrs(pm.Role)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 544, Col: 45}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 545, Col: 45}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var113))
 						if templ_7745c5c3_Err != nil {
@@ -2972,7 +2973,7 @@ func formElementsColumn4() templ.Component {
 					var templ_7745c5c3_Var124 string
 					templ_7745c5c3_Var124, templ_7745c5c3_Err = templ.ResolveAttributeValue("btn-radio-toolbar-" + strconv.Itoa(i+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 583, Col: 113}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 584, Col: 113}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var124)
 					if templ_7745c5c3_Err != nil {
@@ -2995,7 +2996,7 @@ func formElementsColumn4() templ.Component {
 					var templ_7745c5c3_Var125 string
 					templ_7745c5c3_Var125, templ_7745c5c3_Err = templ.ResolveAttributeValue("btn-radio-toolbar-" + strconv.Itoa(i+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 584, Col: 58}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 585, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var125)
 					if templ_7745c5c3_Err != nil {
@@ -4266,7 +4267,7 @@ func headerCardTitle(title string) templ.Component {
 				var templ_7745c5c3_Var175 string
 				templ_7745c5c3_Var175, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 800, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 801, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var175))
 				if templ_7745c5c3_Err != nil {
@@ -4336,7 +4337,7 @@ func submitFooter(label string) templ.Component {
 				var templ_7745c5c3_Var179 string
 				templ_7745c5c3_Var179, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 808, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 809, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var179))
 				if templ_7745c5c3_Err != nil {
@@ -6080,7 +6081,7 @@ func subtitledHeader(title, subtitle string) templ.Component {
 				var templ_7745c5c3_Var247 string
 				templ_7745c5c3_Var247, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1133, Col: 11}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1134, Col: 11}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var247))
 				if templ_7745c5c3_Err != nil {
@@ -6107,7 +6108,7 @@ func subtitledHeader(title, subtitle string) templ.Component {
 				var templ_7745c5c3_Var249 string
 				templ_7745c5c3_Var249, templ_7745c5c3_Err = templ.JoinStringErrs(subtitle)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1136, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1137, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var249))
 				if templ_7745c5c3_Err != nil {
@@ -6716,7 +6717,7 @@ func formLayoutPage() templ.Component {
 							var templ_7745c5c3_Var273 string
 							templ_7745c5c3_Var273, templ_7745c5c3_Err = templ.JoinStringErrs("This throws the icon out of bounds when input element contains `is-invalid` class.")
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1250, Col: 98}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h_forms.templ`, Line: 1251, Col: 98}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var273))
 							if templ_7745c5c3_Err != nil {

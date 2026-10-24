@@ -8,6 +8,7 @@
 package inputmask
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
@@ -16,8 +17,8 @@ import (
 // Version is the IMask version Library loads.
 const Version = versions.IMask
 
-// LibraryURL is IMask on jsDelivr.
-const LibraryURL = "https://cdn.jsdelivr.net/npm/imask@" + Version + "/dist/imask.min.js"
+// LibraryURL is IMask (on cdn.Base).
+func LibraryURL() string { return cdn.URL("imask", Version, "dist/imask.min.js") }
 
 type Props struct {
 	ID         string
@@ -81,5 +82,9 @@ func Script() templ.Component {
 
 // Library loads IMask; put it in the head, before Tabler's script.
 func Library() templ.Component {
-	return templ.Join(plugin.Script(LibraryURL), Script())
+	return templ.Join(plugin.Script(LibraryURL()), Script())
+}
+
+func init() {
+	cdn.Register("inputmask", "imask", Version, "dist/imask.min.js")
 }

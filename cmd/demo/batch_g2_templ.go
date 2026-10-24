@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mind-vm/tabler-templ/cdn"
 	"strconv"
 	"strings"
 
@@ -64,9 +65,9 @@ func socialsCSS() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 templ.SafeURL
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-socials.min.css")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-socials.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 34, Col: 128}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 35, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -107,9 +108,9 @@ func marketingCSS() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-marketing.min.css")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-marketing.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 39, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 40, Col: 106}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -245,7 +246,7 @@ func iconLinkCell(name string) templ.Component {
 		var templ_7745c5c3_Var8 templ.SafeURL
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("https://tabler.io/icons/icon/" + name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 63, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 64, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -336,7 +337,7 @@ func gridCard(title, count string) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 73, Col: 11}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 74, Col: 11}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -356,7 +357,7 @@ func gridCard(title, count string) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(count)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 76, Col: 44}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 77, Col: 44}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -689,7 +690,7 @@ func iconsPage() templ.Component {
 					var templ_7745c5c3_Var28 string
 					templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(outlineIcons)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 140, Col: 150}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 141, Col: 150}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 					if templ_7745c5c3_Err != nil {
@@ -958,7 +959,7 @@ func items(texts ...string) templ.Component {
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 187, Col: 6}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 188, Col: 6}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -1011,7 +1012,7 @@ func iconItem(ic, color, text string) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 194, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 195, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
@@ -1063,7 +1064,7 @@ func mutedItem(ic, text string) templ.Component {
 			var templ_7745c5c3_Var46 string
 			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 200, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 201, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 			if templ_7745c5c3_Err != nil {
@@ -1145,7 +1146,7 @@ func planCard(name, price string, all bool) templ.Component {
 			var templ_7745c5c3_Var51 string
 			templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(price)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 212, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 213, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 			if templ_7745c5c3_Err != nil {
@@ -1220,7 +1221,7 @@ func planCard(name, price string, all bool) templ.Component {
 					var templ_7745c5c3_Var54 string
 					templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 228, Col: 18}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 229, Col: 18}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 					if templ_7745c5c3_Err != nil {
@@ -1252,7 +1253,7 @@ func planCard(name, price string, all bool) templ.Component {
 					var templ_7745c5c3_Var56 string
 					templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 232, Col: 18}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 233, Col: 18}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 					if templ_7745c5c3_Err != nil {
@@ -1319,7 +1320,7 @@ func describedItem(title, text string) templ.Component {
 			var templ_7745c5c3_Var59 string
 			templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 242, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 243, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 			if templ_7745c5c3_Err != nil {
@@ -1332,7 +1333,7 @@ func describedItem(title, text string) templ.Component {
 			var templ_7745c5c3_Var60 string
 			templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 243, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 244, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 			if templ_7745c5c3_Err != nil {
@@ -1948,7 +1949,7 @@ func iconListsPage() templ.Component {
 						var templ_7745c5c3_Var88 string
 						templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinStringErrs("hello@tabler.io")
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 331, Col: 58}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 332, Col: 58}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 						if templ_7745c5c3_Err != nil {
@@ -2310,7 +2311,7 @@ func socialIconsPage() templ.Component {
 						var templ_7745c5c3_Var102 string
 						templ_7745c5c3_Var102, templ_7745c5c3_Err = templ.JoinStringErrs(s.Count)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 406, Col: 25}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 407, Col: 25}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var102))
 						if templ_7745c5c3_Err != nil {
@@ -2323,7 +2324,7 @@ func socialIconsPage() templ.Component {
 						var templ_7745c5c3_Var103 string
 						templ_7745c5c3_Var103, templ_7745c5c3_Err = templ.JoinStringErrs(s.Today)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 407, Col: 48}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 408, Col: 48}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var103))
 						if templ_7745c5c3_Err != nil {
@@ -2410,7 +2411,7 @@ func socialIconsPage() templ.Component {
 							var templ_7745c5c3_Var107 string
 							templ_7745c5c3_Var107, templ_7745c5c3_Err = templ.JoinStringErrs(a.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 425, Col: 29}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 426, Col: 29}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var107))
 							if templ_7745c5c3_Err != nil {
@@ -2939,7 +2940,7 @@ func illustrationsPage() templ.Component {
 						var templ_7745c5c3_Var127 string
 						templ_7745c5c3_Var127, templ_7745c5c3_Err = templ.ResolveAttributeValue(photo("illustrations/light/" + n + ".png"))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 560, Col: 63}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 561, Col: 63}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var127)
 						if templ_7745c5c3_Err != nil {
@@ -2952,7 +2953,7 @@ func illustrationsPage() templ.Component {
 						var templ_7745c5c3_Var128 string
 						templ_7745c5c3_Var128, templ_7745c5c3_Err = templ.ResolveAttributeValue(n)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 560, Col: 73}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 561, Col: 73}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var128)
 						if templ_7745c5c3_Err != nil {
@@ -2965,7 +2966,7 @@ func illustrationsPage() templ.Component {
 						var templ_7745c5c3_Var129 string
 						templ_7745c5c3_Var129, templ_7745c5c3_Err = templ.ResolveAttributeValue(photo("illustrations/dark/" + n + ".png"))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 561, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 562, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var129)
 						if templ_7745c5c3_Err != nil {
@@ -2978,7 +2979,7 @@ func illustrationsPage() templ.Component {
 						var templ_7745c5c3_Var130 string
 						templ_7745c5c3_Var130, templ_7745c5c3_Err = templ.ResolveAttributeValue(n)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 561, Col: 72}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 562, Col: 72}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var130)
 						if templ_7745c5c3_Err != nil {
@@ -3119,9 +3120,9 @@ func screenshotPage() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var133 string
-		templ_7745c5c3_Var133, templ_7745c5c3_Err = templ.ResolveAttributeValue("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler-theme.min.js")
+		templ_7745c5c3_Var133, templ_7745c5c3_Err = templ.ResolveAttributeValue(cdn.URL("@tabler/core", tablerVersion, "dist/js/tabler-theme.min.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 630, Col: 110}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_g2.templ`, Line: 631, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var133)
 		if templ_7745c5c3_Err != nil {

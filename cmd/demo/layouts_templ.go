@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/chart"
 )
 
@@ -132,9 +133,9 @@ func rtlAssets() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.rtl.min.css")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler.rtl.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 61, Col: 124}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 62, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -145,9 +146,9 @@ func rtlAssets() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.rtl.min.css")
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-flags.rtl.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 62, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 63, Col: 106}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -158,9 +159,9 @@ func rtlAssets() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.rtl.min.css")
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-payments.rtl.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 63, Col: 133}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 64, Col: 109}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -171,9 +172,9 @@ func rtlAssets() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-vendors.rtl.min.css")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/core", tablerVersion, "dist/css/tabler-vendors.rtl.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 64, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 65, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -184,9 +185,9 @@ func rtlAssets() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css")
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(cdn.URL("@tabler/icons-webfont", iconsVersion, "dist/tabler-icons.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 65, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/layouts.templ`, Line: 66, Col: 106}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
