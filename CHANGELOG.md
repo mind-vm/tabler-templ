@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## v0.9.0
+
+All of Tabler 1.7 in Go and templ. Every component of the Tabler docs is now a package (66 of 67), and the
+composed parts of the preview are blocks. 143 of 146 preview pages are rebuilt in the demo and checked against
+the original by screenshot.
+
+New in this release:
+- **Pages and starter kit:** dashboards, charts and app pages. `cmd/new` creates a running app.
+- **Plugins:** packages for Tabler's plugins (date picker, select, editor, maps …).
+- **Themes:** Tabler's theme settings and 13 ready-made themes.
+- **Tabler updates:** pinned versions in one place and an update script.
+- **Speed:** compressed pages, and charts that load quickly on phones.
+
+Breaking changes are marked below; most change the look to Tabler 1.7's markup, a few change types
+(`progress` values, `avatar.ShapeCircle`, `shell.Crumb`).
 
 - `chart` draws much faster on phones. Measured at 4G with a 4× slower CPU: the dashboard's visible charts
   appear after 3.3 s instead of 13.3 s, and 36 charts no longer block a page for 51 s.
