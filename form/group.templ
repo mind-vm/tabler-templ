@@ -1,0 +1,116 @@
+package form
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type GroupProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Flat       bool // addons inside the field's border (input-group-flat)
+	Size       Size
+}
+
+// Group joins a control with Addons, buttons or links (input-group).
+templ Group(props ...GroupProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("input-group", kit.If(p.Flat, "input-group-flat"), sized("input-group", p.Size), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// Addon is a text, checkbox, kbd or links next to the control in a Group (input-group-text).
+templ Addon() {
+	<span class="input-group-text">
+		{ children... }
+	</span>
+}
+
+// AddonLink is a link in an Addon, e.g. "Show password" (input-group-link).
+templ AddonLink(href string) {
+	<a href={ templ.URL(href) } class="input-group-link">
+		{ children... }
+	</a>
+}
+
+type InputIconProps struct {
+	Class string
+	Icon  string // e.g. "ti-search"
+	Start bool   // the icon before the control; default after it
+	// Loader shows a spinner instead of the icon, e.g. while results load.
+	Loader bool
+}
+
+// InputIcon puts an icon (or a spinner) inside a control; the children are the control.
+templ InputIcon(p InputIconProps) {
+	<div class={ kit.Classes("input-icon", p.Class) }>
+		if p.Start {
+			@iconAddon(p)
+		}
+		{ children... }
+		if !p.Start {
+			@iconAddon(p)
+		}
+	</div>
+}
+
+templ iconAddon(p InputIconProps) {
+	<span class="input-icon-addon">
+		if p.Loader {
+			<div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+		} else {
+			@icon.Icon(p.Icon)
+		}
+	</span>
+}
+
+type PasswordToggleProps struct {
+	Target    string // id of the password input
+	ShowLabel string // default kit.T(ctx).ShowPassword
+	HideLabel string // default kit.T(ctx).HidePassword
+}
+
+// PasswordToggle is the eye button for an Addon next to a password input. Render PasswordToggleScript
+// once on the page.
+templ PasswordToggle(p PasswordToggleProps) {
+	{{ show := kit.Or(p.ShowLabel, kit.T(ctx).ShowPassword) }}
+	<button
+		type="button"
+		class="link-secondary input-group-link border-0 bg-transparent p-0"
+		title={ show }
+		aria-label={ show }
+		aria-pressed="false"
+		data-bs-toggle="tooltip"
+		data-password-toggle={ p.Target }
+		data-label-show={ show }
+		data-label-hide={ kit.Or(p.HideLabel, kit.T(ctx).HidePassword) }
+	>
+		@icon.Icon("ti-eye", icon.Props{Class: "icon-toggle-show"})
+		@icon.Icon("ti-eye-off", icon.Props{Class: "icon-toggle-hide d-none"})
+	</button>
+}
+
+// PasswordToggleScript makes every PasswordToggle on the page work; it is Tabler's own script.
+templ PasswordToggleScript() {
+	<script>
+		if (!window.__tablerPasswordToggleInit) {
+			window.__tablerPasswordToggleInit = true
+			document.addEventListener("click", (e) => {
+				const btn = e.target.closest("[data-password-toggle]")
+				if (!btn) return
+				const input = document.getElementById(btn.getAttribute("data-password-toggle"))
+				if (!input) return
+				const showing = input.type === "password"
+				input.type = showing ? "text" : "password"
+				const label = showing ? btn.dataset.labelHide : btn.dataset.labelShow
+				btn.setAttribute("aria-pressed", showing ? "true" : "false")
+				btn.setAttribute("aria-label", label)
+				btn.setAttribute("title", label)
+				btn.setAttribute("data-bs-original-title", label)
+				btn.querySelector(".icon-toggle-show")?.classList.toggle("d-none", showing)
+				btn.querySelector(".icon-toggle-hide")?.classList.toggle("d-none", !showing)
+			})
+		}
+	</script>
+}

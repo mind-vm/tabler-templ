@@ -1,8 +1,49 @@
-// Package form renders Tabler form controls: a Field (label, control, hint, error) and the controls
-// Input, Select and Textarea. Labels and controls are linked by ID when one is given.
+// Package form renders Tabler form controls: a Field (label, control, hint, error), the controls
+// Input, Select, Textarea, Check, Range, NumberInput, OTP and Strength, input groups and icons,
+// select groups, image and color checks, floating labels and fieldsets. Labels and controls are linked
+// by ID when one is given.
 package form
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/popover"
+)
+
+// Size of a control; the zero value is the default.
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+)
+
+// State is the validation state of a control.
+type State string
+
+const (
+	StateNone    State = ""
+	StateValid   State = "valid"
+	StateInvalid State = "invalid"
+)
+
+// stateClass returns is-valid / is-invalid (with -lite for the subtle look).
+func stateClass(s State, invalid, lite bool) string {
+	if invalid {
+		s = StateInvalid
+	}
+	if s == StateNone {
+		return ""
+	}
+	return kit.Classes("is-"+string(s), kit.If(lite, "is-"+string(s)+"-lite"))
+}
+
+func sized(base string, s Size) string {
+	if s == SizeDefault {
+		return ""
+	}
+	return base + "-" + string(s)
+}
 
 type FieldProps struct {
 	Class      string // wrapper, default "mb-3"; pass "-" for none
@@ -12,6 +53,11 @@ type FieldProps struct {
 	Required   bool   // marks the label (Tabler's .required)
 	Hint       string
 	Error      string // shown below the control; mark the control Invalid as well
+	Valid      string // positive feedback below the control (valid-feedback); mark the control State valid
+	// Description sits at the end of the label line, e.g. a character count (form-label-description).
+	Description string
+	// Help is a "?" next to the label that opens a popover with this text (form-help).
+	Help string
 }
 
 templ Field(p FieldProps) {
@@ -27,11 +73,26 @@ templ Field(p FieldProps) {
 				if p.For != "" {
 					for={ p.For }
 				}
-			>{ p.Label }</label>
+			>
+				if p.Help == "" && p.Description == "" {
+					{ p.Label }
+				} else {
+					{ p.Label }
+					if p.Help != "" {
+						<span class="form-help" { popover.Attrs(popover.Props{Content: p.Help, Placement: popover.Top})... }>?</span>
+					}
+					if p.Description != "" {
+						<span class="form-label-description">{ p.Description }</span>
+					}
+				}
+			</label>
 		}
 		{ children... }
 		if p.Error != "" {
 			<div class="invalid-feedback d-block">{ p.Error }</div>
+		}
+		if p.Valid != "" {
+			<div class="valid-feedback d-block">{ p.Valid }</div>
 		}
 		if p.Hint != "" {
 			<div class="form-hint">{ p.Hint }</div>
@@ -62,6 +123,24 @@ type InputProps struct {
 	Readonly    bool
 	Disabled    bool
 	Invalid     bool
+	State       State // valid or invalid
+	Lite        bool  // subtle validation look (is-valid-lite)
+	Size        Size
+	Rounded     bool   // form-control-rounded
+	Flush       bool   // no border (form-control-flush)
+	Plaintext   bool   // read-only value shown as text (form-control-plaintext)
+	List        string // id of a <datalist> with suggestions
+	// Autocomplete is the browser's autofill token, e.g. "email", "current-password", "off".
+	Autocomplete string
+}
+
+func inputClasses(p InputProps) string {
+	base := "form-control"
+	if p.Plaintext {
+		base = "form-control-plaintext"
+	}
+	return kit.Classes(base, sized("form-control", p.Size), kit.If(p.Type == "color", "form-control-color"), kit.If(p.Rounded, "form-control-rounded"),
+		kit.If(p.Flush, "form-control-flush"), stateClass(p.State, p.Invalid, p.Lite), p.Class)
 }
 
 func controlAttrs(id, name, placeholder string, a templ.Attributes, ariaLabel ...string) templ.Attributes {
@@ -86,17 +165,33 @@ templ Input(p InputProps) {
 		if p.Type != "" && p.Type != "text" {
 			type={ p.Type }
 		}
-		class={ kit.Classes("form-control", kit.If(p.Invalid, "is-invalid"), p.Class) }
+		class={ inputClasses(p) }
 		value={ p.Value }
+		if p.List != "" {
+			list={ p.List }
+		}
+		if p.Autocomplete != "" {
+			autocomplete={ p.Autocomplete }
+		}
 		required?={ p.Required }
 		readonly?={ p.Readonly }
 		disabled?={ p.Disabled }
+		if p.Invalid || p.State == StateInvalid {
+			aria-invalid="true"
+		}
 		{ controlAttrs(p.ID, p.Name, p.Placeholder, p.Attributes, p.AriaLabel)... }
 	/>
 }
 
 type Option struct {
 	Value, Label string
+	Disabled     bool
+}
+
+// OptionGroup is an <optgroup> of a Select.
+type OptionGroup struct {
+	Label   string
+	Options []Option
 }
 
 type SelectProps struct {
@@ -106,20 +201,51 @@ type SelectProps struct {
 	Attributes templ.Attributes
 	Name       string
 	Options    []Option
+	Groups     []OptionGroup // options in groups, after Options
 	Selected   string
-	Empty      string // first option with value "", e.g. "All"; empty = none
-	Required   bool
-	Disabled   bool
-	Invalid    bool
+	// SelectedValues are the selected options of a Multiple select.
+	SelectedValues []string
+	Empty          string // first option with value "", e.g. "All"; empty = none
+	Required       bool
+	Disabled       bool
+	Invalid        bool
+	State          State
+	Size           Size
+	Multiple       bool
+}
+
+func selected(p SelectProps, v string) bool {
+	if v == p.Selected && (p.Selected != "" || !p.Multiple) {
+		return true
+	}
+	for _, s := range p.SelectedValues {
+		if s == v {
+			return true
+		}
+	}
+	return false
 }
 
 templ Select(p SelectProps) {
-	<select class={ kit.Classes("form-select", kit.If(p.Invalid, "is-invalid"), p.Class) } required?={ p.Required } disabled?={ p.Disabled } { controlAttrs(p.ID, p.Name, "", p.Attributes, p.AriaLabel)... }>
+	<select
+		class={ kit.Classes("form-select", sized("form-select", p.Size), stateClass(p.State, p.Invalid, false), p.Class) }
+		multiple?={ p.Multiple }
+		required?={ p.Required }
+		disabled?={ p.Disabled }
+		{ controlAttrs(p.ID, p.Name, "", p.Attributes, p.AriaLabel)... }
+	>
 		if p.Empty != "" {
 			<option value="">{ p.Empty }</option>
 		}
 		for _, o := range p.Options {
-			<option value={ o.Value } selected?={ o.Value == p.Selected }>{ o.Label }</option>
+			<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled }>{ o.Label }</option>
+		}
+		for _, g := range p.Groups {
+			<optgroup label={ g.Label }>
+				for _, o := range g.Options {
+					<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled }>{ o.Label }</option>
+				}
+			</optgroup>
 		}
 	</select>
 }
@@ -134,16 +260,28 @@ type TextareaProps struct {
 	Rows        int
 	Placeholder string
 	Required    bool
+	Readonly    bool
+	Disabled    bool
 	Invalid     bool
+	State       State
+	Lite        bool
+	Size        Size
+	// Autosize grows the textarea with its content (Tabler's script, data-bs-toggle="autosize").
+	Autosize bool
 }
 
 templ Textarea(p TextareaProps) {
 	<textarea
-		class={ kit.Classes("form-control", kit.If(p.Invalid, "is-invalid"), p.Class) }
+		class={ kit.Classes("form-control", sized("form-control", p.Size), stateClass(p.State, p.Invalid, p.Lite), p.Class) }
 		if p.Rows > 0 {
 			rows={ p.Rows }
 		}
+		if p.Autosize {
+			data-bs-toggle="autosize"
+		}
 		required?={ p.Required }
+		readonly?={ p.Readonly }
+		disabled?={ p.Disabled }
 		{ controlAttrs(p.ID, p.Name, p.Placeholder, p.Attributes, p.AriaLabel)... }
 	>{ p.Value }</textarea>
 }
@@ -159,13 +297,20 @@ type CheckProps struct {
 	Disabled   bool
 	Radio      bool
 	Switch     bool // Tabler's .form-switch
+	Large      bool // a larger switch (form-switch-lg)
+	Inline     bool // side by side (form-check-inline)
+	Required   bool // marks the label
+	// LabelOn and LabelOff replace Label with a text per state, e.g. "Enabled" / "Disabled".
+	LabelOn  string
+	LabelOff string
+	State    State
 }
 
 // Check is a checkbox (or radio) with its label, Tabler's .form-check.
 templ Check(p CheckProps) {
-	<label class={ kit.Classes("form-check", kit.If(p.Switch, "form-switch"), p.Class) }>
+	<label class={ kit.Classes("form-check", kit.If(p.Switch, "form-switch"), kit.If(p.Switch && p.Large, "form-switch-lg"), kit.If(p.Inline, "form-check-inline"), p.Class) }>
 		<input
-			class="form-check-input"
+			class={ kit.Classes("form-check-input", stateClass(p.State, false, false)) }
 			if p.Radio {
 				type="radio"
 			} else {
@@ -178,6 +323,11 @@ templ Check(p CheckProps) {
 			disabled?={ p.Disabled }
 			{ controlAttrs(p.ID, p.Name, "", p.Attributes)... }
 		/>
-		<span class="form-check-label">{ p.Label }</span>
+		if p.LabelOn != "" || p.LabelOff != "" {
+			<span class="form-check-label form-check-label-on">{ p.LabelOn }</span>
+			<span class="form-check-label form-check-label-off">{ p.LabelOff }</span>
+		} else {
+			<span class={ kit.Classes("form-check-label", kit.If(p.Required, "required")) }>{ p.Label }</span>
+		}
 	</label>
 }
