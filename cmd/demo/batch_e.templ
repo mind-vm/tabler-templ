@@ -1,0 +1,659 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/cookie"
+	faqblock "github.com/mind-vm/tabler-templ/blocks/faq"
+	"github.com/mind-vm/tabler-templ/blocks/gallery"
+	"github.com/mind-vm/tabler-templ/blocks/jobs"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/logs"
+	"github.com/mind-vm/tabler-templ/blocks/profile"
+	"github.com/mind-vm/tabler-templ/blocks/search"
+	userblock "github.com/mind-vm/tabler-templ/blocks/users"
+	"github.com/mind-vm/tabler-templ/breadcrumb"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+	"github.com/mind-vm/tabler-templ/pagination"
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/timeline"
+)
+
+func batchEPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"faq":            faqPage(),
+		"changelog":      changelogPage(),
+		"search-results": searchResultsPage(),
+		"job-listing":    jobListingPage(),
+		"gallery":        galleryPage(),
+		"photogrid":      photogridPage(),
+		"logs":           logsPage(),
+		"users":          usersPage(),
+		"profile":        profilePage(),
+		"cookie-banner":  cookieBannerPage(),
+		"blank":          blankPage(),
+	}
+}
+
+// framed is a preview page whose header has actions of its own (before the link to the original).
+// title overrides the catalog's title where the original's heading differs.
+func eFramed(name, title string, actions templ.Component) layout.PageProps {
+	p, _ := catalog.Find(name)
+	if title == "" {
+		title = p.Title
+	}
+	fp := frameProps(name, title)
+	fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: title, Description: p.Description, Actions: eWithOriginal(name, actions)})
+	return fp
+}
+
+templ eWithOriginal(name string, actions templ.Component) {
+	<div class="d-flex align-items-center">
+		@actions
+		<div class="ms-3">
+			@originalLink(name)
+		</div>
+	</div>
+}
+
+// FAQ
+
+const faqLorem = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium alias dignissimos dolorum ea est eveniet, excepturi illum in iste iure maiores nemo recusandae rerum saepe sed, sunt totam! Explicabo, ipsa?"
+
+templ faqAnswer() {
+	<div>
+		<p>{ faqLorem }</p>
+		<p>{ faqLorem }</p>
+	</div>
+}
+
+func faqQuestions(qs ...string) []faqblock.Question {
+	out := make([]faqblock.Question, len(qs))
+	for i, q := range qs {
+		out[i] = faqblock.Question{Q: q, Answer: faqAnswer()}
+	}
+	return out
+}
+
+var faqSections = []faqblock.Section{
+	{Title: "1. Introduction", Questions: faqQuestions("Welcome to our service!", "Who are we?", "What are our values?")},
+	{Title: "2. Functionality", Questions: faqQuestions("What are the key features?", "Does your App support mobile devices?", "Why should I choose your service?", "Is my data secure?")},
+	{Title: "3. Payments", Questions: faqQuestions("Is there any free plan?", "What are the available payment options?", "Can I get a refund?")},
+}
+
+templ faqCrumbs() {
+	<div class="d-flex">
+		@breadcrumb.Breadcrumb(breadcrumb.Props{Separator: breadcrumb.SeparatorArrows, Label: "Breadcrumb"}, []breadcrumb.Crumb{{Text: "Tabler", Href: "#"}, {Text: "Pages"}})
+	</div>
+}
+
+templ faqPage() {
+	@layout.Page(eFramed("faq", "", faqCrumbs())) {
+		@faqblock.FAQ(faqblock.Props{}, faqSections)
+	}
+}
+
+// Changelog: the preview redirects to the changelog on tabler.io.
+
+templ changelogPage() {
+	<!DOCTYPE html>
+	<html lang="en-US">
+		<meta charset="utf-8"/>
+		<title>Redirecting…</title>
+		<link rel="canonical" href="https://tabler.io/changelog"/>
+		<meta http-equiv="refresh" content="0; url=https://tabler.io/changelog"/>
+		<meta name="robots" content="noindex"/>
+		<noscript><a href="https://tabler.io/changelog">Click here if you are not redirected.</a></noscript>
+	</html>
+}
+
+// Photos
+
+type galleryItem struct {
+	File, Alt, Avatar, Initials, Name, Time, Views, Likes string
+	Liked                                                 bool
+}
+
+var searchPhotos = []galleryItem{
+	{"beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg", "Beautiful blonde woman relaxing with a can of coke on a tree stump by the beach", "000m", "", "Paweł Kuna", "3 days ago", "", "", false},
+	{"brainstorming-session-with-creative-designers.jpg", "Brainstorming session with creative designers", "052f", "", "Jeffie Lewzey", "now", "", "", false},
+	{"finances-us-dollars-and-bitcoins-currency-money.jpg", "Finances - US Dollars and Bitcoins - Currency - Money", "002m", "", "Mallory Hulme", "now", "", "", false},
+	{"group-of-people-brainstorming-and-taking-notes-2.jpg", "Group of people brainstorming and taking notes", "003m", "", "Dunn Slane", "10 days ago", "", "", false},
+	{"blue-sofa-with-pillows-in-a-designer-living-room-interior.jpg", "Blue sofa with pillows in a designer living room interior", "000f", "", "Emmy Levet", "now", "", "", false},
+	{"home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg", "Home office desk with Macbook, iPhone, calendar, watch & organizer", "001f", "", "Maryjo Lebarree", "3 days ago", "", "", false},
+	{"young-woman-working-in-a-cafe.jpg", "Young woman working in a cafe", "004m", "", "Egan Poetz", "6 days ago", "", "", false},
+	{"everything-you-need-to-work-from-your-bed.jpg", "Everything you need to work from your bed", "002f", "", "Kellie Skingley", "9 days ago", "", "", false},
+	{"young-entrepreneur-working-from-a-modern-cafe.jpg", "Young Entrepreneur Working from a Modern Cafe", "003f", "", "Christabel Charlwood", "now", "", "", false},
+	{"finances-us-dollars-and-bitcoins-currency-money-2.jpg", "Finances - US Dollars and Bitcoins - Currency - Money", "063m", "", "Haskel Shelper", "now", "", "", false},
+	{"group-of-people-sightseeing-in-the-city.jpg", "Group of people sightseeing in the city", "006m", "", "Lorry Mion", "5 days ago", "", "", false},
+	{"color-palette-guide-sample-colors-catalog-.jpg", "Color Palette Guide. Sample Colors Catalog.", "004f", "", "Leesa Beaty", "now", "", "", false},
+	{"stylish-workplace-with-computer-at-home.jpg", "Stylish workplace with computer at home", "007m", "", "Perren Keemar", "4 days ago", "", "", false},
+	{"pink-desk-in-the-home-office.jpg", "Pink desk in the home office", "", "SA", "Sunny Airey", "5 days ago", "", "", false},
+	{"young-woman-sitting-on-the-sofa-and-working-on-her-laptop.jpg", "Young woman sitting on the sofa and working on her laptop", "009m", "", "Geoffry Flaunders", "7 days ago", "", "", false},
+	{"coffee-on-a-table-with-other-items.jpg", "Coffee on a table with other items", "010m", "", "Thatcher Keel", "9 days ago", "", "", false},
+	{"young-entrepreneur-working-from-a-modern-cafe-2.jpg", "Young Entrepreneur Working from a Modern Cafe", "005f", "", "Dyann Escala", "now", "", "", false},
+	{"soft-photo-of-woman-on-the-bed-with-the-book-and-cup-of-coffee-in-hands.jpg", "Soft photo of woman on the bed with the book and cup of coffee in hands", "006f", "", "Avivah Mugleston", "6 days ago", "", "", false},
+}
+
+var galleryPhotos = []galleryItem{
+	{"beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg", "Beautiful blonde woman relaxing with a can of coke on a tree stump by the beach", "000m", "", "Paweł Kuna", "3 days ago", "467", "67", false},
+	{"brainstorming-session-with-creative-designers.jpg", "Brainstorming session with creative designers", "052f", "", "Jeffie Lewzey", "now", "300", "20", false},
+	{"finances-us-dollars-and-bitcoins-currency-money.jpg", "Finances - US Dollars and Bitcoins - Currency - Money", "002m", "", "Mallory Hulme", "now", "300", "20", true},
+	{"group-of-people-brainstorming-and-taking-notes-2.jpg", "Group of people brainstorming and taking notes", "003m", "", "Dunn Slane", "10 days ago", "479", "71", true},
+	{"blue-sofa-with-pillows-in-a-designer-living-room-interior.jpg", "Blue sofa with pillows in a designer living room interior", "000f", "", "Emmy Levet", "now", "300", "20", true},
+	{"home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg", "Home office desk with Macbook, iPhone, calendar, watch & organizer", "001f", "", "Maryjo Lebarree", "3 days ago", "405", "23", true},
+	{"young-woman-working-in-a-cafe.jpg", "Young woman working in a cafe", "004m", "", "Egan Poetz", "6 days ago", "332", "51", true},
+	{"everything-you-need-to-work-from-your-bed.jpg", "Everything you need to work from your bed", "002f", "", "Kellie Skingley", "9 days ago", "369", "70", true},
+	{"young-entrepreneur-working-from-a-modern-cafe.jpg", "Young Entrepreneur Working from a Modern Cafe", "003f", "", "Christabel Charlwood", "now", "555", "73", false},
+	{"finances-us-dollars-and-bitcoins-currency-money-2.jpg", "Finances - US Dollars and Bitcoins - Currency - Money", "063m", "", "Haskel Shelper", "now", "300", "20", true},
+	{"group-of-people-sightseeing-in-the-city.jpg", "Group of people sightseeing in the city", "006m", "", "Lorry Mion", "5 days ago", "424", "45", false},
+	{"color-palette-guide-sample-colors-catalog-.jpg", "Color Palette Guide. Sample Colors Catalog.", "004f", "", "Leesa Beaty", "now", "300", "20", false},
+	{"stylish-workplace-with-computer-at-home.jpg", "Stylish workplace with computer at home", "007m", "", "Perren Keemar", "4 days ago", "393", "95", false},
+	{"pink-desk-in-the-home-office.jpg", "Pink desk in the home office", "", "SA", "Sunny Airey", "5 days ago", "301", "99", false},
+	{"young-woman-sitting-on-the-sofa-and-working-on-her-laptop.jpg", "Young woman sitting on the sofa and working on her laptop", "009m", "", "Geoffry Flaunders", "7 days ago", "596", "64", false},
+}
+
+func photoProps(g galleryItem) gallery.PhotoProps {
+	av := ""
+	if g.Avatar != "" {
+		av = avatarURL(g.Avatar)
+	}
+	return gallery.PhotoProps{Src: photo("photos/" + g.File), Alt: g.Alt, Avatar: av, Initials: g.Initials, Name: g.Name, Time: g.Time, Views: g.Views, Likes: g.Likes, Liked: g.Liked}
+}
+
+templ photoCards(items []galleryItem) {
+	for _, g := range items {
+		<div class="col-sm-6 col-lg-4">
+			@gallery.Photo(photoProps(g))
+		</div>
+	}
+}
+
+// Search results
+
+templ searchResultsPage() {
+	@preview("search-results") {
+		<div class="row g-4">
+			<div class="col-md-3">
+				@search.Filters(search.FiltersProps{}) {
+					@search.Categories("Category", []search.Category{{Name: "Games", Count: "24", Active: true}, {Name: "Clothing", Count: "11"}, {Name: "Jewelery", Count: "11"}, {Name: "Toys", Count: "54"}})
+					@search.Choices(search.ChoicesProps{Title: "Rating", Name: "form-stars", Radio: true, Options: []search.Option{{Label: "5 stars", Checked: true}, {Label: "4 stars"}, {Label: "3 stars"}, {Label: "2 and less stars"}}})
+					@search.Choices(search.ChoicesProps{Title: "Tags", Name: "form-tags[]", Options: []search.Option{{Label: "business", Checked: true}, {Label: "evening"}, {Label: "leisure"}, {Label: "party"}}})
+					@search.Range(search.RangeProps{Title: "Price", Prefix: "$", From: "3"})
+					@search.Select(search.SelectProps{Title: "Shipping", Name: "shipping-country", Options: []string{"United Kingdom", "USA", "Germany", "Poland", "Other…"}})
+					@search.Buttons(search.ButtonsProps{})
+				}
+			</div>
+			<div class="col-md-9">
+				<div class="row row-cards">
+					@photoCards(searchPhotos)
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Gallery
+
+templ galleryActions() {
+	<div class="d-flex">
+		<div class="me-3">
+			@form.InputIcon(form.InputIconProps{Icon: "ti-search"}) {
+				@form.Input(form.InputProps{Type: "text", Placeholder: "Search…", AriaLabel: "Search"})
+			}
+		</div>
+		@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+			Add event
+		}
+	</div>
+}
+
+func eNoHref(int) string { return "#" }
+
+templ galleryPage() {
+	@layout.Page(eFramed("gallery", "", galleryActions())) {
+		<div class="row row-cards">
+			@photoCards(galleryPhotos)
+		</div>
+		<div class="d-flex mt-5">
+			@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: eNoHref, Class: "ms-auto", Label: "Pagination"})
+		</div>
+	}
+}
+
+// Photogrid
+
+type eGridTile struct{ File, Title, Ratio string }
+
+func eTile(t eGridTile) gallery.TileProps {
+	return gallery.TileProps{Src: photo("photos/" + t.File), Title: t.Title, Ratio: t.Ratio, Class: "rounded-3 border", Lightbox: "gallery"}
+}
+
+var gridTiles = []eGridTile{
+	{"group-of-people-brainstorming-and-taking-notes-2.jpg", "Group of people brainstorming and taking notes", "3x1"},
+	{"blue-sofa-with-pillows-in-a-designer-living-room-interior.jpg", "Blue sofa with pillows in a designer living room interior", "1x1"},
+	{"home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg", "Home office desk with Macbook, iPhone, calendar, watch & organizer", "1x1"},
+	{"young-woman-working-in-a-cafe.jpg", "Young woman working in a cafe", "1x1"},
+	{"everything-you-need-to-work-from-your-bed.jpg", "Everything you need to work from your bed", "1x1"},
+	{"young-entrepreneur-working-from-a-modern-cafe.jpg", "Young Entrepreneur Working from a Modern Cafe", "1x1"},
+	{"finances-us-dollars-and-bitcoins-currency-money-3.jpg", "Finances - US Dollars and Bitcoins - Currency - Money", "4x1"},
+	{"elegant-home-office-with-golden-accessories.jpg", "Elegant home office with golden accessories", "1x1"},
+	{"stylish-workplace-with-computer-at-home.jpg", "Stylish workplace with computer at home", "1x1"},
+	{"group-of-people-sightseeing-in-the-city.jpg", "Group of people sightseeing in the city", "1x1"},
+	{"color-palette-guide-sample-colors-catalog-.jpg", "Color Palette Guide. Sample Colors Catalog.", "1x1"},
+	{"beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg", "Beautiful blonde woman relaxing with a can of coke on a tree stump by the beach", "1x1"},
+	{"contemporary-black-and-white-home-decor.jpg", "Contemporary black-and-white home decor", "4x1"},
+	{"pink-desk-in-the-home-office.jpg", "Pink desk in the home office", "3x1"},
+}
+
+templ eQuad(tiles []eGridTile) {
+	<div class="row g-2 g-md-3">
+		for _, t := range tiles {
+			<div class="col-6">
+				@gallery.Tile(eTile(t))
+			</div>
+		}
+	</div>
+}
+
+templ photogridPage() {
+	@preview("photogrid") {
+		<div class="row g-2 g-md-3">
+			<div class="col-lg-6">
+				<div class="row g-2 g-md-3">
+					<div class="col-12">
+						@gallery.Tile(eTile(gridTiles[0]))
+					</div>
+					<div class="col-6">
+						@gallery.Tile(eTile(gridTiles[1]))
+					</div>
+					<div class="col-6">
+						@eQuad(gridTiles[2:6])
+					</div>
+					<div class="col-12">
+						@gallery.Tile(eTile(gridTiles[6]))
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="row g-2 g-md-3">
+					<div class="col-6">
+						@eQuad(gridTiles[7:11])
+					</div>
+					<div class="col-6">
+						@gallery.Tile(eTile(gridTiles[11]))
+					</div>
+					<div class="col-12">
+						@gallery.Tile(eTile(gridTiles[12]))
+					</div>
+					<div class="col-12">
+						@gallery.Tile(eTile(gridTiles[13]))
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Logs
+
+const appLog = `2024-01-15 14:23:45 [INFO] Application started successfully
+2024-01-15 14:23:46 [DEBUG] Database connection established
+2024-01-15 14:23:47 [INFO] User authentication successful: user_id=12345
+2024-01-15 14:23:48 [WARNING] Rate limit approaching: 85% of quota used
+2024-01-15 14:23:49 [ERROR] Failed to process payment: transaction_id=tx_789
+2024-01-15 14:23:50 [INFO] Cache cleared: keys=1523
+2024-01-15 14:23:51 [DEBUG] API request completed: endpoint=/api/users, duration=234ms`
+
+var requestTiming = []logs.Pair{{Key: "Effective URL", Value: "https://preview.tabler.io", Href: "https://preview.tabler.io"}, {Key: "Redirect count", Value: "0"}, {Key: "Name lookup time", Value: "3.4e-05"},
+	{Key: "Connect time", Value: "0.000521"}, {Key: "Pre-transfer time", Value: "0.0"}, {Key: "Start-transfer time", Value: "0.0"}, {Key: "App connect time", Value: "0.0"}, {Key: "Redirect time", Value: "0.0"},
+	{Key: "Total time", Value: "28.000601"}, {Key: "Response code", Value: "0"}, {Key: "Return keyword", Value: "operation_timedout"}}
+
+templ checkedURL() {
+	<pre><code>GET <a class="text-reset" target="_blank" href="https://preview.tabler.io">https://preview.tabler.io</a></code></pre>
+}
+
+templ logsPage() {
+	@preview("logs") {
+		<div class="row">
+			<div class="col-lg-6">
+				@card.Card() {
+					@card.Body() {
+						@logs.Section("Checked URL") {
+							@checkedURL()
+						}
+						@logs.Section("Request Timing") {
+							@logs.Pairs(0, requestTiming)
+						}
+						@logs.Section("Response Headers") {
+							@logs.Text("HTTP/1.1 200 Connection established")
+						}
+					}
+					@card.Footer() {
+						@logs.Section("Escalation") {
+							Entire team
+						}
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@card.Card() {
+					@card.Body() {
+						@logs.Section("Application Log") {
+							@logs.Code(appLog)
+						}
+						<h2>Log Levels</h2>
+						@badge.List(badge.ListProps{Class: "mb-2"}) {
+							for _, l := range []named{{"success", "INFO"}, {"warning", "WARNING"}, {"danger", "ERROR"}, {"secondary", "DEBUG"}} {
+								@badge.Badge(badge.Props{Color: l.Variant}) {
+									{ l.Text }
+								}
+							}
+						}
+					}
+					@card.Footer() {
+						@logs.Section("Log Source") {
+							Application Server (prod-01)
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+// Users
+
+type ePerson struct {
+	Avatar, Initials, Name, Job, Badge, Role string
+}
+
+var userList = []ePerson{
+	{"000m", "", "Paweł Kuna", "UI Designer", "purple", "Owner"}, {"052f", "", "Jeffie Lewzey", "Chemical Engineer", "green", "Admin"},
+	{"002m", "", "Mallory Hulme", "Geologist IV", "green", "Admin"}, {"003m", "", "Dunn Slane", "Research Nurse", "green", "Admin"},
+	{"000f", "", "Emmy Levet", "VP Product Management", "", ""}, {"001f", "", "Maryjo Lebarree", "Civil Engineer", "", ""},
+	{"004m", "", "Egan Poetz", "Research Nurse", "", ""}, {"002f", "", "Kellie Skingley", "Teacher", "", ""},
+	{"003f", "", "Christabel Charlwood", "Tax Accountant", "", ""}, {"063m", "", "Haskel Shelper", "Staff Scientist", "", ""},
+	{"006m", "", "Lorry Mion", "Automation Specialist IV", "", ""}, {"004f", "", "Leesa Beaty", "Editor", "", ""},
+	{"007m", "", "Perren Keemar", "Analog Circuit Design manager", "", ""}, {"", "SA", "Sunny Airey", "Nuclear Power Engineer", "", ""},
+	{"009m", "", "Geoffry Flaunders", "Software Test Engineer II", "", ""}, {"010m", "", "Thatcher Keel", "VP Sales", "", ""},
+	{"005f", "", "Dyann Escala", "Mechanical Systems Engineer", "", ""}, {"006f", "", "Avivah Mugleston", "Actuary", "", ""},
+}
+
+templ roleBadge(color, role string) {
+	@badge.Badge(badge.Props{Color: color, Light: true}) {
+		{ role }
+	}
+}
+
+func userCard(p ePerson) userblock.CardProps {
+	c := userblock.CardProps{Initials: p.Initials, Name: p.Name, Detail: p.Job,
+		Actions: []userblock.Action{{Href: "#", Icon: "ti-mail", Text: "Email"}, {Href: "#", Icon: "ti-phone", Text: "Call"}}}
+	if p.Avatar != "" {
+		c.Avatar = avatarURL(p.Avatar)
+	}
+	if p.Role != "" {
+		c.Badge = roleBadge(p.Badge, p.Role)
+	}
+	return c
+}
+
+templ usersActions() {
+	<div class="d-flex">
+		@form.Input(form.InputProps{Type: "search", Class: "d-inline-block w-9 me-3", Placeholder: "Search user…", AriaLabel: "Search user"})
+		@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+			New user
+		}
+	</div>
+}
+
+templ usersPage() {
+	@layout.Page(eFramed("users", "Users", usersActions())) {
+		<div class="row row-cards">
+			for _, p := range userList {
+				<div class="col-md-6 col-lg-3">
+					@userblock.Card(userCard(p))
+				</div>
+			}
+		</div>
+		<div class="d-flex mt-4">
+			@pagination.Pagination(pagination.Props{Page: 3, Pages: 5, Href: eNoHref, Class: "ms-auto", Label: "Pagination"})
+		</div>
+	}
+}
+
+// Job listing
+
+type eJob struct {
+	Logo, Title, Salary, Company, Contract, Place string
+	Tags                                          []string
+}
+
+var jobList = []eJob{
+	{"job-1.jpg", "Lead Tailwind Developer", "", "CMS Max", "Full-time", "Remote / USA", []string{"PHP", "Laravel", "CSS", "Vue"}},
+	{"job-2.png", "Frontend Web Engineer", "$140,000 - $180,000", "Center Pixel, Inc", "Full-time or Contract", "Remote / Palo Alto, CA", []string{"HTML", "CSS", "React", "+3"}},
+	{"job-3.png", "Principal Web Application Developer", "", "Chicago Botanic Garden", "Full-time", "Hybrid / Chicago Botanic Garden", []string{"HTML", "PHP", "Laravel"}},
+	{"job-4.png", "Front-End Developer", "", "Simple Focus", "Full-time", "Remote / USA", []string{"HTML", "PHP", "CSS", "+2"}},
+	{"job-5.png", "Senior Front-End Engineer", "", "Infinia ML", "Full-time", "Durham, NC", []string{"HTML", "PHP", "CSS", "+4"}},
+	{"job-6.png", "Senior Web Developer, Open Source", "", "Crowd Favorite", "Full-time", "Remote / USA", []string{"HTML", "JavaScript", "CSS", "+8"}},
+	{"job-7.png", "Frontend Engineer", "$95,000 – $145,000 USD", "Spear AI", "Full-time", "Washington D.C.", []string{"HTML", "JavaScript", "CSS", "+3"}},
+	{"job-8.png", "Web Developer", "", "Third Time Games", "Full-time", "Remote / North America", []string{"PHP", "Laravel", "React", "+8"}},
+	{"job-9.jpg", "Laravel Developer", "", "Mindsize", "Full-time", "Remote / USA", []string{"PHP", "Laravel"}},
+}
+
+func jobProps(j eJob) jobs.JobProps {
+	return jobs.JobProps{Logo: photo("jobs/" + j.Logo), Title: j.Title, Salary: j.Salary, Tags: j.Tags,
+		Facts: []jobs.Fact{{Icon: "ti-building-community", Text: j.Company}, {Icon: "ti-license", Text: j.Contract}, {Icon: "ti-map-pin", Text: j.Place}}}
+}
+
+templ postJob() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		Post a eJob
+	}
+}
+
+templ jobChecks(name string, labels []string, checked int, radio bool) {
+	for i, l := range labels {
+		@form.Check(form.CheckProps{Name: name, Value: string(rune('1' + i)), Label: l, Checked: i < checked, Radio: radio})
+	}
+}
+
+templ onOff() {
+	@form.Check(form.CheckProps{Switch: true, LabelOn: "On", LabelOff: "Off"})
+}
+
+templ jobListingPage() {
+	@layout.Page(eFramed("job-listing", "", postJob())) {
+		<div class="row g-4">
+			<div class="col-md-3">
+				@search.Filters(search.FiltersProps{Class: "sticky-top"}) {
+					<div class="form-label">Job Types</div>
+					<div class="mb-4">
+						@jobChecks("form-type[]", []string{"Programming", "Design", "Management / Finance", "Customer Support", "Sales / Marketing"}, 2, false)
+					</div>
+					<div class="form-label">Remote</div>
+					<div class="mb-4">
+						@onOff()
+					</div>
+					<div class="form-label">Salary Range</div>
+					<div class="mb-4">
+						@jobChecks("form-salary", []string{"$20K - $50K", "$50K - $100K", "> $100K"}, 1, true)
+					</div>
+					<div class="form-label">Immigration</div>
+					<div class="mb-4">
+						@onOff()
+						<div class="small text-secondary">Only show companies that can sponsor a visa</div>
+					</div>
+					<label class="form-label" for="job-location">Location</label>
+					<div class="mb-4">
+						<select class="form-select" id="job-location" name="location">
+							for _, o := range []string{"Anywhere", "London", "San Francisco", "New York", "Berlin"} {
+								<option>{ o }</option>
+							}
+						</select>
+					</div>
+					@search.Buttons(search.ButtonsProps{ResetHref: "#"})
+				}
+			</div>
+			<div class="col-md-9">
+				<div class="row row-cards">
+					<div class="space-y">
+						for _, j := range jobList {
+							@jobs.Job(jobProps(j))
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Profile
+
+templ profileActions() {
+	@button.List() {
+		@button.Button(button.Props{Type: "button", Icon: "ti-dots", IconOnly: true, Attributes: templ.Attributes{"aria-label": "More options"}})
+		@button.Button(button.Props{Type: "button", Icon: "ti-message", IconOnly: true, Attributes: templ.Attributes{"aria-label": "Send message"}})
+		@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-check"}) {
+			Following
+		}
+	}
+}
+
+templ timelineTitle(title string) {
+	<h2 class="h4">{ title }</h2>
+}
+
+templ friendRequests() {
+	@timelineTitle("+3 Friend Requests")
+	@avatar.List(avatar.ListProps{Class: "mt-3"}) {
+		for _, a := range []string{"000m", "052f", "002m"} {
+			@avatar.Avatar(avatar.Props{Src: avatarURL(a), Status: "success", StatusLabel: "Online"})
+		}
+	}
+}
+
+var timelinePhotos = []eGridTile{{"blue-sofa-with-pillows-in-a-designer-living-room-interior.jpg", "Blue sofa with pillows in a designer living room interior", ""},
+	{"home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg", "Home office desk with Macbook, iPhone, calendar, watch & organizer", ""},
+	{"young-woman-working-in-a-cafe.jpg", "Young woman working in a cafe", ""}}
+
+templ slovenia() {
+	@flag.Flag("si", flag.Props{Size: flag.SizeXS})
+	Slovenia
+}
+
+templ profilePage() {
+	{{ fp := frameProps("profile", "Profile") }}
+	{{ fp.Header = profile.Header(profile.HeaderProps{Avatar: avatarURL("003m"), Name: "Dunn Slane", Bio: "Unemployed. Building a $1M solo business while traveling the world. Currently at $400k/yr.",
+		Facts: []profile.Fact{{Icon: "ti-map", Text: "Harbin University of Civil Engineering & Architecture, China"}, {Icon: "ti-mail", Text: "dslane3@epa.gov", Href: "#"}, {Icon: "ti-cake", Text: "15/10/1972"}},
+		Actions: profileActions()}) }}
+	@layout.Page(fp) {
+		<div class="row g-3">
+			<div class="col">
+				@timeline.Timeline() {
+					@timeline.Event(timeline.EventProps{Icon: "ti-brand-x", Strong: "x", Time: "10 hrs ago"}) {
+						@timelineTitle("+1150 Followers")
+						<p class="text-secondary">You’re getting more and more followers, keep it up!</p>
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-briefcase", Time: "2 hrs ago"}) {
+						@timelineTitle("+3 New Products were added!")
+						<p class="text-secondary">Congratulations!</p>
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-check", Time: "1 day ago"}) {
+						@timelineTitle("Database backup completed!")
+						<p class="text-secondary">Download the <a href="#">latest backup</a>.</p>
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-brand-facebook", Strong: "facebook", Time: "1 day ago"}) {
+						@timelineTitle("+290 Page Likes")
+						<p class="text-secondary">This is great, keep it up!</p>
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-user-plus", Time: "2 days ago"}) {
+						@friendRequests()
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-photo", Time: "3 days ago"}) {
+						@timelineTitle("+3 New photos")
+						<div class="mt-3">
+							<div class="row g-2">
+								for _, t := range timelinePhotos {
+									<div class="col-4">
+										<img src={ photo("photos/" + t.File) } class="rounded" alt={ t.Title }/>
+									</div>
+								}
+							</div>
+						</div>
+					}
+					@timeline.Event(timeline.EventProps{Icon: "ti-settings", Time: "2 weeks ago"}) {
+						@timelineTitle("System updated to v2.02")
+						<p class="text-secondary">Check the complete changelog at the <a href="#">activity page</a>.</p>
+					}
+				}
+			</div>
+			<div class="col-lg-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@profile.Info("Basic info", []profile.Item{
+							{Icon: "ti-book", Label: "Went to:", Value: "University of Ljubljana"},
+							{Icon: "ti-briefcase", Label: "Worked at:", Value: "Devpulse"},
+							{Icon: "ti-home", Label: "Lives in:", Value: "Šentilj v Slov. Goricah, Slovenia"},
+							{Icon: "ti-map-pin", Label: "From:", Content: slovenia()},
+							{Icon: "ti-calendar", Label: "Birth date:", Value: "13/01/1985"},
+							{Icon: "ti-clock", Label: "Time zone:", Value: "Europe/Ljubljana"},
+						})
+					</div>
+					<div class="col-12">
+						@card.Card() {
+							@card.Body() {
+								<h2 class="card-title">About Me</h2>
+								<div>
+									<p>
+										Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium aliquid beatae eaque eius esse fugit, hic id illo itaque modi molestias nemo perferendis quae rerum soluta. Blanditiis laborum minima molestiae molestias nemo nesciunt nisi pariatur quae sapiente ut. Aut consectetur doloremque, error impedit, ipsum labore laboriosam minima non omnis perspiciatis possimus praesentium provident quo recusandae suscipit tempore totam.
+									</p>
+								</div>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Cookie banner
+
+templ cookieText() {
+	<strong>Do you like cookies?</strong> 🍪 We use cookies to ensure you get the best experience on our website.
+}
+
+templ cookieBannerPage() {
+	@preview("cookie-banner") {
+		@cookie.Banner(cookie.BannerProps{ID: "offcanvasBottom", Show: true, Text: cookieText(), LearnHref: "./terms-of-service.html",
+			Buttons: []cookie.Button{{Text: "Essential Cookies Only"}, {Text: "Allow All Cookies"}}})
+	}
+}
+
+// Blank page: no page header, an empty state in the middle.
+
+// The original's inline SVG is 256px high; the PNG would grow to the container's width.
+templ blankIllustration() {
+	<img src={ photo("illustrations/light/computer-fix.png") } height="256" style="height:256px" alt=""/>
+}
+
+templ addClient() {
+	@button.Button(button.Props{Href: ".", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		Add your first client
+	}
+}
+
+templ blankPage() {
+	{{ fp := frameProps("blank", "Blank page") }}
+	{{ fp.ContainerClass = "my-auto" }}
+	@layout.Page(fp) {
+		<h1 class="visually-hidden">Blank page</h1>
+		@empty.Empty(empty.Props{Image: blankIllustration(), Title: "No results found", Subtitle: "Try adjusting your search or filter to find what you're looking for.", Action: addClient()})
+	}
+}
+

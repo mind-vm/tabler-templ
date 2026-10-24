@@ -8,7 +8,7 @@ import (
 )
 
 type bar struct {
-	Value int
+	Value float64
 	Color string
 }
 
@@ -29,7 +29,7 @@ var fourColors = []bar{{20, "blue"}, {40, "green"}, {60, "yellow"}, {80, "red"}}
 
 type described struct {
 	Label, Description string
-	Value              int
+	Value              float64
 	Color              string
 	Size               progress.Size
 }

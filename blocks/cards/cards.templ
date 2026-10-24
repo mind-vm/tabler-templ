@@ -1,0 +1,363 @@
+// Package cards holds ready-made cards of Tabler's preview: a placeholder body, tabs below their panes,
+// side and background images, a team invitation, a credit card form and lists of people (with checks,
+// hover actions, letter headers, or in a grid with their status).
+//
+//	@cards.UsersList(cards.UsersListProps{Title: "Last commits", Hoverable: true}, users)
+package cards
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/tabscard"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/listgroup"
+	"github.com/mind-vm/tabler-templ/nav"
+)
+
+type PlaceholderProps struct {
+	Class  string // on the card body
+	Height int    // of the drawing, default 200
+}
+
+// Placeholder is a card body holding a crossed-out box, standing in for content in layout examples.
+templ Placeholder(props ...PlaceholderProps) {
+	{{ p := kit.First(props) }}
+	{{ h := strconv.Itoa(height(p.Height)) }}
+	<div class={ kit.Classes("card-body", p.Class) }>
+		<svg xmlns="http://www.w3.org/2000/svg" class="w-100 border rounded" preserveAspectRatio="none" width="400" height={ h } viewBox={ "0 0 400 " + h } fill="transparent" stroke="var(--tblr-border-color, #b8cef1)">
+			<line x1="0" y1="0" x2="400" y2={ h }></line>
+			<line x1="0" y1={ h } x2="400" y2="0"></line>
+		</svg>
+	</div>
+}
+
+func height(h int) int {
+	if h <= 0 {
+		return 200
+	}
+	return h
+}
+
+func pick(cond bool, yes, no string) string {
+	if cond {
+		return yes
+	}
+	return no
+}
+
+// BottomTabs is tabscard.Tabs with the tabs below their panes (nav-tabs-bottom).
+templ BottomTabs(p tabscard.Props, tabs []tabscard.Tab) {
+	{{ open := activeTab(p, tabs) }}
+	<div class={ kit.Classes("card-tabs", p.Class) }>
+		<div class="tab-content">
+			for _, t := range tabs {
+				if !t.Disabled {
+					<div id={ p.ID + "-" + t.Key } class={ kit.Classes("card tab-pane", kit.If(p.Fade, "fade"), kit.If(t.Key == open, "active show")) } role="tabpanel" aria-labelledby={ p.ID + "-" + t.Key + "-tab" }>
+						<div class="card-body">
+							if t.Content != nil {
+								@t.Content
+							}
+						</div>
+					</div>
+				}
+			}
+		</div>
+		@nav.Nav(nav.Props{Style: nav.StyleTabs, Fill: p.Fill, Bottom: true, Tablist: true}) {
+			for _, t := range tabs {
+				@nav.Item(nav.ItemProps{Target: p.ID + "-" + t.Key, Active: t.Key == open, Disabled: t.Disabled, Icon: t.Icon, Label: kit.If(t.IconOnly, t.Label), Class: kit.If(t.End, "ms-auto")}) {
+					if !t.IconOnly {
+						{ t.Label }
+					}
+				}
+			}
+		}
+	</div>
+}
+
+func activeTab(p tabscard.Props, tabs []tabscard.Tab) string {
+	if p.Active != "" {
+		return p.Active
+	}
+	for _, t := range tabs {
+		if !t.Disabled {
+			return t.Key
+		}
+	}
+	return ""
+}
+
+type PhotoProps struct {
+	Class  string
+	Src    string
+	Ratio  string // img-responsive-{ratio}, e.g. "21x9"; default "21x9"
+	Bottom bool   // below the body (card-img-bottom) instead of above it
+}
+
+// Photo is a card image drawn as a background in a fixed ratio (img-responsive), so any photo fills it.
+templ Photo(p PhotoProps) {
+	<div class={ kit.Classes("img-responsive", "img-responsive-"+kit.Or(p.Ratio, "21x9"), pick(p.Bottom, "card-img-bottom", "card-img-top"), p.Class) } style={ "background-image: url(" + p.Src + ")" }></div>
+}
+
+type SideImageProps struct {
+	Class string // on the card
+	Src   string
+	Alt   string
+	End   bool   // the image at the end (on md screens and up) instead of the start
+	Col   string // the image column, default "col-3"
+}
+
+// SideImage is a card with an image beside its content (the children, e.g. a card.Body).
+templ SideImage(p SideImageProps) {
+	@card.Card(card.Props{Class: p.Class}) {
+		<div class="row row-0">
+			<div class={ kit.Classes(kit.Or(p.Col, "col-3"), kit.If(p.End, "order-md-last")) }>
+				@card.Image(card.ImageProps{Src: p.Src, Alt: p.Alt, Class: "w-100 h-100 object-cover", Place: card.ImagePlace(pick(p.End, "end", "start"))})
+			</div>
+			<div class="col">
+				{ children... }
+			</div>
+		</div>
+	}
+}
+
+type InviteProps struct {
+	Avatars []avatar.Props
+	Title   string
+	Action  templ.Component // e.g. an "Invite Members" button
+}
+
+// Invite is the dashed placeholder card of an empty team: stacked avatars, a title, a text (the
+// children) and an action.
+templ Invite(p InviteProps) {
+	@card.Card(card.Props{Size: card.SizeLarge, Dashed: true, Transparent: true}) {
+		@card.Body(card.Props{Class: "text-center"}) {
+			if len(p.Avatars) > 0 {
+				<div class="mb-3">
+					@avatar.List(avatar.ListProps{Stacked: true}) {
+						for _, a := range p.Avatars {
+							@avatar.Avatar(a)
+						}
+					}
+				</div>
+			}
+			@card.Title() {
+				{ p.Title }
+			}
+			<p class="text-secondary">
+				{ children... }
+			</p>
+			if p.Action != nil {
+				<div class="mt-4">
+					@p.Action
+				</div>
+			}
+		}
+	}
+}
+
+type CreditCardProps struct {
+	ID     string // prefix of the field ids, default "credit-card"
+	Years  []int  // of the expiration year, default 2020–2030
+	Action string // label of the submit button, default "Pay now"
+}
+
+// CreditCard is a card with a payment form: number, name, expiration and CVV.
+templ CreditCard(p CreditCardProps) {
+	{{ id := kit.Or(p.ID, "credit-card") }}
+	@card.Card() {
+		@card.Body() {
+			@form.Field(form.FieldProps{Label: "Card number", For: id + "-number"}) {
+				@form.Input(form.InputProps{ID: id + "-number", Name: "input-mask", Placeholder: "0000 0000 0000 0000", Autocomplete: "cc-number",
+					Attributes: templ.Attributes{"data-mask": "0000 0000 0000 0000", "data-mask-visible": "true"}})
+			}
+			@form.Field(form.FieldProps{Label: "Card name", For: id + "-name"}) {
+				@form.Input(form.InputProps{ID: id + "-name", Autocomplete: "cc-name"})
+			}
+			<div class="row">
+				<div class="col-8">
+					@form.Field(form.FieldProps{Label: "Expiration date"}) {
+						<div class="row g-2">
+							<div class="col">
+								@form.Select(form.SelectProps{AriaLabel: "Expiration month", Options: numbers(1, 12), Attributes: templ.Attributes{"autocomplete": "cc-exp-month"}})
+							</div>
+							<div class="col">
+								@form.Select(form.SelectProps{AriaLabel: "Expiration year", Options: years(p.Years), Attributes: templ.Attributes{"autocomplete": "cc-exp-year"}})
+							</div>
+						</div>
+					}
+				</div>
+				<div class="col">
+					@form.Field(form.FieldProps{Label: "CVV", For: id + "-cvv"}) {
+						@form.Input(form.InputProps{ID: id + "-cvv", Autocomplete: "cc-csc", Attributes: templ.Attributes{"inputmode": "numeric"}})
+					}
+				</div>
+			</div>
+			<div class="mt-2">
+				<button type="button" class="btn btn-primary w-100">{ kit.Or(p.Action, "Pay now") }</button>
+			</div>
+		}
+	}
+}
+
+func numbers(from, to int) []form.Option {
+	var os []form.Option
+	for i := from; i <= to; i++ {
+		os = append(os, form.Option{Value: strconv.Itoa(i), Label: strconv.Itoa(i)})
+	}
+	return os
+}
+
+func years(ys []int) []form.Option {
+	if len(ys) == 0 {
+		return numbers(2020, 2030)
+	}
+	var os []form.Option
+	for _, y := range ys {
+		os = append(os, form.Option{Value: strconv.Itoa(y), Label: strconv.Itoa(y)})
+	}
+	return os
+}
+
+// User is a person in the lists of people.
+type User struct {
+	Name        string
+	Href        string // default "#"
+	Avatar      avatar.Props
+	Description string
+	// Color is the dot before the avatar in a list without checks, e.g. "red"; "-" for a grey dot.
+	Color    string
+	Checked  bool   // checked (or a favorite in a hoverable list); shows the actions
+	Status   string // color of the status badge in TopUsers, e.g. "green"
+	StatusLabel string // e.g. "Online"
+	Meta     string // e.g. "2 days ago" in TopUsers
+}
+
+type UsersListProps struct {
+	Title     string
+	Class     string
+	Hoverable bool // a star appears on hover (list-group-hoverable)
+	Checkbox  bool // a check before each person (list-group-selectable)
+}
+
+// UsersList is a card listing people with a line of text each, either with checks (Checkbox) or with a
+// colored dot and a favorite star shown on hover (Hoverable).
+templ UsersList(p UsersListProps, users []User) {
+	@card.Card(card.Props{Class: p.Class}) {
+		@card.Header() {
+			@card.Title() {
+				{ p.Title }
+			}
+		}
+		@listgroup.List(listgroup.Props{Flush: true, Hoverable: p.Hoverable, Selectable: p.Checkbox}) {
+			for _, u := range users {
+				@listgroup.Item(listgroup.ItemProps{Media: userMedia(p, u), Actions: userActions(p, u), ShowActions: u.Checked}) {
+					@userTitle(u)
+				}
+			}
+		}
+	}
+}
+
+templ userMedia(p UsersListProps, u User) {
+	if p.Checkbox {
+		<input type="checkbox" class="form-check-input list-group-selectable-check m-0" checked?={ u.Checked } aria-label={ "Select " + u.Name }/>
+	} else {
+		<span class={ kit.Classes("badge", kit.If(u.Color != "" && u.Color != "-", "bg-"+u.Color)) }></span>
+	}
+	<a href={ templ.URL(kit.Or(u.Href, "#")) } class="ms-3" tabindex="-1" aria-hidden="true">
+		@avatar.Avatar(u.Avatar)
+	</a>
+}
+
+templ userActions(p UsersListProps, u User) {
+	if p.Hoverable {
+		<a href="#" aria-label={ pick(u.Checked, "Remove from favorites", "Add to favorites") }>
+			@icon.Icon("ti-star", icon.Props{Class: pick(u.Checked, "text-yellow", "text-secondary")})
+		</a>
+	}
+}
+
+templ userTitle(u User) {
+	<a href={ templ.URL(kit.Or(u.Href, "#")) } class="list-group-item-title">{ u.Name }</a>
+	<div class="list-group-item-description">{ u.Description }</div>
+}
+
+// Group is a letter and the people under it in People.
+type Group struct {
+	Letter string
+	Users  []User
+}
+
+type PeopleProps struct {
+	Title     string
+	Class     string
+	MaxHeight string // the list scrolls beyond it, e.g. "35rem"
+}
+
+// People is a card with a scrolling list of people under sticky letter headers.
+templ People(p PeopleProps, groups []Group) {
+	@card.Card(card.Props{Class: p.Class}) {
+		@card.Header() {
+			@card.Title() {
+				{ p.Title }
+			}
+		}
+		@listgroup.List(listgroup.Props{Flush: true, Class: kit.If(p.MaxHeight != "", "overflow-auto"), Attributes: kit.Attrs(templ.Attributes{}, maxHeight(p.MaxHeight))}) {
+			for _, g := range groups {
+				<div class="list-group-header sticky-top">{ g.Letter }</div>
+				for _, u := range g.Users {
+					@listgroup.Item(listgroup.ItemProps{Media: personLink(u)}) {
+						@userTitle(u)
+					}
+				}
+			}
+		}
+	}
+}
+
+func maxHeight(h string) templ.Attributes {
+	if h == "" {
+		return nil
+	}
+	return templ.Attributes{"style": "max-height: " + h}
+}
+
+templ personLink(u User) {
+	<a href={ templ.URL(kit.Or(u.Href, "#")) } tabindex="-1" aria-hidden="true">
+		@avatar.Avatar(u.Avatar)
+	</a>
+}
+
+// TopUsers is a card with people in two columns: avatar with a status badge, name and Meta.
+templ TopUsers(title string, users []User) {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				{ title }
+			}
+		}
+		@card.Body() {
+			<div class="row g-3">
+				for _, u := range users {
+					{{ a := u.Avatar }}
+					{{ a.Status, a.StatusLabel = u.Status, u.StatusLabel }}
+					<div class="col-6">
+						<div class="row g-3 align-items-center">
+							<a href={ templ.URL(kit.Or(u.Href, "#")) } class="col-auto" tabindex="-1" aria-hidden="true">
+								@avatar.Avatar(a)
+							</a>
+							<div class="col text-truncate">
+								<a href={ templ.URL(kit.Or(u.Href, "#")) } class="text-reset d-block text-truncate">{ u.Name }</a>
+								<div class="text-secondary text-truncate mt-n1">{ u.Meta }</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		}
+	}
+}

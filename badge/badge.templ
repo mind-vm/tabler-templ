@@ -35,6 +35,8 @@ type Props struct {
 	// Notification pins the badge to the top right corner of its parent, e.g. a button (badge-notification).
 	Notification bool
 	Blink        bool // badge-blink: pulsing, for unread activity
+	// Href makes the badge a link, e.g. a tag that filters a list.
+	Href string
 }
 
 func Classes(p Props) string {
@@ -61,15 +63,29 @@ func Classes(p Props) string {
 
 templ Badge(props ...Props) {
 	{{ p := kit.First(props) }}
-	<span class={ Classes(p) } { p.Attributes... }>
-		if p.Icon != "" {
-			@icon.Icon(p.Icon)
-		}
-		{ children... }
-		if p.IconEnd != "" {
-			@icon.Icon(p.IconEnd)
-		}
-	</span>
+	if p.Href != "" {
+		<a href={ templ.URL(p.Href) } class={ Classes(p) } { p.Attributes... }>
+			@inner(p) {
+				{ children... }
+			}
+		</a>
+	} else {
+		<span class={ Classes(p) } { p.Attributes... }>
+			@inner(p) {
+				{ children... }
+			}
+		</span>
+	}
+}
+
+templ inner(p Props) {
+	if p.Icon != "" {
+		@icon.Icon(p.Icon)
+	}
+	{ children... }
+	if p.IconEnd != "" {
+		@icon.Icon(p.IconEnd)
+	}
 }
 
 type ListProps struct {

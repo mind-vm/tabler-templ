@@ -44,11 +44,21 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   `placeholder`, `pricing`, `shape`, `shimmer`, `signal`, `sparkline`, `spinner`, `switchicon`, `tag`, `trending`,
   `typography`. `avatar.Props.Empty`, `listgroup` as `<ul>` or `<nav>`. `card`:
   gradients, rotation, image places, overlay, cover, card buttons, meta, code, dropdown; `tabscard.Tabs`.
+- App and content pages: blocks `settings`, `plans`, `pricing`, `invoice`, `billing`, `legal`, `faq`, `profile`,
+  `users`, `gallery`, `search`, `jobs`, `logs`, `cookie`, `cards`, `tables`; packages `payment`, `clipboard`, `prose`,
+  `pattern`, `social`, `colorswatch`. `table` covers Tabler's table docs; `form` gets horizontal fields,
+  fieldsets as fields, wrapped controls, check descriptions, datalists and more; `nav` overflow helpers and
+  link segments; `sparkline` stroke and spot sizes.
+- **Breaking:** `progress` values are `float64` (decimals such as 82.54); a `form.Field` without `For` renders its
+  label as `<div class="form-label">` like Tabler; `.table-responsive` gets `tabindex="0"`.
+- `card.Title` and `pricing.Card` take a heading level; `badge` as a link; `timeline` strong marker colors;
+  `accordion` body class; `layout.Navbar` attributes and `layout.Brand` as a link; `typography.Subheader` as
+  legend; `mention` as anchor; `form.ColorCheck` with any CSS color.
 - `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
   `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
   default is `ShapeDefault`.
-- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps, empty, number-input and password-strength pages, and all authentication pages but license and
-  terms-of-service, checked against the
+- Demo: dropdowns, tabs, offcanvas, toasts, avatars, progress, steps, empty, number-input and password-strength pages, the authentication pages and some 40 app,
+  content and component pages, checked against the
   preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
 

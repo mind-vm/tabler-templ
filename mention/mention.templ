@@ -8,6 +8,8 @@ type Props struct {
 	Class      string
 	Attributes templ.Attributes
 	Href       string // a link; without it a <span>
+	// Anchor renders an <a> without href (as the preview does for mentions handled by script).
+	Anchor bool
 	Avatar     string // URL of a person's photo (mention-avatar)
 	App        string // URL of an app's logo (mention-app)
 	Color      string // a color swatch, e.g. "blue" (mention-color bg-blue)
@@ -37,6 +39,12 @@ templ Mention(props ...Props) {
 	{{ p := kit.First(props) }}
 	if p.Href != "" {
 		<a href={ templ.URL(p.Href) } class={ kit.Classes("mention", p.Class) } { p.Attributes... }>
+			@inner(p) {
+				{ children... }
+			}
+		</a>
+	} else if p.Anchor {
+		<a class={ kit.Classes("mention", p.Class) } { p.Attributes... }>
 			@inner(p) {
 				{ children... }
 			}

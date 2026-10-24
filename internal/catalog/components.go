@@ -68,4 +68,8 @@ var Components = []Component{
 	{Name: "Validation", Doc: "ui/forms/validation", Astro: []string{}, Status: Done, Package: "form"},
 	// Parts of shared/ui without a docs page of their own.
 	{Name: "Flag", Astro: []string{"Flag"}, Status: Done, Package: "flag"},
+	{Name: "Payment", Astro: []string{"Payment"}, Status: Done, Package: "payment"},
+	{Name: "Background pattern", Astro: []string{"BackgroundPattern"}, Status: Done, Package: "pattern"},
+	{Name: "Prose", Astro: []string{"Prose"}, Status: Done, Package: "prose"},
+	{Name: "Subheader", Astro: []string{"Subheader"}, Status: Done, Package: "typography"},
 }

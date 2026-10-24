@@ -1,0 +1,679 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/cards"
+	"github.com/mind-vm/tabler-templ/blocks/tabscard"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/ribbon"
+)
+
+// batchFPages are the cards, card-actions, cards-masonry, lists, datagrid and tables pages.
+func batchFPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"cards":         cardsPage(),
+		"card-actions":  cardActionsPage(),
+		"cards-masonry": cardsMasonryPage(),
+		"lists":         listsPage(),
+		"datagrid":      datagridPage(),
+		"tables":        tablesPage(),
+	}
+}
+
+const bfLorem = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam deleniti fugit incidunt, iste, itaque minima neque pariatur perferendis sed suscipit velit vitae voluptatem."
+const bfLorem2 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto at consectetur culpa ducimus eum fuga fugiat, ipsa iusto, modi nostrum recusandae reiciendis saepe."
+
+// bfHead is a card header with a title, a subtitle below it and actions at the end.
+templ bfHead(title, subtitle string, actions templ.Component) {
+	@card.Header() {
+		<div>
+			@card.Title() {
+				{ title }
+			}
+			if subtitle != "" {
+				@card.Subtitle() {
+					@withCode(subtitle)
+				}
+			}
+		</div>
+		if actions != nil {
+			@actions
+		}
+	}
+}
+
+// bfTitled is a card body with a title and a paragraph of muted text.
+templ bfTitled(title, text string) {
+	@card.Body() {
+		@card.Title() {
+			{ title }
+		}
+		<p class="text-secondary">{ text }</p>
+	}
+}
+
+templ bfTitleCard(title string, props card.Props) {
+	@card.Card(props) {
+		@card.Header() {
+			@card.Title() {
+				{ title }
+			}
+		}
+		{ children... }
+	}
+}
+
+var bfStack = []string{"000m", "052f", "002m", "003m", "000f"}
+
+templ bfAvatars(size avatar.Size, more string) {
+	@avatar.List(avatar.ListProps{Stacked: true, Size: size}) {
+		for _, a := range bfStack {
+			@avatar.Avatar(avatar.Props{Src: avatarURL(a), Size: size})
+		}
+		if more != "" {
+			@avatar.Avatar(avatar.Props{Initials: more, Size: size})
+		}
+	}
+}
+
+// ---- cards
+
+templ cardsPage() {
+	@preview("cards") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Headers & body styles", "Combine a header, a tinted background, or drop the border for a simpler look.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@bfTitleCard("Card title", card.Props{}) {
+								@card.Body() {
+									Simple card
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@card.Header(card.Props{Light: true}) {
+									@card.Title() {
+										Card title
+									}
+								}
+								@card.Body() {
+									Card with header background
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Borderless: true}) {
+								@card.Body() {
+									@card.Title() {
+										Card title
+									}
+									<div>Card without border</div>
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@card.Header() {
+									@card.Title() {
+										Card title <span class="card-subtitle">Subtitle</span>
+									}
+								}
+								@card.Body() {
+									Card with title and subtitle
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Link hover effects", "Add motion cues when the whole card acts as a link.") {
+					<div class="row row-cards">
+						for _, h := range []struct{ hover card.Hover; text string }{{card.HoverNone, "Default hover effect"}, {card.HoverRotate, "Rotate hover effect"}, {card.HoverPop, "Pop hover effect"}} {
+							<div class="col-md-6 col-lg-3">
+								@card.Card(card.Props{Href: "#", Hover: h.hover}) {
+									@card.Body() {
+										{ h.text }
+									}
+								}
+							</div>
+						}
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Rotation & state", "Tilt a card slightly, or mark it as active or inactive.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Rotate: "end"}) {
+								@card.Body() {
+									Card rotate end
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Rotate: "start"}) {
+								@card.Body() {
+									Card rotate start
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Active: true}) {
+								@card.Body() {
+									<p>This is a card with active state.</p>
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Inactive: true}) {
+								@card.Body() {
+									<p>This is some text inactive state.</p>
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Icon & background accents", "Draw attention with a stamp icon or a tinted background.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-4">
+							@card.Card() {
+								@card.Stamp(card.StampProps{Icon: "ti-bell", Color: "yellow"})
+								@bfTitled("Card with icon bg", bfLorem2)
+							}
+						</div>
+						<div class="col-md-6 col-lg-4">
+							@card.Card(card.Props{Class: "bg-primary-lt"}) {
+								@bfTitled("Card with primary light background", bfLorem2)
+							}
+						</div>
+						<div class="col-md-6 col-lg-4">
+							@card.Card(card.Props{Class: "bg-primary text-primary-fg"}) {
+								@card.Stamp(card.StampProps{Icon: "ti-star", Color: "white", TextColor: "primary"})
+								@card.Body() {
+									@card.Title(card.Props{Class: "text-primary-fg"}) {
+										Card with background and icon
+									}
+									<p>{ bfLorem2 }</p>
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Status indicators", "Mark a card's state with a colored edge on any side.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-4">
+							@card.Card(card.Props{Status: "danger"}) {
+								@bfTitled("Card with top status", bfLorem)
+							}
+						</div>
+						<div class="col-md-6 col-lg-4">
+							@card.Card(card.Props{Status: "success", StatusEdge: card.EdgeBottom}) {
+								@bfTitled("Card with bottom status", bfLorem)
+							}
+						</div>
+						<div class="col-md-6 col-lg-4">
+							@card.Card(card.Props{Status: "primary", StatusEdge: card.EdgeStart}) {
+								@bfTitled("Card with side status", bfLorem)
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Ribbons & progress", "Flag content with a ribbon, or track progress right inside the card.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@ribbon.Ribbon(ribbon.Props{Top: true, Color: "yellow"})
+								@bfTitled("Card with top ribbon", bfLorem2)
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@ribbon.Ribbon(ribbon.Props{Color: "red", Text: "NEW"})
+								@bfTitled("Card with text ribbon", bfLorem2)
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with progress bar", bfLorem)
+								@card.Progress(card.ProgressProps{Class: "progress-sm", Value: 38, Label: "38% Complete"})
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card(card.Props{Stacked: true}) {
+								@bfTitled("Stacked card", bfLorem)
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Card images", "Pair a card with an image on the left, right, top, or bottom.") {
+					<div class="row row-cards">
+						<div class="col-lg-6">
+							@cards.SideImage(cards.SideImageProps{Src: photo("photos/beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg"),
+								Alt: "Beautiful blonde woman relaxing with a can of coke on a tree stump by the beach"}) {
+								@bfTitled("Card with left side image", bfLorem)
+							}
+						</div>
+						<div class="col-lg-6">
+							@cards.SideImage(cards.SideImageProps{Src: photo("photos/finances-us-dollars-and-bitcoins-currency-money.jpg"),
+								Alt: "Finances - US Dollars and Bitcoins - Currency - Money", End: true}) {
+								@bfTitled("Card with right side image", bfLorem)
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@cards.Photo(cards.PhotoProps{Src: photo("photos/home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg")})
+								@bfTitled("Card with top image", bfLorem)
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with bottom image", bfLorem)
+								@cards.Photo(cards.PhotoProps{Src: photo("photos/finances-us-dollars-and-bitcoins-currency-money-2.jpg"), Bottom: true})
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Footers", "Add a footer for metadata, a single action, or a group of buttons.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with footer", bfLorem)
+								@card.Footer() {
+									This is standard card footer
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with transparent footer", bfLorem)
+								@card.Footer(card.Props{Transparent: true}) {
+									This is transparent card footer
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with footer button", bfLorem)
+								@card.Footer() {
+									@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary}) {
+										Go somewhere
+									}
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@bfTitled("Card with footer buttons", bfLorem)
+								@card.Footer() {
+									@button.List() {
+										@button.Button(button.Props{Href: "#", Variant: button.VariantLink}) {
+											Cancel
+										}
+										@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary, Class: "ms-auto"}) {
+											Go somewhere
+										}
+									}
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Footer elements", "Compose footer content from prebuilt elements like links, switches, or avatars.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@card.Body() {
+									<p class="text-secondary">{ bfLorem }</p>
+								}
+								@card.Footer() {
+									<div class="row align-items-center">
+										<div class="col-auto">
+											<a href="#">More information</a>
+										</div>
+										<div class="col-auto ms-auto">
+											<label class="form-check form-switch m-0">
+												@form.CheckInput(form.CheckProps{Switch: true, Checked: true, Class: "position-static", Attributes: templ.Attributes{"aria-label": "Enable"}})
+											</label>
+										</div>
+									</div>
+								}
+							}
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@card.Card() {
+								@card.Body() {
+									<p class="text-secondary">{ bfLorem }</p>
+								}
+								@card.Footer() {
+									<div class="row align-items-center">
+										<div class="col-auto ms-auto">
+											@bfAvatars(avatar.SizeSmall, "+3")
+										</div>
+									</div>
+								}
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Header tabs & pills", "Navigate between panes right from the card header.") {
+					<div class="row row-cards">
+						<div class="col-md-6 col-lg-3">
+							@bfHeaderNavCard(nav.StyleTabs)
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@bfHeaderNavCard(nav.StylePills)
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@tabscard.Tabs(tabscard.Props{ID: "tab-top"}, bfTabs())
+						</div>
+						<div class="col-md-6 col-lg-3">
+							@cards.BottomTabs(tabscard.Props{ID: "tab-bottom"}, bfTabs())
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Nested & grouped cards", "Combine cards inside a card, a full-bleed group, or a matched-height deck.") {
+					<div class="row row-cards">
+						<div class="col-12">
+							@bfTitleCard("Cards inside card", card.Props{}) {
+								@card.Body() {
+									<div class="row row-cards">
+										for _, c := range []struct{ title, color string }{{"First card", "red"}, {"Second card", "green"}, {"Third card", "blue"}} {
+											<div class="col-md">
+												@bfTitleCard(c.title, card.Props{Status: c.color}) {
+													@cards.Placeholder()
+												}
+											</div>
+										}
+									</div>
+								}
+							}
+						</div>
+						<div class="col-12">
+							<div class="card-group">
+								for _, t := range []string{"First card", "Second card", "Third card"} {
+									@bfTitleCard(t, card.Props{}) {
+										@cards.Placeholder()
+									}
+								}
+							</div>
+						</div>
+						<div class="col-12">
+							<div class="row row-cards row-deck">
+								for _, c := range [][2]string{
+									{"Card title", "This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer."},
+									{"Card title", "This card has supporting text below as a natural lead-in to additional content."},
+									{"Card with very long content", "This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action."},
+								} {
+									<div class="col">
+										@bfTitleCard(c[0], card.Props{}) {
+											@card.Body() {
+												{ c[1] }
+											}
+											@card.Footer() {
+												Last updated 3 mins ago
+											}
+										}
+									</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@section("Special states", "An empty state, a team placeholder, and a specialty credit card layout.") {
+					<div class="row row-cards">
+						<div class="col-lg-4">
+							@card.Card() {
+								@empty.Empty(empty.Props{Image: bfNotFound(), Title: "No results found", Subtitle: "Try adjusting your search or filter to find what you're looking for.",
+									Action: bfSearchAgain()})
+							}
+						</div>
+						<div class="col-lg-4">
+							@cards.Invite(cards.InviteProps{Avatars: bfStackProps(), Title: "No Team Members", Action: bfInviteButton()}) {
+								Invite your team to
+								<br/>
+								collaborate on this project.
+							}
+						</div>
+						<div class="col-lg-4">
+							@cards.CreditCard(cards.CreditCardProps{})
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ bfSearchAgain() {
+	@button.Button(button.Props{Href: ".", Variant: button.VariantPrimary, Icon: "ti-search"}) {
+		Search again
+	}
+}
+
+templ bfNotFound() {
+	@templ.Raw(bfNotFoundSVG)
+}
+
+func bfStackProps() []avatar.Props {
+	ps := make([]avatar.Props, len(bfStack))
+	for i, a := range bfStack {
+		ps[i] = avatar.Props{Src: avatarURL(a)}
+	}
+	return ps
+}
+
+templ bfInviteButton() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		Invite Members
+	}
+}
+
+templ bfHeaderNavCard(style nav.Style) {
+	@card.Card() {
+		@card.Header() {
+			@nav.Nav(nav.Props{Style: style, CardHeader: true}) {
+				@nav.Item(nav.ItemProps{Href: "#", Active: true}) {
+					Active
+				}
+				@nav.Item(nav.ItemProps{Href: "#", Icon: "ti-star"}) {
+					Link
+				}
+				@nav.Item(nav.ItemProps{Href: "#", Disabled: true}) {
+					Disabled
+				}
+				@nav.Item(nav.ItemProps{Href: "#", Icon: "ti-settings", Label: "Settings", Class: "ms-auto"})
+			}
+		}
+		@card.Body() {
+			<p class="text-secondary">{ bfLorem }</p>
+		}
+	}
+}
+
+const bfTabText = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, alias aliquid distinctio dolorem expedita, fugiat hic magni molestiae molestias odit."
+
+func bfTabs() []tabscard.Tab {
+	var ts []tabscard.Tab
+	for i, l := range []string{"Activity", "Profile", "Settings"} {
+		ts = append(ts, tabscard.Tab{Key: string(rune('1' + i)), Label: l, Content: bfTitledText(l, bfTabText)})
+	}
+	return ts
+}
+
+templ bfTitledText(title, text string) {
+	@card.Title() {
+		{ title }
+	}
+	<p class="text-secondary">{ text }</p>
+}
+
+// ---- card-actions
+
+templ cardActionsPage() {
+	@preview("card-actions") {
+		<div class="row row-cards">
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("Sample card", "A blank card with a title and no actions.", nil)
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("Card with action", "Add a single action button to the header.", bfActions(bfAddNew()))
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("Card title", "Add two secondary action buttons to the header.", bfActions(bfContactButtons()))
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfPersonHead("000m", "Paweł Kuna", "UI Designer", bfActions(bfContactButtons()))
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("With description", "Lorem ipsum dolor sit amet consectetur adipisicing.", nil)
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("With description and action", "Lorem ipsum dolor sit amet consectetur adipisicing.", bfActions(bfCreateJob()))
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfPersonHead("003m", "Dunn Slane", "Research Nurse", bfActions(bfUserMenu()))
+					@cards.Placeholder()
+				}
+			</div>
+			<div class="col-md-6">
+				@card.Card() {
+					@bfHead("Icon toolbar", "A compact row of icon-only actions in the header.", bfToolbar())
+					@cards.Placeholder()
+				}
+			</div>
+		</div>
+	}
+}
+
+templ bfActions(c templ.Component) {
+	@card.Actions() {
+		@c
+	}
+}
+
+templ bfAddNew() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+		Add new
+	}
+}
+
+templ bfCreateJob() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary}) {
+		Create new job
+	}
+}
+
+templ bfContactButtons() {
+	@button.Button(button.Props{Type: "button", Icon: "ti-phone"}) {
+		Phone
+	}
+	@button.Button(button.Props{Type: "button", Icon: "ti-mail"}) {
+		Email
+	}
+}
+
+templ bfUserMenu() {
+	@card.Dropdown(card.DropdownProps{Label: "Actions"}) {
+		@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+			Edit user
+		}
+		@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+			Change permissions
+		}
+		@dropdown.Item(dropdown.ItemProps{Href: "#", Class: "text-danger"}) {
+			Delete user
+		}
+	}
+}
+
+templ bfToolbar() {
+	@card.Actions(card.Props{Class: "btn-actions"}) {
+		for _, b := range [][2]string{{"ti-refresh", "Refresh"}, {"ti-chevron-up", "Collapse"}, {"ti-dots-vertical", "More actions"}, {"ti-x", "Close"}} {
+			@button.Button(button.Props{Href: "#", Action: true, Icon: b[0], Attributes: templ.Attributes{"aria-label": b[1]}})
+		}
+	}
+}
+
+templ bfPersonHead(av, name, role string, actions templ.Component) {
+	@card.Header() {
+		<div>
+			<div class="row align-items-center">
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Src: avatarURL(av)})
+				</div>
+				<div class="col">
+					@card.Title() {
+						{ name }
+					}
+					<div class="card-subtitle">{ role }</div>
+				</div>
+			</div>
+		</div>
+		@actions
+	}
+}
+
+// ---- cards-masonry
+
+var bfMasonryHeights = []int{200, 150, 400, 300, 350, 600, 700, 200, 150, 250, 50, 400, 300, 200}
+
+templ cardsMasonryPage() {
+	@preview("cards-masonry") {
+		<div class="row row-cards" data-masonry='{"percentPosition": true }'>
+			for _, h := range bfMasonryHeights {
+				<div class="col-sm-6 col-lg-4">
+					@card.Card() {
+						@cards.Placeholder(cards.PlaceholderProps{Height: h})
+					}
+				</div>
+			}
+		</div>
+		// Masonry lays out the cards of a data-masonry row (a plugin, as in Tabler's preview).
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js" defer></script>
+	}
+}

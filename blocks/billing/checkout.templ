@@ -1,0 +1,142 @@
+package billing
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/payment"
+)
+
+type CheckoutProps struct {
+	Lang       string // default "en"
+	Title      string
+	Head       templ.Component
+	Scripts    templ.Component
+	Brand      templ.Component // the logo at the top left
+	CloseHref  string          // the close button at the top right, default "."
+	CloseLabel string          // default kit.T(ctx).Close
+	Cover      string          // URL of the product's cover image
+	Avatar     string          // URL of the seller's photo over the cover
+	Product    string          // the heading
+	Text       string          // below the heading
+}
+
+// CheckoutPage is a payment page for a single product (the preview's pay page): a cover image, the
+// product and, as children, the payment (e.g. a nav.Segmented with a CardForm and a PayPal button).
+templ CheckoutPage(p CheckoutProps) {
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body>
+			<header class="navbar">
+				<div class="container-fluid">
+					if p.Brand != nil {
+						@p.Brand
+					}
+					<div>
+						<a href={ templ.URL(kit.Or(p.CloseHref, ".")) } class="btn btn-close" aria-label={ kit.Or(p.CloseLabel, kit.T(ctx).Close) }></a>
+					</div>
+				</div>
+			</header>
+			<main class="page" id="content">
+				<div class="bg-dark bg-cover" style={ "background-image: url(" + p.Cover + ")" }>
+					<div class="bg-dark bg-opacity-75 pt-5 bg-blur">
+						<div class="container container-tight">
+							<img src={ p.Cover } alt="" class="img-fluid rounded-3 rounded-top"/>
+						</div>
+					</div>
+				</div>
+				<div class="container container-tight">
+					<div class="card rounded-top-0 border-top-0">
+						<div class="card-body pt-0">
+							<div class="mb-3 text-center">
+								if p.Avatar != "" {
+									@avatar.Avatar(avatar.Props{Src: p.Avatar, Size: avatar.SizeXL, Cover: true, Class: "rounded-circle mb-3"})
+								}
+								<div class="mb-4">
+									<h1 class="h2">{ p.Product }</h1>
+									if p.Text != "" {
+										<div class="text-secondary">{ p.Text }</div>
+									}
+								</div>
+							</div>
+							{ children... }
+						</div>
+					</div>
+				</div>
+			</main>
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+type CardFormProps struct {
+	Action   string // the form posts here; empty = no action (handled by script)
+	Provider string // the card logo in the number field, default "visa"
+	Submit   string // e.g. "Pay $253"
+	Note     string // below the button, e.g. the VAT
+	// Field labels, default "Card Number", "Expiry Date", "CVC", "Name on Card", "Email".
+	NumberLabel, ExpiryLabel, CVCLabel, NameLabel, EmailLabel string
+}
+
+// CardForm asks for the card details, with the browser's autofill names.
+templ CardForm(p CardFormProps) {
+	<form
+		if p.Action != "" {
+			action={ templ.URL(p.Action) }
+			method="post"
+		}
+	>
+		<div class="space-y">
+			<div>
+				<label class="form-label" for="card-number">{ kit.Or(p.NumberLabel, "Card Number") }</label>
+				@form.Group(form.GroupProps{Flat: true}) {
+					@form.Addon() {
+						@payment.Payment(kit.Or(p.Provider, "visa"), payment.Props{Size: payment.SizeXS})
+					}
+					@form.Input(form.InputProps{ID: "card-number", Name: "card_number", Placeholder: "0000 0000 0000 0000", Autocomplete: "cc-number", Attributes: templ.Attributes{"aria-required": "true"}})
+				}
+			</div>
+			<div class="row g-3">
+				<div class="col-sm-6">
+					<label class="form-label" for="card-expiry">{ kit.Or(p.ExpiryLabel, "Expiry Date") }</label>
+					@form.Input(form.InputProps{ID: "card-expiry", Name: "card_expiry", Placeholder: "MM/YY", Autocomplete: "cc-exp",
+						Attributes: templ.Attributes{"inputmode": "numeric", "aria-required": "true", "maxlength": "5"}})
+				</div>
+				<div class="col-sm-6">
+					<label class="form-label" for="card-cvc">{ kit.Or(p.CVCLabel, "CVC") }</label>
+					@form.Input(form.InputProps{ID: "card-cvc", Name: "card_cvc", Placeholder: "CVC", Autocomplete: "cc-csc",
+						Attributes: templ.Attributes{"inputmode": "numeric", "aria-required": "true", "maxlength": "3"}})
+				</div>
+			</div>
+			<div>
+				<label class="form-label" for="card-name">{ kit.Or(p.NameLabel, "Name on Card") }</label>
+				@form.Input(form.InputProps{ID: "card-name", Name: "card_name", Placeholder: "Full name", Autocomplete: "cc-name", Attributes: templ.Attributes{"aria-required": "true"}})
+			</div>
+			<div>
+				<label class="form-label" for="card-email">{ kit.Or(p.EmailLabel, "Email") }</label>
+				@form.Input(form.InputProps{ID: "card-email", Name: "email", Type: "email", Placeholder: "you@example.com", Autocomplete: "email", Attributes: templ.Attributes{"aria-required": "true"}})
+			</div>
+			<div>
+				@button.Button(button.Props{Type: kit.If(p.Action == "", "button") + kit.If(p.Action != "", "submit"), Variant: button.VariantPrimary, Block: true}) {
+					{ p.Submit }
+				}
+				if p.Note != "" {
+					<div class="text-secondary text-center small mt-3">{ p.Note }</div>
+				}
+			</div>
+		</div>
+	</form>
+}

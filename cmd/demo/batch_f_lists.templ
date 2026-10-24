@@ -1,0 +1,448 @@
+package main
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/cards"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/listgroup"
+	"github.com/mind-vm/tabler-templ/placeholder"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/status"
+)
+
+type bfEntry struct{ Title, Description, Icon, Meta string }
+
+var bfFolders = []bfEntry{
+	{"Inbox", "Messages waiting for a reply", "ti-inbox", "12"},
+	{"Sent", "Everything you have sent", "ti-send", "148"},
+	{"Archive", "Closed conversations", "ti-archive", "2304"},
+	{"Trash", "Removed after 30 days", "ti-trash", "7"},
+}
+
+type bfPerson struct{ Name, Role, Avatar, Meta string }
+
+var bfPersons = []bfPerson{
+	{"Paweł Kuna", "UI Designer", "000m", "3 d"},
+	{"Jeffie Lewzey", "Chemical Engineer", "052f", "3 d"},
+	{"Mallory Hulme", "Geologist IV", "002m", "6 d"},
+	{"Dunn Slane", "Research Nurse", "003m", "9 d"},
+}
+
+var bfFiles = []bfEntry{
+	{"Annual report 2025.pdf", "2.4 MB", "ti-file-type-pdf", ""},
+	{"Budget forecast.xlsx", "318 kB", "ti-file-spreadsheet", ""},
+	{"Office photos.zip", "48 MB", "ti-photo", ""},
+	{"Meeting notes.md", "4 kB", "ti-file-text", ""},
+}
+
+// bfListCard is a card with a title and subtitle in its body and a flush list group below.
+templ bfListCard(title, subtitle string, props listgroup.Props) {
+	@card.Card() {
+		@card.Body() {
+			@card.Title() {
+				{ title }
+			}
+			@card.Subtitle() {
+				@withCode(subtitle)
+			}
+		}
+		{{ props.Flush = true }}
+		@listgroup.List(props) {
+			{ children... }
+		}
+	}
+}
+
+// bfHeaderListCard is a card with a header and a flush list group below.
+templ bfHeaderListCard(title string, props listgroup.Props) {
+	@bfTitleCard(title, card.Props{}) {
+		{{ props.Flush = true }}
+		@listgroup.List(props) {
+			{ children... }
+		}
+	}
+}
+
+templ bfIcon(name string) {
+	@icon.Icon(name, icon.Props{Class: "text-secondary"})
+}
+
+templ bfAvatar(name string, size avatar.Size) {
+	@avatar.Avatar(avatar.Props{Src: avatarURL(name), Size: size})
+}
+
+templ bfText(s string) {
+	{ s }
+}
+
+templ bfChevron() {
+	@icon.Icon("ti-chevron-right", icon.Props{Class: "text-secondary"})
+}
+
+templ bfMoreMenu() {
+	@card.Dropdown(card.DropdownProps{}) {
+		@dropdown.Item() {
+			Import
+		}
+		@dropdown.Item() {
+			Export
+		}
+		@dropdown.Item() {
+			Download
+		}
+		@dropdown.Item(dropdown.ItemProps{Class: "text-danger"}) {
+			Delete
+		}
+	}
+}
+
+templ bfStar(label string) {
+	if label == "Remove from favorites" {
+		<button type="button" class="btn btn-action" aria-label={ label }>
+			@icon.Icon("ti-star", icon.Props{Color: "yellow"})
+		</button>
+	} else {
+		@button.Button(button.Props{Type: "button", Action: true, Icon: "ti-star", Attributes: templ.Attributes{"aria-label": label}})
+	}
+}
+
+templ bfFollow(following bool) {
+	if following {
+		@button.Button(button.Props{Type: "button", Size: button.SizeSmall}) {
+			Following
+		}
+	} else {
+		@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Variant: button.VariantPrimary}) {
+			Follow
+		}
+	}
+}
+
+templ bfSelectMedia(av string, checked bool) {
+	<input type="checkbox" class="form-check-input list-group-selectable-check m-0 me-3" checked?={ checked }/>
+	@bfAvatar(av, "")
+}
+
+templ bfSwitch(checked bool) {
+	<span class="form-check form-switch m-0">
+		<input type="checkbox" role="switch" class="form-check-input" checked?={ checked }/>
+	</span>
+}
+
+templ bfHandle(av string) {
+	<span class="sortable-handle cursor-move text-secondary me-3" aria-hidden="true">
+		@icon.Icon("ti-grip-vertical")
+	</span>
+	@bfAvatar(av, "")
+}
+
+templ bfAmount(amount string, positive bool) {
+	if positive {
+		<span class="fw-medium text-green">{ amount }</span>
+	} else {
+		<span class="fw-medium text-body">{ amount }</span>
+	}
+}
+
+templ bfBrand(name string) {
+	@avatar.Avatar(avatar.Props{Src: photo("brands/" + name + ".svg")})
+}
+
+templ bfFileIcon(name string) {
+	@avatar.Avatar(avatar.Props{Icon: name})
+}
+
+templ bfDownload(name string) {
+	@button.Button(button.Props{Type: "button", Action: true, Icon: "ti-download", Attributes: templ.Attributes{"aria-label": "Download " + name}})
+}
+
+templ bfVisits(pct float64) {
+	@progress.Progress(progress.Props{Value: pct, Size: progress.SizeSmall, Class: "mt-2"})
+}
+
+templ bfPlaceholderRow(a, b string) {
+	@placeholder.Placeholder(placeholder.Props{Class: a})
+	@placeholder.Placeholder(placeholder.Props{Class: b, Size: "xs"})
+}
+
+templ bfDot(unread bool) {
+	if unread {
+		@status.Dot(status.DotProps{Color: "blue", Animated: true, Label: "Unread"})
+	} else {
+		@status.Dot(status.DotProps{Label: "Read"})
+	}
+}
+
+templ bfBadge(color, text string) {
+	@badge.Badge(badge.Props{Color: color, Light: true}) {
+		{ text }
+	}
+}
+
+templ bfFlag(code string) {
+	@flag.Flag(code)
+}
+
+templ listsPage() {
+	@preview("lists") {
+		<div class="row row-cards">
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Text only", "A plain `list-group-item` holds one line of text.", listgroup.Props{}) {
+					for _, f := range bfFolders {
+						@listgroup.Item(listgroup.ItemProps{}) {
+							{ f.Title }
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Title and description", "Put `list-group-item-title` and `list-group-item-description` in `list-group-item-content`.", listgroup.Props{}) {
+					for _, f := range bfFolders {
+						@listgroup.Item(listgroup.ItemProps{Title: f.Title, Description: f.Description})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("With icon", "The `list-group-item-media` slot holds an icon before the content.", listgroup.Props{}) {
+					for _, f := range bfFolders {
+						@listgroup.Item(listgroup.ItemProps{Media: bfIcon(f.Icon), Title: f.Title, Description: f.Description})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("With avatar", "The media slot takes an avatar the same way.", listgroup.Props{}) {
+					for _, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("With meta", "Use `list-group-item-meta` for a time, a count or a badge at the end.", listgroup.Props{}) {
+					for _, f := range bfFolders {
+						@listgroup.Item(listgroup.ItemProps{Title: f.Title, Description: f.Description, Meta: bfText(f.Meta)})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("All slots", "Media, content, meta and `list-group-item-actions` in one item.", listgroup.Props{}) {
+					for i, p := range bfPersons {
+						if i == 0 {
+							@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role, Meta: bfBadge("green", "Owner"), Actions: bfMoreMenu()})
+						} else {
+							@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role, Meta: bfText(p.Meta), Actions: bfMoreMenu()})
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Links", "Add `list-group-item-action` to a link item. It supports `active` and `disabled`.", listgroup.Props{}) {
+					for i, f := range bfFolders {
+						@listgroup.Item(listgroup.ItemProps{Href: "#", Active: i == 0, Disabled: i == 3, Media: bfIcon(f.Icon), Title: f.Title, Description: f.Description, Meta: bfChevron()})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Actions on hover", "In a `list-group-hoverable` list the actions show on hover. Add `show` to keep them visible.", listgroup.Props{Hoverable: true}) {
+					for i, p := range bfPersons {
+						if i == 1 {
+							@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role, Actions: bfStar("Remove from favorites"), ShowActions: true})
+						} else {
+							@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role, Actions: bfStar("Add to favorites")})
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Buttons", "The actions slot holds any control, for example a button.", listgroup.Props{}) {
+					for i, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role, Actions: bfFollow(i > 0)})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Checkboxes", "In a `list-group-selectable` list a checked `list-group-selectable-check` marks its item.", listgroup.Props{Selectable: true}) {
+					for i, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Label: true, Media: bfSelectMedia(p.Avatar, i%2 == 0), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Radios", "Radio inputs with one `name` make a single choice list. Use a `label` as the item.", listgroup.Props{Selectable: true}) {
+					for _, r := range [][4]string{{"starter", "Starter", "Up to 3 projects", "$9"}, {"team", "Team", "Unlimited projects, 10 members", "$29"}, {"business", "Business", "Unlimited members and SSO", "$79"}} {
+						@listgroup.Item(listgroup.ItemProps{Label: true, Media: listgroup.SelectCheck(listgroup.CheckProps{Radio: true, Name: "list-plan", Value: r[0], Checked: r[0] == "team"}),
+							Title: r[1], Description: r[2], Meta: bfText(r[3])})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Switches", "Put a switch in the actions slot to build a settings list.", listgroup.Props{}) {
+					for _, r := range []bfEntry{{"Email", "A summary every morning", "ti-mail", "on"}, {"Push", "Mentions and direct messages", "ti-device-mobile", "on"}, {"Slack", "Posts to the #updates channel", "ti-brand-slack", ""}} {
+						@listgroup.Item(listgroup.ItemProps{Label: true, Media: bfIcon(r.Icon), Title: r.Title, Description: r.Description, Actions: bfSwitch(r.Meta == "on")})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Wrapped description", "Add `align-items-start` to the item and `text-wrap` to the description for longer text.", listgroup.Props{}) {
+					for _, r := range []bfPerson{
+						{"Paweł Kuna", "The new list layout works well on the dashboard. Can we use the same slots for the search results?", "000m", "2 h"},
+						{"Jeffie Lewzey", "Yes, the results only need a wrapped description and the avatar aligned to the top.", "052f", "1 h"},
+						{"Mallory Hulme", "Done. I also added the nested items to the sidebar.", "002m", "12 min"},
+					} {
+						@listgroup.Item(listgroup.ItemProps{Class: "align-items-start", Media: bfAvatar(r.Avatar, ""), Title: r.Name, Meta: bfText(r.Meta)}) {
+							<div class="list-group-item-description text-wrap">{ r.Role }</div>
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Nested items", "Put `list-group-nested` on a collapse after the parent item. `list-group-item-toggle` turns the chevron.", listgroup.Props{}) {
+					@listgroup.Item(listgroup.ItemProps{Button: true, Attributes: listgroup.CollapseToggle("list-nested-projects", true), Media: bfIcon("ti-folder"), Title: "Projects", Meta: listgroup.ToggleIcon()})
+					@listgroup.Nested(listgroup.NestedProps{ID: "list-nested-projects", Show: true}) {
+						for _, t := range []string{"Website redesign", "Mobile app", "Design system"} {
+							@listgroup.Item(listgroup.ItemProps{Href: "#"}) {
+								{ t }
+							}
+						}
+					}
+					@listgroup.Item(listgroup.ItemProps{Button: true, Attributes: listgroup.CollapseToggle("list-nested-teams", false), Media: bfIcon("ti-users"), Title: "Teams", Meta: listgroup.ToggleIcon()})
+					@listgroup.Nested(listgroup.NestedProps{ID: "list-nested-teams"}) {
+						for _, t := range []string{"Design", "Engineering"} {
+							@listgroup.Item(listgroup.ItemProps{Href: "#"}) {
+								{ t }
+							}
+						}
+					}
+					@listgroup.Item(listgroup.ItemProps{Href: "#", Media: bfIcon("ti-settings"), Title: "Settings"})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Drag handle", "Add `data-sortable` to the list and put the handle in the media slot.", listgroup.Props{Attributes: templ.Attributes{"data-sortable": `{"animation":150,"handle":".sortable-handle"}`}}) {
+					for _, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfHandle(p.Avatar), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Default", "Without a size class the items use the default padding.", listgroup.Props{}) {
+					for _, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Small", "Add `list-group-sm` for a compact list.", listgroup.Props{Size: listgroup.SizeSmall}) {
+					for _, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, avatar.SizeSmall), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfListCard("Large", "Add `list-group-lg` for more room around each item.", listgroup.Props{Size: listgroup.SizeLarge}) {
+					for _, p := range bfPersons {
+						@listgroup.Item(listgroup.ItemProps{Media: bfAvatar(p.Avatar, ""), Title: p.Name, Description: p.Role})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfHeaderListCard("Notifications", listgroup.Props{}) {
+					for i, n := range []bfEntry{
+						{"New order received", "Order #12345 has been placed by John Doe", "", "2 h"},
+						{"Payment failed", "Payment for order #12340 failed. Please review payment details.", "", "4 h"},
+						{"System maintenance", "Scheduled maintenance will begin in 2 hours. Expected downtime: 30 minutes.", "", "6 h"},
+						{"New customer registered", "Sarah Johnson has created a new account", "", "8 h"},
+					} {
+						@listgroup.Item(listgroup.ItemProps{Href: "#", Media: bfDot(i < 3), Title: n.Title, Description: n.Description, Meta: bfText(n.Meta)})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfHeaderListCard("Transactions", listgroup.Props{}) {
+					@listgroup.Item(listgroup.ItemProps{Media: bfAvatar("000m", ""), Title: "Aprilynne Pills", Description: "Refund for cancelled prescription", Meta: bfAmount("+$499.99", true)})
+					@listgroup.Item(listgroup.ItemProps{Media: bfBrand("google"), Title: "Google Limited UK", Description: "Google Ads campaign payment", Meta: bfAmount("−$1,029.77", false)})
+					@listgroup.Item(listgroup.ItemProps{Media: bfBrand("github"), Title: "Github Inc.", Description: "GitHub Pro subscription", Meta: bfAmount("−$42.87", false)})
+					@listgroup.Item(listgroup.ItemProps{Media: bfBrand("netflix"), Title: "Netflix", Description: "Monthly streaming subscription", Meta: bfAmount("−$15.99", false)})
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfHeaderListCard("Files", listgroup.Props{}) {
+					for _, f := range bfFiles {
+						@listgroup.Item(listgroup.ItemProps{Media: bfFileIcon(f.Icon), Title: f.Title, Description: f.Description, Actions: bfDownload(f.Title)})
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfHeaderListCard("Visits by country", listgroup.Props{}) {
+					for _, c := range []struct {
+						code, name string
+						pct        float64
+					}{{"us", "United States", 64}, {"de", "Germany", 48}, {"pl", "Poland", 31}, {"jp", "Japan", 17}} {
+						@listgroup.Item(listgroup.ItemProps{Media: bfFlag(c.code), Title: c.name, Meta: bfText(strconv.FormatFloat(c.pct, 'f', -1, 64) + "%")}) {
+							@bfVisits(c.pct)
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@card.Card() {
+					@card.Body() {
+						@card.Title() {
+							Inside a card body
+						}
+						@card.Subtitle() {
+							@withCode("Without `list-group-flush` the list keeps its own border and rounded corners.")
+						}
+						@listgroup.List() {
+							for _, f := range bfFiles[:3] {
+								@listgroup.Item(listgroup.ItemProps{Media: bfIcon(f.Icon), Title: f.Title, Meta: bfText(f.Description)})
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfHeaderListCard("Loading", listgroup.Props{Class: "placeholder-glow", Attributes: templ.Attributes{"aria-hidden": "true"}}) {
+					for i := range 4 {
+						@listgroup.Item(listgroup.ItemProps{Media: bfLoadingAvatar()}) {
+							if i%2 == 0 {
+								@bfPlaceholderRow("col-7", "col-8")
+							} else {
+								@bfPlaceholderRow("col-5", "col-9")
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfTitleCard("Empty", card.Props{}) {
+					@empty.Empty(empty.Props{Icon: "ti-inbox-off", Title: "No messages", Subtitle: "New messages from your team show up here."})
+				}
+			</div>
+			<div class="col-md-6">
+				@cards.UsersList(cards.UsersListProps{Title: "Contacts", Checkbox: true}, bfContacts)
+			</div>
+			<div class="col-md-6">
+				@cards.UsersList(cards.UsersListProps{Title: "Last commits", Hoverable: true}, bfCommits)
+			</div>
+			<div class="col-md-6">
+				@cards.People(cards.PeopleProps{Title: "People", MaxHeight: "35rem"}, bfPeople)
+			</div>
+			<div class="col-md-6">
+				@cards.TopUsers("Top users", bfTopUsers)
+			</div>
+		</div>
+		// Sortable lets the items of a data-sortable list be dragged (a plugin, as in Tabler's preview).
+		<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
+	}
+}
+
+templ bfLoadingAvatar() {
+	@avatar.Avatar(avatar.Props{Empty: true, Class: "placeholder"})
+}

@@ -1,0 +1,57 @@
+// Package users holds the person card of the Tabler preview's users list: avatar, name, role, an
+// optional badge and buttons at the bottom (e.g. Email and Call).
+package users
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Action is a button at the bottom of the card.
+type Action struct {
+	Href string
+	Icon string
+	Text string
+}
+
+type CardProps struct {
+	Avatar   string
+	Initials string
+	Name     string
+	Href     string // the name's link, default "#"
+	Detail   string // e.g. the job title
+	Badge    templ.Component // e.g. a role badge
+	Actions  []Action
+}
+
+// Card is a centered person card.
+templ Card(p CardProps) {
+	@card.Card() {
+		@card.Body(card.Props{Class: "p-4 text-center"}) {
+			@avatar.Avatar(avatar.Props{Src: p.Avatar, Initials: p.Initials, Size: avatar.SizeXL, Class: "mb-3"})
+			<h2 class="m-0 mb-1">
+				<a href={ templ.URL(kit.Or(p.Href, "#")) }>{ p.Name }</a>
+			</h2>
+			<div class="text-secondary">{ p.Detail }</div>
+			<div class="mt-3">
+				if p.Badge != nil {
+					@p.Badge
+				}
+			</div>
+		}
+		if len(p.Actions) > 0 {
+			<div class="d-flex">
+				for _, a := range p.Actions {
+					<a href={ templ.URL(kit.Or(a.Href, "#")) } class="card-btn">
+						if a.Icon != "" {
+							@icon.Icon(a.Icon, icon.Props{Class: "me-2", Color: "muted"})
+						}
+						{ a.Text }
+					</a>
+				}
+			</div>
+		}
+	}
+}

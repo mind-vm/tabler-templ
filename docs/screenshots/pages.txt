@@ -1,0 +1,15 @@
+# Pages scripts/screenshots.sh captures for the README (index is always taken).
+buttons
+avatars
+sign-in
+onboarding
+modals
+dropdowns
+settings
+invoice
+pricing-table
+profile
+cards
+tables
+layout-vertical
+error-404

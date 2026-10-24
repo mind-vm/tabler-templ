@@ -1,0 +1,535 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/plans"
+	"github.com/mind-vm/tabler-templ/blocks/invoice"
+	"github.com/mind-vm/tabler-templ/blocks/billing"
+	"github.com/mind-vm/tabler-templ/datagrid"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/blocks/legal"
+	bpricing "github.com/mind-vm/tabler-templ/blocks/pricing"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/pricing"
+	"github.com/mind-vm/tabler-templ/blocks/settings"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+	"github.com/mind-vm/tabler-templ/payment"
+)
+
+func batchDPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"settings":      settingsPage(),
+		"settings-plan": settingsPlanPage(),
+		"pricing":       pricingPage(),
+		"pricing-table": pricingTablePage(),
+		"invoice":       invoicePage(),
+		"license":       licensePage(),
+		"terms-of-service": termsPage(),
+		"payment-providers": paymentProvidersPage(),
+		"pay":               payPage(),
+		"billing":           billingPage(),
+	}
+}
+
+// framed is a preview page with its own page header (title and pretitle as the preview shows them).
+templ framed(name, title, pretitle string) {
+	{{ p, _ := catalog.Find(name) }}
+	{{ fp := frameProps(name, p.Title) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Pretitle: pretitle, Title: title, Actions: originalLink(name)}) }}
+	@layout.Page(fp) {
+		{ children... }
+	}
+}
+
+func settingsGroups(active string) []settings.Group {
+	return []settings.Group{
+		{Title: "Business settings", Links: []settings.Link{
+			{Text: "My Account", Href: "/settings", Active: active == "settings"},
+			{Text: "My Notifications", Href: "#"},
+			{Text: "Connected Apps", Href: "#"},
+			{Text: "Plans", Href: "/settings-plan", Active: active == "settings-plan"},
+			{Text: "Billing & Invoices", Href: "#"},
+		}},
+		{Title: "Experience", Links: []settings.Link{{Text: "Give Feedback", Href: "#"}}},
+	}
+}
+
+templ settingsFooter() {
+	@settings.Footer() {
+		@button.Button(button.Props{Type: "button"}) {
+			Cancel
+		}
+		@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary}) {
+			Submit
+		}
+	}
+}
+
+templ settingsPage() {
+	@framed("settings", "Account Settings", "") {
+		@settings.Frame(settings.FrameProps{Groups: settingsGroups("settings")}) {
+			@settings.Content("My Account") {
+				@settings.Section(settings.SectionProps{Title: "Profile Details", First: true}) {
+					<div class="row align-items-center">
+						<div class="col-auto">
+							@avatar.Avatar(avatar.Props{Src: avatarURL("000m"), Size: avatar.SizeXL})
+						</div>
+						<div class="col-auto">
+							@button.Button(button.Props{Type: "button"}) {
+								Change avatar
+							}
+						</div>
+						<div class="col-auto">
+							@button.Button(button.Props{Type: "button", Variant: "danger", Ghost: true}) {
+								Delete avatar
+							}
+						</div>
+					</div>
+				}
+				@settings.Section(settings.SectionProps{Title: "Business Profile"}) {
+					<div class="row g-3">
+						for _, f := range []struct{ ID, Label, Value string }{{"business-name", "Business Name", "Tabler"}, {"business-id", "Business ID", "560afc32"}, {"location", "Location", "Peimei, China"}} {
+							<div class="col-md">
+								<label class="form-label" for={ f.ID }>{ f.Label }</label>
+								@form.Input(form.InputProps{ID: f.ID, Name: f.ID, Value: f.Value})
+							</div>
+						}
+					</div>
+				}
+				@settings.Section(settings.SectionProps{Title: "Email", Subtitle: "This contact will be shown to others publicly, so choose it carefully."}) {
+					<div>
+						<div class="row g-2">
+							<div class="col-auto">
+								<label class="form-label visually-hidden" for="email">Email</label>
+								@form.Input(form.InputProps{ID: "email", Name: "email", Type: "email", Value: "paweluna@howstuffworks.com", Autocomplete: "email", Class: "w-auto"})
+							</div>
+							<div class="col-auto">
+								@button.Button(button.Props{Type: "button"}) {
+									Change
+								}
+							</div>
+						</div>
+					</div>
+				}
+				@settings.Section(settings.SectionProps{Title: "Password", Subtitle: "You can set a permanent password if you don't want to use temporary login codes."}) {
+					<div>
+						@button.Button(button.Props{Type: "button"}) {
+							Set new password
+						}
+					</div>
+				}
+				@settings.Section(settings.SectionProps{Title: "Public profile", Subtitle: "Making your profile public means that anyone on the Dashkit network will be able to find you."}) {
+					<div>
+						@form.Check(form.CheckProps{Switch: true, Large: true, LabelOn: "You're currently visible", LabelOff: "You're currently invisible"})
+					</div>
+				}
+			}
+			@settingsFooter()
+		}
+	}
+}
+
+templ users(n string) {
+	<span><strong>{ n }</strong> Users</span>
+}
+
+// planFeatures are the preview's plan lines: users, then the four tools by availability.
+func planFeatures(users string, have ...bool) []plans.Feature {
+	fs := []plans.Feature{{Icon: "ti-users", Content: usersLine(users)}}
+	for i, name := range []string{"Sharing Tools", "Design Tools", "Private Messages", "Twitter API"} {
+		fs = append(fs, plans.Feature{Text: name, Missing: !have[i]})
+	}
+	return fs
+}
+
+func usersLine(n string) templ.Component { return users(n) }
+
+templ bookDemo() {
+	@button.Button(button.Props{Type: "button"}) {
+		Book a demo
+	}
+}
+
+templ planCards() {
+	<div class="col-lg-4">
+		@plans.Plan(plans.PlanProps{Name: "Free", Price: "$0", Features: planFeatures("3", true, false, false, false)})
+	</div>
+	<div class="col-lg-4">
+		@plans.Plan(plans.PlanProps{Name: "Premium", Price: "$49", Featured: "green", Features: planFeatures("10", true, true, false, false)})
+	</div>
+	<div class="col-lg-4">
+		@plans.Plan(plans.PlanProps{Name: "Enterprise", Price: "$99", Features: planFeatures("100", true, true, true, false)})
+	</div>
+	<div class="col-12">
+		@plans.Quote(plans.QuoteProps{Text: "Tabler is designed to work great for large enterprises. Take a look at our feature comparison.", Action: bookDemo()})
+	</div>
+}
+
+templ settingsPlanPage() {
+	@framed("settings-plan", "Account Settings", "") {
+		@settings.Frame(settings.FrameProps{Groups: settingsGroups("settings-plan")}) {
+			@settings.Content("Plans") {
+				<p class="text-secondary mb-4">This workspace’s Basic Plan is set to $34 per month and will renew on June 19, 2022.</p>
+				@form.Field(form.FieldProps{Label: "Users", For: "plan-users", Class: "mb-4"}) {
+					@form.NumberInput(form.NumberInputProps{ID: "plan-users", Value: "10", Min: "1", Max: "100"})
+					@form.Text("plan-users-hint") {
+						Each plan is billed per user. Pick how many people need access.
+					}
+				}
+				<div class="row row-cards">
+					@planCards()
+				</div>
+			}
+		}
+	}
+}
+
+templ popular() {
+	@badge.Badge(badge.Props{Color: "primary"}) {
+		Popular
+	}
+}
+
+templ getStarted(text string, primary bool) {
+	if primary {
+		@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary, Block: true}) {
+			{ text }
+		}
+	} else {
+		@button.Button(button.Props{Href: "#", Block: true}) {
+			{ text }
+		}
+	}
+}
+
+func features(names ...string) []pricing.Feature {
+	fs := make([]pricing.Feature, len(names))
+	for i, n := range names {
+		fs[i] = pricing.Feature{Text: n}
+	}
+	return fs
+}
+
+var perUserMonth = []string{"per user", "per month"}
+
+templ pricingPage() {
+	@preview("pricing") {
+		<div class="row row-cards">
+			<div class="col-sm-6 col-lg-3">
+				@plans.Plan(plans.PlanProps{Name: "Free", Price: "$0", Href: "#", Features: planFeatures("3", true, false, false, false)})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@plans.Plan(plans.PlanProps{Name: "Premium", Price: "$49", Featured: "green", Features: planFeatures("10", true, true, false, false)})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@plans.Plan(plans.PlanProps{Name: "Enterprise", Price: "$99", Features: planFeatures("100", true, true, true, false)})
+			</div>
+			<div class="col-sm-6 col-lg-3">
+				@plans.Plan(plans.PlanProps{Name: "Unlimited", Price: "$139", Features: planFeatures("Unlimited", true, true, true, true)})
+			</div>
+			<div class="col-12">
+				@plans.Quote(plans.QuoteProps{Text: "Tabler is designed to work great for large enterprises. Take a look at our feature comparison.", Action: bookDemo()})
+			</div>
+			<div class="col-12">
+				@pricing.Pricing() {
+					@pricing.Card(pricing.CardProps{Title: "Free", Currency: "$", Price: "0", Description: perUserMonth,
+						Features: features("Up to 3 users", "Basic components", "Community support"), Button: getStarted("Get started", false)})
+					@pricing.Card(pricing.CardProps{Title: "Premium", Currency: "$", Price: "49", Description: perUserMonth, Featured: true, Label: popular(),
+						Features: features("Up to 10 users", "All components", "Figma UI kit", "Priority support"), Button: getStarted("Get started", true)})
+					@pricing.Card(pricing.CardProps{Title: "Enterprise", Currency: "$", Price: "99", Description: perUserMonth,
+						Features: features("Unlimited users", "All components", "Dedicated support"), Button: getStarted("Contact us", false)})
+				}
+			</div>
+		</div>
+	}
+}
+
+var tablePlans = []bpricing.Plan{{Name: "Starter", Price: "$0"}, {Name: "Professional", Price: "$9", Featured: "green"}, {Name: "Business", Price: "$16"}}
+
+func row(feature string, included ...bool) bpricing.Row {
+	return bpricing.Row{Feature: feature, Included: included}
+}
+
+var tableGroups = []bpricing.Group{
+	{Title: "Features", Rows: []bpricing.Row{row("Some info about feature", true, true, true), row("Online payment gateway", false, true, true),
+		row("Unlimited products can be sold", false, false, true)}},
+	{Title: "Reporting", Rows: []bpricing.Row{row("Free hosting and domain name", true, true, true), row("Admin dashboard to control items", true, true, true)}},
+	{Title: "Support", Rows: []bpricing.Row{row("Email marketing and service", false, false, true), row("24/7 customer support online", false, true, true)}},
+}
+
+templ pricingTablePage() {
+	@preview("pricing-table") {
+		@bpricing.Table(bpricing.TableProps{Title: "Pricing plans for teams of all sizes",
+			Text: "Choose an affordable plan that comes with the best features to engage your audience, create customer loyalty and increase sales."}, tablePlans, tableGroups)
+	}
+}
+
+templ printInvoice() {
+	@invoice.PrintButton() {
+		Print Invoice
+	}
+}
+
+var demoInvoice = invoice.Props{
+	From:  invoice.Party{Title: "Company", Lines: []string{"Street Address", "State, City", "Region, Postal Code", "ltd@example.com"}},
+	To:    invoice.Party{Title: "Client", Lines: []string{"Street Address", "State, City", "Region, Postal Code", "ctr@example.com"}},
+	Title: "Invoice INV/001/15",
+	Lines: []invoice.Line{
+		{Product: "Logo Creation", Description: "Logo and business cards design", Quantity: "1", Unit: "$1.800,00", Amount: "$1.800,00"},
+		{Product: "Online Store Design & Development", Description: "Design/Development for all popular modern browsers", Quantity: "1", Unit: "$20.000,00", Amount: "$20.000,00"},
+		{Product: "App Design", Description: "Promotional mobile application", Quantity: "1", Unit: "$3.200,00", Amount: "$3.200,00"},
+	},
+	Totals: []invoice.Total{{Label: "Subtotal", Value: "$25.000,00"}, {Label: "Vat Rate", Value: "20%"}, {Label: "Vat Due", Value: "$5.000,00"},
+		{Label: "Total Due", Value: "$30.000,00", Final: true}},
+	Note: "Thank you very much for doing business with us. We look forward to working with you again!",
+}
+
+templ invoicePage() {
+	{{ p, _ := catalog.Find("invoice") }}
+	{{ fp := frameProps("invoice", p.Title) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Invoice", Actions: printInvoice()}) }}
+	@layout.Page(fp) {
+		@invoice.Invoice(demoInvoice)
+	}
+}
+
+templ notLegalAdvice() {
+	This is not legal advice.
+	<a href="#" target="_blank">Learn more about repository licenses.</a>
+}
+
+func terms(names ...string) []legal.Term {
+	ts := make([]legal.Term, len(names))
+	for i, n := range names {
+		ts[i] = legal.Term{Text: n}
+	}
+	return ts
+}
+
+templ licensePage() {
+	@preview("license") {
+		<div class="row row-cards">
+			<div class="col-lg-8">
+				@legal.Card(legal.CardProps{Large: true}) {
+					@templ.Raw(licenseHTML)
+				}
+			</div>
+			<div class="col-lg-4">
+				@legal.LicenseSummary(legal.LicenseProps{Lead: "tabler/tabler is licensed under the", Name: "MIT License",
+					Text:        "A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.",
+					Permissions: terms("Commercial use", "Modification", "Distribution", "Private use"), Limitations: terms("Liability", "Warranty"),
+					Conditions: terms("License and copyright notice"), Footer: notLegalAdvice()})
+			</div>
+		</div>
+	}
+}
+
+templ termsPage() {
+	{{ p, _ := catalog.Find("terms-of-service") }}
+	@legal.Page(legal.PageProps{Title: p.Title + " · tabler-templ", Head: assets(), Scripts: scripts(), Brand: logo()}) {
+		@legal.Card(legal.CardProps{Title: "Terms of service"}) {
+			@templ.Raw(termsHTML)
+		}
+	}
+}
+
+// paymentsCSS loads Tabler's payment provider logos.
+// TODO(parent): move into assets() in layout.templ.
+templ paymentsCSS() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-payments.min.css" }/>
+}
+
+templ providerGrid(title, subtitle string, dark bool) {
+	@card.Card() {
+		@card.Header() {
+			<div>
+				@card.Title() {
+					{ title }
+				}
+				@card.Subtitle() {
+					{ subtitle }
+				}
+			</div>
+		}
+		@card.Body() {
+			<div class="row g-5 row-cols-5">
+				for _, pr := range payment.Providers {
+					<div class="col">
+						<div class="row">
+							<div class="col-auto">
+								@payment.Payment(pr.Code, payment.Props{Dark: dark})
+							</div>
+							<div class="col">
+								<strong class="d-block">{ pr.Name }</strong>
+								<div class="mt-1">
+									<code>{ pr.Code + kitIf(dark, "-dark") }</code>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		}
+	}
+}
+
+templ paymentProvidersPage() {
+	@preview("payment-providers") {
+		@paymentsCSS()
+		<div class="row row-cards">
+			<div class="col-12">
+				@providerGrid("Light version", "Provider logos on a light background, for use on white or light cards.", false)
+			</div>
+			<div class="col-12">
+				@providerGrid("Dark version", "Provider logos with an inverted color scheme, for dark backgrounds.", true)
+			</div>
+		</div>
+	}
+}
+
+templ smallTablerLogo() {
+	<a href="." aria-label="Tabler" class="navbar-brand navbar-brand-autodark">
+		@templ.Raw(tablerMark)
+	</a>
+}
+
+templ payPage() {
+	{{ p, _ := catalog.Find("pay") }}
+	@billing.CheckoutPage(billing.CheckoutProps{Title: p.Title + " · tabler-templ", Head: payHead(), Scripts: scripts(), Brand: smallTablerLogo(),
+		Cover: photo("bg-cover.jpg"), Avatar: avatarURL("000m"), Product: "Front-End Learning",
+		Text: "Learn to build web apps with HTML & CSS. Get started quickly with included templates."}) {
+		@nav.Segmented(nav.SegmentedProps{Block: true, Class: "mb-4"}) {
+			@nav.Segment(nav.SegmentProps{Target: "tab-card", Icon: "ti-credit-card", Active: true}) {
+				<span>Pay With Card</span>
+			}
+			@nav.Segment(nav.SegmentProps{Target: "tab-paypal", Icon: "ti-brand-paypal"}) {
+				<span>Pay With PayPal</span>
+			}
+		}
+		@nav.Content() {
+			@nav.Pane(nav.PaneProps{ID: "tab-card", Active: true}) {
+				@billing.CardForm(billing.CardFormProps{Submit: "Pay $253", Note: "You'll be charged $253, including $48 for VAT in Poland"})
+			}
+			@nav.Pane(nav.PaneProps{ID: "tab-paypal"}) {
+				@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Block: true, Icon: "ti-brand-paypal"}) {
+					<span class="ms-2">Pay with PayPal - $253</span>
+				}
+				<div class="text-secondary text-center small mt-3">You'll be charged $253, including $48 for VAT in Poland</div>
+			}
+		}
+	}
+}
+
+templ payHead() {
+	@assets()
+	@paymentsCSS()
+}
+
+templ smallButton(text, ic string) {
+	@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Icon: ic}) {
+		{ text }
+	}
+}
+
+templ viewAll() {
+	@button.Button(button.Props{Href: "/invoice", Size: button.SizeSmall}) {
+		View all
+	}
+}
+
+templ seats() {
+	<div class="d-flex align-items-center gap-2">
+		@form.NumberInput(form.NumberInputProps{Size: form.SizeSmall, Value: "10", Min: "8", Max: "100", AriaLabel: "Seats in the plan"})
+		<span class="text-secondary">8 used</span>
+	</div>
+}
+
+templ planDetails() {
+	@datagrid.Grid() {
+		@datagrid.Item(datagrid.ItemProps{Title: "Billing period"}) {
+			Monthly
+		}
+		@datagrid.Item(datagrid.ItemProps{Title: "Next invoice"}) {
+			September 18, 2026
+		}
+		@datagrid.Item(datagrid.ItemProps{Title: "Seats"}) {
+			@seats()
+		}
+	}
+}
+
+templ methodMenu(setDefault bool) {
+	if setDefault {
+		@dropdown.Item(dropdown.ItemProps{Icon: "ti-star"}) {
+			Set as default
+		}
+	}
+	@dropdown.Item(dropdown.ItemProps{Icon: "ti-pencil"}) {
+		Edit
+	}
+	@dropdown.Item(dropdown.ItemProps{Icon: "ti-trash", Class: "text-danger"}) {
+		Remove
+	}
+}
+
+var demoInvoices = []billing.Invoice{
+	{Date: "Sep 18, 2026", Number: "INV-2026-0089", Amount: "$49.00", Status: "Open", StatusColor: "warning", PayHref: "#"},
+	{Date: "Aug 18, 2026", Number: "INV-2026-0081", Amount: "$49.00", Status: "Paid", StatusColor: "success"},
+	{Date: "Jul 18, 2026", Number: "INV-2026-0074", Amount: "$49.00", Status: "Paid", StatusColor: "success"},
+	{Date: "Jun 18, 2026", Number: "INV-2026-0066", Amount: "$49.00", Status: "Paid", StatusColor: "success"},
+}
+
+templ billingPage() {
+	@preview("billing") {
+		@paymentsCSS()
+		<div class="row row-cards">
+			<div class="col-lg-8">
+				<div class="row row-cards">
+					<div class="col-12">
+						@billing.Plan(billing.PlanProps{Name: "Pro plan", Status: "Active", Renews: "Renews on September 18, 2026", Price: "$49", Period: "/month",
+							Action: smallButton("Change plan", ""), Details: planDetails(),
+							Usage: &billing.Usage{Label: "Monthly requests", Used: "7,420", Limit: "/ 10,000", Value: 74,
+								Text: "74% of the included usage. The counter resets at the start of each billing period."}})
+					</div>
+					<div class="col-12">
+						@billing.Invoices(billing.CardProps{Title: "Invoices", Subtitle: "Invoices are issued on the 18th of each month.", Action: viewAll()}, demoInvoices)
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@billing.Methods(billing.MethodsProps{CardProps: billing.CardProps{Title: "Payment method", Subtitle: "The default method is charged on every invoice.",
+							Action: smallButton("Add method", "ti-plus")}}, []billing.Method{
+							{ID: "payment-method-visa", Value: "visa", Provider: "visa", Title: "Visa ending in 4242", Detail: "Expires 09/2028", Default: true, Checked: true, Menu: methodMenu(false)},
+							{ID: "payment-method-mastercard", Value: "mastercard", Provider: "mastercard", Title: "Mastercard ending in 5512", Detail: "Expires 03/2027", Menu: methodMenu(true)},
+							{ID: "payment-method-paypal", Value: "paypal", Provider: "paypal", Title: "PayPal", Detail: "billing@tabler.io", Menu: methodMenu(true)},
+						})
+					</div>
+					<div class="col-12">
+						@billing.Card(billing.CardProps{Title: "Billing details", Subtitle: "Shown on every invoice and receipt.", Action: smallButton("Edit", "ti-pencil")}) {
+							@card.Body() {
+								@datagrid.Grid() {
+									for _, d := range [][2]string{{"Company", "Tabler Ltd."}, {"Billing email", "billing@tabler.io"}, {"Tax ID", "EU123456789"},
+										{"Address", "44 Harbor Street, Portland, OR 97209, United States"}} {
+										@datagrid.Item(datagrid.ItemProps{Title: d[0]}) {
+											{ d[1] }
+										}
+									}
+								}
+							}
+						}
+					</div>
+					<div class="col-12">
+						@billing.Cancel(billing.CancelProps{Text: "Your plan stays active until the end of the current billing period. After that the workspace switches to the free plan and API access is paused."})
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

@@ -49,53 +49,132 @@ type FieldProps struct {
 	Class      string // wrapper, default "mb-3"; pass "-" for none
 	Attributes templ.Attributes
 	Label      string
-	For        string // id of the control
+	For        string // id of the control; without it the label is a <div class="form-label">
 	Required   bool   // marks the label (Tabler's .required)
-	Hint       string
-	Error      string // shown below the control; mark the control Invalid as well
-	Valid      string // positive feedback below the control (valid-feedback); mark the control State valid
+	// RequiredLabel is read out after a Required label by screen readers, e.g. " (required)".
+	RequiredLabel string
+	Hint          string
+	Error         string // shown below the control; mark the control Invalid as well
+	Valid         string // positive feedback below the control (valid-feedback); mark the control State valid
 	// Description sits at the end of the label line, e.g. a character count (form-label-description).
 	Description string
 	// Help is a "?" next to the label that opens a popover with this text (form-help).
 	Help string
+	// LabelHidden keeps the label for screen readers only, e.g. when the placeholder names the field.
+	LabelHidden bool
+	// Horizontal puts the label beside the control (a row with col-3 col-form-label); the control fills
+	// the rest of the row.
+	Horizontal bool
+	// Fieldset is for a group of Checks: they go into a <fieldset> whose hidden legend repeats the label.
+	Fieldset bool
+	// Wrap puts the control inside the label (<label class="d-block"> with a span.form-label), so it
+	// needs no ids.
+	Wrap bool
 }
 
+func labelClass(p FieldProps) string {
+	base := "form-label"
+	if p.Horizontal {
+		base = kit.Classes("col-3 col-form-label", kit.If(p.Fieldset, "pt-0"))
+	}
+	return kit.Classes(base, kit.If(p.Required, "required"), kit.If(p.LabelHidden, "visually-hidden"))
+}
+
+templ labelContent(p FieldProps) {
+	if p.Help == "" && p.Description == "" && (!p.Required || p.RequiredLabel == "") {
+		{ p.Label }
+	} else {
+		{ p.Label }
+		if p.Required && p.RequiredLabel != "" {
+			<span class="visually-hidden">{ p.RequiredLabel }</span>
+		}
+		if p.Help != "" {
+			<span class="form-help" { popover.Attrs(popover.Props{Content: p.Help, Placement: popover.Top})... }>?</span>
+		}
+		if p.Description != "" {
+			<span class="form-label-description">{ p.Description }</span>
+		}
+	}
+}
+
+templ fieldLabel(p FieldProps) {
+	if p.For != "" {
+		<label class={ labelClass(p) } for={ p.For }>
+			@labelContent(p)
+		</label>
+	} else {
+		<div class={ labelClass(p) }>
+			@labelContent(p)
+		</div>
+	}
+}
+
+templ feedback(p FieldProps) {
+	if p.Error != "" {
+		<div class="invalid-feedback d-block">{ p.Error }</div>
+	}
+	if p.Valid != "" {
+		<div class="valid-feedback d-block">{ p.Valid }</div>
+	}
+	if p.Hint != "" {
+		<div class="form-hint">{ p.Hint }</div>
+	}
+}
+
+templ group(p FieldProps, class string) {
+	<fieldset
+		if class != "" {
+			class={ class }
+		}
+	>
+		<legend class="visually-hidden">{ p.Label }</legend>
+		{ children... }
+	</fieldset>
+}
+
+// Field is a form field: a label, the control (the children), and a hint or validation message.
 templ Field(p FieldProps) {
+	{{ c := kit.Classes(wrapper(p.Class), kit.If(p.Horizontal, "row")) }}
 	<div
-		if wrapper(p.Class) != "" {
-			class={ wrapper(p.Class) }
+		if c != "" {
+			class={ c }
 		}
 		{ p.Attributes... }
 	>
-		if p.Label != "" {
-			<label
-				class={ kit.Classes("form-label", kit.If(p.Required, "required")) }
-				if p.For != "" {
-					for={ p.For }
+		if p.Wrap {
+			<label class="d-block">
+				if p.Label != "" {
+					<span class={ labelClass(p) }>
+						@labelContent(p)
+					</span>
 				}
-			>
-				if p.Help == "" && p.Description == "" {
-					{ p.Label }
-				} else {
-					{ p.Label }
-					if p.Help != "" {
-						<span class="form-help" { popover.Attrs(popover.Props{Content: p.Help, Placement: popover.Top})... }>?</span>
-					}
-					if p.Description != "" {
-						<span class="form-label-description">{ p.Description }</span>
-					}
-				}
+				{ children... }
 			</label>
-		}
-		{ children... }
-		if p.Error != "" {
-			<div class="invalid-feedback d-block">{ p.Error }</div>
-		}
-		if p.Valid != "" {
-			<div class="valid-feedback d-block">{ p.Valid }</div>
-		}
-		if p.Hint != "" {
-			<div class="form-hint">{ p.Hint }</div>
+			@feedback(p)
+		} else if p.Horizontal {
+			@fieldLabel(p)
+			if p.Fieldset {
+				@group(p, "col") {
+					{ children... }
+				}
+			} else {
+				<div class="col">
+					{ children... }
+					@feedback(p)
+				</div>
+			}
+		} else {
+			if p.Label != "" {
+				@fieldLabel(p)
+			}
+			if p.Fieldset {
+				@group(p, "") {
+					{ children... }
+				}
+			} else {
+				{ children... }
+			}
+			@feedback(p)
 		}
 	</div>
 }
@@ -186,6 +265,8 @@ templ Input(p InputProps) {
 type Option struct {
 	Value, Label string
 	Disabled     bool
+	// Attributes go on the <option>, e.g. data-custom-properties for an enhanced select.
+	Attributes templ.Attributes
 }
 
 // OptionGroup is an <optgroup> of a Select.
@@ -238,12 +319,12 @@ templ Select(p SelectProps) {
 			<option value="">{ p.Empty }</option>
 		}
 		for _, o := range p.Options {
-			<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled }>{ o.Label }</option>
+			<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled } { o.Attributes... }>{ o.Label }</option>
 		}
 		for _, g := range p.Groups {
 			<optgroup label={ g.Label }>
 				for _, o := range g.Options {
-					<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled }>{ o.Label }</option>
+					<option value={ o.Value } selected?={ selected(p, o.Value) } disabled?={ o.Disabled } { o.Attributes... }>{ o.Label }</option>
 				}
 			</optgroup>
 		}
@@ -288,7 +369,7 @@ templ Textarea(p TextareaProps) {
 
 type CheckProps struct {
 	ID         string
-	Class      string           // on the label
+	Class      string           // on the label (on the input for CheckInput)
 	Attributes templ.Attributes // on the input
 	Name       string
 	Value      string
@@ -303,31 +384,100 @@ type CheckProps struct {
 	// LabelOn and LabelOff replace Label with a text per state, e.g. "Enabled" / "Disabled".
 	LabelOn  string
 	LabelOff string
-	State    State
+	// Description is a muted line below the label (form-check-description).
+	Description string
+	// Row puts the label at the start of a row and the control at its end, e.g. in a list of settings.
+	Row   bool
+	State State
+}
+
+func checkClasses(p CheckProps) string {
+	return kit.Classes("form-check", kit.If(p.Switch, "form-switch"), kit.If(p.Switch && p.Large, "form-switch-lg"), kit.If(p.Inline, "form-check-inline"))
+}
+
+templ checkInput(p CheckProps, class string) {
+	<input
+		class={ kit.Classes("form-check-input", stateClass(p.State, false, false), class) }
+		if p.Radio {
+			type="radio"
+		} else {
+			type="checkbox"
+		}
+		if p.Value != "" {
+			value={ p.Value }
+		}
+		checked?={ p.Checked }
+		disabled?={ p.Disabled }
+		{ controlAttrs(p.ID, p.Name, "", p.Attributes)... }
+	/>
+}
+
+// CheckInput is a bare checkbox (or radio) without a label, e.g. in an Addon; give it an aria-label.
+templ CheckInput(p CheckProps) {
+	@checkInput(p, p.Class)
 }
 
 // Check is a checkbox (or radio) with its label, Tabler's .form-check.
 templ Check(p CheckProps) {
-	<label class={ kit.Classes("form-check", kit.If(p.Switch, "form-switch"), kit.If(p.Switch && p.Large, "form-switch-lg"), kit.If(p.Inline, "form-check-inline"), p.Class) }>
-		<input
-			class={ kit.Classes("form-check-input", stateClass(p.State, false, false)) }
-			if p.Radio {
-				type="radio"
+	if p.Row {
+		<label class={ kit.Classes("row", p.Class) }>
+			<span class="col">{ p.Label }</span>
+			<span class="col-auto">
+				<span class={ kit.Classes(checkClasses(p), "form-check-single") }>
+					@checkInput(p, "")
+				</span>
+			</span>
+		</label>
+	} else {
+		<label class={ kit.Classes(checkClasses(p), p.Class) }>
+			@checkInput(p, "")
+			if p.LabelOn != "" || p.LabelOff != "" {
+				<span class="form-check-label form-check-label-on">{ p.LabelOn }</span>
+				<span class="form-check-label form-check-label-off">{ p.LabelOff }</span>
 			} else {
-				type="checkbox"
+				<span class={ kit.Classes("form-check-label", kit.If(p.Required, "required")) }>{ p.Label }</span>
 			}
-			if p.Value != "" {
-				value={ p.Value }
+			if p.Description != "" {
+				<span class="form-check-description">{ p.Description }</span>
 			}
-			checked?={ p.Checked }
-			disabled?={ p.Disabled }
-			{ controlAttrs(p.ID, p.Name, "", p.Attributes)... }
-		/>
-		if p.LabelOn != "" || p.LabelOff != "" {
-			<span class="form-check-label form-check-label-on">{ p.LabelOn }</span>
-			<span class="form-check-label form-check-label-off">{ p.LabelOff }</span>
-		} else {
-			<span class={ kit.Classes("form-check-label", kit.If(p.Required, "required")) }>{ p.Label }</span>
+		</label>
+	}
+}
+
+type FeedbackProps struct {
+	ID    string // for the control's aria-describedby
+	Valid bool   // valid-feedback; default invalid-feedback
+}
+
+// Feedback is a validation message right after a control that is marked valid or invalid; it shows
+// only then.
+templ Feedback(p FeedbackProps) {
+	<div
+		class={ kit.Classes(kit.If(p.Valid, "valid-feedback"), kit.If(!p.Valid, "invalid-feedback")) }
+		if p.ID != "" {
+			id={ p.ID }
 		}
-	</label>
+	>
+		{ children... }
+	</div>
+}
+
+// Datalist holds the suggestions of an Input with List.
+templ Datalist(id string, values []string) {
+	<datalist id={ id }>
+		for _, v := range values {
+			<option value={ v }></option>
+		}
+	</datalist>
+}
+
+type HelpProps struct {
+	Content string // the popover's text
+	HTML    bool   // Content is HTML; it is not escaped, never pass user input
+	Label   string // aria-label, default "Help"
+}
+
+// Help is a "?" button that opens a popover, e.g. next to a control (form-help).
+templ Help(p HelpProps) {
+	<button type="button" class="form-help" { popover.Attrs(popover.Props{Content: p.Content, Placement: popover.Top, HTML: p.HTML})... } aria-label={ kit.Or(p.Label, "Help") }>?</button>
 }

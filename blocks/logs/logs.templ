@@ -1,0 +1,65 @@
+// Package logs holds the parts of the Tabler preview's logs page: titled sections with preformatted
+// text, aligned key–value timings and log lines.
+package logs
+
+import (
+	"strings"
+	"unicode/utf8"
+)
+
+// Section is a heading with its content.
+templ Section(title string) {
+	<h2>{ title }</h2>
+	<div>
+		{ children... }
+	</div>
+}
+
+// Code shows preformatted lines, e.g. a log (pre > code).
+templ Code(text string) {
+	<pre><code>{ text }</code></pre>
+}
+
+// Text shows preformatted text without code styling (pre).
+templ Text(text string) {
+	<pre>{ text }</pre>
+}
+
+// Pair is a key and its value; Href links the value.
+type Pair struct {
+	Key, Value, Href string
+}
+
+// pad fills the key with non-breaking spaces to width characters, so the values line up.
+func pad(key string, width int) string {
+	n := width - utf8.RuneCountInString(key)
+	if n < 1 {
+		n = 1
+	}
+	return key + strings.Repeat(" ", n)
+}
+
+// pairsHTML writes the pairs without any whitespace between them, which a <pre> would show.
+func pairsHTML(width int, pairs []Pair) string {
+	if width == 0 {
+		width = 25
+	}
+	var b strings.Builder
+	for i, p := range pairs {
+		if i > 0 {
+			b.WriteString("<br>")
+		}
+		b.WriteString(templ.EscapeString(pad(p.Key, width)))
+		if p.Href != "" {
+			b.WriteString(`<a class="text-reset" target="_blank" href="` + templ.EscapeString(string(templ.URL(p.Href))) + `">` + templ.EscapeString(p.Value) + `</a>`)
+		} else {
+			b.WriteString(templ.EscapeString(p.Value))
+		}
+	}
+	return b.String()
+}
+
+// Pairs shows keys and values lined up in a preformatted block; width is the key column (default 25).
+templ Pairs(width int, pairs []Pair) {
+	@templ.Raw("<pre>" + pairsHTML(width, pairs) + "</pre>")
+}

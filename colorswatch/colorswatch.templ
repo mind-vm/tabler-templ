@@ -1,0 +1,74 @@
+// Package colorswatch shows colors of a palette: a swatch with the color's name and value, and Tabler's
+// gradient utilities (bg-gradient) as a component.
+package colorswatch
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Color string // a Tabler color, e.g. "blue", "gray-200", "facebook"
+	// Light shows the tinted variant (bg-{color}-lt) instead of the solid color.
+	Light    bool
+	Name     string // e.g. "Blue"
+	Value    string // e.g. "#066fd1" or "var(--tblr-blue)"
+	Initials string // short text in the swatch, e.g. "bl"
+	Icon     string // an icon in the swatch instead, e.g. "ti-brand-github"
+}
+
+func swatchClass(p Props) string {
+	if p.Light {
+		return "bg-" + p.Color + "-lt"
+	}
+	return "bg-" + p.Color + " text-" + p.Color + "-fg"
+}
+
+// Swatch is a square in the color next to its name and value.
+templ Swatch(p Props) {
+	<div class="row align-items-center">
+		<div class="col-auto">
+			@avatar.Avatar(avatar.Props{Class: swatchClass(p), Shape: avatar.ShapeSquare, Initials: p.Initials, Icon: p.Icon})
+		</div>
+		<div class="col">
+			{ p.Name }
+			<br/>
+			<code>{ p.Value }</code>
+		</div>
+	</div>
+}
+
+// Direction of a gradient.
+type Direction string
+
+const (
+	ToTop         Direction = "to-t"
+	ToTopEnd      Direction = "to-te"
+	ToEnd         Direction = "to-r"
+	ToBottomEnd   Direction = "to-be"
+	ToBottom      Direction = "to-b"
+	ToBottomStart Direction = "to-bs"
+	ToStart       Direction = "to-s"
+	ToTopStart    Direction = "to-ts"
+)
+
+type GradientProps struct {
+	Class      string // e.g. "border rounded px-4 py-2"
+	Attributes templ.Attributes
+	From, Via  string // colors, e.g. "blue", "transparent", "inverted", "white"
+	To         string
+	Direction  Direction // default Tabler's (to the end)
+}
+
+// GradientClasses returns the bg-gradient classes, e.g. for a card.
+func GradientClasses(p GradientProps) string {
+	return kit.Classes("bg-gradient", kit.If(p.From != "", "bg-gradient-from-"+p.From), kit.If(p.To != "", "bg-gradient-to-"+p.To),
+		kit.If(p.Via != "", "bg-gradient-via-"+p.Via), kit.If(p.Direction != "", "bg-gradient-"+string(p.Direction)))
+}
+
+// Gradient is a <div> with a color gradient background; the children go on top of it.
+templ Gradient(p GradientProps) {
+	<div class={ kit.Classes(p.Class, GradientClasses(p)) } { p.Attributes... }>
+		{ children... }
+	</div>
+}

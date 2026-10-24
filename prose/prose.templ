@@ -1,0 +1,33 @@
+// Package prose renders Tabler's prose container: long-form text (articles, help pages, rendered
+// Markdown) whose plain HTML elements get Tabler's typography (prose).
+package prose
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string // e.g. "text-secondary"
+	Attributes templ.Attributes
+}
+
+// Prose styles the HTML inside it: headings, paragraphs, lists, tables, quotes, code, figures.
+templ Prose(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("prose", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// HTML renders trusted HTML inside a Prose, e.g. the output of a Markdown renderer. It is not escaped:
+// never pass user input that was not sanitized.
+templ HTML(html string, props ...Props) {
+	@Prose(props...) {
+		@templ.Raw(html)
+	}
+}
+
+// Callout is a highlighted note inside a Prose (callout), e.g. a tip.
+templ Callout() {
+	<div class="callout">
+		{ children... }
+	</div>
+}

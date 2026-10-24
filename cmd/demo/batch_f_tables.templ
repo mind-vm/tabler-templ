@@ -1,0 +1,531 @@
+package main
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/tables"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/clipboard"
+	"github.com/mind-vm/tabler-templ/datagrid"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/status"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// ---- datagrid
+
+type bfPair struct{ Title, Value string }
+
+templ bfPairs(pairs []bfPair, list bool) {
+	for _, p := range pairs {
+		@datagrid.Item(datagrid.ItemProps{Title: p.Title, List: list}) {
+			{ p.Value }
+		}
+	}
+}
+
+var bfServer = []bfPair{{"CPU", "8 cores"}, {"Memory", "32 GB"}, {"Storage", "512 GB"}, {"Region", "eu-central"}, {"Uptime", "99.98%"}, {"Backups", "Daily"},
+	{"IPv6", "Enabled"}, {"Port", "3306"}}
+
+templ bfPersonCell(av, name string) {
+	<div class="d-flex align-items-center">
+		@avatar.Avatar(avatar.Props{Src: avatarURL(av), Size: avatar.SizeXS, Class: "me-2"})
+		{ name }
+	</div>
+}
+
+templ bfUsage(pct float64, color string) {
+	<div class="mb-1">{ itoaPct(pct) }</div>
+	@progress.Progress(progress.Props{Value: pct, Color: color, Size: progress.SizeSmall})
+}
+
+templ bfCopy(id, value, label string) {
+	<div class="d-flex align-items-center gap-2">
+		<code id={ id } class="text-truncate">{ value }</code>
+		@clipboard.Button(clipboard.Props{Small: true, Class: "btn-action", Target: id, AriaLabel: label, FeedbackColor: "green"})
+	</div>
+}
+
+templ bfGridCard(title, subtitle string) {
+	@card.Card() {
+		@card.Body() {
+			@card.Title() {
+				{ title }
+			}
+			@card.Subtitle() {
+				@withCode(subtitle)
+			}
+			{ children... }
+		}
+	}
+}
+
+templ datagridPage() {
+	@preview("datagrid") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@bfTitleCard("Base info", card.Props{}) {
+					@card.Body() {
+						@datagrid.Grid() {
+							@bfPairs([]bfPair{{"Registrar", "Third Party"}, {"Nameservers", "Third Party"}, {"Port number", "3306"}, {"Expiration date", "–"}}, false)
+							@datagrid.Item(datagrid.ItemProps{Title: "Creator"}) {
+								@bfPersonCell("000m", "Paweł Kuna")
+							}
+							@bfPairs([]bfPair{{"Age", "15 days"}}, false)
+							@datagrid.Item(datagrid.ItemProps{Title: "Edge network"}) {
+								@status.Status(status.Props{Color: "green"}) {
+									Active
+								}
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Avatars list"}) {
+								@bfAvatars(avatar.SizeXS, "+3")
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Checkbox"}) {
+								@form.Check(form.CheckProps{Label: "Click me", Checked: true})
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Icon"}) {
+								@icon.Icon("ti-check", icon.Props{Color: "green", Inline: true})
+								Checked
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Form control"}) {
+								@form.Input(form.InputProps{Flush: true, Placeholder: "Input placeholder"})
+							}
+							@bfPairs([]bfPair{{"Longer description", "Lorem ipsum dolor sit amet, consectetur adipisicing elit."}}, false)
+						}
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Basic", "A `.datagrid` with plain text values.") {
+					@datagrid.Grid() {
+						@bfPairs([]bfPair{{"Plan", "Business"}, {"Billing period", "Monthly"}, {"Next invoice", "October 18, 2026"}, {"Seats", "8 of 10 used"}}, false)
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Description list", "Use `dl`, `dt` and `dd` so screen readers announce the pairs.") {
+					@datagrid.Grid(datagrid.Props{List: true}) {
+						@bfPairs([]bfPair{{"Company", "Tabler Ltd."}, {"Tax ID", "EU123456789"}, {"Billing email", "billing@tabler.io"}, {"Country", "Poland"}}, true)
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Narrow columns", "Lower `--tblr-datagrid-item-width` to fit more columns in a row.") {
+					@datagrid.Grid(datagrid.Props{ItemWidth: "7rem"}) {
+						@bfPairs(bfServer, false)
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Compact gap", "Lower `--tblr-datagrid-padding` to bring the items closer together.") {
+					@datagrid.Grid(datagrid.Props{ItemWidth: "7rem", Gap: "0.75rem"}) {
+						@bfPairs(bfServer, false)
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Horizontal", "Add `.datagrid-horizontal` to put the label beside the value.") {
+					@datagrid.Grid(datagrid.Props{Horizontal: true, Gap: "1rem"}) {
+						@bfPairs([]bfPair{{"Plan", "Business"}}, false)
+						@datagrid.Item(datagrid.ItemProps{Title: "Status"}) {
+							@status.Status(status.Props{Color: "green"}) {
+								Active
+							}
+						}
+						@bfPairs([]bfPair{{"Next invoice", "October 18, 2026"}, {"Address", "44 Harbor Street, Portland, OR 97209, United States"}}, false)
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfGridCard("Horizontal in columns", "Add `.datagrid-cols-2` and lower `--tblr-datagrid-title-width` to fit two pairs in a row.") {
+					@datagrid.Grid(datagrid.Props{Horizontal: true, Columns: 2, Gap: "1rem", TitleWidth: "5rem"}) {
+						@bfPairs(bfServer[:6], false)
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfGridCard("Single column", "Add `.datagrid-cols-1` to stack the items.") {
+					@datagrid.Grid(datagrid.Props{Columns: 1, Gap: "1rem"}) {
+						@datagrid.Item(datagrid.ItemProps{Title: "Customer"}) {
+							@bfPersonCell("002m", "Mallory Hulme")
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Email"}) {
+							<a href="#">mhulme2@domainmarket.com</a>
+						}
+						@bfPairs([]bfPair{{"Shipping address", "44 Harbor Street, Portland, OR 97209, United States"}}, false)
+						@datagrid.Item(datagrid.ItemProps{Title: "Notes"}) {
+							<span class="text-secondary">Not set</span>
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfGridCard("Two columns", "Add `.datagrid-cols-2` to keep two columns at any width.") {
+					@datagrid.Grid(datagrid.Props{Columns: 2, Gap: "1rem"}) {
+						@bfPairs([]bfPair{{"Order", "#48213"}}, false)
+						@datagrid.Item(datagrid.ItemProps{Title: "Status"}) {
+							@badge.Badge(badge.Props{Color: "green", Light: true}) {
+								Paid
+							}
+						}
+						@bfPairs([]bfPair{{"Placed", "September 12, 2026"}, {"Delivery", "September 16, 2026"}, {"Items", "3"}}, false)
+						@datagrid.Item(datagrid.ItemProps{Title: "Total"}) {
+							<strong>$248.00</strong>
+						}
+						@bfPairs([]bfPair{{"Payment", "Visa ending 4242"}, {"Carrier", "DHL Express"}}, false)
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@bfGridCard("Statuses and progress", "A value can hold a status, a badge or a progress bar.") {
+					@datagrid.Grid(datagrid.Props{Columns: 2, Gap: "1rem"}) {
+						@datagrid.Item(datagrid.ItemProps{Title: "State"}) {
+							@status.Status(status.Props{Color: "green"}) {
+								Running
+							}
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Health"}) {
+							@status.Status(status.Props{Color: "yellow"}) {
+								Degraded
+							}
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Environment"}) {
+							@badge.Badge(badge.Props{Color: "blue", Light: true}) {
+								Production
+							}
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Version"}) {
+							<code>v1.6.1</code>
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Disk usage"}) {
+							@bfUsage(68, "")
+						}
+						@datagrid.Item(datagrid.ItemProps{Title: "Memory usage"}) {
+							@bfUsage(41, "green")
+						}
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							Domain details
+						}
+						@card.Actions() {
+							@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Icon: "ti-pencil"}) {
+								Edit
+							}
+						}
+					}
+					@card.Body() {
+						@datagrid.Grid(datagrid.Props{ItemWidth: "12rem"}) {
+							@datagrid.Item(datagrid.ItemProps{Title: "Domain"}) {
+								<a href="#">
+									tabler.io{ " " }
+									@icon.Icon("ti-external-link", icon.Props{Inline: true})
+								</a>
+							}
+							@bfPairs([]bfPair{{"Registrar", "Third Party"}}, false)
+							@datagrid.Item(datagrid.ItemProps{Title: "SSL certificate"}) {
+								@icon.Icon("ti-lock", icon.Props{Color: "green", Inline: true})
+								Valid until May 2, 2027
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Auto renew"}) {
+								@form.Check(form.CheckProps{Switch: true, Checked: true, Label: "Enabled", Class: "mb-0"})
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Owner"}) {
+								@bfPersonCell("000f", "Emmy Levet")
+							}
+							@bfPairs([]bfPair{{"Expiration date", "–"}}, false)
+						}
+					}
+					@card.Footer() {
+						@button.List(button.ListProps{Class: "justify-content-end"}) {
+							@button.Button(button.Props{Type: "button", Ghost: true, Variant: button.VariantSecondary}) {
+								Transfer
+							}
+							@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary}) {
+								Renew domain
+							}
+						}
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				@bfTitleCard("API credentials", card.Props{}) {
+					@card.Body() {
+						@card.Subtitle() {
+							@withCode("Add a `data-bs-toggle=\"clipboard\"` button to let users copy a value.")
+						}
+						@datagrid.Grid(datagrid.Props{Columns: 1, Gap: "1rem"}) {
+							@datagrid.Item(datagrid.ItemProps{Title: "Client ID"}) {
+								@bfCopy("datagrid-client-id", "tblr_live_8f3a2c91d7e4", "Copy the client ID")
+							}
+							@datagrid.Item(datagrid.ItemProps{Title: "Webhook URL"}) {
+								@bfCopy("datagrid-webhook-url", "https://example.com/hooks/tabler", "Copy the webhook URL")
+							}
+							@bfPairs([]bfPair{{"Last used", "2 hours ago"}}, false)
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+// ---- tables
+
+type bfStaff struct{ Name, Title, Email, Role string }
+
+var bfStaffBasic = []bfStaff{
+	{"Paweł Kuna", "UI Designer, Training", "paweluna@howstuffworks.com", "User"},
+	{"Jeffie Lewzey", "Chemical Engineer, Support", "jlewzey1@seesaa.net", "User"},
+	{"Mallory Hulme", "Geologist IV, Support", "mhulme2@domainmarket.com", "User"},
+	{"Dunn Slane", "Research Nurse, Sales", "dslane3@epa.gov", "Owner"},
+	{"Emmy Levet", "VP Product Management, Accounting", "elevet4@senate.gov", "User"},
+	{"Maryjo Lebarree", "Civil Engineer, Product Management", "mlebarree5@unc.edu", "User"},
+	{"Egan Poetz", "Research Nurse, Engineering", "epoetz6@free.fr", "Admin"},
+	{"Kellie Skingley", "Teacher, Services", "kskingley7@columbia.edu", "Owner"},
+}
+
+var bfStaffStriped = []bfStaff{
+	{"Maryjo Lebarree", "Civil Engineer, Product Management", "mlebarree5@unc.edu", "User"},
+	{"Egan Poetz", "Research Nurse, Engineering", "epoetz6@free.fr", "User"},
+	{"Kellie Skingley", "Teacher, Services", "kskingley7@columbia.edu", "User"},
+	{"Christabel Charlwood", "Tax Accountant, Engineering", "ccharlwood8@nifty.com", "Owner"},
+	{"Haskel Shelper", "Staff Scientist, Legal", "hshelper9@woothemes.com", "User"},
+}
+
+type bfMember struct{ Avatar, Name, Email, Title, Dept, Role string }
+
+var bfMembers = []bfMember{
+	{"006m", "Lorry Mion", "lmiona@livejournal.com", "Automation Specialist IV", "Accounting", "User"},
+	{"004f", "Leesa Beaty", "lbeatyb@alibaba.com", "Editor", "Services", "User"},
+	{"007m", "Perren Keemar", "pkeemarc@yahoo.com", "Analog Circuit Design manager", "Services", "User"},
+	{"I:SA", "Sunny Airey", "saireyd@prlog.org", "Nuclear Power Engineer", "Engineering", "Owner"},
+	{"009m", "Geoffry Flaunders", "gflaunderse@loc.gov", "Software Test Engineer II", "Accounting", "User"},
+}
+
+var bfMembersMobile = []bfMember{
+	{"010m", "Thatcher Keel", "tkeelf@blogger.com", "VP Sales", "Business Development", "User"},
+	{"005f", "Dyann Escala", "descalag@usatoday.com", "Mechanical Systems Engineer", "Sales", "User"},
+	{"006f", "Avivah Mugleston", "amuglestonh@intel.com", "Actuary", "Sales", "User"},
+	{"I:AA", "Arlie Armstead", "aarmsteadi@yellowpages.com", "VP Quality Control", "Accounting", "Owner"},
+	{"008f", "Tessie Curzon", "tcurzonj@hp.com", "Research Nurse", "Product Management", "User"},
+}
+
+func bfAvatarProps(a string) avatar.Props {
+	if len(a) > 2 && a[:2] == "I:" {
+		return avatar.Props{Initials: a[2:], Class: "me-2"}
+	}
+	return avatar.Props{Src: avatarURL(a), Class: "me-2"}
+}
+
+templ bfStaffTable(rows []bfStaff, striped bool) {
+	@table.Table(table.Props{Responsive: true, VCenter: true, Card: true, Striped: striped}) {
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Title</th>
+				<th>Email</th>
+				<th>Role</th>
+				<th class="w-1"><span class="visually-hidden">Actions</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, r := range rows {
+				<tr>
+					<td>{ r.Name }</td>
+					<td class="text-secondary">{ r.Title }</td>
+					<td class="text-secondary"><a href="#" class="text-reset">{ r.Email }</a></td>
+					<td class="text-secondary">{ r.Role }</td>
+					<td><a href="#">Edit</a></td>
+				</tr>
+			}
+		</tbody>
+	}
+}
+
+templ bfMemberTable(rows []bfMember, mobile bool) {
+	@table.Table(table.Props{Responsive: true, VCenter: true, Card: true, Mobile: pickStr(mobile, "md")}) {
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Title</th>
+				<th>Role</th>
+				<th class="w-1"><span class="visually-hidden">Actions</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, r := range rows {
+				<tr>
+					<td data-label={ pickStr(mobile, "Name") }>
+						<div class="d-flex py-1 align-items-center">
+							@avatar.Avatar(bfAvatarProps(r.Avatar))
+							<div class="flex-fill">
+								<div class="fw-medium">{ r.Name }</div>
+								<div class="text-secondary"><a href="#" class="text-reset">{ r.Email }</a></div>
+							</div>
+						</div>
+					</td>
+					<td data-label={ pickStr(mobile, "Title") }>
+						<div>{ r.Title }</div>
+						<div class="text-secondary">{ r.Dept }</div>
+					</td>
+					<td class="text-secondary" data-label={ pickStr(mobile, "Role") }>{ r.Role }</td>
+					<td>
+						if mobile {
+							@button.List(button.ListProps{Class: "flex-nowrap"}) {
+								@button.Button(button.Props{Type: "button"}) {
+									Edit
+								}
+								@tables.RowActions(bfRowMenu())
+							}
+						} else {
+							<a href="#">Edit</a>
+						}
+					</td>
+				</tr>
+			}
+		</tbody>
+	}
+}
+
+func pickStr(cond bool, s string) string {
+	if cond {
+		return s
+	}
+	return ""
+}
+
+templ bfRowMenu() {
+	@dropdown.Item() {
+		Action
+	}
+	@dropdown.Item() {
+		Another action
+	}
+}
+
+var bfTopPages = []tables.RankingRow{
+	{Text: "/", Percent: 82.54, Value: "4896"}, {Text: "/form-elements.html", Percent: 76.29, Value: "3652"}, {Text: "/index.html", Percent: 72.65, Value: "3256"},
+	{Text: "/icons.html", Percent: 44.89, Value: "986"}, {Text: "/docs/", Percent: 41.12, Value: "912"}, {Text: "/accordion.html", Percent: 32.65, Value: "855"},
+	{Text: "/datagrid.html", Percent: 16.22, Value: "764"}, {Text: "/datatables.html", Percent: 8.69, Value: "686"},
+}
+
+var bfEmployeeColumns = []tables.Column{
+	{Field: "sort-name", Label: "Name"}, {Field: "sort-city", Label: "City"}, {Field: "sort-status", Label: "Status"}, {Field: "sort-date", Label: "Start date"},
+	{Field: "sort-tags", Label: "Tags"}, {Field: "sort-category", Label: "Category", Class: "py-0"},
+}
+
+func bfEmployeeTable() tables.AdvancedProps {
+	rows := make([]tables.Row, len(bfEmployees))
+	for i, e := range bfEmployees {
+		a := e.Avatar
+		a.Class = "me-2"
+		rows[i] = tables.Row{Name: e.Name, Cells: []templ.Component{bfEmployeeName(a, e.Name), bfText(e.City), bfEmployeeStatus(e.Status, e.StatusColor),
+			bfText(e.Date), bfTags(e.Tags), tables.OnChecked(e.Category, bfDotsButton())}}
+	}
+	return tables.AdvancedProps{ID: "advanced-table", Title: "Employee", Description: "Table description.", Search: true, Actions: bfEmployeeActions(),
+		Columns: bfEmployeeColumns, Rows: rows, Page: 3, Pages: 10}
+}
+
+templ bfEmployeeName(a avatar.Props, name string) {
+	@avatar.Avatar(a)
+	{ name }
+}
+
+templ bfEmployeeStatus(text, color string) {
+	@badge.Badge(badge.Props{Color: color, Light: true}) {
+		{ text }
+	}
+}
+
+templ bfTags(tags []string) {
+	@badge.List() {
+		for _, t := range tags {
+			@badge.Badge() {
+				{ t }
+			}
+		}
+	}
+}
+
+templ bfDotsButton() {
+	@button.Button(button.Props{Type: "button", IconOnly: true, Icon: "ti-dots", Label: "Actions"})
+}
+
+templ bfEmployeeActions() {
+	@button.Button(button.Props{Type: "button", IconOnly: true, Icon: "ti-dots", Label: "More actions"})
+	@dropdown.Dropdown() {
+		@dropdown.Toggle(button.Props{}) {
+			Download
+		}
+		@dropdown.Menu() {
+			@dropdown.Item() {
+				Action
+			}
+			@dropdown.Item() {
+				Another action
+			}
+			@dropdown.Item() {
+				Third action
+			}
+		}
+	}
+	@button.Button(button.Props{Type: "button"}) {
+		Button
+	}
+}
+
+templ tablesPage() {
+	@preview("tables") {
+		<div class="row row-cards">
+			<div class="col-lg-8">
+				@card.Card() {
+					@bfHead("Basic table", "A clean list of rows and columns, ready to drop into any card.", nil)
+					@bfStaffTable(bfStaffBasic, false)
+				}
+			</div>
+			<div class="col-lg-4">
+				@tables.Ranking(tables.RankingProps{Title: "Top Pages", Label: "Page", ValueLabel: "Visitors"}, bfTopPages)
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@bfHead("Striped rows", "Alternate row shading with `table-striped` to make wide tables easier to scan.", nil)
+					@bfStaffTable(bfStaffStriped, true)
+				}
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@bfHead("With avatars", "Swap the plain name column for an avatar, title, and department.", nil)
+					@bfMemberTable(bfMembers, false)
+				}
+			</div>
+			<div class="col-12">
+				@card.Card() {
+					@bfHead("Responsive with actions", "Collapses to stacked rows on mobile and adds an actions button per row.", nil)
+					@bfMemberTable(bfMembersMobile, true)
+				}
+			</div>
+			<div class="col-12">
+				@tables.Invoices(tables.InvoicesProps{Count: 8, Total: 16, Page: 3, Pages: 5, Actions: bfRowMenu()}, bfInvoices)
+			</div>
+			<div class="col-12">
+				@tables.Advanced(bfEmployeeTable())
+			</div>
+		</div>
+		// List.js sorts, searches and pages the advanced table (a plugin, as in Tabler's preview).
+		<script src="https://cdn.jsdelivr.net/npm/list.js@2.3.1/dist/list.min.js" defer></script>
+		@tables.AdvancedScript(bfEmployeeTable())
+	}
+}
+
+func itoaPct(n float64) string { return strconv.FormatFloat(n, 'f', -1, 64) + "%" }

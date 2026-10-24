@@ -25,6 +25,10 @@ type Props struct {
 	Multiple bool
 	// HeadingLevel of the item headers (2–6), default 3; the button takes the heading's size.
 	HeadingLevel int
+	// BodyClass is added to every item's body, e.g. "pt-0".
+	BodyClass string
+	// NoRegion drops role="region" from the panels (for accordions with many items).
+	NoRegion bool
 }
 
 func level(p Props) string {
@@ -87,10 +91,12 @@ templ Accordion(p Props, items []Item) {
 					if !p.Multiple {
 						data-bs-parent={ "#" + p.ID }
 					}
-					role="region"
-					aria-labelledby={ id + "-button" }
+					if !p.NoRegion {
+						role="region"
+						aria-labelledby={ id + "-button" }
+					}
 				>
-					<div class="accordion-body">
+					<div class={ kit.Classes("accordion-body", p.BodyClass) }>
 						if it.Content != nil {
 							@it.Content
 						}

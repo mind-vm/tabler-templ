@@ -32,8 +32,8 @@ const (
 type Props struct {
 	Class      string
 	Attributes templ.Attributes
-	Value      int    // percent, 0–100
-	Color      string // bar color, e.g. "red", "primary"
+	Value      float64 // percent, 0–100; decimals are kept (82.54)
+	Color      string  // bar color, e.g. "red", "primary"
 	Size       Size
 	Width      string // width of the track, e.g. "8rem"
 	// ShowValue prints the value in the bar; otherwise it is only read out (visually-hidden).
@@ -46,7 +46,9 @@ type Props struct {
 	Separated bool
 }
 
-func pct(v int) string { return strconv.Itoa(v) + "%" }
+func num(v float64) string { return strconv.FormatFloat(v, 'f', -1, 64) }
+
+func pct(v float64) string { return num(v) + "%" }
 
 func track(p Props) string {
 	return kit.Classes("progress", kit.If(p.Size != SizeDefault, "progress-"+string(p.Size)), kit.If(p.Separated, "progress-separated"), p.Class)
@@ -111,7 +113,7 @@ func Progress(props ...Props) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(width(p.Width))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 56, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 58, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -179,7 +181,7 @@ func Progress(props ...Props) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + pct(p.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 65, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 67, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -190,9 +192,9 @@ func Progress(props ...Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(p.Value))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(p.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 67, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 69, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -205,7 +207,7 @@ func Progress(props ...Props) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(p.Label, pct(p.Value)+" Complete"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 70, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 72, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +221,7 @@ func Progress(props ...Props) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(pct(p.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 73, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 75, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -233,7 +235,7 @@ func Progress(props ...Props) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Label, pct(p.Value)+" Complete"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 75, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 77, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -259,7 +261,7 @@ func Progress(props ...Props) templ.Component {
 
 // Bar is one part of a Multi or Stacked progress.
 type Bar struct {
-	Value int
+	Value float64
 	Color string
 	Label string // aria-label, default "<value>%"
 }
@@ -342,7 +344,7 @@ func Multi(p Props, bars []Bar) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + pct(b.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 95, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 97, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -353,9 +355,9 @@ func Multi(p Props, bars []Bar) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(b.Value))
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(b.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 97, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 99, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 			if templ_7745c5c3_Err != nil {
@@ -368,7 +370,7 @@ func Multi(p Props, bars []Bar) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(b.Label, pct(b.Value)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 100, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 102, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 			if templ_7745c5c3_Err != nil {
@@ -447,7 +449,7 @@ func Stacked(p Props, bars []Bar) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + pct(b.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 112, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 114, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -458,9 +460,9 @@ func Stacked(p Props, bars []Bar) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(b.Value))
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(num(b.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 114, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 116, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 			if templ_7745c5c3_Err != nil {
@@ -473,7 +475,7 @@ func Stacked(p Props, bars []Bar) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(kit.Or(b.Label, pct(b.Value)+" of total"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 117, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 119, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 			if templ_7745c5c3_Err != nil {
@@ -516,7 +518,7 @@ func Stacked(p Props, bars []Bar) templ.Component {
 
 type BackgroundProps struct {
 	Class     string
-	Value     int
+	Value     float64
 	Color     string // default "primary"
 	Strong    bool   // the full color instead of the light (-lt) one
 	Text      string
@@ -580,7 +582,7 @@ func Background(p BackgroundProps) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(p.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 140, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 142, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -599,7 +601,7 @@ func Background(p BackgroundProps) templ.Component {
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(pct(p.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 143, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 145, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
@@ -622,7 +624,7 @@ type DescriptionProps struct {
 	Class       string
 	Label       string
 	Description string
-	Value       int
+	Value       float64
 	Color       string
 	Size        Size
 }
@@ -674,7 +676,7 @@ func Description(p DescriptionProps) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 161, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 163, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -692,7 +694,7 @@ func Description(p DescriptionProps) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 163, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 165, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -710,7 +712,7 @@ func Description(p DescriptionProps) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(pct(p.Value))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 165, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 167, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -805,7 +807,7 @@ func Steps(p StepsProps) templ.Component {
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 197, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 199, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var44)
 			if templ_7745c5c3_Err != nil {
@@ -824,7 +826,7 @@ func Steps(p StepsProps) templ.Component {
 			var templ_7745c5c3_Var45 string
 			templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 200, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 202, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
 			if templ_7745c5c3_Err != nil {
@@ -875,7 +877,7 @@ func Steps(p StepsProps) templ.Component {
 			var templ_7745c5c3_Var48 string
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(l)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 210, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `progress/progress.templ`, Line: 212, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {

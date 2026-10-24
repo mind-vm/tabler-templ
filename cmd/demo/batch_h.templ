@@ -1,0 +1,650 @@
+package main
+
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/clipboard"
+	"github.com/mind-vm/tabler-templ/dropdown"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/sparkline"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// batchHPages are the form, navigation, clipboard and sparkline pages.
+func batchHPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"sparkline":         sparklinePage(),
+		"clipboard":         clipboardPage(),
+		"scroll-spy":        scrollSpyPage(),
+		"segmented-control": segmentedControlPage(),
+		"nav-overflow":      navOverflowPage(),
+		"navigation":        navigationPage(),
+		"form-elements":     formElementsPage(),
+		"form-layout":       formLayoutPage(),
+	}
+}
+
+func fp(f float64) *float64 { return &f }
+
+// ---------------------------------------------------------------- sparkline
+templ sparklineCol(title, subtitle string) {
+	<div class="col-md-6 col-lg-4">
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ sparkRow(class string) {
+	<div class={ "d-flex align-items-center gap-3", class }>
+		{ children... }
+	</div>
+}
+
+var sparkColors = []string{"blue", "azure", "indigo", "purple", "pink", "red", "orange", "yellow", "lime", "green", "teal", "cyan"}
+
+func sparkLabel(c string) string { return strings.ToUpper(c[:1]) + c[1:] }
+
+templ sparklinePage() {
+	@preview("sparkline") {
+		<div class="row row-cards">
+			@sparklineCol("Line", "Add `data-bs-toggle=\"sparkline\"` and a comma-separated `data-bs-values` list.") {
+				@sparkline.Sparkline(sparkline.Props{Values: []float64{3, 4, 2, 6, 5, 8, 7}, Color: "primary", AriaLabel: "Weekly trend"})
+			}
+			@sparklineCol("Area with spot", "Use `data-bs-fill=\"auto\"` for a tinted area and `data-bs-spot` to mark the `last`, `min` or `max` value.") {
+				@sparkRow("") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{12, 14, 9, 18, 16, 22, 20}, Color: "success", Fill: true, Spot: "last", AriaLabel: "Last value"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{12, 14, 9, 18, 16, 22, 20}, Color: "danger", Fill: true, Spot: "min", AriaLabel: "Lowest value"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{12, 14, 9, 18, 16, 22, 20}, Color: "azure", Fill: true, Spot: "max", AriaLabel: "Highest value"})
+				}
+			}
+			@sparklineCol("Bars", "Set `data-bs-type=\"bar\"`. Tune the gap and rounding with `data-bs-bar-gap` and `data-bs-bar-radius`.") {
+				@sparkRow("") {
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{1, 2, 3, 2, 4, 3, 5}, Color: "warning", AriaLabel: "Daily activity"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{1, 2, 3, 2, 4, 3, 5}, Color: "purple", BarGap: fp(4), BarRadius: fp(0), AriaLabel: "Daily activity, square bars"})
+				}
+			}
+			@sparklineCol("Signed bars", "Negative values hang below a zero line in `--tblr-sparkline-negative`, red by default; the line uses `--tblr-sparkline-zero`.") {
+				@sparkRow("flex-wrap") {
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{3, -1, 4, -2, 5, -3, 2, -1}, Color: "success", AriaLabel: "Daily change"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{-2, 4, -3, 1, -1, 5, -4, 2}, Color: "primary", NegativeColor: "orange", AriaLabel: "Daily change, orange negatives"})
+				}
+			}
+			@sparklineCol("Win/loss", "Set `data-bs-type=\"tristate\"`: every value is a full bar up, down or a tick on the zero line, whatever its size.") {
+				@sparkRow("flex-wrap") {
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Tristate, Values: []float64{1, 1, -1, 1, 0, -1, 1, 1, -1, 1}, Color: "green", AriaLabel: "Match results"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Tristate, Size: "lg", Values: []float64{3, -2, 0, 5, 1, -1, -4, 2, 0, 1, 6, -3}, Color: "primary", BarGap: fp(3), AriaLabel: "Deployments, large"})
+				}
+			}
+			@sparklineCol("Threshold", "Set `data-bs-threshold` to draw a guide line at a value. Bars below it take the negative color.") {
+				@sparkRow("flex-wrap") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{62, 71, 68, 84, 79, 88, 92, 75}, Color: "primary", Fill: true, Threshold: fp(80), AriaLabel: "CPU usage, 80% limit"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{99.9, 99.7, 99.2, 99.8, 99.4, 99.95, 99.6}, Color: "green", Min: fp(98), Max: fp(100), Threshold: fp(99.5), AriaLabel: "Uptime, 99.5% target"})
+				}
+			}
+			@sparklineCol("Circle", "Use `data-bs-type=\"circle\"` with a single value as a share of `data-bs-max`, `sparkline-square` for a round box and `data-bs-label=\"auto\"` for the percentage in the middle.") {
+				@sparkRow("flex-wrap") {
+					for _, c := range []struct{ v float64; color, label string }{{10, "danger", "10%"}, {50, "warning", "50%"}, {72, "primary", "72%"}, {100, "success", "100%"}} {
+						@sparkline.Sparkline(sparkline.Props{Type: sparkline.Circle, Values: []float64{c.v}, Color: c.color, AriaLabel: "Completion " + c.label})
+					}
+					for _, c := range []struct{ v float64; color, label string }{{10, "danger", "10%"}, {50, "warning", "50%"}, {72, "primary", "72%"}, {100, "success", "100%"}} {
+						@sparkline.Sparkline(sparkline.Props{Type: sparkline.Circle, Size: "lg", Values: []float64{c.v}, Color: c.color, Label: "auto", StrokeWidth: "3", AriaLabel: "Completion " + c.label})
+					}
+				}
+			}
+			@sparklineCol("Disabled", "Add `sparkline-disabled` to grey out a chart, for a series that is off or data that is stale.") {
+				@sparkRow("flex-wrap") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{12, 14, 9, 18, 16, 22, 20}, Color: "primary", Fill: true, Spot: "last", Disabled: true, AriaLabel: "Trend, disabled"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Bar, Values: []float64{3, -1, 4, -2, 5, -3, 2}, Color: "warning", Disabled: true, AriaLabel: "Daily change, disabled"})
+					@sparkline.Sparkline(sparkline.Props{Type: sparkline.Circle, Size: "lg", Values: []float64{72}, Color: "green", Label: "auto", StrokeWidth: "3", Disabled: true, AriaLabel: "Completion 72%, disabled"})
+				}
+			}
+			@sparklineCol("Colors", "The chart uses `currentColor`, so any `text-{color}` utility themes it.") {
+				@sparkRow("flex-wrap") {
+					for _, c := range sparkColors {
+						@sparkline.Sparkline(sparkline.Props{Values: []float64{2, 3, 2, 4, 3, 5, 4}, Color: c, Fill: true, AriaLabel: sparkLabel(c)})
+					}
+				}
+			}
+			@sparklineCol("Fixed range", "Set `data-bs-min` and `data-bs-max` so several charts share the same scale.") {
+				@sparkRow("") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{10, 20, 35, 30, 45, 60, 55}, Color: "primary", Min: fp(0), Max: fp(100), AriaLabel: "Series A, 0 to 100"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{5, 15, 25, 40, 70, 65, 80}, Color: "danger", Min: fp(0), Max: fp(100), AriaLabel: "Series B, 0 to 100"})
+				}
+			}
+			@sparklineCol("Sizes", "Add `sparkline-sm` or `sparkline-lg`; for a custom box override `--tblr-sparkline-width` and `--tblr-sparkline-height`.") {
+				@sparkRow("flex-wrap") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{2, 3, 2, 4, 3, 5, 4}, Size: "sm", Color: "info", AriaLabel: "Small"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{2, 3, 2, 4, 3, 5, 4}, Color: "info", AriaLabel: "Default"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{2, 3, 2, 4, 3, 5, 4}, Size: "lg", Color: "info", AriaLabel: "Large"})
+				}
+			}
+			@sparklineCol("Stroke width", "Change `--tblr-sparkline-stroke-width` and `--tblr-sparkline-spot-size` in SVG units.") {
+				@sparkRow("") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{3, 4, 2, 6, 5, 8, 7}, Color: "primary", Spot: "last", StrokeWidth: "1", SpotSize: "1.5", AriaLabel: "Thin"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{3, 4, 2, 6, 5, 8, 7}, Color: "primary", Spot: "last", AriaLabel: "Default"})
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{3, 4, 2, 6, 5, 8, 7}, Color: "primary", Spot: "last", StrokeWidth: "4", SpotSize: "3", AriaLabel: "Thick"})
+				}
+			}
+			@sparklineCol("Update from JavaScript", "Call `update(values)` on the instance. It writes `data-bs-values` back, tweens the chart for `data-bs-animation` milliseconds and fires `updated.bs.sparkline`.") {
+				@sparkRow("") {
+					@sparkline.Sparkline(sparkline.Props{Values: []float64{3, 4, 2, 6, 5, 8, 7, 9, 6, 8}, Size: "lg", Color: "primary", Fill: true, Spot: "last", AriaLabel: "Orders",
+						Attributes: templ.Attributes{"id": "sparkline-orders"}})
+					@button.Button(button.Props{ID: "sparkline-update", Type: "button", Size: button.SizeSmall, Variant: button.VariantPrimary, Outline: true}) {
+						Randomize
+					}
+					<span class="badge bg-secondary-lt" id="sparkline-updates">0 updates</span>
+				}
+			}
+			<div class="col-lg-8">
+				@section("In a table", "A sparkline sits inline with text, so it works in table cells and stat rows.") {
+					@table.Table(table.Props{Responsive: true, VCenter: true, Card: true}) {
+						<thead>
+							<tr>
+								<th>Metric</th>
+								<th class="text-end">Value</th>
+								<th class="text-end">Trend</th>
+							</tr>
+						</thead>
+						<tbody>
+							@sparkTableRow("Revenue", "$12.4k", sparkline.Props{Values: []float64{5, 6, 7, 6, 8, 9, 10}, Color: "success", Fill: true, AriaLabel: "Revenue trend"})
+							@sparkTableRow("Orders", "1,352", sparkline.Props{Type: sparkline.Bar, Values: []float64{3, 4, 2, 6, 5, 8, 7}, Color: "primary", AriaLabel: "Orders trend"})
+							@sparkTableRow("Errors", "31", sparkline.Props{Type: sparkline.Bar, Values: []float64{2, 3, 5, 4, 8, 13, 21}, Color: "danger", AriaLabel: "Errors trend"})
+							@sparkTableRow("CPU usage", "72%", sparkline.Props{Values: []float64{40, 55, 50, 70, 65, 80, 72}, Color: "info", AriaLabel: "CPU usage trend"})
+						</tbody>
+					}
+				}
+			</div>
+		</div>
+		@sparklineUpdateScript()
+	}
+}
+
+templ sparkTableRow(metric, value string, p sparkline.Props) {
+	<tr>
+		<td>{ metric }</td>
+		<td class="text-end">{ value }</td>
+		<td class="text-end">
+			@sparkline.Sparkline(p)
+		</td>
+	</tr>
+}
+
+// sparklineUpdateScript is the preview's demo: random data into a sparkline, counting the updates.
+templ sparklineUpdateScript() {
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const element = document.getElementById('sparkline-orders')
+			const sparkline = tabler.Sparkline.getOrCreateInstance(element)
+			let updates = 0
+			document.getElementById('sparkline-update').addEventListener('click', () => {
+				sparkline.update(Array.from({ length: 10 }, () => Math.floor(Math.random() * 30)))
+			})
+			element.addEventListener('updated.bs.sparkline', () => {
+				updates += 1
+				document.getElementById('sparkline-updates').textContent = `${updates} update${updates === 1 ? '' : 's'}`
+			})
+		})
+	</script>
+}
+
+// ---------------------------------------------------------------- clipboard
+templ clipboardField(label, id, value string) {
+	@form.Field(form.FieldProps{Class: "mb-0", Label: label, For: id}) {
+		{ children... }
+	}
+}
+
+templ clipboardPage() {
+	@preview("clipboard") {
+		<div class="row row-cards">
+			@sparklineCol("Button with a label", "The button reads `data-bs-target` and swaps `clipboard-label` for `clipboard-feedback`.") {
+				@clipboardField("API key", "clipboard-key", "") {
+					@form.Group() {
+						@form.Input(form.InputProps{ID: "clipboard-key", Value: "tblr_live_8f2c41d0a7", Readonly: true})
+						@clipboard.Button(clipboard.Props{Target: "clipboard-key", Label: "Copy"})
+					}
+				}
+			}
+			@sparklineCol("Button with an icon", "An icon-only button needs an `aria-label` and a hidden word for the announcement.") {
+				@clipboardField("API key", "clipboard-key-icon", "") {
+					@form.Group() {
+						@form.Input(form.InputProps{ID: "clipboard-key-icon", Value: "tblr_live_8f2c41d0a7", Readonly: true})
+						@clipboard.Button(clipboard.Props{Target: "clipboard-key-icon", AriaLabel: "Copy the API key"})
+					}
+				}
+			}
+			@sparklineCol("Icon inside the field", "With `input-group-flat` the button sits in an `input-group-text`, so it looks like part of the field.") {
+				@clipboardField("Invite link", "clipboard-invite", "") {
+					@form.Group(form.GroupProps{Flat: true}) {
+						@form.Input(form.InputProps{ID: "clipboard-invite", Value: "https://tabler.io/invite/9fbc2e", Readonly: true})
+						@form.Addon() {
+							@clipboard.Button(clipboard.Props{Style: clipboard.StyleLink, Target: "clipboard-invite", AriaLabel: "Copy the invite link"})
+						}
+					}
+				}
+			}
+			@sparklineCol("Green confirmation", "The feedback element takes any utility, so a `text-green` check confirms the copy in colour.") {
+				@clipboardField("API key", "clipboard-key-green", "") {
+					@form.Group(form.GroupProps{Flat: true}) {
+						@form.Input(form.InputProps{ID: "clipboard-key-green", Value: "tblr_live_8f2c41d0a7", Readonly: true})
+						@form.Addon() {
+							@clipboard.Button(clipboard.Props{Style: clipboard.StyleLink, Target: "clipboard-key-green", FeedbackColor: "green", AriaLabel: "Copy the API key"})
+						}
+					}
+				}
+			}
+			@sparklineCol("A literal string", "Use `data-bs-text` when the text is not on the page.") {
+				@clipboard.Button(clipboard.Props{Text: "https://tabler.io/", Icon: "ti-link", Label: "Copy link", FeedbackIcon: "ti-check", Feedback: "Link copied"})
+			}
+			@sparklineCol("Any element", "A target that is not a field is copied from its text.") {
+				<div class="d-flex align-items-center gap-2">
+					<code id="clipboard-command">npm install { "@" }tabler/core</code>
+					@clipboard.Button(clipboard.Props{Small: true, Target: "clipboard-command", AriaLabel: "Copy the install command"})
+				</div>
+			}
+			@sparklineCol("How long it lasts", "Set `data-bs-delay` in milliseconds. The default is 2000.") {
+				<div class="d-flex flex-wrap align-items-center gap-2">
+					@clipboard.Button(clipboard.Props{Text: "Tabler", Delay: 500, Label: "Half a second"})
+					@clipboard.Button(clipboard.Props{Text: "Tabler", Delay: 6000, Label: "Six seconds"})
+				</div>
+			}
+		</div>
+	}
+}
+
+// ---------------------------------------------------------------- scroll spy
+
+var scrollSpySections = []struct{ ID, Title, P1, P2 string }{
+	{"pills-home", "Home", "Welcome back. Here's a quick look at what's new since your last visit — three updates shipped, two conversations are waiting for a reply, and your weekly summary is ready below.",
+		"The dashboard pulls together everything you touched this week: recent files, comments left on your work, and the tasks you marked to revisit. Nothing here requires action unless you want it to."},
+	{"pills-profile", "Profile", "Your profile is what teammates see when they open your card — name, role, and a short line about what you're working on. Keep it current; it's the first thing a new collaborator checks before reaching out.",
+		"Profile photos update automatically from your workspace avatar. If you'd rather use a different image, upload one from the settings page and it will sync across every app connected to this account."},
+	{"pills-messages", "Messages", "Conversations are grouped by project, so a thread never gets lost between unrelated channels. Mentions are highlighted, and anything addressed directly to you moves to the top of the list.",
+		"Replies you haven't read yet are marked with a dot. Archiving a conversation doesn't delete it — it just clears it from the active list until someone posts in it again."},
+	{"pills-settings", "Settings", "Most defaults here are fine for everyday use, but a few are worth reviewing: notification frequency, default timezone, and who can see your activity status.",
+		"Changes save immediately — there's no separate 'apply' step. If something looks wrong after a change, the history tab keeps the last ten versions of your settings so you can roll back."},
+	{"pills-about", "About", "This project started as an internal tool for a five-person team and grew from there. The goal has stayed the same the whole time: make the boring parts of daily work take less time.",
+		"We ship small updates often rather than large releases a few times a year. That means the product changes gradually, but it also means feedback turns into fixes faster."},
+	{"pills-contact", "Contact", "The fastest way to reach the team is the in-app chat — most questions get a reply within a few hours during business days. For anything urgent, use the priority line in your account settings.",
+		"Bug reports and feature requests both go to the same inbox, so include a short description of what you expected versus what happened. Screenshots help more than long explanations."},
+	{"pills-services", "Services", "Onboarding, migration, and training are available as add-ons for teams moving from another tool. A specialist walks through your existing setup and maps it to the equivalent here before anything is switched over.",
+		"Ongoing support plans include a monthly check-in call, priority responses, and early access to features still in testing. Most teams start on the standard plan and upgrade once they've settled in."},
+	{"pills-team", "Team", "The team is spread across four time zones, which means someone is usually online to help. Each person owns a specific part of the product, listed on their profile.",
+		"We hire slowly and keep the team small on purpose — it's easier to keep quality high and response times short when fewer people need to stay in sync."},
+	{"pills-work", "Work", "A selection of recent projects is listed below, newest first. Each entry links to a short write-up covering the problem, the approach, and what changed as a result.",
+		"Older work is archived rather than deleted, so nothing here disappears — it just moves further down the list as new projects are added."},
+}
+
+templ scrollSpyPage() {
+	@preview("scroll-spy") {
+		<div class="row g-5">
+			<div class="col-sm-2">
+				<div class="sticky-top">
+					<h2>Menu</h2>
+					@nav.Nav(nav.Props{Links: true, Vertical: true, Style: nav.StylePills, Attributes: templ.Attributes{"id": "pills"}}) {
+						for _, s := range scrollSpySections {
+							@nav.Link(nav.ItemProps{Href: "#" + s.ID}) {
+								{ s.Title }
+							}
+						}
+					}
+				</div>
+			</div>
+			<div class="col-sm" data-bs-spy="scroll" data-bs-target="#pills" data-bs-offset="0">
+				@card.Card(card.Props{Size: card.SizeLarge}) {
+					@card.Body() {
+						for _, s := range scrollSpySections {
+							<h2 id={ s.ID }>{ s.Title }</h2>
+							<p>{ s.P1 }</p>
+							<p class="mb-6">{ s.P2 }</p>
+						}
+					}
+				}
+			</div>
+		</div>
+	}
+}
+
+// ---------------------------------------------------------------- segmented control
+
+type seg struct {
+	Text, Icon, Label string
+	Disabled          bool
+}
+
+var (
+	segViews     = []seg{{"List", "ti-list", "", false}, {"Kanban", "ti-layout", "", false}, {"Calendar", "ti-calendar", "", false}, {"Files", "ti-files", "", false}}
+	segIcons     = []seg{{"", "ti-home", "Home", false}, {"", "ti-star", "Star", false}, {"", "ti-clock", "Clock", false}, {"", "ti-ghost", "Ghost", false}, {"", "ti-bold", "Bold", false}, {"", "ti-italic", "Italic", false}, {"", "ti-underline", "Underline", false}}
+	segPeriods   = []string{"Daily", "Weekly", "Monthly", "Quarterly", "Yearly"}
+	segSizeTexts = []seg{{"List", "", "", false}, {"Kanban", "", "", false}, {"Calendar", "", "", true}, {"Files", "", "", false}}
+	segSizeIcons = []seg{{"List", "ti-list", "", false}, {"Kanban", "ti-layout", "", false}, {"Calendar", "ti-calendar", "", true}, {"Files", "ti-files", "", false}}
+	segSizeOnly  = []seg{{"", "ti-list", "List", false}, {"", "ti-layout", "Layout", false}, {"", "ti-calendar", "Calendar", true}, {"", "ti-files", "Files", false}}
+)
+
+func texts(ts ...string) []seg {
+	s := make([]seg, len(ts))
+	for i, t := range ts {
+		s[i] = seg{Text: t}
+	}
+	return s
+}
+
+func disabledFrom(ss []seg, disabled ...int) []seg {
+	out := append([]seg(nil), ss...)
+	for _, i := range disabled {
+		out[i].Disabled = true
+	}
+	return out
+}
+
+templ segmented(p nav.SegmentedProps, items []seg) {
+	@nav.Segmented(p) {
+		for i, s := range items {
+			@nav.Segment(nav.SegmentProps{Icon: s.Icon, Label: s.Label, Active: i == 0, Disabled: s.Disabled}) {
+				{ s.Text }
+			}
+		}
+	}
+}
+
+templ segCol(title, subtitle string) {
+	<div class="col-md-6">
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ segmentedControlPage() {
+	@preview("segmented-control") {
+		<div class="row row-cards">
+			@segCol("Basic", "A `nav-segmented` with text `nav-link` items is enough for a plain control.") {
+				@segmented(nav.SegmentedProps{}, texts("1", "2", "3", "4"))
+			}
+			@segCol("Any content", "Items can be any short text, including emoji.") {
+				@segmented(nav.SegmentedProps{}, texts("👦", "👦🏿", "👦🏾", "👦🏽", "👦🏼", "👦🏻"))
+			}
+			@segCol("Icons only", "Put only an icon in each `nav-link` for an icon-only control.") {
+				@segmented(nav.SegmentedProps{}, segIcons)
+			}
+			@segCol("With icons", "Combine an icon and text in each `nav-link` to label each option.") {
+				@segmented(nav.SegmentedProps{}, segViews)
+			}
+			@segCol("Vertical", "Add `nav-segmented-vertical` to stack the options in a column.") {
+				@segmented(nav.SegmentedProps{Vertical: true}, segViews)
+			}
+			@segCol("Vertical with disabled items", "Add `disabled` to a `nav-link` to make that option unselectable.") {
+				@segmented(nav.SegmentedProps{Vertical: true}, disabledFrom(segIcons, 2))
+			}
+			@segCol("Disabled items", "Disabled options stay visible but can't be selected.") {
+				@segmented(nav.SegmentedProps{}, disabledFrom(texts(segPeriods...), 3, 4))
+			}
+			@segCol("Vertical, no icons", "A vertical control also works with text-only items.") {
+				@segmented(nav.SegmentedProps{Vertical: true}, texts(segPeriods...))
+			}
+			@segCol("Independent group", "Use radio inputs with a unique `name` so this control doesn't share selection state with others using the same items.") {
+				@nav.Segmented(nav.SegmentedProps{Name: "checkbox"}) {
+					for i, t := range segPeriods {
+						@nav.Segment(nav.SegmentProps{Name: "checkbox", ID: "segmented-checkbox-" + string(rune('1'+i)), Active: i == 0}) {
+							{ t }
+						}
+					}
+				}
+			}
+			@segCol("Full width", "Add `w-100` to stretch the control across its container.") {
+				@segmented(nav.SegmentedProps{Block: true}, texts(segPeriods...))
+			}
+			@segCol("Full width, stacked", "Multiple full-width controls, one above the other.") {
+				<div class="space-y">
+					<div>
+						@segmented(nav.SegmentedProps{Block: true}, texts("Overview", "Analytics", "Reports", "Notifications"))
+					</div>
+					<div>
+						@segmented(nav.SegmentedProps{Block: true}, texts("Account", "Password"))
+					</div>
+				</div>
+			}
+			@segCol("Sizes", "Add `nav-sm` or `nav-lg` to change the size — with text, icons, or both.") {
+				<div class="space-y">
+					for _, items := range [][]seg{segSizeTexts, segSizeIcons, segSizeOnly} {
+						for _, size := range []nav.Size{nav.SizeSmall, nav.SizeDefault, nav.SizeLarge} {
+							<div>
+								@segmented(nav.SegmentedProps{Size: size}, items)
+							</div>
+						}
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+// ---------------------------------------------------------------- nav overflow
+templ overflowItems(titles []string, keep ...int) {
+	for i, t := range titles {
+		@nav.Item(nav.ItemProps{Active: i == 0, Keep: has(keep, i)}) {
+			{ t }
+		}
+	}
+}
+
+func has(xs []int, x int) bool {
+	for _, v := range xs {
+		if v == x {
+			return true
+		}
+	}
+	return false
+}
+
+func overflowMenu(icons bool) []layout.Entry {
+	es := []layout.Entry{
+		{Title: "Home", Href: "#", Icon: "ti-home", Active: true},
+		{Title: "Analytics", Href: "#", Icon: "ti-chart-bar"},
+		{Title: "Products", Href: "#", Icon: "ti-package"},
+		{Title: "Customers", Href: "#", Icon: "ti-users"},
+		{Title: "Reports", Href: "#", Icon: "ti-file-text"},
+		{Title: "Settings", Href: "#", Icon: "ti-settings"},
+	}
+	if icons {
+		es = append(es, layout.Entry{Title: "Help", Icon: "ti-help", Children: []layout.Item{{Title: "Documentation", Href: "#"}, {Title: "Changelog", Href: "#"}, {Title: "Support", Href: "#"}}})
+	}
+	return es
+}
+
+templ productMenu(label string, items ...string) {
+	@nav.Dropdown(nav.DropdownProps{Label: label}) {
+		for _, it := range items {
+			@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+				{ it }
+			}
+		}
+	}
+}
+
+// demoNavbar is the bare navbar of the preview's nav-overflow demos (not a page's navbar).
+templ demoNavbar(class string, dark bool) {
+	<div
+		class={ "navbar navbar-expand rounded", class }
+		if dark {
+			data-bs-theme="dark"
+		}
+	>
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">Brand</a>
+			{ children... }
+		</div>
+	</div>
+}
+
+var overflowPills = []string{"Home", "Dashboard", "Products", "Services", "Analytics", "Reports", "Settings", "Help"}
+
+templ navOverflowPage() {
+	@preview("nav-overflow") {
+		<div class="row row-cards">
+			<div class="col-12">
+				@section("Pills", "Wrap a `.nav` in `.nav-overflow` with `data-bs-toggle=\"nav-overflow\"`.") {
+					@nav.Nav(nav.Props{Style: nav.StylePills, Overflow: true}) {
+						@overflowItems(overflowPills)
+					}
+				}
+			</div>
+			@segCol("Tabs", "Works with `.nav-tabs` and keeps `.active` and `.disabled` in the menu.") {
+				@nav.Nav(nav.Props{Style: nav.StyleTabs, Overflow: true}) {
+					@overflowItems([]string{"Overview", "Details", "History", "Activity"})
+					@nav.Item(nav.ItemProps{Disabled: true}) {
+						Comments
+					}
+					@nav.Item(nav.ItemProps{}) {
+						Attachments
+					}
+				}
+			}
+			@segCol("Keep items visible", "Add `.nav-overflow-keep` to items that must never move to the menu.") {
+				@nav.Nav(nav.Props{Style: nav.StyleUnderline, Overflow: true}) {
+					@overflowItems([]string{"Home", "Products", "Services", "About", "Blog", "Careers", "Contact"}, 0, 6)
+				}
+			}
+			@segCol("With dropdowns", "A nav item with a dropdown becomes a nested dropdown in the menu.") {
+				@nav.Nav(nav.Props{Style: nav.StylePills, Overflow: true}) {
+					@overflowItems([]string{"Home", "Dashboard", "Services"})
+					@productMenu("Products", "Laptops", "Phones", "Tablets")
+					@productMenu("Company", "About", "Careers", "Press")
+					@nav.Item(nav.ItemProps{}) {
+						Help
+					}
+				}
+			}
+			@segCol("Icon-only toggle", "Set `data-bs-more-text=\"false\"` to show only the icon.") {
+				@nav.Nav(nav.Props{Style: nav.StylePills, Overflow: true, NoMoreText: true}) {
+					@overflowItems(overflowPills)
+				}
+			}
+			@segCol("In a navbar", "Wrap the `.navbar-nav` of a navbar in `.nav-overflow`.") {
+				@demoNavbar("border", false) {
+					@nav.Overflow(nav.OverflowProps{Label: "Demo"}) {
+						@layout.Menu(layout.MenuProps{}, overflowMenu(true))
+					}
+				}
+			}
+			@segCol("Colored navbar", "The overflow menu follows the theme of the navbar, here `data-bs-theme=\"dark\"`.") {
+				@demoNavbar("bg-primary", true) {
+					@nav.Overflow(nav.OverflowProps{Label: "Colored demo"}) {
+						@layout.Menu(layout.MenuProps{NoIcons: true}, overflowMenu(false))
+					}
+				}
+			}
+		</div>
+	}
+}
+
+// ---------------------------------------------------------------- navigation
+
+func sampleMenu() []layout.Entry {
+	return []layout.Entry{
+		{Title: "First", Href: "./#", Icon: "ti-star", Active: true},
+		{Title: "Second", Href: "./#", Icon: "ti-star", Badge: "2"},
+		{Title: "Third", Icon: "ti-star", Children: []layout.Item{{Title: "First", Href: "./#"}, {Title: "Second", Href: "./#"}, {Title: "Third", Href: "./#"}}},
+		{Title: "Disabled", Href: "./#", Icon: "ti-star", Disabled: true},
+	}
+}
+
+func navUser(photo, name, detail string, hideName bool) layout.UserProps {
+	return layout.UserProps{Avatar: avatar.Props{Src: avatarURL(photo)}, Name: name, Detail: detail, HideName: hideName}
+}
+
+// sampleActions are the actions of the preview's navbars with another signed-in user.
+templ sampleActions(user layout.UserProps) {
+	<div class="d-none d-md-flex me-3">
+		@layout.ThemeToggle(layout.ThemeToggleProps{})
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Icon: "ti-bell", Label: "Show notifications", Dot: "red", Card: true}) {
+			@layout.Notifications(layout.NotificationsProps{Footer: notificationActions()}, previewNotifications)
+		}
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Icon: "ti-apps", Label: "Show app menu", Card: true}) {
+			@layout.Apps(layout.AppsProps{SettingsHref: "#"}, apps())
+		}
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Text: "EN", Label: "Select language"}) {
+			for _, l := range previewLanguages {
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Attributes: templ.Attributes{"data-lang": l.Code}}) {
+					{ l.Name }
+				}
+			}
+		}
+	</div>
+	@layout.UserMenu(user) {
+		@userItems()
+	}
+}
+
+templ textBrand(text string) {
+	@layout.Brand(layout.BrandProps{Label: "Tabler", Class: "pe-0 pe-md-3"}) {
+		{ text }
+	}
+}
+
+templ markBrand(title string) {
+	@layout.Brand(layout.BrandProps{Label: "Tabler", Class: "pe-0 pe-md-3"}) {
+		if title != "" {
+			@templ.Raw(strings.Replace(tablerMark, `class="navbar-brand-image"`, `class="navbar-brand-image me-3"`, 1))
+			{ title }
+		} else {
+			@templ.Raw(tablerMark)
+		}
+	}
+}
+
+// customizeSide is the "Customize" button at the end of a navbar's menu row; it opens the theme settings.
+templ customizeSide() {
+	<ul class="navbar-nav">
+		<li class="nav-item">
+			<button type="button" class="nav-link" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-settings" aria-controls="offcanvas-settings">
+				<span class="nav-link-icon">
+					@icon.Icon("ti-brush")
+				</span>
+				<span class="nav-link-title">Customize</span>
+			</button>
+		</li>
+	</ul>
+}
+
+templ navigationPage() {
+	@preview("navigation") {
+		<div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-1", Condensed: true, Transparent: true, Brand: navbarBrand(), Search: layout.Search(layout.SearchProps{}),
+					Actions: sampleActions(navUser("002m", "Mallory Hulme", "Geologist IV", false))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-2", Condensed: true, Brand: navbarBrand(), Search: layout.Search(layout.SearchProps{}),
+					Actions: sampleActions(navUser("003m", "Dunn Slane", "Research Nurse", false))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-3", Condensed: true, Dark: true, Brand: textBrand("Dashboard"), Search: layout.Search(layout.SearchProps{}),
+					Menu: layout.MenuProps{NoIcons: true}, Actions: sampleActions(navUser("000f", "", "", true))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-4", Condensed: true, Dark: true, Brand: markBrand(""), Attributes: templ.Attributes{"style": "background: #7952b3"},
+					Actions: sampleActions(navUser("001f", "Maryjo Lebarree", "Civil Engineer", false))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-5", Condensed: true, Dark: true, Background: "primary", Search: layout.Search(layout.SearchProps{}),
+					Menu: layout.MenuProps{NoIcons: true}, Actions: sampleActions(navUser("004m", "", "", true))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-6", Brand: markBrand("Dashboard"), Search: layout.Search(layout.SearchProps{}), Side: customizeSide(),
+					Actions: sampleActions(navUser("002f", "Kellie Skingley", "Teacher", false))}, sampleMenu())
+			</div>
+			<div class="mb-3">
+				@layout.Navbar(layout.NavbarProps{MenuID: "navbar-menu-7", Dark: true, Brand: navbarBrand(), Search: layout.Search(layout.SearchProps{}), Side: customizeSide(),
+					Actions: sampleActions(navUser("003f", "Christabel Charlwood", "Tax Accountant", false))}, sampleMenu())
+			</div>
+		</div>
+	}
+}

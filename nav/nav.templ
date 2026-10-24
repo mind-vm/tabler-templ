@@ -48,6 +48,10 @@ type Props struct {
 	Bottom bool
 	// Overflow keeps the nav on one line and moves items that do not fit into a "More" menu.
 	Overflow bool
+	// NoMoreText shows only the icon on the overflow menu's toggle (data-bs-more-text="false").
+	NoMoreText bool
+	// Links renders a <nav> holding Links instead of a list of Items, e.g. the menu of a scroll spy.
+	Links bool
 	// Tablist marks a nav whose items switch Panes (role="tablist").
 	Tablist bool
 	Label   string // aria-label of the nav
@@ -82,20 +86,76 @@ templ list(p Props) {
 	</ul>
 }
 
-// Nav holds Items (and Dropdowns).
+// Nav holds Items (and Dropdowns), or Links when Links is set.
 templ Nav(props ...Props) {
 	{{ p := kit.First(props) }}
-	if p.Overflow {
-		<div class="nav-overflow" data-bs-toggle="nav-overflow">
+	if p.Links {
+		<nav
+			class={ Classes(p) }
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			{ p.Attributes... }
+		>
+			{ children... }
+		</nav>
+	} else if p.Overflow {
+		@Overflow(OverflowProps{NoMoreText: p.NoMoreText}) {
 			@list(p) {
 				{ children... }
 			}
-		</div>
+		}
 	} else {
 		@list(p) {
 			{ children... }
 		}
 	}
+}
+
+type OverflowProps struct {
+	Class string
+	// Label names the navigation; with it the wrapper is a <nav>, e.g. around a navbar's menu.
+	Label string
+	// NoMoreText shows only the icon on the "More" toggle (data-bs-more-text="false").
+	NoMoreText bool
+}
+
+// Overflow keeps the nav inside on one line and moves items that do not fit into a "More" menu
+// (nav-overflow). Nav does this itself with Props.Overflow; wrap other navs with it, e.g. a navbar's menu
+// (navbar-nav).
+templ Overflow(p OverflowProps) {
+	if p.Label != "" {
+		<nav
+			class={ kit.Classes("nav-overflow", p.Class) }
+			data-bs-toggle="nav-overflow"
+			if p.NoMoreText {
+				data-bs-more-text="false"
+			}
+			aria-label={ p.Label }
+		>
+			{ children... }
+		</nav>
+	} else {
+		<div
+			class={ kit.Classes("nav-overflow", p.Class) }
+			data-bs-toggle="nav-overflow"
+			if p.NoMoreText {
+				data-bs-more-text="false"
+			}
+		>
+			{ children... }
+		</div>
+	}
+}
+
+// Link is a link of a Nav with Links, without the list item around it.
+templ Link(p ItemProps) {
+	<a href={ templ.URL(href(p)) } class={ kit.Classes("nav-link", kit.If(p.Active, "active"), kit.If(p.Disabled, "disabled"), p.Class) } { linkAttrs(p)... }>
+		if p.Icon != "" {
+			@icon.Icon(p.Icon, icon.Props{Class: kit.If(p.Label == "", "me-2")})
+		}
+		{ children... }
+	</a>
 }
 
 type ItemProps struct {

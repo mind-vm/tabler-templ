@@ -1,0 +1,167 @@
+// Package search holds the filter column of a search page (the preview's parts/NavAside): categories
+// with counts, groups of radios or check boxes, a price range, a select and the buttons, each a block of
+// its own inside Filters.
+//
+//	@search.Filters(search.FiltersProps{Action: "/search"}) {
+//		@search.Categories("Category", cats)
+//		@search.Choices(search.ChoicesProps{Title: "Rating", Name: "stars", Radio: true, Options: …})
+//		@search.Buttons(search.ButtonsProps{})
+//	}
+package search
+
+import (
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/listgroup"
+	"github.com/mind-vm/tabler-templ/typography"
+)
+
+type FiltersProps struct {
+	Action string // default "./"
+	Method string // default "get"
+	Class  string // e.g. "sticky-top"
+}
+
+// Filters is the form around the filter blocks.
+templ Filters(p FiltersProps) {
+	<form
+		action={ templ.URL(kit.Or(p.Action, "./")) }
+		method={ kit.Or(p.Method, "get") }
+		autocomplete="off"
+		novalidate
+		if p.Class != "" {
+			class={ p.Class }
+		}
+	>
+		{ children... }
+	</form>
+}
+
+// Category is an entry of Categories.
+type Category struct {
+	Name   string
+	Count  string
+	Href   string
+	Active bool
+}
+
+// Categories is a titled list of links with counts.
+templ Categories(title string, cats []Category) {
+	@typography.Subheader(typography.SubheaderProps{Class: "mb-2"}) {
+		{ title }
+	}
+	@listgroup.List(listgroup.Props{Nav: true, Transparent: true, Class: "mb-3"}) {
+		for _, c := range cats {
+			@listgroup.Item(listgroup.ItemProps{Href: kit.Or(c.Href, "#"), Active: c.Active, Class: "d-flex align-items-center"}) {
+				{ c.Name }<small class="text-secondary ms-auto">{ c.Count }</small>
+			}
+		}
+	}
+}
+
+// Option is a choice of Choices.
+type Option struct {
+	Value, Label string
+	Checked      bool
+}
+
+type ChoicesProps struct {
+	Title   string
+	Name    string
+	Radio   bool
+	Options []Option
+}
+
+// Choices is a titled group of radios or check boxes.
+templ Choices(p ChoicesProps) {
+	<fieldset class="border-0 p-0 mb-3">
+		<legend class="subheader mb-2 float-none">{ p.Title }</legend>
+		for _, o := range p.Options {
+			@form.Check(form.CheckProps{Name: p.Name, Value: kit.Or(o.Value, o.Label), Label: o.Label, Checked: o.Checked, Radio: p.Radio})
+		}
+	</fieldset>
+}
+
+type RangeProps struct {
+	Title          string
+	Prefix         string // e.g. "$"
+	FromName       string
+	ToName         string
+	From, To       string // values
+	FromHint       string // placeholder, default "from"
+	ToHint         string // default "to"
+	Separator      string // default "—"
+}
+
+// Range is a titled from–to pair of fields, e.g. a price range.
+templ Range(p RangeProps) {
+	@typography.Subheader(typography.SubheaderProps{Class: "mb-2"}) {
+		{ p.Title }
+	}
+	<div class="row g-2 align-items-center mb-3">
+		<div class="col">
+			@rangeField(p.Prefix, p.FromName, kit.Or(p.FromHint, "from"), p.From)
+		</div>
+		<div class="col-auto">{ kit.Or(p.Separator, "—") }</div>
+		<div class="col">
+			@rangeField(p.Prefix, p.ToName, kit.Or(p.ToHint, "to"), p.To)
+		</div>
+	</div>
+}
+
+templ rangeField(prefix, name, hint, value string) {
+	@form.Group() {
+		if prefix != "" {
+			@form.Addon() {
+				{ prefix }
+			}
+		}
+		@form.Input(form.InputProps{Name: name, Placeholder: hint, Value: value})
+	}
+}
+
+type SelectProps struct {
+	Title    string
+	Name     string
+	Options  []string
+	Selected string
+}
+
+// Select is a titled select.
+templ Select(p SelectProps) {
+	@typography.Subheader(typography.SubheaderProps{Class: "mb-2"}) {
+		{ p.Title }
+	}
+	<div>
+		<select name={ p.Name } class="form-select">
+			for _, o := range p.Options {
+				<option selected?={ o == p.Selected }>{ o }</option>
+			}
+		</select>
+	</div>
+}
+
+type ButtonsProps struct {
+	Submit    string // default "Confirm changes"
+	Reset     string // default "Reset to defaults"
+	ResetHref string // a link instead of a button
+}
+
+// Buttons are the submit and reset buttons at the end of the filters.
+templ Buttons(p ButtonsProps) {
+	<div class="mt-5">
+		@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary, Block: true}) {
+			{ kit.Or(p.Submit, "Confirm changes") }
+		}
+		if p.ResetHref != "" {
+			@button.Button(button.Props{Href: p.ResetHref, Variant: button.VariantLink, Block: true}) {
+				{ kit.Or(p.Reset, "Reset to defaults") }
+			}
+		} else {
+			@button.Button(button.Props{Type: "button", Variant: button.VariantLink, Block: true}) {
+				{ kit.Or(p.Reset, "Reset to defaults") }
+			}
+		}
+	</div>
+}

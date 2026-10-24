@@ -62,8 +62,15 @@ go run ./cmd/demo -addr localhost:8080
 | ![Buttons](docs/screenshots/buttons.png) | ![Avatars](docs/screenshots/avatars.png) |
 | **Sign in** | **Onboarding** |
 | ![Sign in](docs/screenshots/sign-in.png) | ![Onboarding](docs/screenshots/onboarding.png) |
+| **Settings** | **Invoice** |
+| ![Settings](docs/screenshots/settings.png) | ![Invoice](docs/screenshots/invoice.png) |
+| **Profile** | **Pricing table** |
+| ![Profile](docs/screenshots/profile.png) | ![Pricing table](docs/screenshots/pricing-table.png) |
+| **Vertical layout** | **Tables** |
+| ![Vertical layout](docs/screenshots/layout-vertical.png) | ![Tables](docs/screenshots/tables.png) |
 
-`scripts/screenshots.sh` takes the screenshots in `docs/screenshots/` with Playwright (the only place that
+`scripts/screenshots.sh` takes the screenshots listed in `docs/screenshots/pages.txt` (`--all`: every rebuilt
+page) with Playwright (the only place that
 uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
 next to the Tabler original to check it by eye.
 
@@ -105,7 +112,7 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `card` | `Card` (sizes, link with hover effect, borderless, dashed, transparent, stacked, active, inactive, status line, gradients, rotation), `Header` (light), `Title`, `Subtitle`, `Actions`, `Dropdown`, `Body` (scrollable), `Footer` (transparent), `Stamp`, `Progress`, `Image` (top, bottom, start, end, full), `Overlay`, `Cover`, `Button`, `Meta`, `Code` |
 | `modal` | `Modal` (sizes sm/lg/xl/full-width/fullscreen, centered, scrollable, blur, status line, without header, several `Body` sections, `<form>` as content, shown inline), `Title`, `Trigger(id)`, `Dismiss()`; `Dialog` (native `<dialog>` as a card) with `DialogOpen` and `DialogScript` |
 | `form` | `Field` (label, required, description, help popover, hint, error, valid feedback), `Input` (sizes, rounded, flush, plaintext, color, datalist, validation incl. lite), `Select` (groups, multiple, sizes), `Textarea` (autosize), `Check` (checkbox, radio, switch, large, inline, on/off labels), `Group`/`Addon`/`AddonLink` (input groups), `InputIcon`, `PasswordToggle` + `PasswordToggleScript`, `SelectGroup`/`SelectItem` (pills, boxes), `ImageCheck`, `ColorCheck`, `Floating`, `Fieldset`, `Range`, `NumberInput`, `OTP`, `Strength`, `Footer`, `Text` |
-| `table` | `Table` (optionally responsive, wrapper classes), `Empty` row |
+| `table` | `Table` (card, vcenter, nowrap, striped, hover, borderless, center, small, selectable, mobile layout, responsive wrapper), `SortHeader`, `SelectCheck`, `Empty` row; `Classes(p)` |
 | `pagination` | `Pagination` with first/last/neighbour pages, arrows or text labels, first/last links, named previous/next pages; `Numbers(page, pages)` |
 | `alert` | `Alert` (variant with its default icon, heading and description, important, minor, dismissible), `Action`, `Link`, `List` |
 | `badge` | `Badge` (color, light, outline, sizes, pill, icons, icon-only, dot, notification, blink), `List` |
@@ -148,6 +155,12 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `tag` | `Tag` (flag, icon, avatar, status or legend dot, check box, badge, removable), `List` |
 | `typography` | `Subheader`, `Keys` (keyboard shortcut) |
 | `trending` | `Trending`: change with arrow and color |
+| `clipboard` | `Button`: copy a target's or a fixed text with Tabler's script (feedback, delay, icon-only, link style) |
+| `colorswatch` | `Swatch` (color with name and value), `Gradient` (`bg-gradient-*` with direction) |
+| `pattern` | `Pattern`: Tabler's background patterns (type, color, size, opacity) |
+| `payment` | `Payment(code)`: the 169 payment provider logos (needs `tabler-payments.css`) |
+| `prose` | `Prose` (rich text), `HTML` (checked HTML, e.g. rendered Markdown), `Callout` |
+| `social` | `Social`: brand icons of the socials stylesheet (sizes, grey) |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline, filled icons (`Filled` or a `-filled` name, from the filled webfont) – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
@@ -173,6 +186,22 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/errorpage` | `Page` (404, 500, maintenance: illustration or code, title, text, button home), `LoaderPage` |
 | `blocks/modals` | Ready-made dialogs: `Status` (success, danger …), `Confirm`, `ConfirmDelete` (items, check box before deleting), `ChangePassword` (strength, match check) |
 | `blocks/auth` | Tabler's sign-in and account pages: `Page` (centered, optional illustration `Aside`), `CoverPage` (form beside a cover image), `OnboardingPage` (top bar with progress); `SignInForm`, `SignInCard` (other providers), `SignUpCard` (password strength, terms), `ForgotPasswordCard`, `LockCard`, `VerifyCard` (OTP code), `FormCard` (own fields), `Card`, `Message`, `Note`, `Logo`. All texts are props (Tabler's English by default) |
+| `blocks/settings` | `Frame` (settings card with navigation groups), `Content`, `Section`, `Footer` |
+| `blocks/plans` | `Plan` (plan card with features), `Quote` (custom offer), `Featured` (plan on a gradient) |
+| `blocks/pricing` | `Table`: plan comparison with groups of features |
+| `blocks/invoice` | `Invoice` (from, to, lines, totals, note), `PrintButton` |
+| `blocks/billing` | `Card`, `Plan` (usage), `Invoices`, `Methods`, `Cancel`, `CheckoutPage`, `CardForm` |
+| `blocks/legal` | `Card` and `Page` around prose (license, terms), `LicenseSummary` |
+| `blocks/faq` | `FAQ`: sections of questions in accordions |
+| `blocks/profile` | `Header` (avatar, name, bio, facts, actions), `Info` |
+| `blocks/users` | `Card`: a person with avatar, detail, badge and actions |
+| `blocks/gallery` | `Photo` (photo card with author, views, likes), `Tile` |
+| `blocks/search` | `Filters`, `Categories`, `Choices`, `Range`, `Select`, `Buttons`: a filter sidebar |
+| `blocks/jobs` | `Job`: job offer card |
+| `blocks/logs` | `Section`, `Code`, `Text`, `Pairs`: a log view |
+| `blocks/cookie` | `Banner`: cookie consent at the bottom |
+| `blocks/cards` | `UsersList`, `People`, `TopUsers`, `Invite`, `CreditCard`, `Photo`, `SideImage`, `Placeholder`, `BottomTabs` |
+| `blocks/tables` | `Ranking` (progress background rows), `Invoices`, `RowActions`, `Advanced` (search, sort, select, paging with List.js) |
 | `blocks/landing` | `Page` (public start page without sidebar: top bar with brand, anchor links and actions, footer slot), `Hero` (title, lead, actions, optional visual), `Section` (full-width band with heading, `Muted` to set it apart), `Features` (icon, title, text in a grid), `Steps` (numbered), `CallToAction`, `Footer` (text and links); no script |
 | `blocks/tabscard` | `Card(Props, []Tab)`: the tabbed card of the preview, and `Tabs` (card-tabs: each panel a card of its own) (tabs in the header, one panel each; icons, end tab, disabled, fill, reverse, fade, a dropdown tab) |
 | `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |

@@ -30,6 +30,8 @@ type CardProps struct {
 	Featured    bool            // highlighted (featured)
 	Label       templ.Component // above the title, e.g. a "Popular" badge
 	Button      templ.Component // at the bottom, e.g. a full-width button
+	// TitleLevel renders the title as <h2> when 2; default <h3>.
+	TitleLevel int
 }
 
 templ Card(p CardProps) {
@@ -39,7 +41,11 @@ templ Card(p CardProps) {
 				@p.Label
 			</div>
 		}
-		<h3 class="pricing-title">{ p.Title }</h3>
+		if p.TitleLevel == 2 {
+			<h2 class="pricing-title">{ p.Title }</h2>
+		} else {
+			<h3 class="pricing-title">{ p.Title }</h3>
+		}
 		<div class="pricing-price">
 			if p.Currency != "" {
 				<span class="pricing-price-currency">{ p.Currency }</span>
