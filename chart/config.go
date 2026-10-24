@@ -7,12 +7,11 @@ import (
 	"time"
 )
 
-// config is what the chart script gets: the ApexCharts options, the formatters to put in by path, and
-// whether the colors must be resolved to hex first (heatmap and treemap shade from a literal color).
+// config is what the chart script gets: the ApexCharts options and the formatters to put in by path. The
+// script resolves the colors itself.
 type config struct {
 	Config     map[string]any    `json:"config"`
 	Formatters map[string]string `json:"formatters,omitempty"`
-	Resolve    bool              `json:"resolveColors,omitempty"`
 }
 
 func (p Props) typ() Type {
@@ -392,7 +391,7 @@ func (p Props) build() config {
 	}
 
 	merge(c, p.Options)
-	return config{Config: c, Formatters: f, Resolve: t == Heatmap || t == Treemap}
+	return config{Config: c, Formatters: f}
 }
 
 func asSlice(v any) []any {

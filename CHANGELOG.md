@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `chart` draws much faster on phones. Measured at 4G with a 4× slower CPU: the dashboard's visible charts
+  appear after 3.3 s instead of 13.3 s, and 36 charts no longer block a page for 51 s.
+  - A chart is drawn when it comes near the screen, one at a time, with a frame for the browser between
+    charts. Charts in hidden tabs and dialogs are drawn at their real width when shown.
+  - The colors are resolved once per chart instead of once per use inside ApexCharts. Each of those uses
+    restyled the whole page.
+  - Charts follow theme changes (color mode, accent, settings panel) by redrawing.
+  - `window.tablerCharts.flush()` draws all charts at once, e.g. before a screenshot; printing calls it.
+
 - New package `compress`: gzip middleware for an app's pages (standard library only; streams, websockets
   and small or binary responses pass through). The demo and `cmd/new` apps use it; the demo's pages are
   5–6 times smaller on the wire (e.g. `/cards` 196 KB → 31 KB).

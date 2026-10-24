@@ -24,6 +24,8 @@ async function shoot(url) {
     const res = await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
     if (!res || !res.ok()) return null;
     await page.evaluate(() => document.fonts.ready);
+    // Charts are drawn as they come into view; draw all of them for the picture.
+    await page.evaluate(() => window.tablerCharts?.flush?.());
     await page.waitForTimeout(300);
     const body = page.locator(".page-body .container-xl");
     const el = (await body.count()) ? body.first() : page.locator("main").first();

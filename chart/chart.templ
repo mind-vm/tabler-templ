@@ -7,8 +7,9 @@
 //		Series: []chart.Serie{{Name: "Revenue", Color: "primary", Data: revenue}},
 //	})
 //
-// Charts in content swapped in later (e.g. by htmx) start on htmx:afterSettle, or call
-// window.tablerCharts.init(element).
+// A chart is drawn when it comes near the screen, one chart at a time, so a page with many charts stays
+// responsive. Charts in content swapped in later (e.g. by htmx) start on htmx:afterSettle, or call
+// window.tablerCharts.init(element); window.tablerCharts.flush() draws all at once (it returns a promise).
 package chart
 
 import (
@@ -249,23 +250,59 @@ templ Script() {
 					'suffix-k': function (v) { return v + 'K'; },
 					percent: function (v) { return v + '%'; },
 				};
-				// Heatmap and treemap shade each cell from a literal color, which ApexCharts can only read as hex:
-				// resolve var()/color-mix() on a probe inside the chart, then go through a 1x1 canvas.
-				function resolve(el, value) {
-					if (typeof value !== 'string' || value.indexOf('var(') < 0) return value;
-					var probe = document.createElement('span');
-					probe.style.cssText = 'position:absolute;visibility:hidden';
-					probe.style.color = value;
-					el.appendChild(probe);
-					var color = getComputedStyle(probe).color;
-					probe.remove();
-					if (!color) return value;
-					var ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
-					ctx.fillStyle = color;
-					ctx.fillRect(0, 0, 1, 1);
-					var d = ctx.getImageData(0, 0, 1, 1).data;
-					return '#' + [d[0], d[1], d[2]].map(function (c) { return c.toString(16).padStart(2, '0'); }).join('');
+				// ApexCharts resolves every var() color itself, with a helper element and getComputedStyle each
+				// time: on a large page every call restyles the whole page. So the colors of a chart are resolved
+				// here in one go (one style pass) and handed over as hex colors; heatmaps and treemaps need literal
+				// colors anyway. resolveAll walks the config, finds the strings with var(), reads them on probes
+				// inside the chart (its own --chart-* properties apply there) and converts them on a canvas.
+				var cx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });
+				function literal(css, original) {
+					cx.clearRect(0, 0, 1, 1);
+					cx.fillStyle = '#000';
+					cx.fillStyle = css;
+					cx.fillRect(0, 0, 1, 1);
+					var d = cx.getImageData(0, 0, 1, 1).data;
+					var hex = '#' + [d[0], d[1], d[2]].map(function (c) { return c.toString(16).padStart(2, '0'); }).join('');
+					// A translucent color stays var(): ApexCharts mixes a var() with the fill opacity, but replaces the
+					// alpha of an rgba() with it. Translucent colors are few, so they cost little.
+					return d[3] === 255 ? hex : original;
 				}
+				function walk(v, fn) {
+					if (typeof v === 'string') return fn(v);
+					if (Array.isArray(v)) return v.map(function (x) { return walk(x, fn); });
+					if (v && typeof v === 'object') {
+						var o = {};
+						Object.keys(v).forEach(function (k) { o[k] = walk(v[k], fn); });
+						return o;
+					}
+					return v;
+				}
+				function resolveAll(el, config) {
+					var found = [];
+					walk(config, function (s) { if (s.indexOf('var(') >= 0 && found.indexOf(s) < 0) found.push(s); return s; });
+					if (!found.length) return config;
+					var box = document.createElement('div');
+					box.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
+					var probes = found.map(function (s) { var p = document.createElement('span'); p.style.color = s; box.appendChild(p); return p; });
+					el.appendChild(box);
+					var map = {};
+					found.forEach(function (s, i) { var c = getComputedStyle(probes[i]).color; map[s] = c ? literal(c, s) : s; });
+					box.remove();
+					return walk(config, function (s) { return map[s] || s; });
+				}
+				// The colors that stay var() (translucent ones) ApexCharts still resolves itself, with a hidden
+				// helper div in <body> per call. Its result only depends on the color and the theme, so it is kept
+				// per color until the theme changes; every other getComputedStyle call goes through untouched.
+				var computed = window.getComputedStyle, cache = {};
+				window.getComputedStyle = function (el) {
+					var st = el && el.style;
+					if (st && st.left === '-9999px' && st.visibility === 'hidden' && st.color && el.parentNode === document.body && !el.firstChild) {
+						var key = st.color;
+						if (!(key in cache)) cache[key] = computed.apply(window, arguments).color;
+						return { color: cache[key], getPropertyValue: function (p) { return p === 'color' ? cache[key] : ''; } };
+					}
+					return computed.apply(window, arguments);
+				};
 				function set(obj, path, value) {
 					var keys = path.split('.');
 					for (var i = 0; i < keys.length - 1; i++) {
@@ -274,28 +311,89 @@ templ Script() {
 					}
 					obj[keys[keys.length - 1]] = value;
 				}
-				function init(root) {
-					if (!window.ApexCharts) return;
+				// options is a chart's ApexCharts config with formatters and resolved colors.
+				function options(el) {
+					var data = JSON.parse(el.getAttribute('data-tabler-chart'));
+					var config = resolveAll(el, data.config);
+					Object.keys(data.formatters || {}).forEach(function (path) {
+						var f = formatters[data.formatters[path]];
+						if (f) set(config, path, f);
+					});
+					if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+						config.chart.animations = { enabled: false };
+					}
+					return config;
+				}
+				// draw starts one chart; a brush draws its target first.
+				function draw(el) {
+					if (el.tablerChart) return Promise.resolve();
 					window.tabler_chart = window.tabler_chart || {};
-					(root || document).querySelectorAll('[data-tabler-chart]').forEach(function (el) {
-						if (el.tablerChart) return;
-						var data = JSON.parse(el.getAttribute('data-tabler-chart'));
-						var config = data.config;
-						Object.keys(data.formatters || {}).forEach(function (path) {
-							var f = formatters[data.formatters[path]];
-							if (f) set(config, path, f);
-						});
-						if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-							config.chart.animations = { enabled: false };
-						}
-						if (data.resolveColors && Array.isArray(config.colors)) {
-							config.colors = config.colors.map(function (c) { return resolve(el, c); });
-						}
-						el.tablerChart = window.tabler_chart[el.id] = new ApexCharts(el, config);
-						el.tablerChart.render();
+					var config = options(el);
+					var target = config.chart.brush && document.getElementById('chart-' + config.chart.brush.target);
+					if (target) draw(target);
+					el.tablerChart = window.tabler_chart[el.id] = new ApexCharts(el, config);
+					return Promise.resolve(el.tablerChart.render());
+				}
+				// Charts are drawn one at a time, with a frame for the browser in between: ApexCharts reads its
+				// colors from the computed style, and drawing many charts in one task makes every chart restyle
+				// the whole page (seconds on a phone).
+				var queue = [], busy = false;
+				function pump() {
+					if (busy || !queue.length) return;
+					busy = true;
+					draw(queue.shift()).catch(function (e) { console.error(e); }).then(function () {
+						requestAnimationFrame(function () { setTimeout(function () { busy = false; pump(); }, 0); });
 					});
 				}
-				window.tablerCharts = { init: init, formatters: formatters };
+				function enqueue(el) {
+					if (el.tablerChart || el.tablerQueued) return;
+					el.tablerQueued = true;
+					queue.push(el);
+					pump();
+				}
+				// A chart is drawn when it comes near the screen: charts further down wait, and charts in a
+				// hidden tab or dialog are drawn when it opens, at their real width.
+				var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+					entries.forEach(function (e) {
+						if (e.isIntersecting) { io.unobserve(e.target); enqueue(e.target); }
+					});
+				}, { rootMargin: '300px 0px' }) : null;
+				function init(root) {
+					if (!window.ApexCharts) return;
+					(root || document).querySelectorAll('[data-tabler-chart]').forEach(function (el) {
+						if (el.tablerChart || el.tablerWatched) return;
+						el.tablerWatched = true;
+						io ? io.observe(el) : enqueue(el);
+					});
+				}
+				// flush draws every chart now, e.g. before a screenshot or printing.
+				function flush() {
+					var all = [];
+					document.querySelectorAll('[data-tabler-chart]').forEach(function (el) {
+						if (io) io.unobserve(el);
+						all.push(draw(el));
+					});
+					return Promise.all(all);
+				}
+				window.addEventListener('beforeprint', flush);
+				// The colors are literal now, so a new color mode or theme (Tabler's theme switch, the settings
+				// panel) redraws the drawn charts with their colors resolved again, one after another.
+				var restyling = false;
+				new MutationObserver(function () {
+					cache = {};
+					if (restyling) return;
+					restyling = true;
+					requestAnimationFrame(function () {
+						restyling = false;
+						var drawn = [].filter.call(document.querySelectorAll('[data-tabler-chart]'), function (el) { return el.tablerChart; });
+						(function next() {
+							var el = drawn.shift();
+							if (!el) return;
+							Promise.resolve(el.tablerChart.updateOptions(options(el), false, false)).then(function () { setTimeout(next, 0); });
+						})();
+					});
+				}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-bs-theme-primary', 'data-bs-theme-base', 'data-bs-theme-pack', 'data-bs-navbar-theme'] });
+				window.tablerCharts = { init: init, flush: flush, formatters: formatters };
 				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
 				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
 				document.addEventListener('click', function (e) {

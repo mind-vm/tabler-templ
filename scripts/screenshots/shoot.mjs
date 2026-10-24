@@ -22,6 +22,8 @@ for (const line of ["index", ...names]) {
   await page.setViewportSize({ width: widths[name] ?? 1280, height: 800 });
   await page.goto(name === "index" ? base : `${base}/${name}`, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
+  // Charts are drawn as they come into view; draw all of them for the picture.
+  await page.evaluate(() => window.tablerCharts?.flush?.());
   await page.screenshot({ path: join(out, `${name}.png`), fullPage: true });
   console.log(name);
 }
