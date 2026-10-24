@@ -124,7 +124,8 @@ templ Customer(c Customer) {
 
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
-the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself.
+the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself
+([Serve Tabler yourself](#serve-tabler-yourself)).
 jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
 wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
 in front compresses already.
@@ -435,6 +436,58 @@ ctx = kit.WithMessages(r.Context(), kit.German) // or your own kit.Messages{…}
 
 There are no translation files in the kit. An app with several languages picks the `Messages` for the
 request's language (and translates its own texts with whatever it uses, e.g. go-i18n).
+
+## Serve Tabler yourself
+
+An app that should not depend on jsDelivr (offline, privacy, an intranet, a strict Content-Security-Policy)
+serves Tabler itself. Done naively that is slow: Tabler's CSS is 670 KB, the icon webfont 500 KB plus 210 KB of
+CSS for 5,000 icons, and without cache headers a phone loads all of it again on every page. Package `static`
+and `cmd/static` do it fast:
+
+```sh
+go get -tool github.com/mind-vm/tabler-templ/cmd/static  # once: the tool at your tabler-templ version
+go tool static -css tabler,tabler-vendors                # writes static/core/… and static/icons/…
+```
+
+`cmd/static` fetches Tabler's CSS and JS in the versions the module is built against and cuts the icon
+webfont down to the `ti-…` classes your packages and the tabler-templ packages they import name (in Go):
+a new app from `cmd/new` has 35 icons, a 5 KB font and 2 KB of CSS. Icons named elsewhere come in with
+`-dir templates`, icons put together at run time with `-keep ti-user,ti-star`; `-icons=all` keeps the
+whole webfont. Run it again after using a new icon; `go tool static -check` fails when a used icon is
+missing (CI).
+
+```go
+//go:embed all:static
+var embedded embed.FS
+
+var files = static.New("/static/", must(fs.Sub(embedded, "static"))) // Tabler (core/, icons/) and your files
+
+mux.Handle("/static/", files)
+```
+
+```templ
+@layout.Page(layout.PageProps{
+	Head:    static.Head(files, assets.Props{Vendors: true}), // like assets.Head, from files
+	Scripts: static.Scripts(files),
+}) { … }
+
+<link rel="stylesheet" href={ files.URL("app.css") }/>
+```
+
+- `files.URL("app.css")` is `/static/v<hash>/app.css`: the hash covers all files of the bundle, so the
+  addresses change with any file, and the files are sent with `Cache-Control: public, max-age=31536000,
+  immutable`. A repeat visit loads only the page.
+- Another version (an old page after a deploy) gets the current file with `no-cache`; an address without
+  version (`/static/app.css`) a short cache (5 minutes), or a year with `?v=<hash of the file>`.
+- ETag and 304, HEAD, 404 for directories.
+- Text is compressed once in memory, gzip at once and brotli in the background: Tabler's CSS goes out as
+  60 KB, its JS as 37 KB. Fonts (woff2) are sent as they are. `compress.Handler` leaves the files alone.
+
+Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s, 100 ms RTT): the first
+visit went from 1.9 MB in 4.3 s (served without compression or cache headers, the whole webfont) to 185 KB
+in 0.7 s, a repeat visit to 12–17 KB (the page) in 0.2 s.
+
+Plugins (`chart`, `mapview` …) and the filled icon font (`icon.FilledFontURL`) still come from jsDelivr.
 
 ## Develop
 

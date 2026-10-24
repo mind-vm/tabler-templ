@@ -1,0 +1,75 @@
+package static
+
+import (
+	"github.com/mind-vm/tabler-templ/assets"
+	"github.com/mind-vm/tabler-templ/chart"
+)
+
+// Where Head, Theme and Scripts expect Tabler in the bundle: the layout of the npm packages' dist folders,
+// as cmd/static writes it.
+const (
+	CoreDir  = "core/"                       // @tabler/core's dist: css/tabler.min.css, js/tabler.min.js …
+	IconsCSS = "icons/tabler-icons.min.css" // @tabler/icons-webfont's stylesheet (fonts/ next to it)
+)
+
+func css(p assets.Props, name string) string {
+	if p.RTL {
+		return CoreDir + "css/" + name + ".rtl.min.css"
+	}
+	return CoreDir + "css/" + name + ".min.css"
+}
+
+// Stylesheets are the bundle's names of the stylesheets Head links for props, e.g. to check in a test
+// that the bundle has them all (Files.Has).
+func Stylesheets(props assets.Props) []string {
+	names := []string{css(props, "tabler")}
+	for _, x := range []struct {
+		on   bool
+		name string
+	}{
+		{props.Flags, "tabler-flags"}, {props.Payments, "tabler-payments"}, {props.Socials, "tabler-socials"},
+		{props.Marketing, "tabler-marketing"}, {props.Themes, "tabler-themes"},
+		{props.Vendors || props.Charts, "tabler-vendors"},
+	} {
+		if x.on {
+			names = append(names, css(props, x.name))
+		}
+	}
+	return append(names, IconsCSS)
+}
+
+// Head is assets.Head with Tabler served from files instead of jsDelivr: the same Props, the same
+// stylesheets in the same order. Charts still loads ApexCharts from jsDelivr (chart.Library).
+templ Head(files *Files, props ...assets.Props) {
+	{{
+		var p assets.Props
+		if len(props) > 0 {
+			p = props[0]
+		}
+	}}
+	for _, name := range Stylesheets(p) {
+		<link rel="stylesheet" href={ files.URL(name) }/>
+	}
+	if p.Charts {
+		@chart.Library()
+	}
+}
+
+// Theme is assets.Theme served from files: Tabler's theme script; put it in Head, after the stylesheets.
+templ Theme(files *Files) {
+	@script(files.URL(CoreDir + "js/tabler-theme.min.js"))
+}
+
+// Scripts is assets.Scripts served from files: Tabler's script; put it at the end of <body>.
+templ Scripts(files *Files) {
+	@script(files.URL(CoreDir + "js/tabler.min.js"))
+}
+
+// script carries templ's nonce, if set (templ.WithNonce), for a Content-Security-Policy with nonces.
+templ script(src string) {
+	if n := templ.GetNonce(ctx); n != "" {
+		<script src={ src } nonce={ n }></script>
+	} else {
+		<script src={ src }></script>
+	}
+}

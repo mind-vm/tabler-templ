@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- New package `static`: serves an app's own static files fast, for apps that serve Tabler themselves
+  instead of loading it from jsDelivr (#29).
+  - `static.New(prefix, fsys)` is an `http.Handler`; `URL(name)` gives an address with a hash over the
+    bundle in the path, sent with `Cache-Control: public, max-age=31536000, immutable`. Other versions
+    get `no-cache`, addresses without version a short cache (or a year with `?v=<hash>`). ETag and 304, HEAD.
+  - Text is compressed once in memory: gzip at once, brotli in the background (new dependency
+    `github.com/andybalholm/brotli`, templ's already). woff2 is sent as it is.
+  - `static.Head`, `Theme` and `Scripts` are `assets.Head`, `Theme` and `Scripts` from the bundle;
+    `Scripts` and `Theme` carry templ's nonce.
+- New command `cmd/static` (`go get -tool …/cmd/static`, `go tool static`): fetches Tabler's CSS and JS
+  for package `static` and cuts the icon webfont down to the icons the app's packages use (in Go, new
+  dependency `github.com/tdewolff/font` for the command only): 35 icons for a `cmd/new` app, 5 KB of font
+  and 2 KB of CSS instead of 500 KB and 210 KB. `-check` fails when a used icon is missing.
+- Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s): the first visit of a
+  page went from 1.9 MB in 4.3 s to 185 KB in 0.7 s, a repeat visit to 12–17 KB in 0.2 s.
+
 ## v0.9.0
 
 All of Tabler 1.7 in Go and templ. Every component of the Tabler docs is now a package (66 of 67), and the
