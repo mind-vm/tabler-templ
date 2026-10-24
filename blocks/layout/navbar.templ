@@ -1,0 +1,331 @@
+package layout
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/tooltip"
+)
+
+type NavbarProps struct {
+	MenuID string // id of the collapsible menu, default "navbar-menu"
+	Class  string
+	Dark   bool // dark navbar (data-bs-theme="dark")
+	// Transparent drops the background; Background colors it, e.g. "primary".
+	Transparent bool
+	Background  string
+	// Condensed puts the menu into the same row as the brand and the actions.
+	Condensed bool
+	Brand     templ.Component // usually Brand
+	Actions   templ.Component // the right side: ThemeToggle, NavDropdown, UserMenu …
+	Search    templ.Component // usually Search; in the menu row
+	Side      templ.Component // the end of the menu row (navbar-side)
+	Menu      MenuProps
+	// ToggleLabel is the menu button's aria-label on small screens.
+	ToggleLabel string
+}
+
+templ toggler(target, label string) {
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target={ "#" + target } aria-controls={ target } aria-expanded="false" aria-label={ label }>
+		<span class="navbar-toggler-icon"></span>
+	</button>
+}
+
+// Navbar is the top navigation: brand, actions and the menu (in a second row, or in the same row when
+// Condensed). Without entries it is just the header bar, e.g. above a Sidebar.
+templ Navbar(p NavbarProps, entries []Entry) {
+	{{ id := kit.Or(p.MenuID, "navbar-menu") }}
+	<header
+		class={ kit.Classes("navbar navbar-expand-md", kit.If(p.Transparent, "navbar-transparent"), kit.If(!p.Transparent && p.Background != "", "bg-"+p.Background), p.Class, "d-print-none") }
+		if p.Dark {
+			data-bs-theme="dark"
+		}
+	>
+		<div class="container-xl">
+			if len(entries) > 0 || p.Search != nil {
+				@toggler(id, kit.Or(p.ToggleLabel, "Toggle primary navigation"))
+			}
+			if p.Brand != nil {
+				@p.Brand
+			}
+			if p.Actions != nil {
+				<div class="navbar-nav flex-row order-md-last">
+					@p.Actions
+				</div>
+			}
+			if p.Condensed && (len(entries) > 0 || p.Search != nil) {
+				<div class="collapse navbar-collapse" id={ id }>
+					<div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
+						@overflowMenu(p.Menu, entries)
+						if p.Search != nil {
+							<div class="my-2 my-md-0 flex-grow-1 flex-md-grow-0 order-first order-md-last">
+								@p.Search
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</header>
+	if !p.Condensed && (len(entries) > 0 || p.Search != nil || p.Side != nil) {
+		<div class="navbar-expand-md">
+			<div class="collapse navbar-collapse" id={ id }>
+				<div class="navbar">
+					<div class="container-xl">
+						<div class="row flex-column flex-md-row flex-fill align-items-center">
+							<div class="col">
+								@overflowMenu(p.Menu, entries)
+							</div>
+							if p.Search != nil {
+								<div class="col-2 d-none d-xxl-block">
+									<div class="my-2 my-md-0 flex-grow-1 flex-md-grow-0 order-first order-md-last">
+										@p.Search
+									</div>
+								</div>
+							}
+							if p.Side != nil {
+								<div class="col col-md-auto">
+									<div class="navbar-side">
+										@p.Side
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ overflowMenu(p MenuProps, entries []Entry) {
+	<nav aria-label="Primary" class="nav-overflow" data-bs-toggle="nav-overflow">
+		@Menu(p, entries)
+	</nav>
+}
+
+type SidebarProps struct {
+	MenuID      string // id of the collapsible menu, default "sidebar-menu"
+	Class       string
+	Dark        bool
+	End         bool   // on the end side (navbar-end)
+	Transparent bool   // navbar-transparent
+	Breakpoint  string // from this width on the sidebar is shown, default "lg"
+	// Folded is an icon rail with flyout submenus; FoldedHover unfolds on hover. Prefer
+	// PageProps.SidebarMode, which also adjusts the page.
+	Folded      bool
+	FoldedHover bool
+	Brand       templ.Component // usually Brand, with FoldToggle as its After to fold the sidebar at runtime
+	User        templ.Component // usually SidebarUser; at the bottom on large screens
+	Side        templ.Component // the menu's trailing group at the bottom (navbar-side)
+	Menu        MenuProps       // Sections, KeepOpen and OpenActive are on by default
+	// ToggleLabel is the menu button's aria-label on small screens.
+	ToggleLabel string
+}
+
+func sidebarMenu(p SidebarProps) MenuProps {
+	m := p.Menu
+	m.Class = kit.Or(m.Class, "pt-lg-3")
+	m.Sections = true
+	if !p.Folded && !p.FoldedHover {
+		m.KeepOpen, m.OpenActive = true, true
+	}
+	return m
+}
+
+// Sidebar is the vertical navigation on the side of the page.
+templ Sidebar(p SidebarProps, entries []Entry) {
+	{{ id := kit.Or(p.MenuID, "sidebar-menu") }}
+	<aside
+		class={ kit.Classes("navbar navbar-vertical", kit.If(p.End, "navbar-end"), "navbar-expand-"+kit.Or(p.Breakpoint, "lg"), kit.If(p.Transparent, "navbar-transparent"),
+			kit.If(p.Folded, "navbar-folded"), kit.If(p.FoldedHover, "navbar-folded-hover"), p.Class) }
+		if p.Dark {
+			data-bs-theme="dark"
+		}
+	>
+		<div class="container-fluid">
+			@toggler(id, kit.Or(p.ToggleLabel, "Toggle sidebar navigation"))
+			if p.Brand != nil {
+				@p.Brand
+			}
+			if p.User != nil {
+				@p.User
+			}
+			<nav class="collapse navbar-collapse" id={ id } aria-label="Sidebar">
+				@Menu(sidebarMenu(p), entries)
+				if p.Side != nil {
+					<div class="navbar-side">
+						@p.Side
+					</div>
+				}
+			</nav>
+		</div>
+	</aside>
+}
+
+type BrandProps struct {
+	Href  string          // default "."
+	Label string          // aria-label, e.g. the app's name
+	Class string          // e.g. "pe-0 pe-md-3" in a Navbar
+	After templ.Component // after the link, e.g. FoldToggle in a Sidebar
+}
+
+// Brand is the logo at the start of a Navbar or Sidebar; the children are the logo (an <img> with
+// class "navbar-brand-image" or inline SVG) and, optionally, the app's name.
+templ Brand(p BrandProps) {
+	<div class={ kit.Classes("navbar-brand navbar-brand-autodark", p.Class) }>
+		<a
+			href={ templ.URL(kit.Or(p.Href, ".")) }
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+		>
+			{ children... }
+		</a>
+		if p.After != nil {
+			@p.After
+		}
+	</div>
+}
+
+// FoldToggle is Tabler's button that folds a Sidebar to icons at runtime (data-bs-toggle="sidebar-folded");
+// put it into the sidebar's Brand as After. Label is its aria-label, default "Pin sidebar".
+templ FoldToggle(label string, folded bool) {
+	<button
+		type="button"
+		class="btn btn-action btn-sm d-none d-lg-inline-flex"
+		data-bs-toggle="sidebar-folded"
+		if folded {
+			aria-pressed="true"
+		} else {
+			aria-pressed="false"
+		}
+		aria-label={ kit.Or(label, "Pin sidebar") }
+	>
+		@icon.Icon("ti-pin")
+	</button>
+}
+
+type ThemeToggleProps struct {
+	DarkHref   string // default "?theme=dark"
+	LightHref  string // default "?theme=light"
+	DarkLabel  string // default "Enable dark mode"
+	LightLabel string // default "Enable light mode"
+}
+
+// ThemeToggle switches between light and dark mode; the links set ?theme=, which Tabler's theme script
+// reads (or the app handles them itself).
+templ ThemeToggle(p ThemeToggleProps) {
+	<div class="nav-item">
+		<a href={ templ.URL(kit.Or(p.DarkHref, "?theme=dark")) } class="nav-link px-0 hide-theme-dark" { tooltip.Attrs(kit.Or(p.DarkLabel, "Enable dark mode"), tooltip.Bottom)... }>
+			@icon.Icon("ti-moon")
+		</a>
+		<a href={ templ.URL(kit.Or(p.LightHref, "?theme=light")) } class="nav-link px-0 hide-theme-light" { tooltip.Attrs(kit.Or(p.LightLabel, "Enable light mode"), tooltip.Bottom)... }>
+			@icon.Icon("ti-sun")
+		</a>
+	</div>
+}
+
+type NavDropdownProps struct {
+	Class string // e.g. "d-none d-md-flex"
+	Icon  string // the button's icon, e.g. "ti-bell"
+	Text  string // or a text, e.g. "EN"
+	Label string // aria-label
+	// Dot marks the button, e.g. unread notifications ("red" → a red dot).
+	Dot string
+	// Card makes the menu hold a card (notifications, apps); the children are the menu's content.
+	Card bool
+}
+
+// NavDropdown is an icon (or text) button in the navbar's actions that opens a menu, e.g. notifications,
+// apps or the language.
+templ NavDropdown(p NavDropdownProps) {
+	<div class={ kit.Classes("nav-item dropdown", p.Class) }>
+		<a href="#" class="nav-link px-0" data-bs-toggle="dropdown" aria-label={ p.Label } data-bs-auto-close="outside" aria-expanded="false">
+			if p.Icon != "" {
+				@icon.Icon(p.Icon)
+			}
+			{ p.Text }
+			if p.Dot != "" {
+				<span class={ "badge bg-" + p.Dot }></span>
+			}
+		</a>
+		<div class={ kit.Classes("dropdown-menu dropdown-menu-arrow dropdown-menu-end", kit.If(p.Card, "dropdown-menu-card")) }>
+			{ children... }
+		</div>
+	</div>
+}
+
+type UserProps struct {
+	Avatar avatar.Props
+	Name   string
+	Detail string // e.g. the role
+	Label  string // aria-label of the button, default "Open user menu"
+	// HideName shows only the avatar.
+	HideName bool
+}
+
+// UserMenu is the signed-in user in the navbar's actions; the children are the menu's dropdown.Items.
+templ UserMenu(p UserProps) {
+	{{ a := p.Avatar }}
+	{{ a.Size = avatar.SizeSmall }}
+	<div class="nav-item dropdown">
+		<a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label={ kit.Or(p.Label, "Open user menu") }>
+			@avatar.Avatar(a)
+			if !p.HideName {
+				<div class="d-none d-xl-block ps-2">
+					<div>{ p.Name }</div>
+					if p.Detail != "" {
+						<div class="mt-1 small text-secondary">{ p.Detail }</div>
+					}
+				</div>
+			}
+		</a>
+		<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+			{ children... }
+		</div>
+	</div>
+}
+
+// SidebarUser is the signed-in user at the bottom of a Sidebar; the children are the menu's items.
+templ SidebarUser(p UserProps) {
+	{{ a := p.Avatar }}
+	{{ a.Size = avatar.SizeSmall }}
+	<div class="navbar-footer">
+		<ul class="navbar-nav">
+			<li class="nav-item dropup">
+				<a href="#" class="nav-link" data-bs-toggle="dropdown" aria-label={ kit.Or(p.Label, "Open user menu") }>
+					@avatar.Avatar(a)
+					<div class="nav-link-title">
+						{ p.Name }
+						if p.Detail != "" {
+							<div class="small text-secondary">{ p.Detail }</div>
+						}
+					</div>
+				</a>
+				<div class="dropdown-menu">
+					{ children... }
+				</div>
+			</li>
+		</ul>
+	</div>
+}
+
+type SearchProps struct {
+	Action string // default "./"
+	Name   string // default "q"
+	Value  string
+	Label  string // aria-label, default "Search in website"
+	// Placeholder, default "Search…".
+	Placeholder string
+}
+
+// Search is the navbar's search field.
+templ Search(p SearchProps) {
+	<form action={ templ.URL(kit.Or(p.Action, "./")) } method="get" autocomplete="off" novalidate role="search">
+		@form.InputIcon(form.InputIconProps{Icon: "ti-search", Start: true}) {
+			@form.Input(form.InputProps{Name: kit.Or(p.Name, "q"), Value: p.Value, Placeholder: kit.Or(p.Placeholder, "Search…"), AriaLabel: kit.Or(p.Label, "Search in website")})
+		}
+	</form>
+}

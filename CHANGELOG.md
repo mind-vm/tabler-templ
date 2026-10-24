@@ -32,6 +32,9 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
 - `blocks/auth`: Tabler's sign-in and account pages (sign in in four variants, sign up, forgot password,
   account locked, 2-step verification, trial ended, onboarding). `blocks/signin` stays for existing apps.
   New packages `divider` and `iconlist`.
+- `blocks/layout`: Tabler's page frame with navbar, sidebar, data-driven menu, navbar actions, page header and
+  footer; the layout variants of the preview as props (data-bs-* on <html>). `blocks/errorpage`: error,
+  maintenance and loader pages. The demo runs in Tabler's frame with the preview's own menu.
 - `icon.Styles()` / `icon.CSS`: sizes webfont icons where Tabler's CSS only sizes SVG; `shell`, `signin` and
   `landing` include it. **Breaking:** `avatar.ShapeCircle` is now the round shape (`avatar-rounded`), the
   default is `ShapeDefault`.

@@ -1,0 +1,65 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/empty"
+)
+
+// layoutVariant is the frame of one of the preview's layout-* pages.
+type layoutVariant struct {
+	Header   string
+	Position layout.Position
+	Width    layout.Width
+	Mode     layout.SidebarMode
+	Sticky, Floating, Dark, Condensed, End, Transparent, FoldToggle, RTL bool
+}
+
+var layoutVariants = map[string]layoutVariant{
+	"layout-boxed":                {Header: "Boxed layout", Width: layout.Boxed},
+	"layout-condensed":            {Header: "Condensed layout", Condensed: true},
+	"layout-fluid":                {Header: "Fluid layout", Width: layout.Fluid},
+	"layout-fluid-vertical":       {Header: "Fluid vertical layout", Width: layout.Fluid, Position: layout.Vertical},
+	"layout-folded":               {Header: "Folded sidebar layout", Position: layout.Vertical, Mode: layout.Folded},
+	"layout-folded-hover":         {Header: "Folded hover layout", Position: layout.Vertical, Mode: layout.FoldedHover},
+	"layout-horizontal":           {Header: "Horizontal layout"},
+	"layout-navbar-dark":          {Header: "Navbar dark", Dark: true},
+	"layout-navbar-floating":      {Header: "Navbar floating", Condensed: true, Floating: true},
+	"layout-navbar-sticky":        {Header: "Navbar sticky", Sticky: true},
+	"layout-rtl":                  {Header: "RTL mode", RTL: true},
+	"layout-vertical":             {Header: "Vertical layout", Position: layout.Vertical, FoldToggle: true},
+	"layout-vertical-floating":    {Header: "Vertical floating layout", Position: layout.Vertical, Floating: true},
+	"layout-vertical-right":       {Header: "Right vertical layout", Position: layout.Vertical, End: true},
+	"layout-vertical-transparent": {Header: "Vertical transparent layout", Position: layout.Vertical, Transparent: true},
+}
+
+func variantProps(name string) layout.PageProps {
+	v := layoutVariants[name]
+	p := frameProps(name, "Dashboard")
+	p.Position, p.Width, p.SidebarMode, p.Sticky, p.Floating, p.RTL = v.Position, v.Width, v.Mode, v.Sticky, v.Floating, v.RTL
+	if v.Dark {
+		p.NavbarTheme = "dark"
+	}
+	if v.RTL {
+		p.Head = rtlAssets()
+	}
+	p.Sidebar = layout.Sidebar(layout.SidebarProps{Brand: sidebarBrand(v.FoldToggle), User: sidebarUser(), End: v.End, Transparent: v.Transparent,
+		Folded: v.Mode == layout.Folded, FoldedHover: v.Mode == layout.FoldedHover}, menuFor(name))
+	p.Navbar = layout.Navbar(layout.NavbarProps{Brand: navbarBrand(), Actions: navbarActions(), Condensed: v.Condensed}, menuFor(name))
+	p.Header = layout.PageHeader(layout.PageHeaderProps{Pretitle: "Overview", Title: v.Header, Actions: originalLink(name)})
+	return p
+}
+
+// layoutPage rebuilds a layout-* page: the frame matches the preview; the dashboard in it comes with
+// the dashboard page.
+templ layoutPage(name string) {
+	@layout.Page(variantProps(name)) {
+		@empty.Empty(empty.Props{Icon: "ti-layout-dashboard", Title: "Dashboard", Subtitle: "The preview shows its dashboard in this frame; it follows with the dashboard page."})
+	}
+}
+
+// rtlAssets are Tabler's right-to-left stylesheets.
+templ rtlAssets() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.rtl.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.rtl.min.css" }/>
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+}

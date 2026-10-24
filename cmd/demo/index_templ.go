@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
 
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/internal/catalog"
@@ -48,6 +49,9 @@ func index() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		p := frameProps("", "Tabler preview")
+		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Tabler preview in Go and templ",
+			Description: "Every page of the Tabler preview, rebuilt with tabler-templ. Linked pages are rebuilt (marked partial where parts are still missing); grey ones are still open, see ROADMAP.md."})
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -60,7 +64,7 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"page-header d-print-none\"><div class=\"container-xl\"><h1 class=\"page-title\">Tabler preview in Go and templ</h1><div class=\"text-secondary mt-1\">Every page of the Tabler preview, rebuilt with tabler-templ. Linked pages are rebuilt (marked partial where variants are still missing); grey ones are still open, see ROADMAP.md.</div></div></div><div class=\"page-body\"><div class=\"container-xl\"><div class=\"row row-cards\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"row row-cards\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,7 +76,7 @@ func index() templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(g)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 39, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 35, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -86,7 +90,7 @@ func index() templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d of %d", n, of))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 42, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 38, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -110,7 +114,7 @@ func index() templ.Component {
 							var templ_7745c5c3_Var5 string
 							templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 51, Col: 75}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 47, Col: 73}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 							if templ_7745c5c3_Err != nil {
@@ -128,7 +132,7 @@ func index() templ.Component {
 							var templ_7745c5c3_Var6 templ.SafeURL
 							templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/" + p.Name))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 53, Col: 51}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 49, Col: 49}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 							if templ_7745c5c3_Err != nil {
@@ -141,7 +145,7 @@ func index() templ.Component {
 							var templ_7745c5c3_Var7 string
 							templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Title)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 53, Col: 69}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 49, Col: 67}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 							if templ_7745c5c3_Err != nil {
@@ -154,7 +158,7 @@ func index() templ.Component {
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(p.Name)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 53, Col: 80}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/index.templ`, Line: 49, Col: 78}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -200,13 +204,13 @@ func index() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = document("Tabler preview").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layout.Page(p).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

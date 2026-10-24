@@ -25,33 +25,45 @@ const (
 )
 
 // pages maps a preview page name to its rebuild. Keep catalog.Pages' Status in step with it.
-var pages = map[string]templ.Component{
-	"sign-in-cover":            signInCoverPage(),
-	"sign-in-illustration":     signInIllustrationPage(),
-	"sign-in-link":             signInLinkPage(),
-	"sign-up":                  signUpPage(),
-	"forgot-password":          forgotPasswordPage(),
-	"auth-lock":                authLockPage(),
-	"2-step-verification":      twoStepPage(),
-	"2-step-verification-code": twoStepCodePage(),
-	"trial-ended":              trialEndedPage(),
-	"onboarding":               onboardingPage(),
-	"alerts":                   alertsPage(),
-	"avatars":                  avatarsPage(),
-	"badges":                   badgesPage(),
-	"buttons":                  buttonsPage(),
-	"dropdowns":                dropdownsPage(),
-	"empty":                    emptyPage(),
-	"number-input":             numberInputPage(),
-	"offcanvas":                offcanvasPage(),
-	"tabs":                     tabsPage(),
-	"toasts":                   toastsPage(),
-	"modals":                   modalsPage(),
-	"pagination":               paginationPage(),
-	"password-strength":        passwordStrengthPage(),
-	"progress":                 progressPage(),
-	"sign-in":                  signInPage(),
-	"steps":                    stepsPage(),
+// It is filled in init: the pages' menus link to the rebuilt pages, so they refer to the map.
+var pages map[string]templ.Component
+
+func init() {
+	pages = map[string]templ.Component{
+		"error-404":                error404Page(),
+		"error-500":                error500Page(),
+		"error-maintenance":        maintenancePage(),
+		"page-loader":              pageLoaderPage(),
+		"sign-in-cover":            signInCoverPage(),
+		"sign-in-illustration":     signInIllustrationPage(),
+		"sign-in-link":             signInLinkPage(),
+		"sign-up":                  signUpPage(),
+		"forgot-password":          forgotPasswordPage(),
+		"auth-lock":                authLockPage(),
+		"2-step-verification":      twoStepPage(),
+		"2-step-verification-code": twoStepCodePage(),
+		"trial-ended":              trialEndedPage(),
+		"onboarding":               onboardingPage(),
+		"alerts":                   alertsPage(),
+		"avatars":                  avatarsPage(),
+		"badges":                   badgesPage(),
+		"buttons":                  buttonsPage(),
+		"dropdowns":                dropdownsPage(),
+		"empty":                    emptyPage(),
+		"number-input":             numberInputPage(),
+		"offcanvas":                offcanvasPage(),
+		"tabs":                     tabsPage(),
+		"toasts":                   toastsPage(),
+		"modals":                   modalsPage(),
+		"pagination":               paginationPage(),
+		"password-strength":        passwordStrengthPage(),
+		"progress":                 progressPage(),
+		"sign-in":                  signInPage(),
+		"steps":                    stepsPage(),
+	}
+	for name := range layoutVariants {
+		pages[name] = layoutPage(name)
+	}
 }
 
 func handler() http.Handler {

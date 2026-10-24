@@ -1,20 +1,15 @@
 package main
 
 import (
-	"github.com/mind-vm/tabler-templ/icon"
 	"strings"
 
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/internal/catalog"
 )
-
-templ head(title string) {
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-	<title>{ title } · tabler-templ</title>
-	@assets()
-	@icon.Styles()
-}
 
 // assets are Tabler's stylesheet and the icon font.
 templ assets() {
@@ -29,60 +24,184 @@ templ scripts() {
 	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/js/tabler.min.js" }></script>
 }
 
-templ document(title string) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			@head(title)
-		</head>
-		<body>
-			<div class="page">
-				<header class="navbar navbar-expand-md d-print-none">
-					<div class="container-xl">
-						<a href="/" class="navbar-brand">tabler-templ</a>
-						<div class="navbar-nav flex-row order-md-last">
-							<a class="nav-link" href="https://github.com/mind-vm/tabler-templ">GitHub</a>
-						</div>
-					</div>
-				</header>
-				<div class="page-wrapper">
-					{ children... }
-				</div>
-			</div>
-			@scripts()
-		</body>
-	</html>
+// frameProps are the layout settings of a preview page; the layout-* pages change them.
+func frameProps(name string, title string) layout.PageProps {
+	return layout.PageProps{
+		Title:   title + " · tabler-templ",
+		Head:    assets(),
+		Scripts: scripts(),
+		Sidebar: layout.Sidebar(layout.SidebarProps{Brand: sidebarBrand(false), User: sidebarUser()}, menuFor(name)),
+		Navbar:  layout.Navbar(layout.NavbarProps{Brand: navbarBrand(), Actions: navbarActions()}, menuFor(name)),
+		Footer:  previewFooter(),
+	}
 }
 
-// preview is the frame of a rebuilt preview page: navbar, page header with the original's title and
-// description and a link to the original, page body.
+templ logoSVG() {
+	@templ.Raw(tablerLogo)
+}
+
+templ navbarBrand() {
+	@layout.Brand(layout.BrandProps{Label: "Tabler", Class: "pe-0 pe-md-3"}) {
+		@logoSVG()
+	}
+}
+
+templ sidebarBrand(foldToggle bool) {
+	if foldToggle {
+		@layout.Brand(layout.BrandProps{Label: "Tabler", After: layout.FoldToggle("", false)}) {
+			@templ.Raw(tablerMark)
+		}
+	} else {
+		@layout.Brand(layout.BrandProps{Label: "Tabler"}) {
+			@templ.Raw(tablerMark)
+		}
+	}
+}
+
+templ sidebarUser() {
+	@layout.SidebarUser(previewUser) {
+		@userItems()
+	}
+}
+
+templ userItems() {
+	@dropdown.Item(dropdown.ItemProps{Href: "/profile", Icon: "ti-user"}) {
+		Profile
+	}
+	@dropdown.Item(dropdown.ItemProps{Href: "#", Icon: "ti-chart-pie"}) {
+		Analytics
+	}
+	@dropdown.Divider()
+	@dropdown.Item(dropdown.ItemProps{Href: "/settings"}) {
+		Settings &amp; Privacy
+	}
+	@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+		Help
+	}
+	@dropdown.Item(dropdown.ItemProps{Href: "/sign-in"}) {
+		Sign out
+	}
+}
+
+var previewUser = layout.UserProps{Avatar: avatar.Props{Src: avatarURL("000m")}, Name: "Paweł Kuna", Detail: "UI Designer"}
+
+var previewNotifications = []layout.Notification{
+	{Title: "Example 1", Text: "Change deprecated html tags to text decoration classes (#29604)", Unread: true, StarHref: "#", StarLabel: "Add to favorites"},
+	{Title: "Example 2", Text: "justify-content:between ⇒ justify-content:space-between (#29734)", Starred: true, StarHref: "#", StarLabel: "Remove from favorites"},
+	{Title: "Example 3", Text: "Update change-version.js (#29736)", StarHref: "#", StarLabel: "Add to favorites"},
+	{Title: "Example 4", Text: "Regenerate package-lock.json (#29730)", Unread: true, Color: "green", StarHref: "#", StarLabel: "Add to favorites"},
+}
+
+func apps() []layout.App {
+	as := make([]layout.App, len(previewApps))
+	for i, a := range previewApps {
+		as[i] = layout.App{Name: a.Name, Icon: photo("brands/" + a.Logo + ".svg")}
+	}
+	return as
+}
+
+templ notificationActions() {
+	<div class="row">
+		<div class="col">
+			@button.Button(button.Props{Type: "button", Block: true}) {
+				Archive all
+			}
+		</div>
+		<div class="col">
+			@button.Button(button.Props{Type: "button", Block: true}) {
+				Mark all as read
+			}
+		</div>
+	</div>
+}
+
+templ navbarActions() {
+	<div class="d-none d-md-flex me-3">
+		@layout.ThemeToggle(layout.ThemeToggleProps{})
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Icon: "ti-bell", Label: "Show notifications", Dot: "red", Card: true}) {
+			@layout.Notifications(layout.NotificationsProps{Footer: notificationActions()}, previewNotifications)
+		}
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Icon: "ti-apps", Label: "Show app menu", Card: true}) {
+			@layout.Apps(layout.AppsProps{SettingsHref: "#"}, apps())
+		}
+		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Text: "EN", Label: "Select language"}) {
+			for _, l := range previewLanguages {
+				@dropdown.Item(dropdown.ItemProps{Href: "#", Attributes: templ.Attributes{"data-lang": l.Code}}) {
+					{ l.Name }
+				}
+			}
+		}
+	</div>
+	@layout.UserMenu(previewUser) {
+		@userItems()
+	}
+}
+
+templ previewFooter() {
+	@layout.Footer(layout.FooterProps{
+		Links: []layout.Link{{Text: "Documentation", Href: "https://docs.tabler.io", External: true}, {Text: "License", Href: "/license"},
+			{Text: "Source code", Href: "https://github.com/mind-vm/tabler-templ", External: true}},
+		Start: []templ.Component{copyright()},
+	})
+}
+
+templ copyright() {
+	Rebuilt with <a href="https://github.com/mind-vm/tabler-templ" class="link-secondary">tabler-templ</a> from Tabler { tablerVersion }.
+}
+
+// menuFor builds the preview's menu with the entry of the page active. Rebuilt pages link into the
+// demo, open ones to the original preview.
+func menuFor(page string) []layout.Entry {
+	var es []layout.Entry
+	for _, n := range previewMenu {
+		e := layout.Entry{Title: n.Title, Icon: n.Icon, Section: n.Section, Columns: n.Columns, End: n.End, Badge: "", Href: menuHref(n.URL)}
+		for _, c := range n.Children {
+			it, active := menuItem(c, page)
+			e.Children = append(e.Children, it)
+			e.Active = e.Active || active
+		}
+		es = append(es, e)
+	}
+	return es
+}
+
+func menuItem(n menuNode, page string) (layout.Item, bool) {
+	it := layout.Item{Title: n.Title, Icon: n.Icon, Badge: n.Badge, Color: n.Color, Href: menuHref(n.URL), Active: n.URL == page && page != "",
+		External: strings.HasPrefix(n.URL, "http")}
+	for _, c := range n.Children {
+		ch, active := menuItem(c, page)
+		it.Children = append(it.Children, ch)
+		it.Active = it.Active || active
+	}
+	return it, it.Active
+}
+
+func menuHref(name string) string {
+	if name == "" || strings.HasPrefix(name, "http") {
+		return name
+	}
+	if _, ok := pages[name]; ok {
+		return "/" + name
+	}
+	return "https://preview.tabler.io/" + name + ".html"
+}
+
+// preview is the frame of a rebuilt preview page: Tabler's navigation, a page header with the
+// original's title and description and a link to the original, the page body and the footer.
 templ preview(name string) {
 	{{ p, _ := catalog.Find(name) }}
-	@document(p.Title) {
-		<div class="page-header d-print-none">
-			<div class="container-xl">
-				<div class="row g-2 align-items-center">
-					<div class="col">
-						<h1 class="page-title">{ p.Title }</h1>
-						if p.Description != "" {
-							<div class="text-secondary mt-1">{ p.Description }</div>
-						}
-					</div>
-					<div class="col-auto ms-auto d-print-none">
-						<a href={ templ.SafeURL("https://preview.tabler.io/" + name + ".html") } target="_blank" rel="noopener" class="link-secondary">
-							Original
-							<i class="ti ti-external-link icon icon-sm icon-inline" aria-hidden="true"></i>
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="page-body">
-			<div class="container-xl">
-				{ children... }
-			</div>
-		</div>
+	{{ fp := frameProps(name, p.Title) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: p.Title, Description: p.Description, Actions: originalLink(name)}) }}
+	@layout.Page(fp) {
+		{ children... }
 	}
+}
+
+templ originalLink(name string) {
+	<a href={ templ.SafeURL("https://preview.tabler.io/" + name + ".html") } target="_blank" rel="noopener" class="link-secondary">
+		Original
+		<i class="ti ti-external-link icon icon-sm icon-inline" aria-hidden="true"></i>
+	</a>
 }
 
 // section is the card the component pages of the preview use for each example.

@@ -9,8 +9,8 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 | | Status |
 |---|---|
 | Components | 37 done, 4 partial, 22 open (of 63) |
-| Blocks | 8 done, 5 partial, 165 open (of 178) |
-| Preview pages | 24 done, 2 partial, 120 open (of 146) |
+| Blocks | 23 done, 3 partial, 152 open (of 178) |
+| Preview pages | 28 done, 17 partial, 101 open (of 146) |
 
 ## Plan
 
@@ -227,23 +227,23 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 ### navbar
 
 - [x] [navbar/Logo](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Logo.astro) — `blocks/auth`, auth.Logo
-- [ ] [navbar/Navbar](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Navbar.astro)
-- [ ] [navbar/NavbarMenu](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenu.astro)
-- [ ] [navbar/NavbarMenuItem](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenuItem.astro)
-- [ ] [navbar/NavbarSearch](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSearch.astro)
-- [ ] [navbar/NavbarSide](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSide.astro)
-- [ ] [navbar/NavbarSideApps](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideApps.astro)
-- [ ] [navbar/NavbarSideLanguage](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideLanguage.astro)
-- [ ] [navbar/NavbarSideNotifications](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideNotifications.astro)
-- [ ] [navbar/NavbarSideTheme](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideTheme.astro)
-- [ ] [navbar/NavbarSideUser](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideUser.astro)
-- [ ] [navbar/NavbarToggler](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarToggler.astro)
-- [ ] [navbar/Sidebar](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Sidebar.astro) — `sidebar`, partial, own sidebar that collapses to icons; Tabler's navbar-vertical not yet
-- [ ] [navbar/SidebarUser](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/SidebarUser.astro)
+- [x] [navbar/Navbar](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Navbar.astro) — `blocks/layout`
+- [x] [navbar/NavbarMenu](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenu.astro) — `blocks/layout`
+- [x] [navbar/NavbarMenuItem](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenuItem.astro) — `blocks/layout`
+- [x] [navbar/NavbarSearch](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSearch.astro) — `blocks/layout`
+- [x] [navbar/NavbarSide](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSide.astro) — `blocks/layout`
+- [x] [navbar/NavbarSideApps](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideApps.astro) — `blocks/layout`
+- [x] [navbar/NavbarSideLanguage](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideLanguage.astro) — `blocks/layout`, NavDropdown with dropdown items
+- [x] [navbar/NavbarSideNotifications](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideNotifications.astro) — `blocks/layout`
+- [x] [navbar/NavbarSideTheme](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideTheme.astro) — `blocks/layout`
+- [x] [navbar/NavbarSideUser](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarSideUser.astro) — `blocks/layout`
+- [x] [navbar/NavbarToggler](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarToggler.astro) — `blocks/layout`
+- [x] [navbar/Sidebar](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Sidebar.astro) — `blocks/layout`
+- [x] [navbar/SidebarUser](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/SidebarUser.astro) — `blocks/layout`
 
 ### layout
 
-- [ ] [layout/Footer](https://github.com/tabler/tabler/blob/dev/shared/components/layout/Footer.astro)
+- [x] [layout/Footer](https://github.com/tabler/tabler/blob/dev/shared/components/layout/Footer.astro) — `blocks/layout`
 - [ ] [layout/HeaderActionsAddBoard](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderActionsAddBoard.astro)
 - [ ] [layout/HeaderActionsAddJob](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderActionsAddJob.astro)
 - [ ] [layout/HeaderActionsBreadcrumb](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderActionsBreadcrumb.astro)
@@ -253,7 +253,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [layout/HeaderActionsUsers](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderActionsUsers.astro)
 - [ ] [layout/HeaderProfile](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderProfile.astro)
 - [ ] [layout/HeaderUptime](https://github.com/tabler/tabler/blob/dev/shared/components/layout/HeaderUptime.astro)
-- [ ] [layout/PageHeader](https://github.com/tabler/tabler/blob/dev/shared/components/layout/PageHeader.astro) — `blocks/shell`, partial, page header with title, subtitle and actions; no pretitle yet
+- [x] [layout/PageHeader](https://github.com/tabler/tabler/blob/dev/shared/components/layout/PageHeader.astro) — `blocks/layout`
 
 ### marketing
 
@@ -302,7 +302,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 
 Blocks of this module without a counterpart in the preview, grown from the apps that use it:
 
-- `blocks/shell`: page frame with sidebar, sticky header, breadcrumbs, page header and flash message
+- `blocks/shell`: app frame with a sidebar that folds to icons, sticky header, breadcrumbs and flash message (Tabler's own frame: blocks/layout)
 - `blocks/listpage`: list page: search, filters and pagination read from the URL
 - `blocks/create`: create page: post form with footer
 - `blocks/detail`: detail page: sections with edit dialogs that reopen after a failed save
@@ -333,29 +333,29 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 
 - [ ] [cookie-banner](https://preview.tabler.io/cookie-banner.html) Cookie banner
 - [x] [empty](https://preview.tabler.io/empty.html) Empty page
-- [ ] [error-404](https://preview.tabler.io/error-404.html) Page 404
-- [ ] [error-500](https://preview.tabler.io/error-500.html) Page 500
-- [ ] [error-maintenance](https://preview.tabler.io/error-maintenance.html) Maintenance mode
-- [ ] [page-loader](https://preview.tabler.io/page-loader.html) Page loader
+- [x] [error-404](https://preview.tabler.io/error-404.html) Page 404
+- [x] [error-500](https://preview.tabler.io/error-500.html) Page 500
+- [x] [error-maintenance](https://preview.tabler.io/error-maintenance.html) Maintenance mode
+- [x] [page-loader](https://preview.tabler.io/page-loader.html) Page loader
 
 ### Layouts
 
 - [ ] [blank](https://preview.tabler.io/blank.html) Blank page
-- [ ] [layout-boxed](https://preview.tabler.io/layout-boxed.html) Dashboard
-- [ ] [layout-condensed](https://preview.tabler.io/layout-condensed.html) Dashboard
-- [ ] [layout-fluid-vertical](https://preview.tabler.io/layout-fluid-vertical.html) Dashboard
-- [ ] [layout-fluid](https://preview.tabler.io/layout-fluid.html) Dashboard
-- [ ] [layout-folded-hover](https://preview.tabler.io/layout-folded-hover.html) Dashboard
-- [ ] [layout-folded](https://preview.tabler.io/layout-folded.html) Dashboard
-- [ ] [layout-horizontal](https://preview.tabler.io/layout-horizontal.html) Dashboard
-- [ ] [layout-navbar-dark](https://preview.tabler.io/layout-navbar-dark.html) Dashboard
-- [ ] [layout-navbar-floating](https://preview.tabler.io/layout-navbar-floating.html) Dashboard
-- [ ] [layout-navbar-sticky](https://preview.tabler.io/layout-navbar-sticky.html) Dashboard
-- [ ] [layout-rtl](https://preview.tabler.io/layout-rtl.html) RTL mode
-- [ ] [layout-vertical-floating](https://preview.tabler.io/layout-vertical-floating.html) Dashboard
-- [ ] [layout-vertical-right](https://preview.tabler.io/layout-vertical-right.html) Dashboard
-- [ ] [layout-vertical-transparent](https://preview.tabler.io/layout-vertical-transparent.html) Dashboard
-- [ ] [layout-vertical](https://preview.tabler.io/layout-vertical.html) Dashboard
+- [ ] [layout-boxed](https://preview.tabler.io/layout-boxed.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-condensed](https://preview.tabler.io/layout-condensed.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-fluid-vertical](https://preview.tabler.io/layout-fluid-vertical.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-fluid](https://preview.tabler.io/layout-fluid.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-folded-hover](https://preview.tabler.io/layout-folded-hover.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-folded](https://preview.tabler.io/layout-folded.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-horizontal](https://preview.tabler.io/layout-horizontal.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-navbar-dark](https://preview.tabler.io/layout-navbar-dark.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-navbar-floating](https://preview.tabler.io/layout-navbar-floating.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-navbar-sticky](https://preview.tabler.io/layout-navbar-sticky.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-rtl](https://preview.tabler.io/layout-rtl.html) RTL mode — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-vertical-floating](https://preview.tabler.io/layout-vertical-floating.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-vertical-right](https://preview.tabler.io/layout-vertical-right.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-vertical-transparent](https://preview.tabler.io/layout-vertical-transparent.html) Dashboard — partial, frame done; the dashboard inside follows with index
+- [ ] [layout-vertical](https://preview.tabler.io/layout-vertical.html) Dashboard — partial, frame done; the dashboard inside follows with index
 
 ### App pages
 

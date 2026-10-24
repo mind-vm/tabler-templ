@@ -1,0 +1,241 @@
+// Package layout is Tabler's page frame (the preview's default layout) as blocks: Page with a top Navbar
+// and/or a vertical Sidebar, a data-driven Menu, the navbar's actions (theme toggle, user menu,
+// dropdowns, search), PageHeader and Footer. The layout variants of the preview (vertical, horizontal,
+// condensed, fluid, boxed, sticky, floating, dark, folded sidebar, RTL) are props.
+//
+//	@layout.Page(layout.PageProps{Title: "Orders", Head: head(), Scripts: scripts(),
+//		Sidebar: layout.Sidebar(layout.SidebarProps{Brand: logo(), User: user()}, menu),
+//		Header: layout.PageHeader(layout.PageHeaderProps{Pretitle: "Sales", Title: "Orders"})}) {
+//		… content …
+//	}
+package layout
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Position is where the main menu lives when a page has both a Navbar and a Sidebar.
+type Position string
+
+const (
+	Horizontal Position = ""         // the navbar's menu row
+	Vertical   Position = "vertical" // the sidebar; the navbar's menu row is hidden
+	Combined   Position = "combined" // both: a sidebar and the navbar above the content
+)
+
+// Width of the content.
+type Width string
+
+const (
+	Default Width = ""
+	Fluid   Width = "fluid" // full width
+	Boxed   Width = "boxed" // the whole page in a centered box
+)
+
+// SidebarMode folds the sidebar to icons.
+type SidebarMode string
+
+const (
+	Expanded    SidebarMode = ""
+	Folded      SidebarMode = "folded"       // an icon rail with flyout submenus
+	FoldedHover SidebarMode = "folded-hover" // an icon rail that unfolds on hover
+)
+
+type PageProps struct {
+	Lang    string          // <html lang>, default "en"
+	Title   string          // <title>
+	Head    templ.Component // the app's stylesheets (Tabler, icons, theme)
+	Scripts templ.Component // end of <body>: Tabler's script and the app's
+	RTL     bool            // dir="rtl"; load Tabler's RTL stylesheet in Head
+	// Theme is "light" or "dark" (data-bs-theme); empty = the browser's preference via Tabler's CSS.
+	Theme     string
+	BodyClass string
+	// The navigations; either or both.
+	Sidebar templ.Component
+	Navbar  templ.Component
+	// Layout settings, rendered as Tabler's data-bs-* attributes on <html>.
+	Position    Position
+	Width       Width
+	Sticky      bool   // the navbar stays at the top
+	Floating    bool   // navbar and sidebar keep a gap from the screen edges
+	NavbarTheme string // "dark" or "primary": colors the navigation
+	SidebarMode SidebarMode
+	Header      templ.Component // usually a PageHeader
+	Footer      templ.Component // usually a Footer
+	// Full puts the children into the page body without the container (page-wrapper-full).
+	Full bool
+	// ContainerClass is added to the body's container, e.g. "my-auto" to center the content.
+	ContainerClass string
+}
+
+func htmlAttrs(p PageProps) templ.Attributes {
+	a := templ.Attributes{"lang": kit.Or(p.Lang, "en")}
+	set := func(k, v string) {
+		if v != "" {
+			a["data-bs-"+k] = v
+		}
+	}
+	if p.RTL {
+		a["dir"] = "rtl"
+	}
+	set("theme", p.Theme)
+	set("navbar-position", string(p.Position))
+	set("layout", string(p.Width))
+	set("navbar", kit.If(p.Sticky, "sticky"))
+	set("navbar-style", kit.If(p.Floating, "floating"))
+	set("navbar-theme", p.NavbarTheme)
+	set("sidebar", string(p.SidebarMode))
+	return a
+}
+
+// Page is the HTML document with the navigation(s), the page header, the content (the children) and
+// the footer.
+templ Page(p PageProps) {
+	<!DOCTYPE html>
+	<html { htmlAttrs(p)... }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body
+			if p.BodyClass != "" {
+				class={ p.BodyClass }
+			}
+		>
+			<div class="page">
+				if p.Sidebar != nil {
+					@p.Sidebar
+				}
+				if p.Navbar != nil {
+					@p.Navbar
+				}
+				<div class={ kit.Classes("page-wrapper", kit.If(p.Full, "page-wrapper-full")) }>
+					<main id="content" class="d-flex flex-column flex-fill">
+						if p.Header != nil {
+							@p.Header
+						}
+						<div class="page-body">
+							if p.Full {
+								{ children... }
+							} else {
+								<div class={ kit.Classes("container-xl", p.ContainerClass) }>
+									{ children... }
+								</div>
+							}
+						</div>
+					</main>
+					if p.Footer != nil {
+						@p.Footer
+					}
+				</div>
+			</div>
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+type PageHeaderProps struct {
+	Class       string
+	Pretitle    string // small text above the title
+	Title       string
+	Description string          // muted line below the title
+	Actions     templ.Component // buttons on the right, e.g. a button.List
+}
+
+// PageHeader is the title row above the content.
+templ PageHeader(p PageHeaderProps) {
+	<div class={ kit.Classes("page-header", p.Class, "d-print-none") }>
+		<div class="container-xl">
+			<div class="row g-2 align-items-center">
+				<div class="col">
+					if p.Pretitle != "" {
+						<div class="page-pretitle">{ p.Pretitle }</div>
+					}
+					<h1 class="page-title">{ p.Title }</h1>
+					if p.Description != "" {
+						<div class="text-secondary mt-1">{ p.Description }</div>
+					}
+					{ children... }
+				</div>
+				if p.Actions != nil {
+					<div class="col-auto ms-auto d-print-none">
+						@p.Actions
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Link is an entry of the Footer.
+type Link struct {
+	Text     string
+	Href     string
+	Icon     string // e.g. "ti-heart"
+	Color    string // icon color, e.g. "pink"
+	External bool   // opens in a new tab
+}
+
+type FooterProps struct {
+	Class string // e.g. "footer-transparent"
+	// Links on the end side, e.g. documentation and license.
+	Links []Link
+	// Start is the other side, e.g. the copyright and the version.
+	Start []templ.Component
+}
+
+templ footerLink(l Link) {
+	<a
+		href={ templ.URL(l.Href) }
+		class="link-secondary"
+		if l.External {
+			target="_blank"
+			rel="noopener"
+		}
+	>
+		if l.Icon != "" {
+			@icon.Icon(l.Icon, icon.Props{Inline: true, Color: l.Color})
+		}
+		{ l.Text }
+	</a>
+}
+
+// Footer is the page footer with two lists separated by dots.
+templ Footer(p FooterProps) {
+	<footer class={ kit.Classes("footer", kit.Or(p.Class, "footer-transparent"), "d-print-none") }>
+		<div class="container-xl">
+			<div class="row text-center align-items-center flex-row-reverse">
+				<div class="col-lg-auto ms-lg-auto">
+					if len(p.Links) > 0 {
+						<nav aria-label="Footer">
+							<ul class="list-inline list-inline-dots mb-0">
+								for _, l := range p.Links {
+									<li class="list-inline-item">
+										@footerLink(l)
+									</li>
+								}
+							</ul>
+						</nav>
+					}
+				</div>
+				<div class="col-12 col-lg-auto mt-3 mt-lg-0">
+					<ul class="list-inline list-inline-dots mb-0">
+						for _, s := range p.Start {
+							<li class="list-inline-item">
+								@s
+							</li>
+						}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</footer>
+}
