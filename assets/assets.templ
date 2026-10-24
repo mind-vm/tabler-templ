@@ -7,14 +7,14 @@ package assets
 
 import (
 	"github.com/mind-vm/tabler-templ/chart"
-	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/versions"
 )
 
 // TablerVersion is the version of @tabler/core the components follow.
-const TablerVersion = "1.7.1"
+const TablerVersion = versions.Tabler
 
 // IconsVersion is the version of @tabler/icons-webfont.
-const IconsVersion = icon.FilledVersion
+const IconsVersion = versions.Icons
 
 // CoreURL is the URL of a file in @tabler/core's dist folder, e.g. CoreURL("css/tabler.min.css").
 func CoreURL(file string) string {

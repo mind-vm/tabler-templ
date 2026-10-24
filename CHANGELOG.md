@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- New package `versions`: Tabler, its icons and the plugin libraries are pinned in one place; every
+  package's `Version` constant reads from it. `scripts/tabler-update.sh` prepares a Tabler update. It
+  updates the pins (`internal/tools/versions`), regenerates the demo data (now also the menu,
+  `internal/tools/menu`), and compares every page with Tabler's preview (`compare-all.mjs`).
+- Demo: the sortable list loads SortableJS 1.15.7 like the `sortable` package, not 1.15.6. Two illustration
+  images had the wrong size.
+
 - **Breaking (look):** `form.Field`'s `Hint` renders Tabler 1.6+'s `form-text` instead of the deprecated
   `form-hint` (4px closer to the control). A required field's label carries Tabler's hidden " (required)"
   for screen readers by default (`kit.Messages.Required`; `RequiredLabel: "-"` for none).

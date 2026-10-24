@@ -406,6 +406,36 @@ ROADMAP.md and the demo index are generated from it, and a test fails when eithe
 and classes come from Tabler's sources (`shared/ui/*.astro`, `shared/components/**`, `docs/content/ui/**`
 in [tabler/tabler](https://github.com/tabler/tabler)); nothing is invented.
 
+## Updating Tabler
+
+The module follows one Tabler release at a time. `versions/versions.go` pins it: Tabler, its commit, the
+icons and every plugin library, each at the version Tabler's lockfile resolves. All packages and the demo
+read their CDN URLs from there. Users get a new Tabler only with a new release of this module.
+
+```sh
+scripts/tabler-update.sh ~/work/tabler v1.8.0
+```
+
+The script moves a Tabler checkout to the release and works through the update:
+
+1. It lists what changed in Tabler's components, pages, data and styles (`changes.txt`), and in the upgrade
+   notes, which name renamed classes (`upgrade-notes.diff`).
+2. It updates the pinned versions (`internal/tools/versions -write`).
+3. It regenerates the demo data from Tabler's sources: charts, menu, filled icons, icon names, flags and
+   colours.
+4. It builds Tabler's preview and compares every rebuilt page with it (`scripts/screenshots/compare-all.mjs`).
+   The result, `report.tsv`, lists the pages by how much they differ.
+
+Then: fix the pages at the top of the report (`crop.mjs` shows where), add new components and pages to
+`internal/catalog`, note changed markup as "Breaking (look)" in CHANGELOG.md, and release a new minor
+version. `go run ./internal/tools/versions <tabler checkout>` alone checks that the pins match a checkout.
+
+The same comparison against the current release is the regression check for any change:
+
+```sh
+node scripts/screenshots/compare-all.mjs http://localhost:8080 http://localhost:8081  # demo, preview
+```
+
 ## License
 
 MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module. tabler-templ is not an official Tabler project.

@@ -839,7 +839,7 @@ func copyright() templ.Component {
 func menuFor(page string) []layout.Entry {
 	var es []layout.Entry
 	for _, n := range previewMenu {
-		e := layout.Entry{Title: n.Title, Icon: n.Icon, Section: n.Section, Columns: n.Columns, End: n.End, Badge: "", Href: menuHref(n.URL)}
+		e := layout.Entry{Title: n.Title, Icon: n.Icon, Section: n.Section, Columns: n.Columns, Badge: "", Href: menuHref(n.URL)}
 		for _, c := range n.Children {
 			it, active := menuItem(c, page)
 			e.Children = append(e.Children, it)

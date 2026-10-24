@@ -12,6 +12,7 @@
 package mapview
 
 import (
+	"github.com/mind-vm/tabler-templ/versions"
 	"encoding/json"
 	"strconv"
 
@@ -20,10 +21,10 @@ import (
 )
 
 // TablerVersion is the Tabler version whose map script Library loads.
-const TablerVersion = "1.7.1"
+const TablerVersion = versions.Tabler
 
 // MapLibreVersion is the MapLibre GL JS version Tabler 1.7 is built against.
-const MapLibreVersion = "6.11.2"
+const MapLibreVersion = versions.MapLibre
 
 // LibraryURL is MapLibre GL JS as a module on jsDelivr; Tabler's map script imports it on first use.
 const LibraryURL = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.mjs"

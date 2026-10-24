@@ -6,12 +6,13 @@
 package wysiwyg
 
 import (
+	"github.com/mind-vm/tabler-templ/versions"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // Version is the HugeRTE version Library loads.
-const Version = "1.0.14"
+const Version = versions.HugeRTE
 
 // LibraryURL is HugeRTE on jsDelivr; it loads its theme, skins and plugins from next to it.
 const LibraryURL = "https://cdn.jsdelivr.net/npm/hugerte@" + Version + "/hugerte.min.js"

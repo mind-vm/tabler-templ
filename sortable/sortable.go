@@ -8,10 +8,11 @@ package sortable
 import (
 	"github.com/a-h/templ"
 	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/versions"
 )
 
 // Version is the SortableJS version Library loads.
-const Version = "1.15.7"
+const Version = versions.SortableJS
 
 // LibraryURL is SortableJS on jsDelivr (with the MultiDrag and Swap plugins).
 const LibraryURL = "https://cdn.jsdelivr.net/npm/sortablejs@" + Version + "/Sortable.min.js"
