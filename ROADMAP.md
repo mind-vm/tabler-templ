@@ -8,8 +8,8 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 37 done, 4 partial, 22 open (of 63) |
-| Blocks | 23 done, 3 partial, 152 open (of 178) |
+| Components | 38 done, 3 partial, 22 open (of 63) |
+| Blocks | 43 done, 5 partial, 130 open (of 178) |
 | Preview pages | 28 done, 17 partial, 101 open (of 146) |
 
 ## Plan
@@ -55,7 +55,7 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Map](https://docs.tabler.io/ui/components/map)
 - [ ] [Mention](https://docs.tabler.io/ui/components/mention)
 - [ ] [Mockup browser](https://docs.tabler.io/ui/components/mockup-browser) (MockupBrowser)
-- [ ] [Modal](https://docs.tabler.io/ui/components/modal) — `modal`, partial, no status bar, blur or inline dialogs yet
+- [x] [Modal](https://docs.tabler.io/ui/components/modal) — `modal`
 - [x] [Nav overflow](https://docs.tabler.io/ui/components/nav-overflow) — `nav`
 - [x] [Offcanvas](https://docs.tabler.io/ui/components/offcanvas) (Offcanvas, OffcanvasHeader, OffcanvasBody) — `offcanvas`
 - [x] [Pagination](https://docs.tabler.io/ui/components/pagination) (Pagination) — `pagination`
@@ -201,28 +201,28 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 
 ### modals
 
-- [ ] [modals/AddTaskModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/AddTaskModalContent.astro)
-- [ ] [modals/ChangePasswordModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ChangePasswordModalContent.astro)
-- [ ] [modals/ConfirmDeleteModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ConfirmDeleteModalContent.astro)
-- [ ] [modals/DangerModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/DangerModalContent.astro)
-- [ ] [modals/EditProfileModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/EditProfileModalContent.astro)
-- [ ] [modals/FullWidthModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/FullWidthModalContent.astro)
-- [ ] [modals/LargeModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/LargeModalContent.astro)
-- [ ] [modals/Modal](https://github.com/tabler/tabler/blob/dev/shared/components/modals/Modal.astro)
-- [ ] [modals/ModalClose](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalClose.astro)
-- [ ] [modals/ModalFooter](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalFooter.astro)
-- [ ] [modals/ModalHeader](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalHeader.astro)
-- [ ] [modals/ModalInline](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalInline.astro)
-- [ ] [modals/NewEmailModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEmailModalContent.astro)
-- [ ] [modals/NewEventModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEventModalContent.astro)
-- [ ] [modals/NewTaskModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewTaskModalContent.astro)
-- [ ] [modals/ReportModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ReportModalContent.astro)
-- [ ] [modals/ScrollableModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ScrollableModalContent.astro)
-- [ ] [modals/SignatureModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SignatureModalContent.astro)
-- [ ] [modals/SimpleModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SimpleModalContent.astro)
-- [ ] [modals/SmallModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SmallModalContent.astro)
-- [ ] [modals/SuccessModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SuccessModalContent.astro)
-- [ ] [modals/TeamModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/TeamModalContent.astro)
+- [x] [modals/AddTaskModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/AddTaskModalContent.astro) — `modal`, modal with form components, no block of its own
+- [x] [modals/ChangePasswordModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ChangePasswordModalContent.astro) — `blocks/modals`, ChangePassword
+- [x] [modals/ConfirmDeleteModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ConfirmDeleteModalContent.astro) — `blocks/modals`, ConfirmDelete
+- [x] [modals/DangerModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/DangerModalContent.astro) — `blocks/modals`, Status
+- [x] [modals/EditProfileModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/EditProfileModalContent.astro) — `modal`, modal with form components, no block of its own
+- [x] [modals/FullWidthModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/FullWidthModalContent.astro) — `modal`
+- [x] [modals/LargeModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/LargeModalContent.astro) — `modal`
+- [x] [modals/Modal](https://github.com/tabler/tabler/blob/dev/shared/components/modals/Modal.astro) — `modal`
+- [x] [modals/ModalClose](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalClose.astro) — `modal`
+- [x] [modals/ModalFooter](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalFooter.astro) — `modal`
+- [x] [modals/ModalHeader](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalHeader.astro) — `modal`
+- [x] [modals/ModalInline](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ModalInline.astro) — `modal`, Show and Class
+- [ ] [modals/NewEmailModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEmailModalContent.astro) — `modal`, partial, the WYSIWYG editor plugin is not loaded
+- [x] [modals/NewEventModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewEventModalContent.astro) — `modal`, modal with form components; the date picker plugin is not loaded
+- [x] [modals/NewTaskModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/NewTaskModalContent.astro) — `modal`, modal with form components; date picker and select plugins are not loaded
+- [x] [modals/ReportModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ReportModalContent.astro) — `modal`, modal with form components, no block of its own
+- [x] [modals/ScrollableModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/ScrollableModalContent.astro) — `modal`
+- [ ] [modals/SignatureModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SignatureModalContent.astro) — `modal`, partial, the signature pad plugin is not loaded
+- [x] [modals/SimpleModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SimpleModalContent.astro) — `modal`
+- [x] [modals/SmallModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SmallModalContent.astro) — `blocks/modals`, Confirm
+- [x] [modals/SuccessModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/SuccessModalContent.astro) — `blocks/modals`, Status
+- [x] [modals/TeamModalContent](https://github.com/tabler/tabler/blob/dev/shared/components/modals/TeamModalContent.astro) — `modal`, modal with form components, no block of its own
 
 ### navbar
 
@@ -447,7 +447,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [ ] [lists](https://preview.tabler.io/lists.html) Lists
 - [ ] [markdown](https://preview.tabler.io/markdown.html) markdown
 - [ ] [mockup-browser](https://preview.tabler.io/mockup-browser.html) Mockup browser
-- [ ] [modals](https://preview.tabler.io/modals.html) Modals — partial, simple, large, full width and scrollable; no small modal without header, no forms, status or native dialogs
+- [ ] [modals](https://preview.tabler.io/modals.html) Modals — partial, everything but the plugins: WYSIWYG editor, date picker, select
 - [ ] [nav-overflow](https://preview.tabler.io/nav-overflow.html) Nav overflow
 - [ ] [navigation](https://preview.tabler.io/navigation.html) Navigation
 - [x] [number-input](https://preview.tabler.io/number-input.html) Number input

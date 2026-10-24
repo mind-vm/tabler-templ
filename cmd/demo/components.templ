@@ -5,7 +5,6 @@ import (
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/dropdown"
-	"github.com/mind-vm/tabler-templ/modal"
 	"github.com/mind-vm/tabler-templ/pagination"
 )
 
@@ -297,53 +296,3 @@ templ paginationPage() {
 	}
 }
 
-// Inline modals: the preview shows its dialogs open within the page instead of over it.
-const inlineModal = "modal-blur position-relative rounded d-block bg-surface-backdrop py-6 w-auto h-auto z-0 show"
-
-const lorem = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci animi beatae delectus deleniti dolorem eveniet facere fuga iste nemo nesciunt nihil odio perspiciatis, quia quis reprehenderit sit tempora totam unde."
-
-templ modalFooter() {
-	@button.Button(button.Props{Type: "button", Class: "me-auto", Attributes: templ.Attributes{"data-bs-dismiss": "modal"}}) {
-		Close
-	}
-	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Attributes: templ.Attributes{"data-bs-dismiss": "modal"}}) {
-		Save changes
-	}
-}
-
-type modalExample struct {
-	Heading, ID, Title string
-	Size               modal.Size
-	DialogClass        string
-	Scrollable         bool
-	Paragraphs         int
-}
-
-var modalExamples = []modalExample{
-	{"Simple modal", "modal-simple", "Modal title", modal.SizeDefault, "", false, 1},
-	{"Large modal", "modal-large", "Large modal", modal.SizeLarge, "", false, 1},
-	{"Full width modal", "modal-full-width", "Full width modal", modal.SizeDefault, "modal-full-width", false, 1},
-	{"Scrollable modal", "modal-scrollable", "Scrollable modal", modal.SizeDefault, "", true, 12},
-}
-
-templ modalsPage() {
-	@preview("modals") {
-		<div class="card">
-			<div class="card-body">
-				<div class="space-y-6">
-					for _, m := range modalExamples {
-						<div>
-							<h2>{ m.Heading }</h2>
-							@modal.Modal(modal.Props{ID: m.ID, Title: m.Title, Size: m.Size, DialogClass: m.DialogClass, Scrollable: m.Scrollable,
-								Centered: true, Fade: true, Class: inlineModal, Footer: modalFooter(), Attributes: templ.Attributes{"role": "dialog"}}) {
-								for range m.Paragraphs {
-									<p>{ lorem }</p>
-								}
-							}
-						</div>
-					}
-				</div>
-			</div>
-		</div>
-	}
-}

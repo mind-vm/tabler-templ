@@ -28,7 +28,7 @@ var Components = []Component{
 	{Name: "Map", Doc: "ui/components/map", Astro: []string{}},
 	{Name: "Mention", Doc: "ui/components/mention", Astro: []string{}},
 	{Name: "Mockup browser", Doc: "ui/components/mockup-browser", Astro: []string{"MockupBrowser"}},
-	{Name: "Modal", Doc: "ui/components/modal", Status: Partial, Package: "modal", Note: "no status bar, blur or inline dialogs yet"},
+	{Name: "Modal", Doc: "ui/components/modal", Status: Done, Package: "modal"},
 	{Name: "Nav overflow", Doc: "ui/components/nav-overflow", Status: Done, Package: "nav"},
 	{Name: "Offcanvas", Doc: "ui/components/offcanvas", Astro: []string{"Offcanvas", "OffcanvasHeader", "OffcanvasBody"}, Status: Done, Package: "offcanvas"},
 	{Name: "Pagination", Doc: "ui/components/pagination", Astro: []string{"Pagination"}, Status: Done, Package: "pagination"},
