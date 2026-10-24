@@ -18,13 +18,14 @@
 package shell
 
 import (
-	"github.com/mind-vm/tabler-templ/breadcrumb"
 	"github.com/mind-vm/tabler-templ/alert"
 	"github.com/mind-vm/tabler-templ/blocks/create"
 	"github.com/mind-vm/tabler-templ/blocks/detail"
 	"github.com/mind-vm/tabler-templ/blocks/history"
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/blocks/stats"
+	"github.com/mind-vm/tabler-templ/breadcrumb"
+	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/sidebar"
 )
@@ -171,9 +172,10 @@ templ PageHeader(p Props) {
 	</div>
 }
 
-// Styles is the CSS of the shell, of the sidebar and of the other blocks (list page, detail, create, history, stats).
+// Styles is the CSS of the shell, of webfont icons (icon.Styles), of the sidebar and of the other blocks (list page, detail, create, history, stats).
 // Page includes it; render it yourself only when you build your own frame.
 templ Styles() {
+	@icon.Styles()
 	@sidebar.Styles()
 	@listpage.Styles()
 	@detail.Styles()

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mind-vm/tabler-templ/icon"
 	"strings"
 
 	"github.com/mind-vm/tabler-templ/card"
@@ -19,6 +20,7 @@ templ assets() {
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-flags.min.css" }/>
 	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + iconsVersion + "/dist/tabler-icons.min.css" }/>
+	@icon.Styles()
 	// Rules of the preview's own demo.scss (not part of Tabler's CSS), e.g. menus shown open in the page.
 	<style>.dropdown-menu-demo{display:inline-block;width:100%;position:relative;top:0;margin-bottom:1rem!important}</style>
 }

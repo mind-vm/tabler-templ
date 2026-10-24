@@ -1,0 +1,69 @@
+// Package timeline renders Tabler's timeline: events in order, each with an icon (or avatar) marker and
+// a card with time, title and text; the simple timeline without markers.
+package timeline
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Simple     bool // no markers (timeline-simple)
+}
+
+// Timeline holds Events.
+templ Timeline(props ...Props) {
+	{{ p := kit.First(props) }}
+	<ul class={ kit.Classes("timeline", kit.If(p.Simple, "timeline-simple"), p.Class) } { p.Attributes... }>
+		{ children... }
+	</ul>
+}
+
+type EventProps struct {
+	Class     string
+	Icon      string          // marker icon, e.g. "ti-check"
+	IconColor string          // tints the marker, e.g. "green" → bg-green-lt
+	Marker    templ.Component // replaces the icon, e.g. an avatar
+	Time      string          // e.g. "2 hrs ago", at the top right of the card
+	Title     string
+	// TitleLevel 3 renders the title as <h3 class="h4"> for a timeline under an h2; default <h4>.
+	TitleLevel int
+	// NoBody puts the children into the event's card directly, without the card body (e.g. a list).
+	NoBody bool
+}
+
+// Event is one entry; the children are its text below the title.
+templ Event(p EventProps) {
+	<li class={ kit.Classes("timeline-event", p.Class) }>
+		if p.Marker != nil || p.Icon != "" {
+			<div class={ kit.Classes("timeline-event-icon", kit.If(p.IconColor != "", "bg-"+p.IconColor+"-lt")) }>
+				if p.Marker != nil {
+					@p.Marker
+				} else {
+					@icon.Icon(p.Icon)
+				}
+			</div>
+		}
+		<div class="card timeline-event-card">
+			if p.NoBody {
+				{ children... }
+			} else {
+				<div class="card-body">
+					if p.Time != "" {
+						<div class="text-secondary float-end">{ p.Time }</div>
+					}
+					if p.Title != "" {
+						if p.TitleLevel == 3 {
+							<h3 class="h4">{ p.Title }</h3>
+						} else {
+							<h4>{ p.Title }</h4>
+						}
+					}
+					{ children... }
+				</div>
+			}
+		</div>
+	</li>
+}

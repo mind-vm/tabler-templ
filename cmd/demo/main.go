@@ -27,15 +27,19 @@ const (
 // pages maps a preview page name to its rebuild. Keep catalog.Pages' Status in step with it.
 var pages = map[string]templ.Component{
 	"alerts":     alertsPage(),
+	"avatars":    avatarsPage(),
 	"badges":     badgesPage(),
 	"buttons":    buttonsPage(),
 	"dropdowns":  dropdownsPage(),
+	"empty":      emptyPage(),
 	"offcanvas":  offcanvasPage(),
 	"tabs":       tabsPage(),
 	"toasts":     toastsPage(),
 	"modals":     modalsPage(),
 	"pagination": paginationPage(),
+	"progress":   progressPage(),
 	"sign-in":    signInPage(),
+	"steps":      stepsPage(),
 }
 
 func handler() http.Handler {

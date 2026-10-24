@@ -91,7 +91,8 @@ templ Customer(c Customer) {
 }
 ```
 
-The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont. The kit
+The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
+(the blocks' pages include it). The kit
 does not ship or link them: serve them yourself (embedded in your binary or from a CDN, as you prefer).
 
 ## Components
@@ -115,8 +116,17 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `popover` | `Attrs(Props)`: title, content, placement, trigger, container, HTML |
 | `avatar` | `Avatar` (photo, initials, icon, link, sizes xxs–2xl, shapes, color, status, brand, cover), `List` (stacked, sizes), `Upload` |
 | `flag` | `Flag("de")` with sizes (needs Tabler's `tabler-flags.css`) |
+| `listgroup` | `List` (sizes, flush, hoverable, selectable, transparent, horizontal, numbered, in a card), `Item` (div, link, button, label or li; media, title, description, meta and actions slots; active, disabled, colors), `Header`, `Nested` with `CollapseToggle` and `ToggleIcon`, `SelectCheck` |
+| `progress` | `Progress` (value, color, sizes, shown value, indeterminate, striped, animated), `Multi`, `Stacked`, `Background`, `Description`, `Steps` |
+| `steps` | `Steps(Props, []Step)`: titles, numbers (counter), descriptions (vertical), colors, tooltips, or dots with read-out labels |
+| `status` | `Status` (color, dot, animated, lite), `Dot`, `Indicator` |
+| `timeline` | `Timeline` (simple), `Event` (icon or avatar marker, color, time, title) |
+| `datagrid` | `Grid` (horizontal, columns, item and title width, gap, as `<dl>`), `Item` |
+| `empty` | `Empty` (icon, illustration or big header text, title, subtitle, action) |
+| `ribbon` | `Ribbon` (top, bottom, start, end, bookmark, color, text or icon) |
+| `tracking` | `Tracking(Props, []Block)`: colored blocks with tooltips, squares |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
-| `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source |
+| `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
 Everything else in Tabler is listed in [ROADMAP.md](ROADMAP.md).

@@ -23,10 +23,12 @@ const (
 
 type Shape string
 
+// Shape of an avatar; Tabler's default is a square with slightly rounded corners. The preview also uses
+// the utilities "rounded-circle" and "rounded-0" through Class.
 const (
-	ShapeCircle  Shape = ""
-	ShapeRounded Shape = "rounded" // rounded corners
-	ShapeSquare  Shape = "square"  // square corners
+	ShapeDefault Shape = ""
+	ShapeCircle  Shape = "rounded" // fully rounded (avatar-rounded)
+	ShapeSquare  Shape = "square"  // the theme's border radius (avatar-square)
 )
 
 type Props struct {
@@ -54,7 +56,7 @@ func Classes(p Props) string {
 		s = "avatar-" + string(p.Size)
 	}
 	sh := ""
-	if p.Shape != ShapeCircle {
+	if p.Shape != ShapeDefault {
 		sh = "avatar-" + string(p.Shape)
 	}
 	return kit.Classes("avatar", s, p.Class, sh, kit.If(p.Color != "", "bg-"+p.Color+"-lt"), kit.If(p.Cover, "avatar-cover"))

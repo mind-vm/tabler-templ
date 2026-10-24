@@ -36,7 +36,7 @@ func TestDropdown(t *testing.T) {
 func TestAvatarAndFlag(t *testing.T) {
 	ctx := context.Background()
 	assert.Equal(t, `<span class="avatar avatar-xs avatar-rounded bg-green-lt">AB</span>`,
-		render(t, ctx, avatar.Avatar(avatar.Props{Initials: "AB", Size: avatar.SizeXS, Shape: avatar.ShapeRounded, Color: "green"})))
+		render(t, ctx, avatar.Avatar(avatar.Props{Initials: "AB", Size: avatar.SizeXS, Shape: avatar.ShapeCircle, Color: "green"})))
 	assert.Equal(t, `<span class="avatar" style="background-image: url(/a.jpg);"><span class="badge bg-danger" role="img" aria-label="Busy"></span> </span>`,
 		render(t, ctx, avatar.Avatar(avatar.Props{Src: "/a.jpg", Status: "danger", StatusLabel: "Busy"})))
 	assert.Equal(t, `<span class="avatar"><i class="ti ti-user icon" aria-hidden="true"></i></span>`, render(t, ctx, avatar.Avatar()))

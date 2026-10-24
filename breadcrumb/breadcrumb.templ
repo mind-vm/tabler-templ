@@ -24,6 +24,20 @@ type Crumb struct {
 	// Icon shows an icon; with IconOnly the text becomes its aria-label (e.g. a home icon).
 	Icon     string
 	IconOnly bool
+	// Active and Disabled mark the crumbs explicitly, e.g. for breadcrumbs used as the steps of a
+	// wizard. As soon as one crumb is Active, the last crumb is no longer current by default and every
+	// crumb with Href stays a link.
+	Active   bool
+	Disabled bool
+}
+
+func explicit(cs []Crumb) bool {
+	for _, c := range cs {
+		if c.Active {
+			return true
+		}
+	}
+	return false
 }
 
 type Props struct {
@@ -47,7 +61,22 @@ templ Breadcrumb(p Props, crumbs []Crumb) {
 	<nav aria-label={ kit.Or(p.Label, kit.T(ctx).Breadcrumbs) } { p.Attributes... }>
 		<ol class={ kit.Classes("breadcrumb", p.Class, kit.If(p.Separator != SeparatorSlash, "breadcrumb-"+string(p.Separator)), kit.If(p.Muted, "breadcrumb-muted")) }>
 			for i, c := range crumbs {
-				if i == len(crumbs)-1 {
+				if explicit(crumbs) {
+					<li
+						class={ kit.Classes("breadcrumb-item", kit.If(c.Active, "active"), kit.If(c.Disabled, "disabled")) }
+						if c.Active {
+							aria-current="step"
+						}
+					>
+						if c.Href != "" {
+							<a href={ templ.URL(c.Href) }>
+								@crumbInner(c)
+							</a>
+						} else {
+							@crumbInner(c)
+						}
+					</li>
+				} else if i == len(crumbs)-1 {
 					<li class="breadcrumb-item active" aria-current="page">
 						@crumbInner(c)
 					</li>

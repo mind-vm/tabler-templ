@@ -48,6 +48,7 @@ templ Page(p Props) {
 					{ heading }
 				}
 			</title>
+			@icon.Styles()
 			@templ.Raw("<style>" + css + "</style>")
 			if p.Head != nil {
 				@p.Head

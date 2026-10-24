@@ -1,0 +1,57 @@
+// Package empty renders Tabler's empty state: an icon, an illustration or a big text (e.g. "404"),
+// a title, a subtitle and an action.
+package empty
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Icon       string          // e.g. "ti-search"
+	Image      templ.Component // an illustration, e.g. an <img> or inline SVG (empty-img)
+	Header     string          // big text instead of an icon, e.g. "404" (empty-header)
+	Title      string
+	Subtitle   string
+	// TitleLevel renders the title as h1 or h2 (e.g. on an error page); default a <p>.
+	TitleLevel int
+	// Action is shown below, e.g. a button back to the start page (empty-action).
+	Action templ.Component
+}
+
+templ Empty(p Props) {
+	<div class={ kit.Classes("empty", p.Class) } { p.Attributes... }>
+		if p.Image != nil {
+			<div class="empty-img">
+				@p.Image
+			</div>
+		} else if p.Header != "" {
+			<div class="empty-header">{ p.Header }</div>
+		} else if p.Icon != "" {
+			<div class="empty-icon">
+				@icon.Icon(p.Icon)
+			</div>
+		}
+		if p.Title != "" {
+			switch p.TitleLevel {
+				case 1:
+					<h1 class="empty-title">{ p.Title }</h1>
+				case 2:
+					<h2 class="empty-title">{ p.Title }</h2>
+				default:
+					<p class="empty-title">{ p.Title }</p>
+			}
+		}
+		if p.Subtitle != "" {
+			<p class="empty-subtitle text-secondary">{ p.Subtitle }</p>
+		}
+		{ children... }
+		if p.Action != nil {
+			<div class="empty-action">
+				@p.Action
+			</div>
+		}
+	</div>
+}

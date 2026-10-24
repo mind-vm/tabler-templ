@@ -1,0 +1,99 @@
+// Package steps renders Tabler steps: the stages of a process with the current one highlighted, with
+// titles, numbers (counter), descriptions (vertical) or only dots with read-out labels.
+package steps
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/tooltip"
+)
+
+type Step struct {
+	Title       string // without titles the steps are dots, read out as "Step n"
+	Description string // second line, for vertical steps
+	Href        string // links the step, e.g. back to a finished stage
+	Tooltip     string
+}
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Active     int    // the current step, 1-based
+	Color      string // steps-{color}
+	Counter    bool   // numbers in the dots (steps-counter)
+	Vertical   bool
+	Label      string // aria-label of an untitled list, default "Progress"
+}
+
+func classes(p Props) string {
+	return kit.Classes("steps", kit.If(p.Color != "", "steps-"+p.Color), kit.If(p.Counter, "steps-counter"), kit.If(p.Vertical, "steps-vertical"), p.Class)
+}
+
+func titled(steps []Step) bool {
+	for _, s := range steps {
+		if s.Title != "" {
+			return true
+		}
+	}
+	return false
+}
+
+func item(p Props, i int, s Step) templ.Attributes {
+	a := templ.Attributes{"class": kit.Classes("step-item", kit.If(i+1 == p.Active, "active"))}
+	if s.Tooltip != "" {
+		a = kit.Attrs(a, tooltip.Attrs(s.Tooltip, tooltip.Top))
+	}
+	return a
+}
+
+func hidden(p Props, i int) string {
+	l := "Step " + strconv.Itoa(i+1)
+	switch {
+	case i+1 == p.Active:
+		l += " (current)"
+	case i+1 < p.Active:
+		l += " (completed)"
+	}
+	return l
+}
+
+templ Steps(p Props, steps []Step) {
+	if titled(steps) {
+		<ul class={ classes(p) } { p.Attributes... }>
+			for i, s := range steps {
+				<li { item(p, i, s)... }>
+					if s.Description != "" {
+						<div class="h4 m-0">{ s.Title }</div>
+						<div class="text-secondary">{ s.Description }</div>
+					} else if s.Href != "" {
+						<a href={ templ.URL(s.Href) }>{ s.Title }</a>
+					} else {
+						{ s.Title }
+					}
+				</li>
+			}
+		</ul>
+	} else {
+		<ol class={ classes(p) } aria-label={ kit.Or(p.Label, "Progress") } { p.Attributes... }>
+			for i, s := range steps {
+				<li { item(p, i, s)... }>
+					if i+1 > p.Active {
+						<span>
+							<span class="visually-hidden">{ hidden(p, i) }</span>
+						</span>
+					} else {
+						<a
+							href={ templ.URL(kit.Or(s.Href, "#")) }
+							if i+1 == p.Active {
+								aria-current="step"
+							}
+						>
+							<span class="visually-hidden">{ hidden(p, i) }</span>
+						</a>
+					}
+				</li>
+			}
+		</ol>
+	}
+}
