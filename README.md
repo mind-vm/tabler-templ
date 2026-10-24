@@ -106,6 +106,15 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `pagination` | `Pagination` with first/last/neighbour pages, arrows or text labels, first/last links, named previous/next pages; `Numbers(page, pages)` |
 | `alert` | `Alert` (variant with its default icon, heading and description, important, minor, dismissible), `Action`, `Link`, `List` |
 | `badge` | `Badge` (color, light, outline, sizes, pill, icons, icon-only, dot, notification, blink), `List` |
+| `dropdown` | `Dropdown` (direction), `Toggle` (any `button.Props`), `ToggleAttributes`, `Menu` (end, arrow, dark, card, scrollable), `Item` (link or button, icon, active, disabled), `Text`, `Check` (checkbox, radio, switch), `Header`, `Divider`, `Columns`/`Column`, `Submenu` |
+| `nav` | `Nav` (tabs, pills, underline, bordered, vertical, fill, justified, sizes, in a card header, overflow into a "More" menu), `Item` (link or tab for a `Pane`, icon, active, disabled), `Dropdown`, `Content`, `Pane`; `Segmented`/`Segment` (segmented control as tabs or radio buttons) |
+| `breadcrumb` | `Breadcrumb` (separators, muted, icon crumbs) |
+| `offcanvas` | `Offcanvas` (placement, responsive, floating, narrow, title/header, footer, scroll, backdrop), `Trigger(id)`, `Dismiss()` |
+| `toast` | `Toast` (header with avatar, title and time, colors, autohide, urgent), `Container` (screen position), `Trigger(id)`, `Dismiss()` |
+| `tooltip` | `Attrs(title, placement)`, `HTML(…)`: attributes for any element |
+| `popover` | `Attrs(Props)`: title, content, placement, trigger, container, HTML |
+| `avatar` | `Avatar` (photo, initials, icon, link, sizes xxs–2xl, shapes, color, status, brand, cover), `List` (stacked, sizes), `Upload` |
+| `flag` | `Flag("de")` with sizes (needs Tabler's `tabler-flags.css`) |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
@@ -128,6 +137,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
 | `blocks/landing` | `Page` (public start page without sidebar: top bar with brand, anchor links and actions, footer slot), `Hero` (title, lead, actions, optional visual), `Section` (full-width band with heading, `Muted` to set it apart), `Features` (icon, title, text in a grid), `Steps` (numbered), `CallToAction`, `Footer` (text and links); no script |
+| `blocks/tabscard` | `Card(Props, []Tab)`: the tabbed card of the preview (tabs in the header, one panel each; icons, end tab, disabled, fill, reverse, fade, a dropdown tab) |
 | `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |
 
 ```go

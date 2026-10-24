@@ -1,0 +1,211 @@
+// Package nav renders Tabler navs: tabs, pills, underline and bordered navs, vertical navs, navs in a
+// card header, the overflow nav that moves items into a "More" menu, tab panels and the segmented control.
+//
+//	@nav.Nav(nav.Props{Style: nav.StyleTabs, CardHeader: true}) {
+//		@nav.Item(nav.ItemProps{Target: "tab-home", Active: true}) { Home }
+//		@nav.Item(nav.ItemProps{Target: "tab-profile"}) { Profile }
+//	}
+//	@nav.Content() {
+//		@nav.Pane(nav.PaneProps{ID: "tab-home", Active: true}) { … }
+//		@nav.Pane(nav.PaneProps{ID: "tab-profile"}) { … }
+//	}
+package nav
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Style string
+
+const (
+	StylePlain     Style = ""
+	StyleTabs      Style = "tabs"
+	StylePills     Style = "pills"
+	StyleUnderline Style = "underline"
+	StyleBordered  Style = "bordered"
+)
+
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeSmall   Size = "sm"
+	SizeLarge   Size = "lg"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Style      Style
+	Vertical   bool // nav-vertical
+	Fill       bool // items share the width (nav-fill)
+	Justified  bool // items get equal widths (nav-justified)
+	Size       Size
+	// CardHeader fits tabs or pills into a card header (card-header-tabs, card-header-pills).
+	CardHeader bool
+	// Bottom puts tabs below their content (nav-tabs-bottom).
+	Bottom bool
+	// Overflow keeps the nav on one line and moves items that do not fit into a "More" menu.
+	Overflow bool
+	// Tablist marks a nav whose items switch Panes (role="tablist").
+	Tablist bool
+	Label   string // aria-label of the nav
+}
+
+// Classes returns the class string of a nav.
+func Classes(p Props) string {
+	st := ""
+	if p.Style != StylePlain {
+		st = "nav-" + string(p.Style)
+	}
+	ch := ""
+	if p.CardHeader && (p.Style == StyleTabs || p.Style == StylePills) {
+		ch = "card-header-" + string(p.Style)
+	}
+	return kit.Classes("nav", st, ch, kit.If(p.Bottom && p.Style == StyleTabs, "nav-tabs-bottom"), kit.If(p.Vertical, "nav-vertical"),
+		kit.If(p.Fill, "nav-fill"), kit.If(p.Justified, "nav-justified"), kit.If(p.Size != SizeDefault, "nav-"+string(p.Size)), p.Class)
+}
+
+templ list(p Props) {
+	<ul
+		class={ Classes(p) }
+		if p.Tablist {
+			role="tablist"
+		}
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</ul>
+}
+
+// Nav holds Items (and Dropdowns).
+templ Nav(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Overflow {
+		<div class="nav-overflow" data-bs-toggle="nav-overflow">
+			@list(p) {
+				{ children... }
+			}
+		</div>
+	} else {
+		@list(p) {
+			{ children... }
+		}
+	}
+}
+
+type ItemProps struct {
+	Class      string // on the <li>, e.g. "ms-auto" to push an item to the end
+	Attributes templ.Attributes
+	Href       string
+	// Target is the id of a Pane: the item becomes a tab that shows it (data-bs-toggle="tab").
+	Target   string
+	Icon     string
+	Label    string // aria-label and title, for icon-only items
+	Active   bool
+	Disabled bool
+	// Keep never moves the item into the overflow menu (nav-overflow-keep).
+	Keep bool
+}
+
+func linkAttrs(p ItemProps) templ.Attributes {
+	a := templ.Attributes{}
+	if p.Target != "" {
+		a["id"] = p.Target + "-tab"
+		a["data-bs-toggle"] = "tab"
+		a["data-bs-target"] = "#" + p.Target
+		a["role"] = "tab"
+		a["aria-controls"] = p.Target
+		if p.Active {
+			a["aria-selected"] = "true"
+		} else {
+			a["aria-selected"] = "false"
+		}
+	} else if p.Active {
+		a["aria-current"] = "page"
+	}
+	if p.Disabled {
+		a["aria-disabled"] = "true"
+		a["tabindex"] = "-1"
+	}
+	if p.Label != "" {
+		a["aria-label"] = p.Label
+		a["title"] = p.Label
+	}
+	return kit.Attrs(a, p.Attributes)
+}
+
+func href(p ItemProps) string {
+	if p.Href != "" {
+		return p.Href
+	}
+	if p.Target != "" {
+		return "#" + p.Target
+	}
+	return "#"
+}
+
+// Item is a link of the nav; with Target it switches tab panels.
+templ Item(p ItemProps) {
+	<li
+		class={ kit.Classes("nav-item", kit.If(p.Keep, "nav-overflow-keep"), p.Class) }
+		if p.Target != "" {
+			role="presentation"
+		}
+	>
+		<a href={ templ.URL(href(p)) } class={ kit.Classes("nav-link", kit.If(p.Active, "active"), kit.If(p.Disabled, "disabled")) } { linkAttrs(p)... }>
+			if p.Icon != "" {
+				@icon.Icon(p.Icon, icon.Props{Class: kit.If(p.Label == "", "me-2")})
+			}
+			{ children... }
+		</a>
+	</li>
+}
+
+type DropdownProps struct {
+	Class  string
+	Label  string
+	Active bool
+}
+
+// Dropdown is an item that opens a menu; the children are dropdown.Item entries.
+templ Dropdown(p DropdownProps) {
+	<li class={ kit.Classes("nav-item dropdown", p.Class) }>
+		<a href="#" class={ kit.Classes("nav-link dropdown-toggle", kit.If(p.Active, "active")) } data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{ p.Label }</a>
+		<div class="dropdown-menu">
+			{ children... }
+		</div>
+	</li>
+}
+
+// Content holds the Panes of a tabbed nav.
+templ Content(props ...Props) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("tab-content", p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+type PaneProps struct {
+	Class      string
+	Attributes templ.Attributes
+	ID         string // the Target of its Item
+	Active     bool
+	Fade       bool // fade in when shown
+}
+
+templ Pane(p PaneProps) {
+	<div
+		class={ kit.Classes("tab-pane", kit.If(p.Fade, "fade"), kit.If(p.Active, "active show"), p.Class) }
+		id={ p.ID }
+		role="tabpanel"
+		aria-labelledby={ p.ID + "-tab" }
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}

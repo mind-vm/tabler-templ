@@ -18,6 +18,7 @@
 package shell
 
 import (
+	"github.com/mind-vm/tabler-templ/breadcrumb"
 	"github.com/mind-vm/tabler-templ/alert"
 	"github.com/mind-vm/tabler-templ/blocks/create"
 	"github.com/mind-vm/tabler-templ/blocks/detail"
@@ -28,11 +29,9 @@ import (
 	"github.com/mind-vm/tabler-templ/sidebar"
 )
 
-// Crumb is one step of the breadcrumbs; the last one is the current page, a crumb without Href is text.
-type Crumb struct {
-	Text string
-	Href string
-}
+// Crumb is one step of the breadcrumbs (package breadcrumb); the last one is the current page, a crumb
+// without Href is text.
+type Crumb = breadcrumb.Crumb
 
 // Flash is a message after an action, shown above the content and dismissible.
 type Flash struct {
@@ -141,19 +140,7 @@ templ Header(p Props) {
 
 // Breadcrumbs renders Tabler's .breadcrumb; on small screens only the current page is left.
 templ Breadcrumbs(cs []Crumb) {
-	<nav class="kit-shell-breadcrumbs" aria-label={ kit.T(ctx).Breadcrumbs }>
-		<ol class="breadcrumb">
-			for i, c := range cs {
-				if i == len(cs)-1 {
-					<li class="breadcrumb-item active" aria-current="page">{ c.Text }</li>
-				} else if c.Href != "" {
-					<li class="breadcrumb-item"><a href={ templ.URL(c.Href) }>{ c.Text }</a></li>
-				} else {
-					<li class="breadcrumb-item">{ c.Text }</li>
-				}
-			}
-		</ol>
-	</nav>
+	@breadcrumb.Breadcrumb(breadcrumb.Props{Attributes: templ.Attributes{"class": "kit-shell-breadcrumbs"}}, cs)
 }
 
 // PageHeader is Tabler's .page-header: heading with extra, subtitle and actions.

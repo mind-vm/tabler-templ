@@ -4,6 +4,7 @@ import (
 	"github.com/mind-vm/tabler-templ/alert"
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/modal"
 	"github.com/mind-vm/tabler-templ/pagination"
 )
@@ -189,6 +190,22 @@ templ badgesPage() {
 						}
 						@button.Button(button.Props{Type: "button", Icon: "ti-bell", IconOnly: true, Action: true, Attributes: templ.Attributes{"aria-label": "Notifications"}}) {
 							@badge.Badge(badge.Props{Color: "red", Dot: true, Notification: true})
+						}
+					}
+				}
+			</div>
+			<div class="col-md-6 col-lg-4">
+				@section("In a dropdown", "A badge inside a dropdown item.") {
+					@dropdown.Menu(dropdown.MenuProps{Class: demoMenu, Arrow: true}) {
+						@dropdown.Item() {
+							Action
+							@badge.Badge(badge.Props{Color: "primary", Class: "ms-auto"}) {
+								12
+							}
+						}
+						@dropdown.Item() {
+							Another action
+							@badge.Badge(badge.Props{Class: "bg-green ms-auto"})
 						}
 					}
 				}

@@ -37,5 +37,5 @@ func TestServe(t *testing.T) {
 		w := get(t, "/"+name)
 		assert.Equal(t, http.StatusOK, w.Code, name)
 	}
-	assert.Equal(t, http.StatusNotFound, get(t, "/dropdowns").Code)
+	assert.Equal(t, http.StatusNotFound, get(t, "/no-such-page").Code)
 }

@@ -61,7 +61,7 @@ var Blocks = []Block{
 	{Source: "cards/Subscribe"},
 	{Source: "cards/SuccessMessage"},
 	{Source: "cards/SystemStatus"},
-	{Source: "cards/TabsCard"},
+	{Source: "cards/TabsCard", Status: Done, Package: "blocks/tabscard"},
 	{Source: "cards/Tasks"},
 	{Source: "cards/TasksDue"},
 	{Source: "cards/TeamLeaderboard"},

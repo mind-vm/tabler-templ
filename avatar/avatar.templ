@@ -1,0 +1,178 @@
+// Package avatar renders Tabler avatars: a photo, initials or an icon in a circle or square, with sizes,
+// colors, a status badge and a brand mark; avatar lists (stacked or not) and the upload placeholder.
+package avatar
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Size is one of Tabler's avatar sizes; the zero value is the default (md).
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeXXS     Size = "xxs"
+	SizeXS      Size = "xs"
+	SizeSmall   Size = "sm"
+	SizeMedium  Size = "md"
+	SizeLarge   Size = "lg"
+	SizeXL      Size = "xl"
+	Size2XL     Size = "2xl"
+)
+
+type Shape string
+
+const (
+	ShapeCircle  Shape = ""
+	ShapeRounded Shape = "rounded" // rounded corners
+	ShapeSquare  Shape = "square"  // square corners
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Src        string // photo URL; without it the avatar shows Initials, Icon or a user icon
+	Initials   string
+	Icon       string // e.g. "ti-user"
+	Href       string // renders <a>
+	Size       Size
+	Shape      Shape
+	Color      string // light background with colored text, e.g. "green" → bg-green-lt
+	// Status is the color of the status dot, e.g. "success"; StatusText puts a count in it.
+	Status      string
+	StatusText  string
+	StatusLabel string // accessible name of the status, e.g. "Online"
+	Brand       string // URL of a small brand mark at the corner (avatar-brand)
+	Cover       bool   // ring for an avatar overlapping a cover image (avatar-cover)
+}
+
+// Classes returns the class string of an avatar.
+func Classes(p Props) string {
+	s := ""
+	if p.Size != SizeDefault {
+		s = "avatar-" + string(p.Size)
+	}
+	sh := ""
+	if p.Shape != ShapeCircle {
+		sh = "avatar-" + string(p.Shape)
+	}
+	return kit.Classes("avatar", s, p.Class, sh, kit.If(p.Color != "", "bg-"+p.Color+"-lt"), kit.If(p.Cover, "avatar-cover"))
+}
+
+func style(p Props) string {
+	if p.Src == "" {
+		return ""
+	}
+	return "background-image: url(" + p.Src + ")"
+}
+
+templ inner(p Props) {
+	if p.Status != "" {
+		<span
+			class={ "badge bg-" + p.Status }
+			if p.StatusLabel != "" {
+				role="img"
+				aria-label={ p.StatusLabel }
+			}
+		>{ p.StatusText }</span>
+	}
+	if p.Brand != "" {
+		<span class="avatar-brand" style={ "background-image: url(" + p.Brand + ")" }></span>
+	}
+	if p.Src == "" {
+		if p.Initials != "" {
+			{ p.Initials }
+		} else if p.Icon != "" {
+			@icon.Icon(p.Icon)
+		} else {
+			@icon.Icon("ti-user")
+		}
+	}
+	{ children... }
+}
+
+templ Avatar(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Href != "" {
+		<a
+			href={ templ.URL(p.Href) }
+			class={ Classes(p) }
+			if p.Src != "" {
+				style={ style(p) }
+			}
+			{ p.Attributes... }
+		>
+			@inner(p) {
+				{ children... }
+			}
+		</a>
+	} else {
+		<span
+			class={ Classes(p) }
+			if p.Src != "" {
+				style={ style(p) }
+			}
+			{ p.Attributes... }
+		>
+			@inner(p) {
+				{ children... }
+			}
+		</span>
+	}
+}
+
+type ListProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Stacked    bool // overlapping (avatar-list-stacked)
+	Size       Size // avatar-list-{size}
+}
+
+// List lays out avatars in a row (.avatar-list).
+templ List(props ...ListProps) {
+	{{ p := kit.First(props) }}
+	<div class={ kit.Classes("avatar-list", kit.If(p.Stacked, "avatar-list-stacked"), kit.If(p.Size != SizeDefault, "avatar-list-"+string(p.Size)), p.Class) } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+type UploadProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Href       string // default "#"
+	// For makes it a <label> for a file input with that id instead of a link.
+	For   string
+	Size  Size
+	Shape Shape
+	Label string // aria-label, e.g. "Upload photo"
+	Text  string // visible text below the icon (avatar-upload-text)
+}
+
+// Upload is the dashed placeholder to add a photo.
+templ Upload(p UploadProps) {
+	{{ c := kit.Classes(Classes(Props{Size: p.Size, Shape: p.Shape}), "avatar-upload", p.Class) }}
+	if p.For != "" {
+		<label for={ p.For } class={ kit.Classes(c, "cursor-pointer") } { p.Attributes... }>
+			@uploadInner(p)
+		</label>
+	} else {
+		<a
+			href={ templ.URL(kit.Or(p.Href, "#")) }
+			class={ c }
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			{ p.Attributes... }
+		>
+			@uploadInner(p)
+		</a>
+	}
+}
+
+templ uploadInner(p UploadProps) {
+	@icon.Icon("ti-plus")
+	if p.Text != "" {
+		<span class="avatar-upload-text">{ p.Text }</span>
+	}
+}

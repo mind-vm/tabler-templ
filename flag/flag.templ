@@ -1,0 +1,43 @@
+// Package flag renders country flags from Tabler's flag stylesheet (tabler-flags.css, load it next to
+// Tabler's CSS).
+package flag
+
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Size shares the avatar sizes: xxs, xs, sm, md, lg, xl, 2xl; the zero value is the default.
+type Size string
+
+const (
+	SizeDefault Size = ""
+	SizeXXS     Size = "xxs"
+	SizeXS      Size = "xs"
+	SizeSmall   Size = "sm"
+	SizeMedium  Size = "md"
+	SizeLarge   Size = "lg"
+	SizeXL      Size = "xl"
+	Size2XL     Size = "2xl"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Size       Size
+	Label      string // accessible name, e.g. "Germany"; without it the flag is decorative
+}
+
+// Flag renders the flag of a country by its ISO 3166 code, e.g. "de", "us", "gb".
+templ Flag(country string, props ...Props) {
+	{{ p := kit.First(props) }}
+	<span
+		class={ kit.Classes("flag", kit.If(p.Size != SizeDefault, "flag-"+string(p.Size)), "flag-country-"+strings.ToLower(country), p.Class) }
+		if p.Label != "" {
+			role="img"
+			aria-label={ p.Label }
+		}
+		{ p.Attributes... }
+	></span>
+}

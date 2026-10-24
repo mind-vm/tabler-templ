@@ -1,0 +1,73 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/tabscard"
+	"github.com/mind-vm/tabler-templ/dropdown"
+)
+
+templ tabText(title, text string) {
+	<h2>{ title }</h2>
+	<div>{ text }</div>
+}
+
+var (
+	homeText     = tabText("Home tab", "Cursus turpis vestibulum, dui in pharetra vulputate id sed non turpis ultricies fringilla at sed facilisis lacus pellentesque purus nibh")
+	profileText  = tabText("Profile tab", "Fringilla egestas nunc quis tellus diam rhoncus ultricies tristique enim at diam, sem nunc amet, pellentesque id egestas velit sed")
+	settingsText = tabText("Settings tab", "Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan nibh habitant senectus")
+	activityText = tabText("Activity tab", "Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet, facilisi sit mauris accumsan nibh habitant senectus")
+)
+
+// sampleTabs builds the preview's tab sets: home and profile, with icons, plus activity, disabled or settings tabs.
+func sampleTabs(icons bool, extra ...tabscard.Tab) []tabscard.Tab {
+	tabs := []tabscard.Tab{{Key: "home", Label: "Home", Content: homeText}, {Key: "profile", Label: "Profile", Content: profileText}}
+	if icons {
+		tabs[0].Icon, tabs[1].Icon = "ti-home", "ti-user"
+	}
+	return append(tabs, extra...)
+}
+
+var (
+	settingsTab = tabscard.Tab{Key: "settings", Label: "Settings", Icon: "ti-settings", IconOnly: true, End: true, Content: settingsText}
+	activityTab = tabscard.Tab{Key: "activity", Label: "Activity", Content: activityText}
+	disabledTab = tabscard.Tab{Key: "disabled", Label: "Disabled", Disabled: true}
+)
+
+templ tabsDropdown() {
+	@dropdown.Item() {
+		Action
+	}
+	@dropdown.Item() {
+		Another action
+	}
+}
+
+templ tabsPage() {
+	@preview("tabs") {
+		<div class="row row-cards">
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-1"}, sampleTabs(false, settingsTab))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-2", Reverse: true}, sampleTabs(false, settingsTab))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-3"}, sampleTabs(true))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-4", DropdownLabel: "Dropdown", Dropdown: tabsDropdown()}, sampleTabs(false))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-5", Fill: true}, sampleTabs(false, activityTab))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-6", Fill: true}, sampleTabs(false, disabledTab))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-7", Fill: true}, sampleTabs(true, tabscard.Tab{Key: "activity", Label: "Activity", Icon: "ti-activity", Content: activityText}))
+			</div>
+			<div class="col-md-4">
+				@tabscard.Card(tabscard.Props{ID: "tabs-8", Fade: true}, sampleTabs(false, activityTab))
+			</div>
+		</div>
+	}
+}

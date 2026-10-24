@@ -1,0 +1,113 @@
+// Package tabscard is the tabbed card of the Tabler preview (shared/components/cards/TabsCard): tabs in
+// the card header, one panel per tab in the body.
+//
+//	@tabscard.Card(tabscard.Props{ID: "customer"}, []tabscard.Tab{
+//		{Key: "orders", Label: "Orders", Content: orders()},
+//		{Key: "notes", Label: "Notes", Icon: "ti-notes", Content: notes()},
+//	})
+package tabscard
+
+import (
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/nav"
+)
+
+type Tab struct {
+	Key   string // unique within the card; the panel's id is "<ID>-<Key>"
+	Label string
+	Icon  string
+	// IconOnly shows just the icon; Label becomes its title and aria-label.
+	IconOnly bool
+	// End pushes the tab to the far end of the header (e.g. a settings tab).
+	End      bool
+	Disabled bool
+	Content  templ.Component
+}
+
+type Props struct {
+	ID      string // prefix of the panel ids, unique on the page
+	Class   string
+	Active  string // Key of the open tab, default the first tab that is not disabled
+	Fill    bool   // tabs share the header's width
+	Reverse bool   // tabs start at the right
+	Fade    bool   // panels fade in
+	// Dropdown adds a last tab that opens a menu: DropdownLabel and the menu's dropdown.Item entries.
+	DropdownLabel string
+	Dropdown      templ.Component
+}
+
+func active(p Props, tabs []Tab) string {
+	if p.Active != "" {
+		return p.Active
+	}
+	for _, t := range tabs {
+		if !t.Disabled {
+			return t.Key
+		}
+	}
+	return ""
+}
+
+func endClass(p Props, t Tab) string {
+	if !t.End {
+		return ""
+	}
+	if p.Reverse {
+		return "me-auto"
+	}
+	return "ms-auto"
+}
+
+func paneID(p Props, t Tab) string { return p.ID + "-" + t.Key }
+
+func label(t Tab) string {
+	if t.IconOnly {
+		return t.Label
+	}
+	return ""
+}
+
+templ Card(p Props, tabs []Tab) {
+	{{ open := active(p, tabs) }}
+	@card.Card(card.Props{Class: p.Class}) {
+		@card.Header() {
+			@nav.Nav(nav.Props{Style: nav.StyleTabs, CardHeader: true, Fill: p.Fill, Tablist: true, Class: kit.If(p.Reverse, "flex-row-reverse")}) {
+				for _, t := range tabs {
+					if t.Disabled {
+						@nav.Item(nav.ItemProps{Disabled: true, Icon: t.Icon, Label: label(t), Class: endClass(p, t),
+							Attributes: templ.Attributes{"data-bs-toggle": "tab", "role": "tab", "aria-selected": "false"}}) {
+							if !t.IconOnly {
+								{ t.Label }
+							}
+						}
+					} else {
+						@nav.Item(nav.ItemProps{Target: paneID(p, t), Active: t.Key == open, Icon: t.Icon, Label: label(t), Class: endClass(p, t)}) {
+							if !t.IconOnly {
+								{ t.Label }
+							}
+						}
+					}
+				}
+				if p.Dropdown != nil {
+					@nav.Dropdown(nav.DropdownProps{Label: p.DropdownLabel}) {
+						@p.Dropdown
+					}
+				}
+			}
+		}
+		@card.Body() {
+			@nav.Content() {
+				for _, t := range tabs {
+					if !t.Disabled {
+						@nav.Pane(nav.PaneProps{ID: paneID(p, t), Active: t.Key == open, Fade: p.Fade}) {
+							if t.Content != nil {
+								@t.Content
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

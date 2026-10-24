@@ -19,6 +19,11 @@ Existing components follow Tabler 1.7's markup and cover the variants of Tabler'
   `Status`/`StatusEdge`, `Light` header, `Scrollable` body; `Subtitle`, `Stamp`, `Progress`, `Image`.
 - `kit.Messages`: new texts for pagination. Empty fields of an app's own `Messages` now fall back to English,
   so new texts never render empty.
+- New packages: `dropdown`, `nav` (tabs, pills, overflow nav, tab panels, segmented control), `breadcrumb`,
+  `offcanvas`, `toast`, `tooltip`, `popover`, `avatar`, `flag`; block `blocks/tabscard`.
+- `blocks/shell`: `Crumb` is now `breadcrumb.Crumb` (same fields); the breadcrumbs render through package
+  `breadcrumb`.
+- Demo: dropdowns, tabs, offcanvas and toasts pages, checked against the preview.
 - `scripts/screenshots/compare.mjs` screenshots a rebuilt page next to the Tabler original.
 
 ## v0.8.0
