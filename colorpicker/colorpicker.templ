@@ -1,0 +1,89 @@
+// Package colorpicker renders Tabler's color picker: a text field with a swatch that opens Coloris, with
+// Tabler's colors as swatches. Load the plugin with Library in the head, before Tabler's stylesheet.
+//
+//	@colorpicker.Input(colorpicker.Props{ID: "brand", Name: "brand", Value: "#066fd1", Format: "hex"})
+package colorpicker
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the Coloris version Library loads.
+const Version = "0.25.0"
+
+// LibraryURL and StylesheetURL are Coloris on jsDelivr.
+const (
+	LibraryURL    = "https://cdn.jsdelivr.net/npm/@melloware/coloris@" + Version + "/dist/umd/coloris.min.js"
+	StylesheetURL = "https://cdn.jsdelivr.net/npm/@melloware/coloris@" + Version + "/dist/coloris.min.css"
+)
+
+// Swatches are Tabler's colors (Coloris reads hex, rgb and hsl only, not Tabler's oklch tokens).
+var Swatches = []string{"#066fd1", "#4299e1", "#4263eb", "#ae3ec9", "#d6336c", "#d63939", "#f76707", "#f59f00", "#74b816", "#2fb344", "#0ca678", "#17a2b8"}
+
+type Props struct {
+	ID         string // required: Coloris keeps the settings of each field by its id
+	Name       string
+	Class      string
+	Attributes templ.Attributes
+	Value      string
+	// Format is the value's format: "hex", "rgb", "hsl", "auto" or "mixed"; default Coloris' own.
+	Format string
+	Alpha  bool
+	// Swatches default to Tabler's colors; an empty, non-nil slice shows none.
+	Swatches []string
+	Label    string // aria-label, default "Color value"
+}
+
+func settings(p Props) string {
+	s := map[string]any{"selectInput": false, "alpha": p.Alpha, "swatches": Swatches}
+	if p.Swatches != nil {
+		s["swatches"] = p.Swatches
+	}
+	if p.Format != "" {
+		s["format"] = p.Format
+	}
+	return plugin.JSON(s)
+}
+
+// Input is a color field.
+templ Input(p Props) {
+	<input
+		type="text"
+		class={ kit.Classes("form-control d-block", p.Class) }
+		id={ p.ID }
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		if p.Value != "" {
+			value={ p.Value }
+		}
+		aria-label={ kit.Or(p.Label, "Color value") }
+		data-tabler-colorpicker={ settings(p) }
+		{ p.Attributes... }
+	/>
+	@Script()
+}
+
+// Script starts the color fields; Input renders it.
+func Script() templ.Component {
+	return plugin.Start("colorpicker", `function (root) {
+		if (!window.Coloris) return;
+		root.querySelectorAll('input[data-tabler-colorpicker]').forEach(function (el) {
+			if (el.dataset.colorpickerStarted || !el.id) return;
+			el.dataset.colorpickerStarted = 'true';
+			var selector = '#' + CSS.escape(el.id);
+			// el can only be set globally; setInstance scopes the rest to this field.
+			Coloris({ el: selector });
+			Coloris.setInstance(selector, JSON.parse(el.getAttribute('data-tabler-colorpicker')));
+		});
+	}`)
+}
+
+// Library loads Coloris and its stylesheet and starts every color field on the page; put it in the head,
+// before Tabler's stylesheet.
+templ Library() {
+	@plugin.Stylesheet(StylesheetURL)
+	@plugin.Script(LibraryURL)
+	@Script()
+}

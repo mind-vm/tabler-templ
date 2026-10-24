@@ -7,11 +7,16 @@ import (
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/clipboard"
+	"github.com/mind-vm/tabler-templ/datepicker"
 	"github.com/mind-vm/tabler-templ/dropdown"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/inputmask"
+	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/payment"
 	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/rangeslider"
+	"github.com/mind-vm/tabler-templ/selectbox"
 	"github.com/mind-vm/tabler-templ/table"
 	"github.com/mind-vm/tabler-templ/typography"
 )
@@ -243,7 +248,7 @@ templ formElementsColumn1() {
 		}
 		@form.Field(form.FieldProps{Label: "Select multiple states"}) {
 			@form.Select(form.SelectProps{ID: "select-states", AriaLabel: "Select multiple states", Multiple: true, Options: usStates, SelectedValues: []string{"AZ", "SC", "WY"},
-				Attributes: templ.Attributes{"value": ""}})
+				Attributes: kit.Attrs(templ.Attributes{"value": ""}, selectbox.Attrs(map[string]any{"controlInput": "<input>"}))})
 		}
 		@form.Field(form.FieldProps{Label: "Input group"}) {
 			@form.Group(form.GroupProps{Class: "mb-2"}) {
@@ -679,10 +684,9 @@ templ formElementsColumn6() {
 		}
 		@form.Field(form.FieldProps{Label: "Range input"}) {
 			@form.Range(form.RangeProps{Class: "mb-2", AriaLabel: "Default range", Value: 40, Max: 100, Step: 10})
-			// Sliders of the noUiSlider plugin, which is not loaded: the empty elements it would fill.
-			<div class="form-range mb-2" id="range-simple"></div>
-			<div class="form-range mb-2" id="range-connect"></div>
-			<div class="form-range mb-2 text-green" id="range-color"></div>
+			@rangeslider.Slider(rangeslider.Props{ID: "range-simple", Values: []float64{20}, Connect: true, Step: 10, Label: "Connected range"})
+			@rangeslider.Slider(rangeslider.Props{ID: "range-connect", Values: []float64{60, 90}, Step: 10, Label: "Price range"})
+			@rangeslider.Slider(rangeslider.Props{ID: "range-color", Class: "text-green", Values: []float64{40}, Connect: true, Step: 10, Label: "Colored range"})
 		}
 		@form.Field(form.FieldProps{Label: "Datepicker"}) {
 			@datepickerInput("datepicker-default", "mb-2")
@@ -714,37 +718,36 @@ templ formElementsColumn6() {
 				</div>
 			</div>
 		}
-		// Tom Select is not loaded: the selects below are plain, with its data attributes.
 		@form.Field(form.FieldProps{Label: "Tags input", For: "select-fe6-tags"}) {
 			@form.Select(form.SelectProps{ID: "select-fe6-tags", AriaLabel: "Tags input", Multiple: true, Options: plainOptions(tagNames...),
-				SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"}, Attributes: templ.Attributes{"data-placeholder": "Select tags"}})
+				SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"}, Attributes: kit.Attrs(templ.Attributes{"data-placeholder": "Select tags"}, selectbox.Attrs(nil))})
 		}
 		@form.Field(form.FieldProps{Label: "Advanced select", For: "select-fe6-advanced-select"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-advanced-select", AriaLabel: "Advanced select", Options: options("1", "Chuck Tesla", "2", "Elon Musk", "3", "Paweł Kuna", "4", "Nikola Tesla"), Selected: "3"})
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-advanced-select", AriaLabel: "Advanced select", Options: options("1", "Chuck Tesla", "2", "Elon Musk", "3", "Paweł Kuna", "4", "Nikola Tesla"), Selected: "3"})
 		}
 		@form.Field(form.FieldProps{Label: "Advanced select with optgroup", For: "select-fe6-select-optgroup"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-select-optgroup", AriaLabel: "Advanced select with optgroup",
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-select-optgroup", AriaLabel: "Advanced select with optgroup",
 				Groups: []form.OptionGroup{{Label: "Tags", Options: plainOptions(tagNames...)}, {Label: "People", Options: plainOptions(peopleNames...)}}})
 		}
 		@form.Field(form.FieldProps{Label: "Select with avatars", For: "select-fe6-select-avatars"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-select-avatars", AriaLabel: "Select with avatars", Options: avatarOptions(), Selected: "4"})
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-select-avatars", AriaLabel: "Select with avatars", Options: avatarOptions(), Selected: "4"})
 		}
 		@form.Field(form.FieldProps{Label: "Select with flags", For: "select-fe6-select-flags"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-select-flags", AriaLabel: "Select with flags", Options: flagOptions(), Selected: "pl"})
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-select-flags", AriaLabel: "Select with flags", Options: flagOptions(), Selected: "pl"})
 		}
 		@form.Field(form.FieldProps{Label: "Select with labels", For: "select-fe6-select-labels"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-select-labels", AriaLabel: "Select with labels", Selected: "paste",
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-select-labels", AriaLabel: "Select with labels", Selected: "paste",
 				Options: custom(options("copy", "Copy", "paste", "Paste", "cut", "Cut"),
 					`<span class="badge bg-primary-lt">cmd + C</span>`, `<span class="badge bg-primary-lt">cmd + V</span>`, `<span class="badge bg-primary-lt">cmd + X</span>`)})
 		}
 		@form.Field(form.FieldProps{Label: "Select with priority", For: "select-fe6-select-priority"}) {
-			@form.Select(form.SelectProps{ID: "select-fe6-select-priority", AriaLabel: "Select with priority", Selected: "normal",
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-fe6-select-priority", AriaLabel: "Select with priority", Selected: "normal",
 				Options: custom(options("urgent", "Urgent", "normal", "Normal", "low", "Low", "none", "No priority"),
 					signalHTML("orange", 3), signalHTML("blue", 2), signalHTML("green", 1), signalHTML("", 0))})
 		}
 		@form.Field(form.FieldProps{Label: "Advanced select with validation state"}) {
-			@form.Select(form.SelectProps{ID: "select-countries-valid", AriaLabel: "Country (valid)", Class: "mb-3", State: form.StateValid, Options: flagCountries, Selected: "pl"})
-			@form.Select(form.SelectProps{ID: "select-countries-invalid", AriaLabel: "Country (invalid)", Invalid: true, Options: flagCountries, Selected: "pl"})
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-countries-valid", AriaLabel: "Country (valid)", Class: "mb-3", State: form.StateValid, Options: flagCountries, Selected: "pl"})
+			@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-countries-invalid", AriaLabel: "Country (invalid)", Invalid: true, Options: flagCountries, Selected: "pl"})
 		}
 	</div>
 }
@@ -857,7 +860,7 @@ templ wrappedInput(label string, p form.InputProps) {
 }
 
 templ formElementsPage() {
-	@preview("form-elements") {
+	@previewLibs("form-elements", rangeslider.Library(), datepicker.Library(), selectbox.Library(), inputmask.Library()) {
 		@paymentStyles()
 		<div class="row row-cards">
 			<div class="col-12">
@@ -1157,7 +1160,7 @@ templ iconField(ic string, p form.InputProps) {
 }
 
 templ formLayoutPage() {
-	@preview("form-layout") {
+	@previewLibs("form-layout", datepicker.Library()) {
 		<div class="row row-cards row-cols-1 row-cols-md-3">
 			<div class="col">
 				<div class="row row-cards">

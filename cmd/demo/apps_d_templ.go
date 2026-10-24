@@ -27,6 +27,7 @@ import (
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/progress"
 	"github.com/mind-vm/tabler-templ/prose"
+	"github.com/mind-vm/tabler-templ/wysiwyg"
 )
 
 // appFrame is preview with the page title of the original (when it differs from the catalog's) and a
@@ -203,7 +204,7 @@ func chatPage() templ.Component {
 									var templ_7745c5c3_Var8 string
 									templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(c.GIF)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 75, Col: 25}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 76, Col: 25}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 									if templ_7745c5c3_Err != nil {
@@ -320,7 +321,7 @@ func mailMenu(icon_, label, header string, items []string, more bool) templ.Comp
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 125, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 126, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 				if templ_7745c5c3_Err != nil {
@@ -379,7 +380,7 @@ func mailMenu(icon_, label, header string, items []string, more bool) templ.Comp
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(header)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 135, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 136, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -406,7 +407,7 @@ func mailMenu(icon_, label, header string, items []string, more bool) templ.Comp
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(it)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 139, Col: 9}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 140, Col: 9}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -556,13 +557,13 @@ func emailInboxPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = mail.Compose(mail.ComposeProps{Value: "Hello, <b>Tabler</b>!"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = mail.Compose(mail.ComposeProps{Message: wysiwyg.Editor(wysiwyg.Props{ID: "modal-new-email-message", Name: "message", Value: "Hello, <b>Tabler</b>!"})}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = appFrame("email-inbox", "Inbox", "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = appFrameLibs("email-inbox", "Inbox", "", wysiwyg.Library()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -655,7 +656,7 @@ func emailsPage() templ.Component {
 						var templ_7745c5c3_Var27 string
 						templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(adEmails)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 180, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 181, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 						if templ_7745c5c3_Err != nil {
@@ -699,7 +700,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var28 templ.SafeURL
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(photo("emails/" + e.Key + ".jpg")))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 194, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -712,7 +713,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(e.Short)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 194, Col: 144}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 144}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 				if templ_7745c5c3_Err != nil {
@@ -725,7 +726,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(e.Long)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 194, Col: 175}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 175}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 				if templ_7745c5c3_Err != nil {
@@ -738,7 +739,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.ResolveAttributeValue(photo("emails/" + e.Key + ".jpg"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 194, Col: 227}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 227}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
 				if templ_7745c5c3_Err != nil {
@@ -751,7 +752,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.ResolveAttributeValue(photo("emails/" + e.Key + ".jpg"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 196, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var32)
 				if templ_7745c5c3_Err != nil {
@@ -764,7 +765,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.ResolveAttributeValue(e.Short)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 94}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 196, Col: 94}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var33)
 				if templ_7745c5c3_Err != nil {
@@ -777,7 +778,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(e.Width))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 126}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 196, Col: 126}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
 				if templ_7745c5c3_Err != nil {
@@ -790,7 +791,7 @@ func emailsPage() templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.ResolveAttributeValue(strconv.Itoa(e.Height))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 195, Col: 160}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 196, Col: 160}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var35)
 				if templ_7745c5c3_Err != nil {
@@ -1097,7 +1098,7 @@ func wizardPicture() templ.Component {
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.ResolveAttributeValue(photo("illustrations/light/boy-girl.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 300, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 301, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var46)
 		if templ_7745c5c3_Err != nil {
@@ -1202,7 +1203,7 @@ func wizardPage() templ.Component {
 						var templ_7745c5c3_Var52 string
 						templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.ResolveAttributeValue(t.Abbr)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 323, Col: 28}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 324, Col: 28}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var52)
 						if templ_7745c5c3_Err != nil {
@@ -1225,7 +1226,7 @@ func wizardPage() templ.Component {
 						var templ_7745c5c3_Var53 string
 						templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(t.Text)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 323, Col: 70}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/apps_d.templ`, Line: 324, Col: 70}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 						if templ_7745c5c3_Err != nil {

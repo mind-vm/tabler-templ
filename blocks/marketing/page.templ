@@ -1,0 +1,236 @@
+// Package marketing holds the blocks of Tabler's marketing pages (tabler-marketing.css): the page with a
+// transparent navbar and a link footer, heroes, sections with dividers, logos, features, a call to action,
+// counters, testimonials, FAQs, a newsletter form, a pricing banner and property cards. Load
+// tabler-marketing.css (MarketingCSS) next to Tabler's stylesheet.
+//
+//	@marketing.Page(marketing.PageProps{Title: "Acme", Head: head, Navbar: nav, Footer: footer}) {
+//		@marketing.Hero(marketing.HeroProps{Title: "Build faster", Description: "…"})
+//		@marketing.Section(marketing.SectionProps{Background: "light"}) {
+//			@marketing.Features(features)
+//		}
+//	}
+package marketing
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// MarketingCSS is Tabler's marketing stylesheet on jsDelivr for a Tabler version, e.g. "1.7.1".
+func MarketingCSS(tablerVersion string) string {
+	return "https://cdn.jsdelivr.net/npm/@tabler/core@" + tablerVersion + "/dist/css/tabler-marketing.min.css"
+}
+
+type PageProps struct {
+	Lang    string // default "en"
+	Title   string
+	Head    templ.Component // stylesheets: Tabler, tabler-marketing.css, icons
+	Scripts templ.Component // end of <body>
+	// BodyClass defaults to "body-marketing body-gradient".
+	BodyClass string
+	Navbar    templ.Component // usually a Navbar
+	Footer    templ.Component // usually a Footer and a Legal footer
+	SkipLabel string          // the skip link, default "Skip to main content"
+}
+
+// Page is a marketing page: the navbar, the children in <main> and the footer.
+templ Page(p PageProps) {
+	<!DOCTYPE html>
+	<html lang={ kit.Or(p.Lang, "en") }>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ p.Title }</title>
+			if p.Head != nil {
+				@p.Head
+			}
+			@icon.Styles()
+		</head>
+		<body class={ kit.Or(p.BodyClass, "body-marketing body-gradient") }>
+			<a href="#content" class="visually-hidden-focusable skip-link">{ kit.Or(p.SkipLabel, "Skip to main content") }</a>
+			if p.Navbar != nil {
+				@p.Navbar
+			}
+			<main id="content">
+				{ children... }
+			</main>
+			if p.Footer != nil {
+				@p.Footer
+			}
+			if p.Scripts != nil {
+				@p.Scripts
+			}
+		</body>
+	</html>
+}
+
+// Link is an entry of a Navbar or a footer column.
+type Link struct {
+	Text     string
+	Href     string
+	Active   bool
+	External bool // opens in a new tab
+}
+
+type NavbarProps struct {
+	Class string
+	Brand templ.Component // e.g. the logo as a navbar-brand link
+	Links []Link
+	// Action is the last entry, e.g. a "Buy now" button.
+	Action templ.Component
+	// ID of the collapsing menu, default "navbar-marketing".
+	ID          string
+	ToggleLabel string // default "Toggle primary navigation"
+	NavLabel    string // default "Primary"
+}
+
+// Navbar is the transparent navbar of a marketing page; on small screens the links collapse.
+templ Navbar(p NavbarProps) {
+	{{ id := kit.Or(p.ID, "navbar-marketing") }}
+	<header class={ kit.Classes("navbar navbar-expand-lg navbar-transparent py-3", p.Class) }>
+		<div class="container">
+			if p.Brand != nil {
+				@p.Brand
+			}
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target={ "#" + id } aria-controls={ id } aria-expanded="false" aria-label={ kit.Or(p.ToggleLabel, "Toggle primary navigation") }>
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id={ id }>
+				<nav aria-label={ kit.Or(p.NavLabel, "Primary") }>
+					<ul class="navbar-nav ms-auto">
+						for _, l := range p.Links {
+							<li class="nav-item">
+								<a class={ kit.Classes("nav-link", kit.If(l.Active, "active")) } href={ templ.URL(l.Href) }><span class="nav-link-title">{ l.Text }</span></a>
+							</li>
+						}
+						if p.Action != nil {
+							<li class="nav-item ms-4">
+								@p.Action
+							</li>
+						}
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+}
+
+// Column is a column of links in a Footer.
+type Column struct {
+	Title string
+	Links []Link
+}
+
+type FooterProps struct {
+	Class   string
+	Columns []Column
+	Text    string // at the right of the columns, e.g. what the product is
+	// Start and End are the second row, e.g. Inline lists of payment logos and social buttons.
+	Start, End templ.Component
+	Label      string // aria-label, default "Links"
+}
+
+// Footer is the link footer of a marketing page.
+templ Footer(p FooterProps) {
+	<footer class={ kit.Classes("footer", p.Class) } aria-label={ kit.Or(p.Label, "Links") }>
+		<div class="container">
+			<div class="py-3">
+				<div class="row g-lg-4">
+					<div class="col-lg-7">
+						<div class="row g-lg-4">
+							for _, c := range p.Columns {
+								<div class="col-md">
+									<div class="subheader mb-3">{ c.Title }</div>
+									<ul class="list-unstyled list-separated gap-2">
+										for _, l := range c.Links {
+											<li>
+												if l.External {
+													<a href={ templ.URL(l.Href) } class="link-secondary" target="_blank" rel="noreferrer">{ l.Text }</a>
+												} else {
+													<a class="link-secondary" href={ templ.URL(l.Href) }>{ l.Text }</a>
+												}
+											</li>
+										}
+									</ul>
+								</div>
+							}
+						</div>
+					</div>
+					if p.Text != "" {
+						<div class="col-lg-4 ms-auto">
+							<div class="text-secondary">{ p.Text }</div>
+						</div>
+					}
+				</div>
+				if p.Start != nil || p.End != nil {
+					<div class="row g-lg-4 justify-content-between mt-0 mt-md-2">
+						<div class="col-sm-7 col-md-6 col-lg-4">
+							if p.Start != nil {
+								@p.Start
+							}
+						</div>
+						<div class="col-sm-5 col-md-6 col-lg-3 text-sm-end">
+							if p.End != nil {
+								@p.End
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</footer>
+}
+
+// Inline is a titled row of items in a Footer, e.g. payment logos or social buttons.
+templ Inline(title string, items ...templ.Component) {
+	<h2 class="subheader">{ title }</h2>
+	<ul class="list-inline mb-0 mt-3">
+		for _, it := range items {
+			<li class="list-inline-item">
+				@it
+			</li>
+		}
+	</ul>
+}
+
+type LegalProps struct {
+	Class     string
+	Copyright templ.Component // e.g. ©<a …>company</a>
+	Links     []Link          // e.g. terms of service, privacy policy
+	Label     string          // aria-label, default "Legal"
+}
+
+// Legal is the last footer line: the children (e.g. "Made with ♥"), the copyright and legal links.
+templ Legal(p LegalProps) {
+	<footer class={ kit.Classes("footer", p.Class) } aria-label={ kit.Or(p.Label, "Legal") }>
+		<div class="container">
+			<div class="py-3 border-top text-center text-lg-start">
+				<div class="row g-lg-4">
+					<div class="col-lg-auto text-lg-end order-lg-last">
+						<div class="row justify-content-center">
+							if p.Copyright != nil {
+								<div class="col-auto">
+									@p.Copyright
+								</div>
+							}
+							if len(p.Links) > 0 {
+								<div class="col-auto">
+									<ul class="list-inline list-inline-dots">
+										for _, l := range p.Links {
+											<li class="list-inline-item">
+												<a class="link-secondary" href={ templ.URL(l.Href) }>{ l.Text }</a>
+											</li>
+										}
+									</ul>
+								</div>
+							}
+						</div>
+					</div>
+					<div class="col-lg">
+						{ children... }
+					</div>
+				</div>
+			</div>
+		</div>
+	</footer>
+}

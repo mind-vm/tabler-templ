@@ -1,0 +1,108 @@
+// Package rating renders Tabler's star rating: a select of ratings that star-rating.js shows as a row of
+// stars (or hearts, or any icon) to click. The select submits the value. Load the plugin with Library in
+// the head, before Tabler's stylesheet.
+//
+//	@rating.Rating(rating.Props{ID: "rating", Name: "rating", Value: 4})
+package rating
+
+import (
+	"context"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the star-rating.js version Library loads.
+const Version = "4.3.1"
+
+// LibraryURL and StylesheetURL are star-rating.js on jsDelivr.
+const (
+	LibraryURL    = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.js"
+	StylesheetURL = "https://cdn.jsdelivr.net/npm/star-rating.js@" + Version + "/dist/star-rating.min.css"
+)
+
+type Props struct {
+	ID         string
+	Name       string
+	Class      string
+	Attributes templ.Attributes // on the select
+	Value      int              // 1 to the number of Labels; 0 = none
+	Icon       string           // default "ti-star", drawn filled
+	Color      string           // e.g. "red"; default Tabler's yellow
+	Size       icon.Size
+	// Label is the select's aria-label, default "Rating".
+	Label string
+	// Labels are the ratings from the best down, default "Excellent", "Very Good", "Average", "Poor",
+	// "Terrible"; Placeholder is the empty option, default "Select a rating".
+	Labels      []string
+	Placeholder string
+	Clearable   bool
+	Tooltip     bool // the rating's label on hover
+}
+
+var labels = []string{"Excellent", "Very Good", "Average", "Poor", "Terrible"}
+
+templ star(p Props) {
+	@icon.Icon(kit.Or(p.Icon, "ti-star"), icon.Props{Filled: true, Class: "gl-star-full", Color: p.Color, Size: p.Size})
+}
+
+func settings(ctx context.Context, p Props) string {
+	html, _ := templ.ToGoHTML(ctx, star(p))
+	return plugin.JSON(map[string]any{"star": string(html), "tooltip": p.Tooltip, "clearable": p.Clearable})
+}
+
+// Rating is a star rating.
+templ Rating(p Props) {
+	{{ ls := p.Labels }}
+	if ls == nil {
+		{{ ls = labels }}
+	}
+	<select
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		if p.Class != "" {
+			class={ p.Class }
+		}
+		aria-label={ kit.Or(p.Label, "Rating") }
+		data-tabler-rating={ settings(ctx, p) }
+		{ p.Attributes... }
+	>
+		<option value="">{ kit.Or(p.Placeholder, "Select a rating") }</option>
+		for i, l := range ls {
+			<option value={ strconv.Itoa(len(ls) - i) } selected?={ p.Value == len(ls)-i }>{ l }</option>
+		}
+	</select>
+	@Script()
+}
+
+// Script starts the ratings; Rating renders it.
+func Script() templ.Component {
+	return plugin.Start("rating", `function (root) {
+		if (!window.StarRating) return;
+		window.tabler_rating = window.tabler_rating || {};
+		root.querySelectorAll('select[data-tabler-rating]').forEach(function (el) {
+			if (el.dataset.ratingStarted) return;
+			el.dataset.ratingStarted = 'true';
+			var s = JSON.parse(el.getAttribute('data-tabler-rating'));
+			var rating = new StarRating(el, {
+				tooltip: s.tooltip, clearable: s.clearable, classNames: {},
+				stars: function (star) { star.innerHTML = s.star; },
+			});
+			if (el.id) window.tabler_rating[el.id] = rating;
+		});
+	}`)
+}
+
+// Library loads star-rating.js and its stylesheet and starts every rating on the page; put it in the
+// head, before Tabler's stylesheet.
+templ Library() {
+	@plugin.Stylesheet(StylesheetURL)
+	@plugin.Script(LibraryURL)
+	@Script()
+}

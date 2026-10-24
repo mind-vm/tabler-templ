@@ -1,0 +1,121 @@
+// Package calendar renders Tabler's event calendar with FullCalendar: a month, week or day view of
+// events, in Tabler's colors. Load the plugin with Library in the head.
+//
+//	@calendar.Calendar(calendar.Props{ID: "events", Events: []calendar.Event{{Title: "Sprint review", Start: start, End: end}}})
+package calendar
+
+import (
+	"time"
+
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the FullCalendar version Library loads.
+const Version = "6.1.22"
+
+// LibraryURL is FullCalendar (all standard plugins) on jsDelivr.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/fullcalendar@" + Version + "/index.global.min.js"
+
+// Event is an event of a Calendar.
+type Event struct {
+	Title      string
+	Start, End time.Time
+	AllDay     bool
+	URL        string
+	// Color is the text and dot color, Background and Border the block's; any CSS color, e.g.
+	// "var(--tblr-red)". Default Tabler's primary.
+	Color, Background, Border string
+}
+
+// View is FullCalendar's initial view.
+type View string
+
+const (
+	Month View = "dayGridMonth"
+	Week  View = "timeGridWeek"
+	Day   View = "timeGridDay"
+	List  View = "listWeek"
+)
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+	View       View // default Month
+	Events     []Event
+	// Options are FullCalendar options, e.g. headerToolbar, locale, firstDay, or events as a URL.
+	Options map[string]any
+}
+
+func (e Event) json() map[string]any {
+	m := map[string]any{"title": e.Title, "start": e.Start.Format(time.RFC3339)}
+	if !e.End.IsZero() {
+		m["end"] = e.End.Format(time.RFC3339)
+	}
+	if e.AllDay {
+		m["allDay"] = true
+		m["start"] = e.Start.Format(time.DateOnly)
+		if !e.End.IsZero() {
+			m["end"] = e.End.Format(time.DateOnly)
+		}
+	}
+	for k, v := range map[string]string{"url": e.URL, "color": e.Color, "backgroundColor": e.Background, "borderColor": e.Border} {
+		if v != "" {
+			m[k] = v
+		}
+	}
+	return m
+}
+
+func options(p Props) string {
+	o := map[string]any{"initialView": string(p.View)}
+	if p.View == "" {
+		o["initialView"] = string(Month)
+	}
+	if p.Events != nil {
+		evs := make([]map[string]any, len(p.Events))
+		for i, e := range p.Events {
+			evs[i] = e.json()
+		}
+		o["events"] = evs
+	}
+	for k, v := range p.Options {
+		o[k] = v
+	}
+	return plugin.JSON(o)
+}
+
+// Calendar is an event calendar.
+templ Calendar(p Props) {
+	<div
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.Class != "" {
+			class={ kit.Classes(p.Class) }
+		}
+		data-tabler-calendar={ options(p) }
+		{ p.Attributes... }
+	></div>
+	@Script()
+}
+
+// Script starts the calendars; Calendar renders it.
+func Script() templ.Component {
+	return plugin.Start("calendar", `function (root) {
+		if (!window.FullCalendar) return;
+		window.tabler_calendar = window.tabler_calendar || {};
+		root.querySelectorAll('[data-tabler-calendar]').forEach(function (el) {
+			if (el.tablerCalendar) return;
+			var calendar = el.tablerCalendar = new FullCalendar.Calendar(el, JSON.parse(el.getAttribute('data-tabler-calendar')));
+			if (el.id) window.tabler_calendar[el.id] = calendar;
+			calendar.render();
+		});
+	}`)
+}
+
+// Library loads FullCalendar and starts every calendar on the page; put it in the head.
+func Library() templ.Component {
+	return templ.Join(plugin.Script(LibraryURL), Script())
+}

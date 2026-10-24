@@ -5,6 +5,8 @@
 package form
 
 import (
+	"context"
+
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/popover"
 )
@@ -51,7 +53,8 @@ type FieldProps struct {
 	Label      string
 	For        string // id of the control; without it the label is a <div class="form-label">
 	Required   bool   // marks the label (Tabler's .required)
-	// RequiredLabel is read out after a Required label by screen readers, e.g. " (required)".
+	// RequiredLabel is read out after a Required label by screen readers; default kit.T(ctx).Required
+	// (" (required)"), "-" for none.
 	RequiredLabel string
 	Hint          string
 	Error         string // shown below the control; mark the control Invalid as well
@@ -80,13 +83,21 @@ func labelClass(p FieldProps) string {
 	return kit.Classes(base, kit.If(p.Required, "required"), kit.If(p.LabelHidden, "visually-hidden"))
 }
 
+func requiredLabel(ctx context.Context, p FieldProps) string {
+	if !p.Required || p.RequiredLabel == "-" {
+		return ""
+	}
+	return kit.Or(p.RequiredLabel, kit.T(ctx).Required)
+}
+
 templ labelContent(p FieldProps) {
-	if p.Help == "" && p.Description == "" && (!p.Required || p.RequiredLabel == "") {
+	{{ req := requiredLabel(ctx, p) }}
+	if p.Help == "" && p.Description == "" && req == "" {
 		{ p.Label }
 	} else {
 		{ p.Label }
-		if p.Required && p.RequiredLabel != "" {
-			<span class="visually-hidden">{ p.RequiredLabel }</span>
+		if req != "" {
+			<span class="visually-hidden">{ req }</span>
 		}
 		if p.Help != "" {
 			<span class="form-help" { popover.Attrs(popover.Props{Content: p.Help, Placement: popover.Top})... }>?</span>
@@ -117,7 +128,7 @@ templ feedback(p FieldProps) {
 		<div class="valid-feedback d-block">{ p.Valid }</div>
 	}
 	if p.Hint != "" {
-		<div class="form-hint">{ p.Hint }</div>
+		<div class="form-text">{ p.Hint }</div>
 	}
 }
 

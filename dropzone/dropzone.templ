@@ -1,0 +1,135 @@
+// Package dropzone renders Tabler's file upload area: a form that Dropzone turns into a drop target with
+// previews of the files, uploading each to Action. Without JavaScript it is a plain file field. Load the
+// plugin with Library in the head, before Tabler's stylesheet.
+//
+//	@dropzone.Dropzone(dropzone.Props{ID: "files", Action: "/upload", Multiple: true})
+package dropzone
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the Dropzone version Library loads.
+const Version = "6.3.5"
+
+// LibraryURL and StylesheetURL are Dropzone on jsDelivr.
+const (
+	LibraryURL    = "https://cdn.jsdelivr.net/npm/dropzone@" + Version + "/dist/dropzone-min.js"
+	StylesheetURL = "https://cdn.jsdelivr.net/npm/dropzone@" + Version + "/dist/dropzone.css"
+)
+
+type Props struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes // on the form
+	Action     string           // where the files go, default "./"
+	Name       string           // the file field, default "file"
+	Multiple   bool
+	// Title and Text replace Dropzone's default message; TitleLevel is the title's heading, default 3.
+	Title      string
+	Text       string
+	TitleLevel int
+	Label      string // the fallback field's label, default "Upload file"
+	// AriaLabel names the drop target for keyboard users, default "Click or drag files to upload".
+	AriaLabel string
+	// Options are Dropzone options, e.g. maxFilesize, acceptedFiles, headers.
+	Options map[string]any
+}
+
+func options(p Props) string {
+	o := map[string]any{"ariaLabel": kit.Or(p.AriaLabel, "Click or drag files to upload")}
+	if p.Options != nil {
+		o["options"] = p.Options
+	}
+	return plugin.JSON(o)
+}
+
+templ title(p Props) {
+	switch p.TitleLevel {
+		case 2:
+			<h2>{ p.Title }</h2>
+		case 4:
+			<h4>{ p.Title }</h4>
+		case 5:
+			<h5>{ p.Title }</h5>
+		default:
+			<h3>{ p.Title }</h3>
+	}
+}
+
+// Dropzone is a file upload area.
+templ Dropzone(p Props) {
+	<form
+		class={ kit.Classes("dropzone", p.Class) }
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		action={ templ.SafeURL(kit.Or(p.Action, "./")) }
+		autocomplete="off"
+		novalidate
+		data-tabler-dropzone={ options(p) }
+		{ p.Attributes... }
+	>
+		<div class="fallback">
+			<label
+				class="visually-hidden"
+				if p.ID != "" {
+					for={ p.ID + "-file" }
+				}
+			>{ kit.Or(p.Label, "Upload file") }</label>
+			<input
+				if p.ID != "" {
+					id={ p.ID + "-file" }
+				}
+				name={ kit.Or(p.Name, "file") }
+				type="file"
+				multiple?={ p.Multiple }
+			/>
+		</div>
+		if p.Title != "" || p.Text != "" {
+			<div class="dz-message">
+				@title(p)
+				<span>{ p.Text }</span>
+			</div>
+		}
+	</form>
+	@Script()
+}
+
+// Script starts the upload areas; Dropzone renders it.
+func Script() templ.Component {
+	// Dropzone would find the forms by itself (autoDiscover) on DOMContentLoaded; turned off right away so
+	// they get the settings and keyboard support below.
+	return plugin.Start("dropzone", `(function () {
+	if (window.Dropzone) Dropzone.autoDiscover = false;
+	return function (root) {
+		if (!window.Dropzone) return;
+		window.tabler_dropzone = window.tabler_dropzone || {};
+		root.querySelectorAll('form[data-tabler-dropzone]').forEach(function (el) {
+			if (el.dropzone) return;
+			var data = JSON.parse(el.getAttribute('data-tabler-dropzone'));
+			var instance = new Dropzone(el, data.options || {});
+			if (el.id) window.tabler_dropzone[el.id] = instance;
+			// Dropzone is click and drag only: make it a button for the keyboard, once its fallback field
+			// is hidden, and open the file dialog on Enter and Space.
+			el.setAttribute('role', 'button');
+			el.setAttribute('tabindex', '0');
+			el.setAttribute('aria-label', data.ariaLabel);
+			el.addEventListener('keydown', function (event) {
+				if (event.target !== el || (event.key !== 'Enter' && event.key !== ' ')) return;
+				event.preventDefault();
+				instance.hiddenFileInput && instance.hiddenFileInput.click();
+			});
+		});
+	};
+	})()`)
+}
+
+// Library loads Dropzone and its stylesheet and starts every upload area on the page; put it in the
+// head, before Tabler's stylesheet.
+templ Library() {
+	@plugin.Stylesheet(StylesheetURL)
+	@plugin.Script(LibraryURL)
+	@Script()
+}

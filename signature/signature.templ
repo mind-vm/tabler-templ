@@ -1,0 +1,107 @@
+// Package signature renders Tabler's signature pad: a canvas to sign on with the mouse, a pen or a
+// finger (Signature Pad), with an optional clear button. With Name the signature is submitted as a PNG
+// data URL in a hidden input. Load the plugin with Library in the head.
+//
+//	@signature.Pad(signature.Props{ID: "sign", Name: "signature", Clear: true})
+package signature
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the Signature Pad version Library loads.
+const Version = "5.1.4"
+
+// LibraryURL is Signature Pad on jsDelivr.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/signature_pad@" + Version + "/dist/signature_pad.umd.min.js"
+
+type Props struct {
+	ID         string // the canvas
+	Name       string // a hidden input with the signature as a PNG data URL
+	Class      string // on the wrapper
+	Attributes templ.Attributes
+	// Clear shows a button that clears the pad; ClearLabel is its title, default "Clear signature".
+	Clear      bool
+	ClearLabel string
+	// Width and Height are the canvas's size before it is fitted to its box, default 400.
+	Width, Height int
+	// Value is a signature to show at first, as a data URL (PNG or SVG).
+	Value string
+}
+
+func size(v int) string {
+	if v == 0 {
+		v = 400
+	}
+	return strconv.Itoa(v)
+}
+
+// Pad is a signature pad.
+templ Pad(p Props) {
+	<div class={ kit.Classes("signature position-relative", p.Class) } { p.Attributes... }>
+		if p.Clear {
+			<div class="position-absolute top-0 end-0 p-2">
+				<button type="button" class="btn btn-icon" title={ kit.Or(p.ClearLabel, "Clear signature") } aria-label={ kit.Or(p.ClearLabel, "Clear signature") } data-bs-toggle="tooltip" data-signature-clear>
+					@icon.Icon("ti-trash")
+					{ " " }
+				</button>
+			</div>
+		}
+		<canvas
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			width={ size(p.Width) }
+			height={ size(p.Height) }
+			class="signature-canvas"
+			data-tabler-signature={ p.Value }
+		></canvas>
+		if p.Name != "" {
+			<input type="hidden" name={ p.Name } value={ p.Value } data-signature-value/>
+		}
+	</div>
+	@Script()
+}
+
+// Script starts the pads; Pad renders it.
+func Script() templ.Component {
+	return plugin.Start("signature", `function (root) {
+		if (!window.SignaturePad) return;
+		window.tabler_signature = window.tabler_signature || {};
+		root.querySelectorAll('canvas[data-tabler-signature]').forEach(function (canvas) {
+			if (canvas.signaturePad) return;
+			var box = canvas.closest('.signature');
+			var pad = canvas.signaturePad = new SignaturePad(canvas, { backgroundColor: 'transparent', penColor: getComputedStyle(canvas).color });
+			if (canvas.id) window.tabler_signature[canvas.id] = pad;
+			var input = box.querySelector('[data-signature-value]');
+			var save = function () { if (input) input.value = pad.isEmpty() ? '' : pad.toDataURL(); };
+			pad.addEventListener('endStroke', save);
+			var clear = box.querySelector('[data-signature-clear]');
+			if (clear) clear.addEventListener('click', function () { pad.clear(); save(); });
+			var resize = function () {
+				if (!canvas.offsetWidth) return;
+				var ratio = Math.max(window.devicePixelRatio || 1, 1);
+				canvas.width = canvas.offsetWidth * ratio;
+				canvas.height = canvas.offsetHeight * ratio;
+				canvas.getContext('2d').scale(ratio, ratio);
+				pad.fromData(pad.toData());
+			};
+			window.addEventListener('resize', resize);
+			// A pad in a modal or a tab has no size until it is shown.
+			document.addEventListener('shown.bs.modal', resize);
+			document.addEventListener('shown.bs.tab', resize);
+			resize();
+			var value = canvas.getAttribute('data-tabler-signature');
+			if (value) pad.fromDataURL(value).then(save);
+		});
+	}`)
+}
+
+// Library loads Signature Pad and starts every pad on the page; put it in the head.
+func Library() templ.Component {
+	return templ.Join(plugin.Script(LibraryURL), Script())
+}

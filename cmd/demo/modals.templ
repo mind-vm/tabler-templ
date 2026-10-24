@@ -9,6 +9,10 @@ import (
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/modal"
 	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/datepicker"
+	"github.com/mind-vm/tabler-templ/selectbox"
+	"github.com/mind-vm/tabler-templ/signature"
+	"github.com/mind-vm/tabler-templ/wysiwyg"
 )
 
 // The preview shows its modals open inside the page instead of over it.
@@ -93,7 +97,7 @@ func people8() []form.Option {
 }
 
 templ modalsPage() {
-	@preview("modals") {
+	@previewLibs("modals", signature.Library(), wysiwyg.Library(), datepicker.Library(), selectbox.Library()) {
 		@card.Card() {
 			@card.Body() {
 				<div class="row g-5">
@@ -266,12 +270,7 @@ templ modalsPage() {
 										<div class="mb-3">
 											<div class="form-label required">Signature</div>
 											<div class="position-relative user-select-none">
-												<div class="signature position-relative">
-													<div class="position-absolute top-0 end-0 p-2">
-														@button.Button(button.Props{Type: "button", Icon: "ti-trash", IconOnly: true, Label: "Clear signature"})
-													</div>
-													<canvas width="684" height="400" class="signature-canvas"></canvas>
-												</div>
+												@signature.Pad(signature.Props{ID: "signature-default", Clear: true, Width: 684, Height: 400})
 											</div>
 										</div>
 									</form>
@@ -291,7 +290,7 @@ templ modalsPage() {
 											@form.Input(form.InputProps{ID: "new-email-subject", Placeholder: "Your subject"})
 										}
 										@form.Field(form.FieldProps{Label: "Message", For: "hugerte-email-message", Class: "-"}) {
-											@form.Textarea(form.TextareaProps{ID: "hugerte-email-message", Value: "Hello, <b>Tabler</b>!"})
+											@wysiwyg.Editor(wysiwyg.Props{ID: "hugerte-email-message", Value: "Hello, <b>Tabler</b>!"})
 										}
 									</form>
 								}
@@ -337,7 +336,7 @@ templ modalsPage() {
 										<div class="row">
 											<div class="col-md-6">
 												@form.Field(form.FieldProps{Label: "Assigned to", For: "select-task-assigned", Class: "mb-4"}) {
-													@form.Select(form.SelectProps{ID: "select-task-assigned", Options: people8(), Selected: "4"})
+													@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-task-assigned", Options: people8(), Selected: "4"})
 												}
 											</div>
 											<div class="col-md-6">
@@ -352,7 +351,7 @@ templ modalsPage() {
 											</div>
 											<div class="col-md-6">
 												@form.Field(form.FieldProps{Label: "Category / Tags", For: "select-task-category", Class: "mb-4"}) {
-													@form.Select(form.SelectProps{ID: "select-task-category", Multiple: true, SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"},
+													@form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-task-category", Multiple: true, SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"},
 														Options: []form.Option{{Value: "HTML", Label: "HTML"}, {Value: "JavaScript", Label: "JavaScript"}, {Value: "CSS", Label: "CSS"},
 															{Value: "jQuery", Label: "jQuery"}, {Value: "Bootstrap", Label: "Bootstrap"}, {Value: "Ruby", Label: "Ruby"}}})
 												}
@@ -367,7 +366,7 @@ templ modalsPage() {
 							<div>
 								<h2>Edit profile modal</h2>
 								{{ m = inline("modal-edit-profile") }}
-								{{ m.Title = "Edit profile" }}
+								{{ m.Title, m.Size = "Edit profile", modal.SizeLarge }}
 								@modal.Modal(m) {
 									<form>
 										<div class="mb-4">

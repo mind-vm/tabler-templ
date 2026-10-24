@@ -191,6 +191,32 @@ the module is built against (with flags, payments, vendors and ApexCharts as opt
 
 Everything else in Tabler is listed in [ROADMAP.md](ROADMAP.md).
 
+### Plugins
+
+Each plugin package loads its library from jsDelivr in the version Tabler 1.7 uses (`Library()`, in the
+head before Tabler's CSS and script) and starts itself with a small script rendered once per page, again
+after htmx swaps.
+
+| Package | |
+|---|---|
+| `datepicker` | `Input` (plain, with icon, inline; single, multiple, range; min/max, months), `Attrs` for any trigger (Tabler's Datepicker on Vanilla Calendar Pro) |
+| `selectbox` | `Select` (search, multiple, groups, create, indicators such as flags or avatars), `Attrs` to enhance a `form.Select` (Tom Select) |
+| `inputmask` | `Input`, `Attrs(mask)` for any input (IMask) |
+| `rangeslider` | `Slider` (one or two handles, steps, hidden inputs) (noUiSlider) |
+| `wysiwyg` | `Editor` (toolbar, height, dark mode) (HugeRTE) |
+| `dropzone` | `Dropzone` (upload area with title and text) |
+| `colorpicker` | `Input` (formats, alpha, Tabler's colors as swatches) (Coloris) |
+| `signature` | `Pad` (value as PNG data URL in a hidden field, clear button) (Signature Pad) |
+| `rating` | `Rating` (stars or other icons, colors, sizes, labels) (star-rating.js) |
+| `calendar` | `Calendar` (views, events with colors) (FullCalendar) |
+| `datatable` | `Table` with search, sort buttons and pages (List.js) |
+| `sortable` | `Attrs` to make lists, rows, grids and boards sortable (Tabler's Sortable) |
+| `tour` | `Tour` (steps on elements), `StartAttrs` (Driver.js) |
+| `confetti` | `Attrs` for a button, `Burst` on render (Tabler's own) |
+| `mapview` | `Map` (MapLibre via Tabler's map script: style, dark style, globe, route, GeoJSON, bubbles, clusters, arcs), `Marker` (dot, circle, pin, pulse, draggable, popup), `Popup`, `FlyTo` |
+| `lightbox` | `Link` around a thumbnail, galleries (fslightbox) |
+| `player` | `Player` for YouTube, Vimeo or a file (Plyr) |
+
 ## Blocks
 
 Components are small and know nothing about the app. Blocks are bigger pieces built from them, the
@@ -227,6 +253,8 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/mail` | Mail app: `Inbox` (folders as offcanvas on small screens), `Folders` (labels, storage), `List`, `Pager`, `Compose` dialog, `ComposeButton` |
 | `blocks/music` | `Tracks` (track list with like and menu), `Info` |
 | `blocks/wizard` | `Step`: a wizard step with media, progress and actions around its fields |
+| `blocks/maps` | Map cards: `StoreLocator` (list with search driving the markers), `Delivery` (route and order status), `LiveUsers`, `Homes` (price markers), `AddressPicker` (draggable pin fills a field), `ServerStatus`, `UsersByCountry` |
+| `blocks/marketing` | Marketing pages: `Page`, `Navbar`, `Footer`, `Legal`; heroes (`Hero` with `Browser`/`Screenshot`, `SideHero`, `CoverHero` with `SearchForm`, `Typed`); sections (`Section` with wave or arc dividers, `SectionHeader`, `Logos`, `Features`, `FeatureList`, `Split`, `CTA`, `Counters`, `Subscribe`, `Testimonials`, `FAQGrid`, `FAQList`, `Banner`, `CheckList`, `Price`, `PropertyCard`) |
 | `blocks/legal` | `Card` and `Page` around prose (license, terms), `LicenseSummary` |
 | `blocks/faq` | `FAQ`: sections of questions in accordions |
 | `blocks/profile` | `Header` (avatar, name, bio, facts, actions), `Info` |

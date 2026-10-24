@@ -1,0 +1,410 @@
+// Package mapview renders Tabler's map: an interactive MapLibre GL map drawn by Tabler's map script
+// (data-bs-toggle="map", Tabler's MapView) with OpenFreeMap tiles, Tabler-styled markers, popups, buttons,
+// routes and GeoJSON shapes. Load the script once with Library. The children of a Map are its markers;
+// Bubbles, Clusters and Arcs add data layers through this package's own small script.
+//
+//	@mapview.Library()
+//	@mapview.Map(mapview.Props{ID: "stores", Label: "Stores", Center: &mapview.LngLat{Lng: 13.405, Lat: 52.52}, Zoom: 12, Controls: "true"}) {
+//		@mapview.Marker(mapview.MarkerProps{Lng: 13.405, Lat: 52.52, Kind: mapview.Pin, Icon: "ti-home"})
+//	}
+//
+// Maps in content swapped in later (e.g. by htmx) start on htmx:afterSettle.
+package mapview
+
+import (
+	"encoding/json"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// TablerVersion is the Tabler version whose map script Library loads.
+const TablerVersion = "1.7.1"
+
+// MapLibreVersion is the MapLibre GL JS version Tabler 1.7 is built against.
+const MapLibreVersion = "6.11.2"
+
+// LibraryURL is MapLibre GL JS as a module on jsDelivr; Tabler's map script imports it on first use.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.mjs"
+
+// LngLat is a position: longitude first, as in GeoJSON.
+type LngLat struct {
+	Lng float64
+	Lat float64
+}
+
+func (p LngLat) MarshalJSON() ([]byte, error) { return json.Marshal([2]float64{p.Lng, p.Lat}) }
+
+func num(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) }
+
+func (p LngLat) String() string { return num(p.Lng) + "," + num(p.Lat) }
+
+// Bubble is a circle sized by Value, with a tooltip "<Name>: <Value> <Unit>".
+type Bubble struct {
+	Name  string  `json:"name"`
+	Lng   float64 `json:"lng"`
+	Lat   float64 `json:"lat"`
+	Value float64 `json:"value"`
+}
+
+// Arc is a dashed great-circle line between two places, e.g. on a globe.
+type Arc struct {
+	From LngLat `json:"from"`
+	To   LngLat `json:"to"`
+}
+
+type Props struct {
+	// ID names the map: the element is map-<ID>, which buttons (data-bs-target) and scripts
+	// (tabler.MapView.getInstance) reach it by.
+	ID         string
+	Class      string // on the map element; default "w-100 h-100 rounded" in a Ratio or Height box
+	Attributes templ.Attributes
+	Label      string // what the map shows, for screen readers; default "Map"
+	Center     *LngLat
+	Zoom       float64 // 0 = Tabler's default (1)
+	// Style is an OpenFreeMap style (positron, the default; liberty, bright, dark, fiord) or a style URL;
+	// DarkStyle the one in dark mode (default dark).
+	Style, DarkStyle string
+	// Controls are buttons over the map: "true" for zoom, or a list such as "zoom,north,locate,fullscreen".
+	Controls string
+	// Labels name the buttons, by action (zoom-in, zoom-out, north, locate, fullscreen).
+	Labels map[string]string
+	Globe  bool // a 3D globe instead of a flat map
+	// Route is a path drawn as a line; RouteProgress the index of the point reached, after which the
+	// line is dashed.
+	Route         []LngLat
+	RouteProgress *int
+	// GeoJSON is drawn over the map: an object (e.g. a map or a struct) or the URL of a file.
+	GeoJSON    any
+	LayerColor string // color of the route and the shapes, e.g. "--tblr-green"; default primary
+	Options    map[string]any // any MapLibre map option
+	// Library is the URL MapLibre GL JS is imported from; default LibraryURL.
+	Library string
+
+	// Ratio puts the map in a box of that aspect ratio, e.g. "16x9" (ratio-16x9); Height in a box of
+	// that height, e.g. "20rem". Without either the map fills its parent (e.g. "map flex-fill").
+	Ratio  string
+	Height string
+	Square bool // no rounded corners, for a map that fills a card's width
+	// Overlay is laid over the map, e.g. a card in a corner.
+	Overlay templ.Component
+
+	// Bubbles are circles sized by value with a tooltip; BubbleUnit follows the value ("users").
+	// BubbleRadius is the radius in px at 0 and at BubbleScale (default 4 and 24); BubbleScale defaults
+	// to the largest value.
+	Bubbles      []Bubble
+	BubbleUnit   string
+	BubbleRadius [2]float64
+	BubbleScale  float64
+	// Clusters are points grouped into clusters that split as you zoom in.
+	Clusters []LngLat
+	// Arcs are dashed lines between places; HideLabels hides the style's place names.
+	Arcs       []Arc
+	HideLabels bool
+}
+
+func js(v any) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+func (p Props) geojson() string {
+	if s, ok := p.GeoJSON.(string); ok {
+		return s
+	}
+	return js(p.GeoJSON)
+}
+
+func (p Props) layers() string {
+	if p.Bubbles == nil && p.Clusters == nil && p.Arcs == nil && !p.HideLabels {
+		return ""
+	}
+	return js(map[string]any{"bubbles": p.Bubbles, "unit": p.BubbleUnit, "radius": p.BubbleRadius, "scale": p.BubbleScale, "clusters": p.Clusters, "arcs": p.Arcs, "hideLabels": p.HideLabels})
+}
+
+func (p Props) mapClass() string {
+	if p.Class != "" {
+		return p.Class
+	}
+	if p.Ratio == "" && p.Height == "" {
+		return "map"
+	}
+	return kit.Classes("w-100 h-100", kit.If(!p.Square, "rounded"))
+}
+
+// Map is a map; the children are its Markers.
+templ Map(p Props) {
+	if p.Height != "" {
+		<div class="position-relative" style={ templ.SafeCSS("height: " + p.Height) }>
+			<div class="h-100">
+				@mapElement(p) {
+					{ children... }
+				}
+				if p.Overlay != nil {
+					@p.Overlay
+				}
+			</div>
+		</div>
+	} else if p.Ratio != "" {
+		<div class={ "ratio ratio-" + p.Ratio }>
+			<div>
+				@mapElement(p) {
+					{ children... }
+				}
+				if p.Overlay != nil {
+					@p.Overlay
+				}
+			</div>
+		</div>
+	} else {
+		@mapElement(p) {
+			{ children... }
+		}
+	}
+	@Script()
+}
+
+templ mapElement(p Props) {
+	<div
+		if p.ID != "" {
+			id={ "map-" + p.ID }
+		}
+		class={ p.mapClass() }
+		role="region"
+		aria-label={ kit.Or(p.Label, "Map") }
+		data-bs-toggle="map"
+		data-bs-library={ kit.Or(p.Library, LibraryURL) }
+		if p.Center != nil {
+			data-bs-center={ p.Center.String() }
+		}
+		if p.Zoom != 0 {
+			data-bs-zoom={ num(p.Zoom) }
+		}
+		if p.Style != "" {
+			data-bs-map-style={ p.Style }
+		}
+		if p.DarkStyle != "" {
+			data-bs-map-style-dark={ p.DarkStyle }
+		}
+		if p.Controls != "" {
+			data-bs-controls={ p.Controls }
+		}
+		if p.Globe {
+			data-bs-globe="true"
+		}
+		if p.Route != nil {
+			data-bs-route={ js(p.Route) }
+		}
+		if p.RouteProgress != nil {
+			data-bs-route-progress={ strconv.Itoa(*p.RouteProgress) }
+		}
+		if p.LayerColor != "" {
+			data-bs-layer-color={ p.LayerColor }
+		}
+		if p.Labels != nil {
+			data-bs-labels={ js(p.Labels) }
+		}
+		if p.GeoJSON != nil {
+			data-bs-geojson={ p.geojson() }
+		}
+		if p.Options != nil {
+			data-bs-map-options={ js(p.Options) }
+		}
+		if l := p.layers(); l != "" {
+			data-map-layers={ l }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</div>
+}
+
+// Kind is the look of a marker.
+type Kind string
+
+const (
+	Circle Kind = ""                // a circle with an icon, a number or a text (map-marker)
+	Dot    Kind = "map-marker-dot"  // a small dot
+	Pin    Kind = "map-marker-pin"  // a pin with its tip on the place
+)
+
+type MarkerProps struct {
+	Class      string
+	Attributes templ.Attributes
+	Lng, Lat   float64
+	Kind       Kind
+	Color      string // map-marker-{color}, e.g. "red", "green", "dark"
+	Icon       string // in a circle or a pin
+	Label      string // a short text next to the marker (map-marker-label)
+	Pulse      bool   // a live position (map-marker-pulse)
+	Draggable  bool
+	// Popup is a text shown on click; for richer content put a Popup in the children.
+	Popup     string
+	PopupOpen bool // open at first
+}
+
+// Marker is a marker of a Map; children (a number, an avatar, a Popup) go into it.
+templ Marker(p MarkerProps) {
+	<span
+		class={ kit.Classes("map-marker", string(p.Kind), kit.If(p.Color != "", "map-marker-"+p.Color), kit.If(p.Pulse, "map-marker-pulse"), p.Class) }
+		data-bs-lng={ num(p.Lng) }
+		data-bs-lat={ num(p.Lat) }
+		if p.Kind == Pin {
+			data-bs-anchor="bottom"
+		}
+		if p.Draggable {
+			data-bs-draggable="true"
+		}
+		if p.Popup != "" {
+			data-bs-popup={ p.Popup }
+		}
+		if p.PopupOpen {
+			data-bs-popup-open="true"
+		}
+		{ p.Attributes... }
+	>
+		if p.Icon != "" {
+			@icon.Icon(p.Icon)
+		}
+		{ children... }
+		if p.Label != "" {
+			<span class="map-marker-label">{ p.Label }</span>
+		}
+	</span>
+}
+
+type PopupProps struct {
+	Card        bool // room for an image (map-popup-card)
+	CloseButton bool
+}
+
+// Popup is the content of a marker's popup, shown on click; put it in the Marker.
+templ Popup(props ...PopupProps) {
+	{{ p := kit.First(props) }}
+	<template
+		if p.Card {
+			class="map-popup-card"
+		}
+		if p.CloseButton {
+			data-bs-close-button="true"
+		}
+	>
+		{ children... }
+	</template>
+}
+
+// FlyTo makes a button move the map with that ID to a place; the other buttons with FlyTo in the same
+// parent lose btn-primary and aria-pressed, the clicked one gets them.
+func FlyTo(id string, to LngLat, zoom float64) templ.Attributes {
+	return templ.Attributes{"data-map-fly": id, "data-map-fly-to": to.String(), "data-map-fly-zoom": num(zoom)}
+}
+
+// Library loads Tabler's map script and MapLibre's stylesheet; put it in the head before Tabler's CSS,
+// so Tabler's map styles (tabler-vendors.css) win.
+// Tabler's own script (tabler.js) must be on the page as well.
+templ Library() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/maplibre-gl@" + MapLibreVersion + "/dist/maplibre-gl.css" }/>
+	<script src={ "https://cdn.jsdelivr.net/npm/@tabler/core@" + TablerVersion + "/dist/js/tabler-map.min.js" } defer></script>
+}
+
+var once = templ.NewOnceHandle()
+
+// Script adds the data layers (Bubbles, Clusters, Arcs), the FlyTo buttons and starting maps swapped in
+// by htmx. Map renders it once per page.
+templ Script() {
+	@once.Once() {
+		<script>
+			(function () {
+				if (window.tablerMapView) return;
+				function features(points, props) {
+					return { type: 'FeatureCollection', features: points.map(function (p, i) { return { type: 'Feature', properties: props ? props(p, i) : {}, geometry: { type: p.type || 'Point', coordinates: p.coordinates || p } }; }) };
+				}
+				// Points along the shortest path between two places on the globe.
+				function arc(from, to, steps) {
+					var r = Math.PI / 180, l1 = from[0] * r, f1 = from[1] * r, l2 = to[0] * r, f2 = to[1] * r;
+					var a = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((f2 - f1) / 2), 2) + Math.cos(f1) * Math.cos(f2) * Math.pow(Math.sin((l2 - l1) / 2), 2)));
+					var out = [];
+					for (var s = 0; s <= steps; s++) {
+						var A = Math.sin((1 - s / steps) * a) / Math.sin(a), B = Math.sin((s / steps) * a) / Math.sin(a);
+						var x = A * Math.cos(f1) * Math.cos(l1) + B * Math.cos(f2) * Math.cos(l2);
+						var y = A * Math.cos(f1) * Math.sin(l1) + B * Math.cos(f2) * Math.sin(l2);
+						var z = A * Math.sin(f1) + B * Math.sin(f2);
+						out.push([Math.atan2(y, x) / r, Math.atan2(z, Math.hypot(x, y)) / r]);
+					}
+					return out;
+				}
+				function layers(el) {
+					var MapView = window.tabler && window.tabler.MapView;
+					var view = MapView && MapView.getOrCreateInstance(el);
+					if (!view || el.tablerLayers) return;
+					el.tablerLayers = true;
+					var d = JSON.parse(el.getAttribute('data-map-layers'));
+					view.onStyle(function (map) {
+						var color = MapView.color('--tblr-primary'), border = MapView.color('--tblr-bg-surface');
+						if (d.hideLabels) {
+							map.getStyle().layers.filter(function (l) { return l.type === 'symbol'; }).forEach(function (l) { map.setLayoutProperty(l.id, 'visibility', 'none'); });
+						}
+						if (d.bubbles) {
+							map.addSource('bubbles', { type: 'geojson', data: features(d.bubbles.map(function (b) { return [b.lng, b.lat]; }), function (p, i) { return d.bubbles[i]; }) });
+							var max = d.scale || Math.max.apply(null, d.bubbles.map(function (b) { return b.value; }));
+							var r = d.radius[1] ? d.radius : [4, 24];
+							map.addLayer({ id: 'bubbles', type: 'circle', source: 'bubbles', paint: { 'circle-color': color, 'circle-opacity': 0.6, 'circle-radius': ['interpolate', ['linear'], ['get', 'value'], 0, r[0], max, r[1]] } });
+						}
+						if (d.clusters) {
+							map.addSource('clusters', { type: 'geojson', data: features(d.clusters), cluster: true, clusterRadius: 40 });
+							map.addLayer({ id: 'clusters', type: 'circle', source: 'clusters', filter: ['has', 'point_count'], paint: { 'circle-color': color, 'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 25, 24], 'circle-stroke-width': 2, 'circle-stroke-color': border } });
+							map.addLayer({ id: 'cluster-count', type: 'symbol', source: 'clusters', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12 }, paint: { 'text-color': MapView.color('--tblr-primary-fg') } });
+							map.addLayer({ id: 'cluster-point', type: 'circle', source: 'clusters', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': color, 'circle-radius': 6, 'circle-stroke-width': 2, 'circle-stroke-color': border } });
+						}
+						if (d.arcs) {
+							map.addSource('arcs', { type: 'geojson', data: features(d.arcs.map(function (a) { return { type: 'LineString', coordinates: arc(a.from, a.to, 64) }; })) });
+							map.addLayer({ id: 'arcs', type: 'line', source: 'arcs', paint: { 'line-color': color, 'line-width': 1.5, 'line-dasharray': [2, 2] } });
+						}
+					});
+					view.ready(function (map) {
+						if (d.bubbles) {
+							var tip = new window.maplibregl.Popup({ closeButton: false, offset: 12, className: 'map-tooltip' });
+							map.on('mousemove', 'bubbles', function (e) {
+								var b = e.features[0].properties;
+								map.getCanvas().style.cursor = 'pointer';
+								tip.setLngLat([b.lng, b.lat]).setText(b.name + ': ' + b.value + (d.unit ? ' ' + d.unit : '')).addTo(map);
+							});
+							map.on('mouseleave', 'bubbles', function () { map.getCanvas().style.cursor = ''; tip.remove(); });
+						}
+						if (d.clusters) {
+							map.on('click', 'clusters', function (e) {
+								var c = e.features[0];
+								map.getSource('clusters').getClusterExpansionZoom(c.properties.cluster_id).then(function (zoom) { map.easeTo({ center: c.geometry.coordinates, zoom: zoom }); });
+							});
+						}
+					});
+				}
+				function init(root) {
+					var MapView = window.tabler && window.tabler.MapView;
+					if (!MapView) return;
+					root = root || document;
+					root.querySelectorAll('[data-bs-toggle="map"]').forEach(function (el) {
+						MapView.getOrCreateInstance(el);
+						if (el.hasAttribute('data-map-layers')) layers(el);
+					});
+				}
+				window.tablerMapView = { init: init };
+				// Tabler's map script starts the maps on DOMContentLoaded; the layers need its instances.
+				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
+				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
+				document.addEventListener('click', function (e) {
+					var b = e.target.closest && e.target.closest('[data-map-fly]');
+					var el = b && document.getElementById('map-' + b.getAttribute('data-map-fly'));
+					var view = el && window.tabler && window.tabler.MapView.getInstance(el);
+					if (!view || !view.map) return;
+					b.parentElement.querySelectorAll('[data-map-fly]').forEach(function (o) {
+						o.classList.toggle('btn-primary', o === b);
+						o.setAttribute('aria-pressed', String(o === b));
+					});
+					view.map.flyTo({ center: b.getAttribute('data-map-fly-to').split(',').map(Number), zoom: Number(b.getAttribute('data-map-fly-zoom')) });
+				});
+			})();
+		</script>
+	}
+}

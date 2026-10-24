@@ -1,0 +1,90 @@
+// Package wysiwyg renders Tabler's rich text editor: a textarea that HugeRTE turns into an editor with a
+// toolbar, in Tabler's look and in dark mode. The textarea submits the HTML. Load the editor with Library
+// in the head.
+//
+//	@wysiwyg.Editor(wysiwyg.Props{ID: "body", Name: "body", Value: "Hello, <b>Tabler</b>!"})
+package wysiwyg
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the HugeRTE version Library loads.
+const Version = "1.0.14"
+
+// LibraryURL is HugeRTE on jsDelivr; it loads its theme, skins and plugins from next to it.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/hugerte@" + Version + "/hugerte.min.js"
+
+type Props struct {
+	ID         string
+	Name       string
+	Class      string // on the textarea
+	Attributes templ.Attributes
+	Value      string // HTML
+	Height     int    // in px, default 300
+	// Toolbar is HugeRTE's toolbar setting, default Tabler's (undo, formats, alignment, lists).
+	Toolbar string
+	// Settings are HugeRTE settings merged over Tabler's.
+	Settings map[string]any
+}
+
+const toolbar = "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"
+
+func settings(p Props) string {
+	s := map[string]any{
+		"height": 300, "menubar": false, "statusbar": false,
+		"plugins": []string{"advlist", "autolink", "lists", "link", "image", "charmap", "preview", "anchor", "searchreplace", "visualblocks", "code", "fullscreen", "insertdatetime", "media", "table", "code", "help", "wordcount"},
+		"toolbar":       kit.Or(p.Toolbar, toolbar),
+		"content_style": "body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }",
+	}
+	if p.Height > 0 {
+		s["height"] = p.Height
+	}
+	for k, v := range p.Settings {
+		s[k] = v
+	}
+	return plugin.JSON(s)
+}
+
+// Editor is a rich text editor.
+templ Editor(p Props) {
+	<textarea
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		if p.Class != "" {
+			class={ p.Class }
+		}
+		data-tabler-wysiwyg={ settings(p) }
+		{ p.Attributes... }
+	>{ p.Value }</textarea>
+	@Script()
+}
+
+// Script starts the editors; Editor renders it.
+func Script() templ.Component {
+	return plugin.Start("wysiwyg", `function (root) {
+		if (!window.hugeRTE) return;
+		root.querySelectorAll('textarea[data-tabler-wysiwyg]').forEach(function (el) {
+			if (el.dataset.wysiwygStarted) return;
+			el.dataset.wysiwygStarted = 'true';
+			var options = JSON.parse(el.getAttribute('data-tabler-wysiwyg'));
+			options.target = el;
+			if (document.documentElement.getAttribute('data-bs-theme') === 'dark') {
+				options.skin = 'oxide-dark';
+				options.content_css = 'dark';
+			}
+			// The textarea submits the HTML: HugeRTE writes it back on submit.
+			hugeRTE.init(options);
+		});
+	}`)
+}
+
+// Library loads HugeRTE and starts every editor on the page; put it in the head.
+func Library() templ.Component {
+	return templ.Join(plugin.Script(LibraryURL), Script())
+}

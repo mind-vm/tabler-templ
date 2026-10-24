@@ -1,0 +1,565 @@
+// Package maps holds the map blocks of the Tabler preview (shared/components/cards/Map*): a store
+// locator, a delivery tracker, live users, homes for sale, an address picker, a server status map and
+// users by country. They are cards around a mapview.Map (or a vectormap.Map); the lists next to a map
+// select its markers through a small script of this package. All texts are props.
+package maps
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/mapview"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/status"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/typography"
+	"github.com/mind-vm/tabler-templ/vectormap"
+)
+
+templ header(title string) {
+	<div class="card-header">
+		<h2 class="card-title">{ title }</h2>
+	</div>
+}
+
+// Store is a place of a StoreLocator.
+type Store struct {
+	Name     string
+	Address  string
+	Distance string // e.g. "0.4 km"
+	Open     bool
+	Lng, Lat float64
+}
+
+type LocatorProps struct {
+	Class string
+	Title string
+	// Map is the map (ID required); its markers are made from the stores.
+	Map               mapview.Props
+	ListHeight        string // default "24rem"
+	SearchPlaceholder string // default "Search stores…"
+	SearchLabel       string // default "Search stores"
+	OpenLabel         string // default "Open"
+	ClosedLabel       string // default "Closed"
+}
+
+// StoreLocator is a list of stores with a search next to a map: picking a store moves the map to it
+// and opens its popup, and the search hides the stores and markers that do not match.
+templ StoreLocator(p LocatorProps, stores []Store) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		<div class="row g-0">
+			<div class="col-lg-4 border-end">
+				<div class="p-3 border-bottom">
+					<div class="input-icon">
+						<span class="input-icon-addon">
+							@icon.Icon("ti-search")
+						</span>
+						<input type="search" class="form-control" id={ p.Map.ID + "-search" } placeholder={ kit.Or(p.SearchPlaceholder, "Search stores…") } aria-label={ kit.Or(p.SearchLabel, "Search stores") } data-map-search={ p.Map.ID + "-list" }/>
+					</div>
+				</div>
+				<div class="list-group list-group-flush overflow-auto" id={ p.Map.ID + "-list" } style={ templ.SafeCSS("height: " + kit.Or(p.ListHeight, "24rem")) } data-map-list={ p.Map.ID } data-map-popups="true">
+					for i, s := range stores {
+						<button type="button" class={ "list-group-item list-group-item-action", kit.If(i == 0, "active") }>
+							<div class="d-flex align-items-center gap-2">
+								<span class="fw-medium">{ s.Name }</span>
+								if s.Open {
+									@badge.Badge(badge.Props{Color: "green", Light: true, Class: "ms-auto"}) {
+										{ kit.Or(p.OpenLabel, "Open") }
+									}
+								} else {
+									@badge.Badge(badge.Props{Color: "secondary", Light: true, Class: "ms-auto"}) {
+										{ kit.Or(p.ClosedLabel, "Closed") }
+									}
+								}
+							</div>
+							<div class="text-secondary">{ s.Address }</div>
+							<div class="text-secondary small mt-1">
+								@icon.Icon("ti-map-pin", icon.Props{Inline: true})
+								{ s.Distance }
+							</div>
+						</button>
+					}
+				</div>
+			</div>
+			<div class="col-lg-8">
+				@mapview.Map(squareMap(p.Map, "28.5rem")) {
+					for _, s := range stores {
+						@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: s.Lng, Lat: s.Lat, Icon: "ti-map-pin"}) {
+							@mapview.Popup() {
+								<div class="fw-medium">{ s.Name }</div>
+								<div class="text-secondary">{ s.Address }</div>
+							}
+						}
+					}
+				}
+			</div>
+		</div>
+		@Script()
+	</div>
+}
+
+func squareMap(m mapview.Props, height string) mapview.Props {
+	m.Square = true
+	if m.Height == "" && m.Ratio == "" {
+		m.Height = height
+	}
+	return m
+}
+
+type DeliveryProps struct {
+	Class string
+	Title string
+	// Map draws Map.Route with the courier at Map.RouteProgress (both required): a dot at the start,
+	// the courier and a home pin at the end.
+	Map      mapview.Props
+	Order    string // e.g. "Order #4821"
+	Status   string // e.g. "Arriving in 12 min"
+	Progress float64
+	Courier  avatar.Props
+	Name     string // the courier's name
+	Role     string // default "Your courier"
+	Distance string // e.g. "3.4 km"
+	Left     string // default "left to go"
+	CallHref  string
+	CallLabel string // default "Call the courier"
+}
+
+// Delivery is a delivery on a map: the route, the courier's position, the order's status over the map
+// and the courier below it.
+templ Delivery(p DeliveryProps) {
+	{{
+		at := 0
+		if p.Map.RouteProgress != nil {
+			at = *p.Map.RouteProgress
+		}
+		m := squareMap(p.Map, "20rem")
+		m.Overlay = deliveryStatus(p)
+	}}
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		@mapview.Map(m) {
+			if n := len(p.Map.Route); n > 0 {
+				@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Lng: p.Map.Route[0].Lng, Lat: p.Map.Route[0].Lat})
+				if at < n {
+					@mapview.Marker(mapview.MarkerProps{Color: "green", Pulse: true, Lng: p.Map.Route[at].Lng, Lat: p.Map.Route[at].Lat, Icon: "ti-truck-delivery"})
+				}
+				@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: p.Map.Route[n-1].Lng, Lat: p.Map.Route[n-1].Lat, Icon: "ti-home"})
+			}
+		}
+		<div class="card-body">
+			<div class="row align-items-center">
+				<div class="col-auto">
+					@avatar.Avatar(p.Courier)
+				</div>
+				<div class="col">
+					<div class="fw-medium">{ p.Name }</div>
+					<div class="text-secondary">{ kit.Or(p.Role, "Your courier") }</div>
+				</div>
+				<div class="col-auto text-end">
+					<div class="fw-medium">{ p.Distance }</div>
+					<div class="text-secondary">{ kit.Or(p.Left, "left to go") }</div>
+				</div>
+				<div class="col-auto">
+					<a href={ templ.SafeURL(kit.Or(p.CallHref, "#")) } class="btn btn-icon" aria-label={ kit.Or(p.CallLabel, "Call the courier") }>
+						@icon.Icon("ti-phone")
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ deliveryStatus(p DeliveryProps) {
+	<div class="card card-sm position-absolute top-0 start-0 m-3 shadow" style="width: 15rem">
+		<div class="card-body">
+			@typography.Subheader() {
+				{ p.Order }
+			}
+			<div class="h3 mb-2">{ p.Status }</div>
+			@progress.Progress(progress.Props{Value: p.Progress, Size: progress.SizeSmall, Color: "green"})
+		</div>
+	</div>
+}
+
+// Stat is a number with its label.
+type Stat struct {
+	Value string
+	Label string
+}
+
+type LiveProps struct {
+	Class string
+	Title string
+	Map   mapview.Props // e.g. with Bubbles
+	Label string        // over the map, e.g. "Active users"
+	Value string        // e.g. "3,544"
+	Trend *trending.Props
+	Note  string // after the trend, e.g. "vs last hour"
+	Top   []Stat // below the map, e.g. the top cities
+}
+
+// LiveUsers is a map of live users with the total in a card over it and the top places below.
+templ LiveUsers(p LiveProps) {
+	{{
+		m := squareMap(p.Map, "20rem")
+		m.Overlay = liveTotal(p)
+	}}
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		@mapview.Map(m)
+		if len(p.Top) > 0 {
+			<div class="card-body">
+				<div class="row text-center">
+					for _, s := range p.Top {
+						<div class="col">
+							<div class="fw-medium">{ s.Value }</div>
+							<div class="text-secondary">{ s.Label }</div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ liveTotal(p LiveProps) {
+	<div class="card card-sm position-absolute top-0 end-0 m-3 shadow">
+		<div class="card-body">
+			@typography.Subheader() {
+				{ p.Label }
+			}
+			<div class="h1 mb-1">{ p.Value }</div>
+			<div class="text-secondary">
+				if p.Trend != nil {
+					@trending.Trending(*p.Trend)
+				}
+				{ " " + p.Note }
+			</div>
+		</div>
+	</div>
+}
+
+// Home is a place of Homes.
+type Home struct {
+	Title    string
+	Price    string // shown on the marker too
+	Beds     int
+	Baths    int
+	Area     string // e.g. "78 m²"
+	Photo    string
+	Lng, Lat float64
+}
+
+type HomesProps struct {
+	Class      string
+	Title      string
+	Map        mapview.Props // ID required
+	ListHeight string        // default "26rem"
+}
+
+// Homes is a list of homes next to a map with their prices as markers: picking a home in the list, or
+// its price on the map, selects both.
+templ Homes(p HomesProps, homes []Home) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		<div class="row g-0">
+			<div class="col-lg-5 border-end">
+				<div class="list-group list-group-flush overflow-auto" id={ p.Map.ID + "-list" } style={ templ.SafeCSS("height: " + kit.Or(p.ListHeight, "26rem")) } data-map-list={ p.Map.ID } data-map-marker-active="map-marker-dark" data-map-marker-idle="map-marker-primary">
+					for i, h := range homes {
+						<button type="button" class={ "list-group-item list-group-item-action", kit.If(i == 0, "active") }>
+							<div class="row g-3 align-items-center">
+								<div class="col-auto">
+									<span class="avatar avatar-lg" style={ templ.SafeCSS("background-image: url(" + h.Photo + ")") }></span>
+								</div>
+								<div class="col">
+									<div class="fw-medium">{ h.Price }</div>
+									<div>{ h.Title }</div>
+									<div class="text-secondary small mt-1">
+										@icon.Icon("ti-bed", icon.Props{Inline: true})
+										{ strconv.Itoa(h.Beds) }
+										@icon.Icon("ti-bath", icon.Props{Inline: true, Class: "ms-2"})
+										{ strconv.Itoa(h.Baths) }
+										@icon.Icon("ti-ruler-2", icon.Props{Inline: true, Class: "ms-2"})
+										{ h.Area }
+									</div>
+								</div>
+							</div>
+						</button>
+					}
+				</div>
+			</div>
+			<div class="col-lg-7">
+				@mapview.Map(squareMap(p.Map, kit.Or(p.ListHeight, "26rem"))) {
+					for i, h := range homes {
+						@mapview.Marker(mapview.MarkerProps{Class: "px-2", Color: homeColor(i), Lng: h.Lng, Lat: h.Lat}) {
+							{ h.Price }
+						}
+					}
+				}
+			</div>
+		</div>
+		@Script()
+	</div>
+}
+
+func homeColor(i int) string {
+	if i == 0 {
+		return "dark"
+	}
+	return "primary"
+}
+
+type AddressProps struct {
+	Class string
+	Title string
+	// Map shows a draggable pin at Pin; dragging it writes "lat, lng" into the input with the id Field.
+	Map   mapview.Props
+	Pin   mapview.LngLat
+	Field string
+}
+
+// AddressPicker is an address form next to a map with a draggable pin, for an address the text alone
+// does not pin down; the children are the form (card body content), including the Field input.
+templ AddressPicker(p AddressProps) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		<div class="row g-0">
+			<div class="col-lg-5 border-end">
+				<div class="card-body">
+					{ children... }
+				</div>
+			</div>
+			<div class="col-lg-7">
+				@mapview.Map(squareMap(p.Map, "24rem")) {
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: p.Pin.Lng, Lat: p.Pin.Lat, Icon: "ti-map-pin", Draggable: true, Attributes: templ.Attributes{"data-map-position": p.Field}})
+				}
+			</div>
+		</div>
+		@Script()
+	</div>
+}
+
+// Position is a position as an AddressPicker writes it into its field: "lat, lng" with 5 decimals.
+func Position(p mapview.LngLat) string {
+	return fmt.Sprintf("%.5f, %.5f", p.Lat, p.Lng)
+}
+
+// State is the state of a Region.
+type State struct {
+	Label string // e.g. "Operational"
+	Color string // e.g. "green"
+	Alert bool   // pulses on the map and in the table
+}
+
+var (
+	Operational = State{Label: "Operational", Color: "green"}
+	Degraded    = State{Label: "Degraded", Color: "yellow", Alert: true}
+	Outage      = State{Label: "Outage", Color: "red", Alert: true}
+)
+
+// Region is a server region of a ServerStatus.
+type Region struct {
+	Name     string
+	Code     string
+	State    State
+	Latency  string
+	Uptime   string
+	Lng, Lat float64
+}
+
+type StatusProps struct {
+	Class string
+	Title string
+	Map   mapview.Props
+	// Column headings, default "Region", "Status", "Latency", "Uptime".
+	RegionLabel, StatusLabel, LatencyLabel, UptimeLabel string
+}
+
+// ServerStatus is a status page map: a marker per region colored by its state, and the regions in a
+// table below. A region with a problem pulses.
+templ ServerStatus(p StatusProps, regions []Region) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		@mapview.Map(squareMap(p.Map, "20rem")) {
+			for _, r := range regions {
+				@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Color: r.State.Color, Pulse: r.State.Alert, Lng: r.Lng, Lat: r.Lat, Popup: r.Name + ": " + r.State.Label})
+			}
+		}
+		<div class="table-responsive" tabindex="0">
+			<table class="table table-vcenter card-table">
+				<thead>
+					<tr>
+						<th>{ kit.Or(p.RegionLabel, "Region") }</th>
+						<th>{ kit.Or(p.StatusLabel, "Status") }</th>
+						<th class="text-end">{ kit.Or(p.LatencyLabel, "Latency") }</th>
+						<th class="text-end">{ kit.Or(p.UptimeLabel, "Uptime") }</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, r := range regions {
+						<tr>
+							<td>
+								{ r.Name } <span class="text-secondary">{ r.Code }</span>
+							</td>
+							<td>
+								@status.Dot(status.DotProps{Color: r.State.Color, Animated: r.State.Alert, Class: "me-2"})
+								{ r.State.Label }
+							</td>
+							<td class="text-end">{ r.Latency }</td>
+							<td class="text-end">{ r.Uptime }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+// Country is a row of UsersByCountry.
+type Country struct {
+	Name  string
+	Flag  string // country code, e.g. "us"
+	Users string
+	Share float64 // percent
+}
+
+type CountriesProps struct {
+	Class string
+	Title string
+	Map   vectormap.Props
+	// Column headings, default "Country", "Users", "Share".
+	CountryLabel, UsersLabel, ShareLabel string
+}
+
+// UsersByCountry is a vector world map shaded by users next to a table of the top countries.
+templ UsersByCountry(p CountriesProps, countries []Country) {
+	<div class={ kit.Classes("card", p.Class) }>
+		@header(p.Title)
+		<div class="row g-0">
+			<div class="col-lg-7 border-end">
+				<div class="card-body">
+					@vectormap.Map(p.Map)
+				</div>
+			</div>
+			<div class="col-lg-5">
+				<div class="table-responsive" tabindex="0">
+					<table class="table table-vcenter card-table">
+						<thead>
+							<tr>
+								<th>{ kit.Or(p.CountryLabel, "Country") }</th>
+								<th class="text-end">{ kit.Or(p.UsersLabel, "Users") }</th>
+								<th class="w-33">{ kit.Or(p.ShareLabel, "Share") }</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, c := range countries {
+								<tr>
+									<td>
+										@flag.Flag(c.Flag, flag.Props{Size: flag.SizeXS, Class: "me-2"})
+										{ c.Name }
+									</td>
+									<td class="text-end">{ c.Users }</td>
+									<td>
+										<div class="d-flex align-items-center gap-2">
+											<span class="text-secondary">{ strconv.FormatFloat(c.Share, 'f', -1, 64) }%</span>
+											@progress.Progress(progress.Props{Value: c.Share, Size: progress.SizeSmall, Class: "flex-fill"})
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+var once = templ.NewOnceHandle()
+
+// Script links the lists of StoreLocator and Homes to their maps, the search of a StoreLocator, and the
+// pin of an AddressPicker to its field. The blocks render it once per page.
+templ Script() {
+	@once.Once() {
+		<script>
+			(function () {
+				if (window.tablerMapBlocks) return;
+				window.tablerMapBlocks = true;
+				function view(id) {
+					var el = document.getElementById('map-' + id);
+					return el && window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(el);
+				}
+				function list(el) {
+					var v = view(el.getAttribute('data-map-list'));
+					if (!v || el.tablerList) return;
+					el.tablerList = true;
+					var popups = el.hasAttribute('data-map-popups');
+					var on = el.getAttribute('data-map-marker-active'), off = el.getAttribute('data-map-marker-idle');
+					v.ready(function (map) {
+						// The markers are in the same order as the items of the list
+						var items = Array.prototype.slice.call(el.querySelectorAll('.list-group-item'));
+						var markers = v.markers;
+						function select(index, move) {
+							items.forEach(function (item, i) { item.classList.toggle('active', i === index); });
+							markers.forEach(function (m, i) {
+								if (popups && m.getPopup() && m.getPopup().isOpen() !== (i === index)) m.togglePopup();
+								if (on) m.getElement().classList.toggle(on, i === index);
+								if (off) m.getElement().classList.toggle(off, i !== index);
+							});
+							if (move) map.flyTo({ center: markers[index].getLngLat(), zoom: 13 });
+						}
+						items.forEach(function (item, i) { item.addEventListener('click', function () { select(i, true); }); });
+						markers.forEach(function (m, i) {
+							m.getElement().addEventListener('click', function (e) {
+								if (popups) e.stopPropagation();
+								select(i, false);
+								items[i].scrollIntoView({ block: 'nearest' });
+							});
+						});
+						document.querySelectorAll('[data-map-search="' + el.id + '"]').forEach(function (input) {
+							input.addEventListener('input', function () {
+								var q = input.value.trim().toLowerCase();
+								items.forEach(function (item, i) {
+									var hidden = item.textContent.toLowerCase().indexOf(q) < 0;
+									item.hidden = hidden;
+									markers[i].getElement().hidden = hidden;
+								});
+							});
+						});
+						if (popups) select(0, false);
+					});
+				}
+				function picker(mapEl) {
+					var v = window.tabler && window.tabler.MapView && window.tabler.MapView.getOrCreateInstance(mapEl);
+					if (!v || mapEl.tablerPicker) return;
+					mapEl.tablerPicker = true;
+					v.ready(function () {
+						v.markers.forEach(function (m) {
+							var field = document.getElementById(m.getElement().getAttribute('data-map-position') || '');
+							if (!field) return;
+							m.on('drag', function () {
+								var p = m.getLngLat();
+								field.value = p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);
+							});
+						});
+					});
+				}
+				function init(root) {
+					root = root || document;
+					root.querySelectorAll('[data-map-list]').forEach(list);
+					root.querySelectorAll('[data-bs-toggle="map"]').forEach(function (el) {
+						if (el.querySelector('[data-map-position]')) picker(el);
+					});
+				}
+				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
+				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
+			})();
+		</script>
+	}
+}

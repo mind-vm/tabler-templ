@@ -1,0 +1,126 @@
+// Package rangeslider renders Tabler's range slider with noUiSlider: one or several handles, a filled
+// track between them, steps and a color (text-{color} on Class). With Name the values are submitted with
+// the form, in hidden inputs. Load the plugin with Library in the head.
+//
+//	@rangeslider.Slider(rangeslider.Props{ID: "price", Name: "price", Values: []float64{60, 90}, Max: 100, Step: 10, Label: "Price range"})
+package rangeslider
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the noUiSlider version Library loads.
+const Version = "15.8.1"
+
+// LibraryURL and StylesheetURL are noUiSlider on jsDelivr.
+const (
+	LibraryURL    = "https://cdn.jsdelivr.net/npm/nouislider@" + Version + "/dist/nouislider.min.js"
+	StylesheetURL = "https://cdn.jsdelivr.net/npm/nouislider@" + Version + "/dist/nouislider.min.css"
+)
+
+type Props struct {
+	ID         string
+	Name       string // submits the values in hidden inputs with this name
+	Class      string // e.g. "text-green" for the color
+	Attributes templ.Attributes
+	Min        float64
+	Max        float64 // default 100
+	Step       float64 // default 1
+	// Values are the handles, default one at 50.
+	Values []float64
+	// Connect fills the track before a single handle; several handles always fill between them.
+	Connect bool
+	Label   string // aria-label of the handles; with two, "… minimum" and "… maximum"
+	// Settings are noUiSlider options merged over the built ones.
+	Settings map[string]any
+}
+
+func (p Props) values() []float64 {
+	if len(p.Values) == 0 {
+		return []float64{50}
+	}
+	return p.Values
+}
+
+// options ports Tabler's Range.astro.
+func (p Props) options() string {
+	vs := p.values()
+	o := map[string]any{"start": vs, "step": p.Step, "range": map[string]float64{"min": p.Min, "max": p.Max}}
+	if p.Max == 0 {
+		o["range"] = map[string]float64{"min": p.Min, "max": 100}
+	}
+	if p.Step == 0 {
+		o["step"] = 1
+	}
+	if len(vs) > 1 || p.Connect {
+		var c []bool
+		for i := 2; i <= len(vs); i++ {
+			c = append(c, (i-2)%2 != 0)
+		}
+		o["connect"] = append(c, true, false)
+	}
+	if p.Label != "" {
+		labels := make([]map[string]string, len(vs))
+		for i := range vs {
+			l := p.Label
+			switch {
+			case len(vs) == 2 && i == 0:
+				l += " minimum"
+			case len(vs) == 2:
+				l += " maximum"
+			case len(vs) > 2:
+				l += " handle " + strconv.Itoa(i+1)
+			}
+			labels[i] = map[string]string{"aria-label": l}
+		}
+		o["handleAttributes"] = labels
+	}
+	for k, v := range p.Settings {
+		o[k] = v
+	}
+	return plugin.JSON(o)
+}
+
+// Slider is a range slider.
+templ Slider(p Props) {
+	<div
+		class={ kit.Classes("form-range mb-2", p.Class) }
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		data-tabler-range={ p.options() }
+		{ p.Attributes... }
+	></div>
+	if p.Name != "" {
+		for _, v := range p.values() {
+			<input type="hidden" name={ p.Name } value={ strconv.FormatFloat(v, 'f', -1, 64) } data-tabler-range-value={ p.ID }/>
+		}
+	}
+	@Script()
+}
+
+// Script starts the sliders; Slider renders it.
+func Script() templ.Component {
+	return plugin.Start("rangeslider", `function (root) {
+		if (!window.noUiSlider) return;
+		root.querySelectorAll('[data-tabler-range]').forEach(function (el) {
+			if (el.noUiSlider) return;
+			noUiSlider.create(el, JSON.parse(el.getAttribute('data-tabler-range')));
+			var inputs = el.id ? document.querySelectorAll('input[data-tabler-range-value="' + el.id + '"]') : [];
+			if (inputs.length) el.noUiSlider.on('change', function (values) {
+				inputs.forEach(function (input, i) { input.value = parseFloat(values[i]); });
+			});
+		});
+	}`)
+}
+
+// Library loads noUiSlider and its stylesheet and starts every slider on the page; put it in the head, before
+// Tabler's stylesheet (Tabler's vendor styles override the plugin's).
+templ Library() {
+	@plugin.Stylesheet(StylesheetURL)
+	@plugin.Script(LibraryURL)
+	@Script()
+}
