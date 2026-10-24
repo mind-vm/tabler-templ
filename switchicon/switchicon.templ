@@ -1,0 +1,79 @@
+// Package switchicon renders Tabler's switch icon: a toggle that swaps between two icons with an
+// animation, e.g. a heart that fills when liked. Tabler's script toggles it (data-bs-toggle="switch-icon").
+package switchicon
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Variant string
+
+const (
+	Default    Variant = ""
+	Fade       Variant = "fade"
+	Scale      Variant = "scale"
+	Flip       Variant = "flip"
+	SlideUp    Variant = "slide-up"
+	SlideDown  Variant = "slide-down"
+	SlideLeft  Variant = "slide-left"
+	SlideRight Variant = "slide-right"
+	SlideStart Variant = "slide-start"
+	SlideEnd   Variant = "slide-end"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Icon       string // default "ti-heart"
+	// ActiveIcon is shown when on; default Icon, filled for a heart or a star (as in Tabler).
+	ActiveIcon  string
+	ActiveColor string // default "red"
+	Variant     Variant
+	Active      bool
+	Loading     bool // a spinner instead of the icons
+	// Action wraps the switch in a btn-action button.
+	Action bool
+	Label  string // aria-label, default "Toggle"
+}
+
+templ inner(p Props) {
+	<span class={ kit.Classes("switch-icon-a", kit.If(!p.Action, "text-muted")) }>
+		@icon.Icon(kit.Or(p.Icon, "ti-heart"))
+	</span>
+	<span class={ "switch-icon-b text-" + kit.Or(p.ActiveColor, "red") }>
+		@icon.Icon(kit.Or(p.ActiveIcon, kit.Or(p.Icon, "ti-heart")), icon.Props{Filled: p.ActiveIcon == "" && fills(kit.Or(p.Icon, "ti-heart"))})
+	</span>
+}
+
+// fills tells whether the on state of an icon is its filled variant: Tabler fills hearts and stars.
+func fills(name string) bool { return name == "ti-heart" || name == "ti-star" }
+
+func attrs(p Props) templ.Attributes {
+	a := templ.Attributes{"data-bs-toggle": "switch-icon", "aria-pressed": "false", "aria-label": kit.Or(p.Label, "Toggle")}
+	if p.Active {
+		a["aria-pressed"] = "true"
+	}
+	if p.Loading {
+		a["aria-busy"] = "true"
+	}
+	return kit.Attrs(a, p.Attributes)
+}
+
+func classes(p Props) string {
+	return kit.Classes("switch-icon", kit.If(p.Variant != Default, "switch-icon-"+string(p.Variant)), kit.If(p.Active, "active"), kit.If(p.Loading, "switch-icon-loading"))
+}
+
+templ SwitchIcon(p Props) {
+	if p.Action {
+		<button type="button" class={ kit.Classes("btn btn-action", p.Class) } { attrs(p)... }>
+			<span class={ classes(p) }>
+				@inner(p)
+			</span>
+		</button>
+	} else {
+		<button type="button" class={ kit.Classes(classes(p), p.Class) } { attrs(p)... }>
+			@inner(p)
+		</button>
+	}
+}

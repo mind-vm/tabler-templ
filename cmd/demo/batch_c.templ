@@ -1,0 +1,561 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/sparkline"
+	"github.com/mind-vm/tabler-templ/typography"
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/carousel"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/listgroup"
+	"github.com/mind-vm/tabler-templ/placeholder"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/ribbon"
+	"github.com/mind-vm/tabler-templ/tooltip"
+	"github.com/mind-vm/tabler-templ/trending"
+)
+
+// batchCPages are the carousel, placeholder and card-gradients pages.
+func batchCPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"carousel":       carouselPage(),
+		"placeholder":    placeholderPage(),
+		"card-gradients": cardGradientsPage(),
+	}
+}
+
+// slides turns photo file names (without .jpg) and their alt texts into carousel slides.
+func slides(pairs ...string) []carousel.Slide {
+	var ss []carousel.Slide
+	for i := 0; i+1 < len(pairs); i += 2 {
+		ss = append(ss, carousel.Slide{Src: photo("photos/" + pairs[i] + ".jpg"), Alt: pairs[i+1]})
+	}
+	return ss
+}
+
+func captioned(names ...string) []carousel.Slide {
+	var ss []carousel.Slide
+	for _, n := range names {
+		ss = append(ss, carousel.Slide{Src: photo("photos/" + n + ".jpg"), Title: "Slide label", Text: "Nulla vitae elit libero, a pharetra augue mollis interdum."})
+	}
+	return ss
+}
+
+// headerCard is a card with a title in its header and the children in its body.
+templ headerCard(title string) {
+	@card.Card() {
+		@card.Header() {
+			@card.Title() {
+				{ title }
+			}
+		}
+		@card.Body() {
+			{ children... }
+		}
+	}
+}
+
+templ carouselPage() {
+	@preview("carousel") {
+		<div class="row row-cards">
+			<div class="col-md-6">
+				@headerCard("Carousel") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-default", Indicators: carousel.NoIndicators, NoControls: true, Label: "Carousel"},
+						slides("beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach", "Beautiful blonde woman relaxing with a can of coke on a tree stump by the beach",
+							"brainstorming-session-with-creative-designers", "Brainstorming session with creative designers",
+							"finances-us-dollars-and-bitcoins-currency-money", "Finances - US Dollars and Bitcoins - Currency - Money",
+							"group-of-people-brainstorming-and-taking-notes-2", "Group of people brainstorming and taking notes",
+							"blue-sofa-with-pillows-in-a-designer-living-room-interior", "Blue sofa with pillows in a designer living room interior"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with indicators") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-indicators", NoControls: true, Label: "Carousel with indicators"},
+						slides("home-office-desk-with-macbook-iphone-calendar-watch-and-organizer", "Home office desk with Macbook, iPhone, calendar, watch & organizer",
+							"young-woman-working-in-a-cafe", "Young woman working in a cafe",
+							"everything-you-need-to-work-from-your-bed", "Everything you need to work from your bed",
+							"young-entrepreneur-working-from-a-modern-cafe", "Young Entrepreneur Working from a Modern Cafe",
+							"finances-us-dollars-and-bitcoins-currency-money-2", "Finances - US Dollars and Bitcoins - Currency - Money"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with controls") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-controls", Indicators: carousel.NoIndicators, Label: "Carousel with controls"},
+						slides("group-of-people-sightseeing-in-the-city", "Group of people sightseeing in the city",
+							"color-palette-guide-sample-colors-catalog-", "Color Palette Guide. Sample Colors Catalog.",
+							"stylish-workplace-with-computer-at-home", "Stylish workplace with computer at home",
+							"pink-desk-in-the-home-office", "Pink desk in the home office",
+							"young-woman-sitting-on-the-sofa-and-working-on-her-laptop", "Young woman sitting on the sofa and working on her laptop"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with captions") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-captions", Indicators: carousel.NoIndicators, Label: "Carousel with captions"},
+						captioned("coffee-on-a-table-with-other-items", "young-entrepreneur-working-from-a-modern-cafe-2",
+							"soft-photo-of-woman-on-the-bed-with-the-book-and-cup-of-coffee-in-hands", "fairy-lights-at-the-beach-in-bulgaria", "woman-working-on-laptop-at-home-office"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with dot indicators") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-indicators-dot", Fade: true, Indicators: carousel.Dots, NoControls: true, Label: "Carousel with dot indicators"},
+						slides("modern-home-office", "Modern Home Office",
+							"blond-using-her-laptop-at-her-bedroom", "Blond using her laptop at her bedroom",
+							"tropical-palm-leaves-floral-pattern-background", "Tropical palm leaves, floral pattern background",
+							"woman-read-book-and-drink-coffee", "Woman read book and drink coffee",
+							"book-on-the-grass", "Book on the grass"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with thumbnail indicators") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-indicators-thumb", Fade: true, Indicators: carousel.Thumbs, NoControls: true, Label: "Carousel with thumbnail indicators"},
+						slides("colorful-exotic-flowers-and-greenery", "Colorful Exotic Flowers and Greenery",
+							"workplace-with-laptop-on-table-at-home", "Workplace with laptop on table at home",
+							"city-lights-reflected-in-the-water-at-night", "City lights reflected in the water at night",
+							"cryptocurrency-bitcoin-coins", "Cryptocurrency Bitcoin coins",
+							"woman-read-book-and-drink-coffee-2", "Woman read book and drink coffee"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with vertical dot indicators") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-indicators-dot-vertical", Fade: true, Indicators: carousel.Dots, Vertical: true, NoControls: true,
+						Label: "Carousel with vertical dot indicators"},
+						slides("friends-at-a-restaurant-drinking-wine", "Friends at a restaurant drinking wine",
+							"beautiful-blonde-woman-on-a-wooden-pier-by-the-lake", "Beautiful blonde woman on a wooden pier by the lake",
+							"white-apple-imac-computer-with-elephant-mousepad", "White Apple iMac computer with elephant mousepad",
+							"workplace-with-laptop-on-table-at-home-2", "Workplace with laptop on table at home",
+							"working-in-a-restaurant-macbook-cheese-cake-and-cup-of-coffee", "Working in a restaurant: Macbook, Cheese Cake and Cup of Coffee"))
+				}
+			</div>
+			<div class="col-md-6">
+				@headerCard("Carousel with vertical thumbnail indicators") {
+					@carousel.Carousel(carousel.Props{ID: "carousel-indicators-thumb-vertical", Fade: true, Indicators: carousel.Thumbs, Vertical: true, NoControls: true,
+						Label: "Carousel with vertical thumbnail indicators"},
+						slides("tropical-palm-leaves-floral-pattern-background", "Tropical palm leaves, floral pattern background",
+							"woman-read-book-and-drink-coffee", "Woman read book and drink coffee",
+							"book-on-the-grass", "Book on the grass",
+							"colorful-exotic-flowers-and-greenery", "Colorful Exotic Flowers and Greenery",
+							"workplace-with-laptop-on-table-at-home", "Workplace with laptop on table at home"))
+				}
+			</div>
+		</div>
+	}
+}
+
+// Placeholder page: the preview's cards/placeholder/Card1–6.
+
+// placeholderLines are the title line and the text lines of a placeholder card body.
+templ placeholderLines(widths ...string) {
+	@placeholder.Placeholder(placeholder.Props{Class: "col-9 mb-3"})
+	for _, w := range widths {
+		@placeholder.Placeholder(placeholder.Props{Class: w, Size: "xs"})
+	}
+}
+
+templ placeholderButton() {
+	<div class="mt-3">
+		@button.Button(button.Props{Href: "#", Variant: button.VariantPrimary, Disabled: true, Class: "placeholder col-4", Attributes: templ.Attributes{"aria-hidden": "true"}})
+	</div>
+}
+
+// placeholderImageCard is Card1: an image, a title, two lines and a button, glowing.
+templ placeholderImageCard() {
+	@card.Card(card.Props{Class: "placeholder-glow"}) {
+		@placeholder.Placeholder(placeholder.Props{Class: "ratio ratio-21x9 card-img-top"})
+		@card.Body() {
+			@placeholderLines("col-10", "col-11")
+			@placeholderButton()
+		}
+	}
+}
+
+templ placeholderAvatar(class string) {
+	@placeholder.Placeholder(placeholder.Props{Class: "avatar avatar-rounded " + class})
+}
+
+templ placeholderPage() {
+	@preview("placeholder") {
+		<div class="row row-cards">
+			for range 4 {
+				<div class="col-6 col-md-3">
+					@placeholderImageCard()
+				</div>
+			}
+			<div class="col-12 col-md-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@card.Card() {
+							@card.Body() {
+								<div class="row">
+									<div class="col-auto">
+										@placeholderAvatar("")
+									</div>
+									<div class="col">
+										@placeholder.Placeholder(placeholder.Props{Class: "col-9", Size: "xs"})
+										@placeholder.Placeholder(placeholder.Props{Class: "col-7", Size: "xs"})
+									</div>
+								</div>
+							}
+						}
+					</div>
+					<div class="col-12">
+						@card.Card() {
+							@card.Body(card.Props{Class: "py-5 text-center"}) {
+								<div>
+									@placeholderAvatar("avatar-lg mb-3")
+								</div>
+								<div class="w-75 mx-auto">
+									@placeholderLines("col-10")
+								</div>
+							}
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-12 col-md-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@placeholderImageCard()
+					</div>
+					<div class="col-12">
+						@card.Card() {
+							<div class="row g-0 align-items-center placeholder-glow">
+								<div class="col-3">
+									@placeholder.Placeholder(placeholder.Props{Class: "ratio ratio-1x1 card-img-start"})
+								</div>
+								<div class="col">
+									@card.Body() {
+										@placeholderLines("col-10", "col-11")
+									}
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-12 col-md-4">
+				<div class="row row-cards">
+					<div class="col-12">
+						@card.Card() {
+							@card.Body(card.Props{Class: "text-end placeholder-glow"}) {
+								@placeholderLines("col-10", "col-12", "col-11", "col-8", "col-10")
+							}
+						}
+					</div>
+					<div class="col-12">
+						@card.Card() {
+							@listgroup.List(listgroup.Props{Unordered: true, Flush: true, Class: "placeholder-glow"}) {
+								for range 4 {
+									@listgroup.Item(listgroup.ItemProps{ListItem: true}) {
+										<div class="row align-items-center">
+											<div class="col-auto">
+												@placeholderAvatar("")
+											</div>
+											<div class="col-7">
+												@placeholder.Placeholder(placeholder.Props{Class: "col-9", Size: "xs"})
+												@placeholder.Placeholder(placeholder.Props{Class: "col-7", Size: "xs"})
+											</div>
+											<div class="col-2 ms-auto text-end">
+												@placeholder.Placeholder(placeholder.Props{Class: "col-8", Size: "xs"})
+												@placeholder.Placeholder(placeholder.Props{Class: "col-10", Size: "xs"})
+											</div>
+										</div>
+									}
+								}
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Card gradients page.
+
+// welcomeFigure is a key figure of the welcome card: label, value with trend and a bar.
+templ welcomeFigure(label, value string, change float64, changeText string, bar int, color string) {
+	<div class="col-auto">
+		@typography.Subheader() {
+			{ label }
+		}
+		<div class="d-flex align-items-baseline">
+			<div class="h3 me-2">{ value }</div>
+			<div class="me-auto">
+				@trending.Trending(trending.Props{Value: change, Text: changeText})
+			</div>
+		</div>
+		@progress.Progress(progress.Props{Size: progress.SizeSmall, Value: bar, Color: color})
+	</div>
+}
+
+// orderStat is a small figure card with an avatar icon and a bar.
+templ orderStat(color, label, value, ic string, bar int) {
+	@card.Card(card.Props{Gradient: color, GradientEdge: "start"}) {
+		@card.Body() {
+			<div class="row g-3">
+				<div class="col">
+					@typography.Subheader(typography.SubheaderProps{Level: 2, Class: "mb-1"}) {
+						{ label }
+					}
+					<div class="h3 m-0">{ value }</div>
+				</div>
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Icon: ic, Color: color})
+				</div>
+				<div class="col-12">
+					@progress.Progress(progress.Props{Size: progress.SizeSmall, Value: bar, Color: color})
+				</div>
+			</div>
+		}
+	}
+}
+
+templ weatherCard(gradient, city, ic, text, temp string) {
+	@card.Card(card.Props{Gradient: gradient, GradientEdge: "end"}) {
+		@card.Body() {
+			<div class="row">
+				<div class="col">
+					<div class="row">
+						<div class="col-auto">
+							<h2 class="card-title mb-2">{ city }</h2>
+						</div>
+						<div class="col">
+							@icon.Icon(ic)
+						</div>
+					</div>
+					<div class="text-secondary">{ text }</div>
+				</div>
+				<div class="col-auto">
+					<div class="display-5 lh-1 fw-lighter">{ temp }°</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ trendCard(gradient, ic, value, change, label string) {
+	@card.Card(card.Props{Size: card.SizeSmall, Gradient: gradient, GradientEdge: "end"}) {
+		@card.Body() {
+			<div class="row align-items-center">
+				<div class="col-auto">
+					@avatar.Avatar(avatar.Props{Icon: ic, Shape: avatar.ShapeSquare, Class: "bg-" + gradient + " text-white"})
+				</div>
+				<div class="col">
+					<div class="fw-medium">
+						{ value }
+						<span class={ "float-end fw-medium text-" + gradient }>{ change }</span>
+					</div>
+					<div class="text-secondary">{ label }</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ celebrationCard(gradient, emoji, emojiClass, title string, button_ string) {
+	@card.Card(card.Props{Gradient: gradient}) {
+		@card.Body(card.Props{Class: "text-center p-5"}) {
+			<div class={ emojiClass + " lh-1 mb-2" }>{ emoji }</div>
+			<h2 class="h1">{ title }</h2>
+			{ children... }
+			<div class="mt-5">
+				@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-gift"}) {
+					{ button_ }
+				}
+			</div>
+		}
+	}
+}
+
+templ contactButton(ic, label string) {
+	@button.Button(button.Props{Href: "#", Icon: ic, IconOnly: true, Pill: true, Attributes: tooltip.Attrs(label, tooltip.Top)})
+}
+
+templ cardGradientsPage() {
+	@preview("card-gradients") {
+		<div class="row row-cards">
+			<div class="col-md-6">
+				<div class="row row-cards">
+					<div class="col-12">
+						@card.Card(card.Props{Gradient: "default"}) {
+							@card.Body() {
+								<div class="row gy-3">
+									<div class="col-12 col-sm-6 d-flex flex-column">
+										<h2 class="h2">Welcome back, Paweł</h2>
+										<p class="text-secondary">You have 5 new messages and 2 new notifications.</p>
+										<div class="row g-5 mt-auto">
+											@welcomeFigure("Today's Sales", "6,782", 7, "", 75, "success")
+											@welcomeFigure("Growth Rate", "78,4%", -1, "", 78, "danger")
+										</div>
+									</div>
+									<div class="col-12 col-sm-6 d-flex justify-content-center">
+										<a href="./illustrations" aria-label="Illustrations">
+											<img src={ photo("illustrations/light/good-info.png") } height="200" alt=""/>
+										</a>
+									</div>
+								</div>
+							}
+						}
+					</div>
+					<div class="col-12">
+						<div class="row">
+							<div class="col-6">
+								<div class="row row-cards">
+									<div class="col-12">
+										@card.Card(card.Props{Gradient: "danger"}) {
+											@card.Body(card.Props{Class: "p-5 text-center"}) {
+												<h2 class="card-title">Are you sure to delete this card?</h2>
+												<p class="text-secondary">If you delete this card, you will not be able to recover it.</p>
+												@button.List(button.ListProps{Center: true, Class: "mt-5"}) {
+													@button.Button(button.Props{Type: "button", Variant: button.VariantDanger}) {
+														Yes, delete it
+													}
+													@button.Button(button.Props{Type: "button"}) {
+														Cancel
+													}
+												}
+											}
+										}
+									</div>
+									<div class="col-12">
+										@card.Card(card.Props{Gradient: "success"}) {
+											@card.Body(card.Props{Class: "p-5 text-center"}) {
+												<div class="mb-3">
+													@icon.Icon("ti-circle-check", icon.Props{Size: icon.SizeLarge, Color: "success"})
+												</div>
+												<h2 class="card-title">Success!</h2>
+												<p class="text-secondary">Your changes have been saved successfully.</p>
+												@button.List(button.ListProps{Center: true, Class: "mt-5"}) {
+													@button.Button(button.Props{Type: "button", Variant: button.VariantSuccess}) {
+														Continue
+													}
+												}
+											}
+										}
+									</div>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="row row-cards">
+									<div class="col-12">
+										@card.Card(card.Props{Gradient: "love"}) {
+											@ribbon.Ribbon(ribbon.Props{Color: "pink", Text: "Featured"})
+											@card.Body() {
+												@typography.Subheader(typography.SubheaderProps{Class: "text-pink"}) {
+												Professional
+											}
+												<div class="d-flex align-items-baseline mt-5">
+													<div class="display-5">$199</div>
+													<div class="fs-1 text-secondary">/ month</div>
+												</div>
+												@iconlist.List(iconlist.Props{Color: "success", Class: "mt-6"}) {
+													@iconlist.Item() {
+														<span><strong>Unlimited</strong> Target Audience</span>
+													}
+													@iconlist.Item() {
+														<span><strong>1</strong> User Account</span>
+													}
+													@iconlist.Item() {
+														<span><strong>100+</strong> Video Tuts</span>
+													}
+													@iconlist.Item(iconlist.ItemProps{Icon: "ti-x", Color: "secondary", Class: "text-secondary"}) {
+														Public Displays
+													}
+												}
+												<p class="mt-4 text-muted">This plan is perfect for small businesses and startups. It includes all the features you need to get started.</p>
+												<div class="mt-6">
+													@button.Button(button.Props{Type: "button", Variant: button.Variant("pink"), Block: true}) {
+														Purchase Now
+													}
+												</div>
+											}
+										}
+									</div>
+									<div class="col-12">
+										@orderStat("success", "Earned", "$2,847", "ti-credit-card", 75)
+									</div>
+									<div class="col-12">
+										@orderStat("yellow", "Pending Orders", "47", "ti-clock", 38)
+									</div>
+									<div class="col-12">
+										@orderStat("red", "Cancelled Orders", "12", "ti-shopping-cart-x", 8)
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-3">
+				<div class="row row-cards">
+					<div class="col-12">
+						@celebrationCard("rainbow", "🍾 🎉", "display-5", "Happy Birthday, Andrew!", "Grab my special deal") {
+							<p class="text-secondary">We truly hope your day is brimming with joy, laughter, and countless moments that bring a smile to your face!</p>
+							<p class="text-secondary">To celebrate your special day, here's a discount code just for you: <strong class="text-body">NWYR20</strong>. Enjoy <strong class="text-body">20% off</strong> your next purchase!</p>
+						}
+					</div>
+					<div class="col-12">
+						@celebrationCard("gold", "🏆", "display-3", "You are winner!", "Claim Your Prize") {
+							<p class="text-secondary">You've been selected as our lucky winner for completing <strong class="text-body">100 orders</strong> this month! Click below to claim your exclusive prize and enjoy the benefits!</p>
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-3">
+				<div class="row row-cards">
+					<div class="col-12">
+						@weatherCard("ocean", "Warsaw, PL", "ti-cloud-rain", "Cloudy morning", "3")
+					</div>
+					<div class="col-12">
+						@weatherCard("snow", "Oslo, NO", "ti-cloud", "Snowy day", "-5")
+					</div>
+					<div class="col-12">
+						@weatherCard("sun", "Dubai, AE", "ti-sun", "Sunny day", "32")
+					</div>
+					<div class="col-12">
+						@card.Card(card.Props{Gradient: "yellow"}) {
+							@card.Body(card.Props{Class: "text-center py-6"}) {
+								<div class="position-absolute top-0 end-0 p-1">
+									@button.Button(button.Props{Type: "button", Action: true, Icon: "ti-star-filled", IconOnly: true, Label: "Favorite", Class: "text-yellow"})
+								</div>
+								<div>
+									@avatar.Avatar(avatar.Props{Src: avatarURL("004m"), Size: avatar.Size2XL, Shape: avatar.ShapeCircle})
+								</div>
+								<div class="h1 mt-4 mb-1">Egan Poetz</div>
+								<div class="text-secondary">Research Nurse</div>
+								@button.List(button.ListProps{Class: "justify-content-center mt-3"}) {
+									@contactButton("ti-message", "Message")
+									@contactButton("ti-phone", "Phone")
+									@contactButton("ti-mail", "Email")
+								}
+							}
+						}
+					</div>
+					<div class="col-12">
+						@card.Card(card.Props{Size: card.SizeSmall, Gradient: "primary", GradientEdge: "end"}) {
+							@card.Body() {
+								<div class="row align-items-center">
+									<div class="col">
+										<div class="fw-medium">1700</div>
+										<div class="text-secondary">Users</div>
+									</div>
+									<div class="col-auto">
+										@sparkline.Sparkline(sparkline.Props{Color: "primary", Fill: true, AriaLabel: "Trend", Values: []float64{11, 16, 13, 20, 17, 24, 19, 23, 16, 20, 13, 17, 11, 19}})
+									</div>
+								</div>
+							}
+						}
+					</div>
+					<div class="col-12">
+						@trendCard("green", "ti-arrow-up", "$5,256.99", "+4%", "Revenue last 30 days")
+					</div>
+					<div class="col-12">
+						@trendCard("red", "ti-arrow-down", "342", "-4.3%", "Sales last 30 days")
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

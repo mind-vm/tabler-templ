@@ -1,0 +1,51 @@
+// Package mention renders Tabler mentions: an inline chip for a person, an app or a color, as a link or
+// text, with an optional count.
+package mention
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Href       string // a link; without it a <span>
+	Avatar     string // URL of a person's photo (mention-avatar)
+	App        string // URL of an app's logo (mention-app)
+	Color      string // a color swatch, e.g. "blue" (mention-color bg-blue)
+	// At reads out "@" before the name for screen readers (for people).
+	At    bool
+	Count string // a count after the text (mention-count)
+}
+
+templ inner(p Props) {
+	if p.Avatar != "" {
+		<span class="mention-avatar" style={ "background-image: url(" + p.Avatar + ")" }></span>
+	} else if p.App != "" {
+		<span class="mention-app" style={ "background-image: url(" + p.App + ")" }></span>
+	} else if p.Color != "" {
+		<span class={ "mention-color bg-" + p.Color }></span>
+	}
+	if p.At {
+		<span class="visually-hidden">{ "@" }</span>
+	}
+	{ children... }
+	if p.Count != "" {
+		<span class="mention-count">{ p.Count }</span>
+	}
+}
+
+templ Mention(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Href != "" {
+		<a href={ templ.URL(p.Href) } class={ kit.Classes("mention", p.Class) } { p.Attributes... }>
+			@inner(p) {
+				{ children... }
+			}
+		</a>
+	} else {
+		<span class={ kit.Classes("mention", p.Class) } { p.Attributes... }>
+			@inner(p) {
+				{ children... }
+			}
+		</span>
+	}
+}

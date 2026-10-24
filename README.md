@@ -102,7 +102,7 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | Package | Components |
 |---|---|
 | `button` | `Button` (`<button>` or `<a>` with `Href`), colors, outline, ghost, pill, square, sizes up to xl, icon at start or end, icon-only, action, block, loading, animated icons, floating; `List`, `Actions`, `Group` (button groups), `Check` (radio or checkbox as a button); `Classes(p)` |
-| `card` | `Card` (sizes, link with hover effect, borderless, dashed, transparent, stacked, active, inactive, status line), `Header` (light), `Title`, `Subtitle`, `Actions`, `Body` (scrollable), `Footer` (transparent), `Stamp`, `Progress`, `Image` |
+| `card` | `Card` (sizes, link with hover effect, borderless, dashed, transparent, stacked, active, inactive, status line, gradients, rotation), `Header` (light), `Title`, `Subtitle`, `Actions`, `Dropdown`, `Body` (scrollable), `Footer` (transparent), `Stamp`, `Progress`, `Image` (top, bottom, start, end, full), `Overlay`, `Cover`, `Button`, `Meta`, `Code` |
 | `modal` | `Modal` (sizes sm/lg/xl/full-width/fullscreen, centered, scrollable, blur, status line, without header, several `Body` sections, `<form>` as content, shown inline), `Title`, `Trigger(id)`, `Dismiss()`; `Dialog` (native `<dialog>` as a card) with `DialogOpen` and `DialogScript` |
 | `form` | `Field` (label, required, description, help popover, hint, error, valid feedback), `Input` (sizes, rounded, flush, plaintext, color, datalist, validation incl. lite), `Select` (groups, multiple, sizes), `Textarea` (autosize), `Check` (checkbox, radio, switch, large, inline, on/off labels), `Group`/`Addon`/`AddonLink` (input groups), `InputIcon`, `PasswordToggle` + `PasswordToggleScript`, `SelectGroup`/`SelectItem` (pills, boxes), `ImageCheck`, `ColorCheck`, `Floating`, `Fieldset`, `Range`, `NumberInput`, `OTP`, `Strength`, `Footer`, `Text` |
 | `table` | `Table` (optionally responsive, wrapper classes), `Empty` row |
@@ -118,7 +118,7 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `popover` | `Attrs(Props)`: title, content, placement, trigger, container, HTML |
 | `avatar` | `Avatar` (photo, initials, icon, link, sizes xxs–2xl, shapes, color, status, brand, cover), `List` (stacked, sizes), `Upload` |
 | `flag` | `Flag("de")` with sizes (needs Tabler's `tabler-flags.css`) |
-| `listgroup` | `List` (sizes, flush, hoverable, selectable, transparent, horizontal, numbered, in a card), `Item` (div, link, button, label or li; media, title, description, meta and actions slots; active, disabled, colors), `Header`, `Nested` with `CollapseToggle` and `ToggleIcon`, `SelectCheck` |
+| `listgroup` | `List` (sizes, flush, hoverable, selectable, transparent, horizontal, numbered, `<ul>`, `<nav>`, in a card), `Item` (div, link, button, label or li; media, title, description, meta and actions slots; active, disabled, colors), `Header`, `Nested` with `CollapseToggle` and `ToggleIcon`, `SelectCheck` |
 | `progress` | `Progress` (value, color, sizes, shown value, indeterminate, striped, animated), `Multi`, `Stacked`, `Background`, `Description`, `Steps` |
 | `steps` | `Steps(Props, []Step)`: titles, numbers (counter), descriptions (vertical), colors, tooltips, or dots with read-out labels |
 | `status` | `Status` (color, dot, animated, lite), `Dot`, `Indicator` |
@@ -129,8 +129,27 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `tracking` | `Tracking(Props, []Block)`: colored blocks with tooltips, squares |
 | `divider` | `Text`: rule with a label ("or"), start/end, colors |
 | `iconlist` | `List` (inline, marker color, size, row gap), `Item` (icon, color) |
+| `accordion` | `Accordion(Props, []Item)`: chevron or plus toggle, icons, flush, inverted, tabs, several open |
+| `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
+| `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
+| `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
+| `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
+| `legend` | `Legend` (value, unit, large, color, link or toggle button, off), `List` (vertical, divided), `Dot` |
+| `mention` | `Mention` (person, app or color, count) |
+| `mockup` | `Browser` (address bar, secure, small) |
+| `placeholder` | `Placeholder` (width, sizes, color), `Glow`, `Wave` |
+| `pricing` | `Pricing`, `Card` (price, features, featured, label, button) |
+| `shape` | `Shape(icon)` with sizes and colors |
+| `shimmer` | `Shimmer`: text shimmer with loader, live region |
+| `signal` | `Signal`: stepped bars with value, max, color |
+| `sparkline` | `Sparkline`: line, bar, tristate or circle chart drawn by Tabler's script (fill, spot, range, threshold, label) |
+| `spinner` | `Spinner` (border or grow, color, small), `Dots` |
+| `switchicon` | `SwitchIcon`: icon toggle with transitions, filled active icon, loading, action button |
+| `tag` | `Tag` (flag, icon, avatar, status or legend dot, check box, badge, removable), `List` |
+| `typography` | `Subheader`, `Keys` (keyboard shortcut) |
+| `trending` | `Trending`: change with arrow and color |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
-| `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
+| `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline, filled icons (`Filled` or a `-filled` name, from the filled webfont) – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
 Everything else in Tabler is listed in [ROADMAP.md](ROADMAP.md).
@@ -155,7 +174,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/modals` | Ready-made dialogs: `Status` (success, danger …), `Confirm`, `ConfirmDelete` (items, check box before deleting), `ChangePassword` (strength, match check) |
 | `blocks/auth` | Tabler's sign-in and account pages: `Page` (centered, optional illustration `Aside`), `CoverPage` (form beside a cover image), `OnboardingPage` (top bar with progress); `SignInForm`, `SignInCard` (other providers), `SignUpCard` (password strength, terms), `ForgotPasswordCard`, `LockCard`, `VerifyCard` (OTP code), `FormCard` (own fields), `Card`, `Message`, `Note`, `Logo`. All texts are props (Tabler's English by default) |
 | `blocks/landing` | `Page` (public start page without sidebar: top bar with brand, anchor links and actions, footer slot), `Hero` (title, lead, actions, optional visual), `Section` (full-width band with heading, `Muted` to set it apart), `Features` (icon, title, text in a grid), `Steps` (numbered), `CallToAction`, `Footer` (text and links); no script |
-| `blocks/tabscard` | `Card(Props, []Tab)`: the tabbed card of the preview (tabs in the header, one panel each; icons, end tab, disabled, fill, reverse, fade, a dropdown tab) |
+| `blocks/tabscard` | `Card(Props, []Tab)`: the tabbed card of the preview, and `Tabs` (card-tabs: each panel a card of its own) (tabs in the header, one panel each; icons, end tab, disabled, fill, reverse, fade, a dropdown tab) |
 | `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |
 
 ```go

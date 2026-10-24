@@ -1,0 +1,60 @@
+// Package tag renders Tabler tags: small removable labels with an optional flag, icon, avatar, status
+// dot, legend dot, check box or badge.
+package tag
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/flag"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Text       string
+	Flag       string // country code
+	Icon       string
+	Avatar     string // avatar URL
+	Status     string // color of a status dot
+	Legend     string // color of a legend dot
+	Check      bool   // a check box before the text
+	Checked    bool
+	Badge      string
+	// Removable adds the close button; RemoveLabel is its aria-label, default "Remove <Text>".
+	Removable   bool
+	RemoveLabel string
+}
+
+templ Tag(p Props) {
+	<span class={ kit.Classes("tag", p.Class) } { p.Attributes... }>
+		switch {
+			case p.Flag != "":
+				@flag.Flag(p.Flag, flag.Props{Size: flag.SizeXXS, Class: "tag-flag"})
+			case p.Icon != "":
+				@icon.Icon(p.Icon, icon.Props{Size: icon.SizeSmall, Class: "tag-icon"})
+			case p.Avatar != "":
+				@avatar.Avatar(avatar.Props{Src: p.Avatar, Size: avatar.SizeXXS, Class: "tag-avatar"})
+			case p.Status != "":
+				<span class={ "badge bg-" + p.Status + " text-" + p.Status + "-fg badge-dot" }></span>
+			case p.Legend != "":
+				<span class={ "legend-dot bg-" + p.Legend }></span>
+			case p.Check:
+				<input type="checkbox" class="form-check-input tag-check" checked?={ p.Checked } aria-label={ p.Text }/>
+		}
+		{ p.Text }
+		if p.Badge != "" {
+			<span class="badge tag-badge">{ p.Badge }</span>
+		}
+		if p.Removable {
+			<button type="button" class="btn-close" aria-label={ kit.Or(p.RemoveLabel, "Remove "+p.Text) }></button>
+		}
+	</span>
+}
+
+// List lays out tags in a row (.tag-list).
+templ List(class ...string) {
+	<div class={ kit.Classes(append([]string{"tag-list"}, class...)...) }>
+		{ children... }
+	</div>
+}

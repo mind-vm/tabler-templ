@@ -1,0 +1,58 @@
+// Package imagelabel renders Tabler's image labels: a small label (text or icon) on a corner of an
+// image (img-labeled, img-label).
+package imagelabel
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Corner string
+
+const (
+	BottomEnd   Corner = ""
+	TopStart    Corner = "top-start"
+	TopEnd      Corner = "top-end"
+	BottomStart Corner = "bottom-start"
+)
+
+type LabeledProps struct {
+	Class  string
+	Inline bool // a <span>, e.g. inside a link
+}
+
+// Labeled wraps an image (the children) and its Labels.
+templ Labeled(props ...LabeledProps) {
+	{{ p := kit.First(props) }}
+	if p.Inline {
+		<span class={ kit.Classes("img-labeled", p.Class) }>
+			{ children... }
+		</span>
+	} else {
+		<div class={ kit.Classes("img-labeled", p.Class) }>
+			{ children... }
+		</div>
+	}
+}
+
+type LabelProps struct {
+	Class  string // e.g. "bg-red text-white" for a custom look
+	Corner Corner
+	Icon   string // an icon before the Text
+	// IconOnly shows just the icon (img-label-icon); Text becomes its read-out name.
+	IconOnly bool
+	Text     string
+}
+
+templ Label(p LabelProps) {
+	<span class={ kit.Classes("img-label", kit.If(p.Corner != BottomEnd, "img-label-"+string(p.Corner)), kit.If(p.IconOnly, "img-label-icon"), p.Class) }>
+		if p.Icon != "" {
+			@icon.Icon(p.Icon)
+		}
+		if p.IconOnly {
+			<span class="visually-hidden">{ p.Text }</span>
+		} else {
+			{ p.Text }
+		}
+	</span>
+}

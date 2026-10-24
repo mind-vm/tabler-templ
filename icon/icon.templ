@@ -1,7 +1,11 @@
 // Package icon renders a Tabler icon from the webfont (tabler-icons) with Tabler's .icon sizing.
 package icon
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/kit"
+)
 
 // Size is one of Tabler's .icon-{size} modifiers; the zero value is the default 1.25rem.
 type Size string
@@ -21,6 +25,22 @@ type Props struct {
 	Size   Size
 	Color  string // text-{color}, e.g. "red" or "primary"
 	Inline bool   // icon-inline: sized and aligned to the surrounding text
+	// Filled uses the filled variant of the icon (also a name ending in "-filled", e.g. "ti-star-filled").
+	// It comes from the filled webfont, which Styles loads.
+	Filled bool
+}
+
+// filledGlyph returns the glyph of the filled variant of name, if there is one.
+func filledGlyph(name string, p Props) (string, bool) {
+	base, suffix := strings.CutSuffix(name, "-filled")
+	if !p.Filled && !suffix {
+		return "", false
+	}
+	r, ok := filled[base]
+	if !ok {
+		return "", false
+	}
+	return string(r), true
 }
 
 // Classes returns the class string of an icon.
@@ -33,14 +53,26 @@ func Classes(name string, p Props) string {
 // icon font can find every icon by scanning for "ti-…" in the source.
 templ Icon(name string, props ...Props) {
 	{{ p := kit.First(props) }}
-	if p.Label != "" {
+	if g, ok := filledGlyph(name, p); ok {
+		<i
+			class={ kit.Classes("ti ti-filled icon", p.Class, kit.If(p.Color != "", "text-"+p.Color), kit.If(p.Inline, "icon-inline"), kit.If(p.Size != SizeDefault, "icon-"+string(p.Size))) }
+			data-icon={ strings.TrimSuffix(name, "-filled") }
+			if p.Label != "" {
+				role="img"
+				aria-label={ p.Label }
+			} else {
+				aria-hidden="true"
+			}
+			{ p.Attributes... }
+		>{ g }</i>
+	} else if p.Label != "" {
 		<i class={ Classes(name, p) } role="img" aria-label={ p.Label } { p.Attributes... }></i>
 	} else {
 		<i class={ Classes(name, p) } aria-hidden="true" { p.Attributes... }></i>
 	}
 }
 
-// Styles renders CSS in a <style> element.
+// Styles renders CSS and FilledCSS in a <style> element.
 templ Styles() {
-	@templ.Raw("<style>" + CSS + "</style>")
+	@templ.Raw("<style>" + CSS + FilledCSS() + "</style>")
 }

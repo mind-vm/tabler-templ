@@ -61,6 +61,11 @@ func init() {
 		"sign-in":                  signInPage(),
 		"steps":                    stepsPage(),
 	}
+	for _, batch := range []map[string]templ.Component{batchAPages(), batchBPages(), batchCPages()} {
+		for k, v := range batch {
+			pages[k] = v
+		}
+	}
 	for name := range layoutVariants {
 		pages[name] = layoutPage(name)
 	}

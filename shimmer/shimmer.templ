@@ -1,0 +1,51 @@
+// Package shimmer renders Tabler's text shimmer: a highlight that sweeps across a short label such as
+// "Thinking…" while something is in progress.
+package shimmer
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Block      bool // a <div> instead of a <span>
+	Loader     bool // a small spinner before the label
+	Live       bool // announce changes (role="status")
+}
+
+templ inner(p Props) {
+	if p.Loader {
+		<span class="text-shimmer-loader" aria-hidden="true"></span>
+	}
+	{ children... }
+}
+
+templ Shimmer(props ...Props) {
+	{{ p := kit.First(props) }}
+	if p.Block {
+		<div
+			class={ kit.Classes("text-shimmer", p.Class) }
+			if p.Live {
+				role="status"
+				aria-live="polite"
+			}
+			{ p.Attributes... }
+		>
+			@inner(p) {
+				{ children... }
+			}
+		</div>
+	} else {
+		<span
+			class={ kit.Classes("text-shimmer", p.Class) }
+			if p.Live {
+				role="status"
+				aria-live="polite"
+			}
+			{ p.Attributes... }
+		>
+			@inner(p) {
+				{ children... }
+			}
+		</span>
+	}
+}

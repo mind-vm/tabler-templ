@@ -1,0 +1,28 @@
+// Package spinner renders Tabler (Bootstrap) spinners and the animated dots.
+package spinner
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Grow       bool   // a growing dot instead of the border spinner
+	Color      string // e.g. "blue"
+	Small      bool
+	Label      string // read out for screen readers, e.g. "Loading…"
+}
+
+templ Spinner(props ...Props) {
+	{{ p := kit.First(props) }}
+	{{ t := kit.If(!p.Grow, "border") + kit.If(p.Grow, "grow") }}
+	<div class={ kit.Classes("spinner-"+t, kit.If(p.Color != "", "text-"+p.Color), kit.If(p.Small, "spinner-"+t+"-sm"), p.Class) } role="status" { p.Attributes... }>
+		if p.Label != "" {
+			<span class="visually-hidden">{ p.Label }</span>
+		}
+	</div>
+}
+
+// Dots are three animated dots after a text, e.g. "Loading" (animated-dots).
+templ Dots() {
+	<span class="animated-dots"></span>
+}

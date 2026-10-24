@@ -1,0 +1,25 @@
+// Package shape renders Tabler's shape: an icon in a tinted square, e.g. in a feature list.
+package shape
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Size       string // xxs, xs, sm, md, lg, xl, 2xl
+	Color      string // shape-{color}, e.g. "blue"
+}
+
+// Shape shows an icon; the children follow it (or replace it when icon is "").
+templ Shape(ic string, props ...Props) {
+	{{ p := kit.First(props) }}
+	<span class={ kit.Classes("shape", kit.If(p.Size != "", "shape-"+p.Size), kit.If(p.Color != "", "shape-"+p.Color), p.Class) } { p.Attributes... }>
+		if ic != "" {
+			@icon.Icon(ic)
+		}
+		{ children... }
+	</span>
+}

@@ -111,3 +111,33 @@ templ Card(p Props, tabs []Tab) {
 		}
 	}
 }
+
+// Tabs is the other tabbed card of Tabler (card-tabs): tabs above, each panel a card of its own, so the
+// active tab joins its card.
+templ Tabs(p Props, tabs []Tab) {
+	{{ open := active(p, tabs) }}
+	<div class={ kit.Classes("card-tabs", p.Class) }>
+		@nav.Nav(nav.Props{Style: nav.StyleTabs, Fill: p.Fill, Tablist: true}) {
+			for _, t := range tabs {
+				@nav.Item(nav.ItemProps{Target: paneID(p, t), Active: t.Key == open, Disabled: t.Disabled, Icon: t.Icon, Label: label(t), Class: endClass(p, t)}) {
+					if !t.IconOnly {
+						{ t.Label }
+					}
+				}
+			}
+		}
+		<div class="tab-content">
+			for _, t := range tabs {
+				if !t.Disabled {
+					<div id={ paneID(p, t) } class={ kit.Classes("card tab-pane", kit.If(p.Fade, "fade"), kit.If(t.Key == open, "active show")) } role="tabpanel" aria-labelledby={ paneID(p, t) + "-tab" }>
+						<div class="card-body">
+							if t.Content != nil {
+								@t.Content
+							}
+						</div>
+					</div>
+				}
+			}
+		</div>
+	</div>
+}

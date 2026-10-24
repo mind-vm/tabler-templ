@@ -1,0 +1,76 @@
+// Package pricing renders Tabler's pricing table: plan cards with title, price, features and a button;
+// one card can be featured.
+package pricing
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Pricing holds the Cards side by side.
+templ Pricing(class ...string) {
+	<div class={ kit.Classes(append([]string{"pricing"}, class...)...) }>
+		{ children... }
+	</div>
+}
+
+// Feature is a line of a plan; Excluded marks what it does not include.
+type Feature struct {
+	Text     string
+	Excluded bool
+}
+
+type CardProps struct {
+	Class       string
+	Title       string
+	Currency    string          // e.g. "$"
+	Price       string          // e.g. "49"
+	Description []string        // lines next to the price, e.g. "per user", "per month"
+	Features    []Feature
+	Featured    bool            // highlighted (featured)
+	Label       templ.Component // above the title, e.g. a "Popular" badge
+	Button      templ.Component // at the bottom, e.g. a full-width button
+}
+
+templ Card(p CardProps) {
+	<div class={ kit.Classes("pricing-card", kit.If(p.Featured, "featured"), p.Class) }>
+		if p.Label != nil {
+			<div class="pricing-label">
+				@p.Label
+			</div>
+		}
+		<h3 class="pricing-title">{ p.Title }</h3>
+		<div class="pricing-price">
+			if p.Currency != "" {
+				<span class="pricing-price-currency">{ p.Currency }</span>
+			}
+			{ p.Price }
+			if len(p.Description) > 0 {
+				<div class="pricing-price-description">
+					for _, d := range p.Description {
+						<div>{ d }</div>
+					}
+				</div>
+			}
+		</div>
+		if len(p.Features) > 0 {
+			<ul class="pricing-features my-4">
+				for _, f := range p.Features {
+					<li>
+						if f.Excluded {
+							@icon.Icon("ti-x", icon.Props{Color: "red", Class: "icon-inline me-1"})
+						} else {
+							@icon.Icon("ti-check", icon.Props{Color: "green", Class: "icon-inline me-1"})
+						}
+						{ f.Text }
+					</li>
+				}
+			</ul>
+		}
+		if p.Button != nil {
+			<div class="pricing-btn">
+				@p.Button
+			</div>
+		}
+	</div>
+}
