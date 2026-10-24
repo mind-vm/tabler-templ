@@ -21,7 +21,7 @@ and reloads the browser on every change.
 | `main.go` | routes and handlers (standard library `net/http`) |
 | `auth.go` | one account from the environment and a signed session cookie; replace with your users |
 | `internal/projects` | the example data: projects in memory, form checks; replace the `Store` with your database |
-| `views/layout.templ` | the page frame (`blocks/layout`: navbar, menu, user menu, theme toggle, page header) and the sign-in page (`blocks/auth`) |
+| `views/layout.templ` | the page frame (`blocks/layout`: navbar, menu, user menu, theme toggle, page header), the app's look (`Appearance`: accent color, base, font, radius; users change theirs under Appearance in the user menu) and the sign-in page (`blocks/auth`) |
 | `views/dashboard.templ` | metric cards (`blocks/metric`) and charts (`chart`) |
 | `views/projects.templ` | list with search, filter and pages (`blocks/listpage`), create page (`blocks/create`), detail page with an edit dialog that reopens after a failed save (`blocks/detail`) |
 

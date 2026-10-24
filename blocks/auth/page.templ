@@ -11,6 +11,7 @@
 package auth
 
 import (
+	"github.com/mind-vm/tabler-templ/theme"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 )
@@ -25,11 +26,24 @@ type PageProps struct {
 	// Aside is a second column on large screens, e.g. an illustration (the preview's
 	// sign-in-illustration page).
 	Aside templ.Component
+	// Theme is "light" or "dark" (data-bs-theme); Appearance the accent color, base, font and radius,
+	// usually the same as the app's other pages.
+	Theme      string
+	Appearance theme.Settings
+}
+
+func htmlAttrs(p PageProps) templ.Attributes {
+	a := p.Appearance.Attrs()
+	a["lang"] = kit.Or(p.Lang, "en")
+	if p.Theme != "" {
+		a["data-bs-theme"] = p.Theme
+	}
+	return a
 }
 
 templ document(p PageProps, bodyClass string) {
 	<!DOCTYPE html>
-	<html lang={ kit.Or(p.Lang, "en") }>
+	<html { htmlAttrs(p)... }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>

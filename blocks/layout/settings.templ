@@ -1,0 +1,216 @@
+package layout
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type ThemeSettingsProps struct {
+	ID string // the offcanvas' id, default "offcanvas-settings"
+	// Title and Text head the panel; default "Make it your own" and Tabler's note that the choices are
+	// saved in this browser.
+	Title, Text string
+	Media       templ.Component // above the title, e.g. an illustration
+	// Sections default to AppearanceSection and LayoutSection; pass your own to translate them, or only
+	// AppearanceSection() for an app with one fixed layout.
+	Sections []ThemeSection
+	// NoButton leaves out the floating button; open the panel with ThemeSettingsToggle on any button.
+	NoButton    bool
+	ButtonLabel string // the floating button's aria-label, default "Customize"
+	Reset, Save string // the footer's buttons, default "Reset changes" and "Save"
+	CloseLabel  string // default "Close"
+}
+
+func (p ThemeSettingsProps) id() string { return kit.Or(p.ID, "offcanvas-settings") }
+
+func (p ThemeSettingsProps) sections() []ThemeSection {
+	if p.Sections != nil {
+		return p.Sections
+	}
+	return []ThemeSection{AppearanceSection(), LayoutSection()}
+}
+
+// ThemeSettingsToggle opens the panel from any button or link, e.g. an item of the user menu.
+func ThemeSettingsToggle(id string) templ.Attributes {
+	return templ.Attributes{"data-bs-toggle": "offcanvas", "data-bs-target": "#" + kit.Or(id, "offcanvas-settings"), "aria-controls": kit.Or(id, "offcanvas-settings")}
+}
+
+// ThemeSettings is Tabler's theme panel: a floating button and an offcanvas where users pick the color
+// scheme, accent color, font, gray base and corner radius, and the layout. The choices apply at once and
+// are saved in the browser; Tabler's theme script (assets.Theme) applies them on every page before it
+// paints. The theme settings need tabler-themes.css (assets.Props{Themes: true}).
+templ ThemeSettings(p ThemeSettingsProps) {
+	{{ sections := p.sections() }}
+	<div class="settings">
+		if !p.NoButton {
+			<button type="button" class="btn btn-floating btn-icon btn-primary" { ThemeSettingsToggle(p.id())... } aria-label={ kit.Or(p.ButtonLabel, "Customize") }>
+				@icon.Icon("ti-brush")
+			</button>
+		}
+		<form class="offcanvas offcanvas-start offcanvas-floating" tabindex="-1" id={ p.id() } role="dialog" aria-modal="true" aria-labelledby={ p.id() + "-title" } data-theme-settings={ themeConfig(sections) }>
+			<button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-1" data-bs-dismiss="offcanvas" aria-label={ kit.Or(p.CloseLabel, "Close") }></button>
+			<div class="offcanvas-body p-0">
+				<section class="p-4 text-center border-bottom">
+					if p.Media != nil {
+						@p.Media
+					}
+					<h2 class="offcanvas-title mb-1" id={ p.id() + "-title" }>{ kit.Or(p.Title, "Make it your own") }</h2>
+					<p class="text-secondary m-0">{ kit.Or(p.Text, "Pick the look and layout. Your choices are saved in this browser.") }</p>
+				</section>
+				for i, sec := range sections {
+					<section class={ "p-4", kit.If(i < len(sections)-1, "border-bottom") }>
+						<h3 class="subheader mb-3">{ sec.Title }</h3>
+						<div class="space-y-4">
+							for _, s := range sec.Settings {
+								@themeSetting(p.id(), s)
+							}
+						</div>
+					</section>
+				}
+			</div>
+			<div class="offcanvas-footer border-top space-y-2">
+				<button type="button" class="btn w-100" data-theme-reset>
+					@icon.Icon("ti-rotate")
+					{ kit.Or(p.Reset, "Reset changes") }
+				</button>
+				<button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas">{ kit.Or(p.Save, "Save") }</button>
+			</div>
+		</form>
+	</div>
+	@themeSettingsScript()
+}
+
+templ themeSetting(id string, s ThemeSetting) {
+	<div role="group" aria-labelledby={ id + "-" + s.Key } data-theme-setting={ s.Key }>
+		<div class="form-label mb-1" id={ id + "-" + s.Key }>{ s.Legend }</div>
+		if s.Hint != "" {
+			<div class="form-text mb-3">{ s.Hint }</div>
+		}
+		switch s.Control {
+			case ControlColor:
+				<div class="row g-2">
+					for _, o := range s.Options {
+						<div class="col-auto">
+							<label class="form-colorinput">
+								<input type="radio" name={ s.Key } value={ o.Value } class="form-colorinput-input" checked?={ themeChecked(s, o) } aria-label={ o.Label }/>
+								<span class={ "form-colorinput-color bg-" + o.Value }></span>
+							</label>
+						</div>
+					}
+				</div>
+			case ControlFont:
+				<div class="row g-3">
+					for _, o := range s.Options {
+						<div class="col-4">
+							<label class="form-imagecheck d-block">
+								<input type="radio" name={ s.Key } value={ o.Value } class="form-imagecheck-input" checked?={ themeChecked(s, o) }/>
+								<span class="form-imagecheck-figure p-1">
+									<span class={ "form-imagecheck-image text-center py-2 display-5 fw-medium lh-1 font-" + o.Value } aria-hidden="true">Aa</span>
+									<span class="form-imagecheck-caption">{ o.Label }</span>
+								</span>
+							</label>
+						</div>
+					}
+				</div>
+			case ControlTile, ControlPreset:
+				<div class="row g-3">
+					for _, o := range s.Options {
+						<div class="col-4">
+							<label class="form-imagecheck">
+								<input type="radio" name={ s.Key } value={ o.Value } class="form-imagecheck-input" checked?={ themeChecked(s, o) }/>
+								<span class="form-imagecheck-figure p-1">
+									if s.Control == ControlPreset {
+										@templ.Raw(presetSVG(o.Values))
+									} else {
+										@templ.Raw(tileSVG(s.Key, o.Value))
+									}
+									<span class="form-imagecheck-caption">{ o.Label }</span>
+								</span>
+							</label>
+						</div>
+					}
+				</div>
+			default:
+				<div class="form-selectgroup">
+					for _, o := range s.Options {
+						<label class="form-selectgroup-item">
+							<input type="radio" name={ s.Key } value={ o.Value } class="form-selectgroup-input" checked?={ themeChecked(s, o) }/>
+							<span class="form-selectgroup-label">{ o.Label }</span>
+						</label>
+					}
+				</div>
+		}
+	</div>
+}
+
+var themeSettingsOnce = templ.NewOnceHandle()
+
+// themeSettingsScript is the preview's settings script: it applies a choice to <html>, saves it where
+// Tabler's theme script reads it (localStorage tabler-<key>) and keeps the URL in step.
+templ themeSettingsScript() {
+	@themeSettingsOnce.Once() {
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				document.querySelectorAll('form[data-theme-settings]').forEach(function (form) {
+					var cfg = JSON.parse(form.getAttribute('data-theme-settings'));
+					var defaults = cfg.defaults, presets = cfg.presets;
+					var url = new URL(window.location);
+					var store = {
+						get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+						set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+						remove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },
+					};
+					// The default state is the absence of the attribute, as in the theme script.
+					function apply(key, value) {
+						var applied = value;
+						if (key === 'theme' && value === 'auto') applied = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+						if (applied !== defaults[key]) document.documentElement.setAttribute('data-bs-' + key, applied);
+						else document.documentElement.removeAttribute('data-bs-' + key);
+					}
+					// A stored choice wins, then what the page rendered, then the default. data-bs-theme holds the
+					// resolved mode, so it is not read back.
+					function current(key) {
+						var rendered = key === 'theme' ? null : document.documentElement.getAttribute('data-bs-' + key);
+						return store.get('tabler-' + key) || rendered || defaults[key];
+					}
+					function toggleGroups() {
+						var vertical = current('navbar-position') === 'vertical';
+						var hide = function (keys, hidden) {
+							(keys || []).forEach(function (k) { var g = form.querySelector('[data-theme-setting="' + k + '"]'); if (g) g.hidden = hidden; });
+						};
+						hide(cfg.sidebarOnly, !vertical);
+						hide(cfg.navbarOnly, vertical);
+					}
+					function set(key, value) { apply(key, value); store.set('tabler-' + key, value); url.searchParams.set(key, value); }
+					function matches(values) { return Object.keys(values).every(function (k) { return current(k) === values[k]; }); }
+					function check() {
+						Object.keys(defaults).forEach(function (key) {
+							var value = current(key);
+							form.querySelectorAll('[name="' + key + '"]').forEach(function (r) { r.checked = r.value === value; });
+						});
+						Object.keys(presets).forEach(function (name) {
+							form.querySelectorAll('[name="' + name + '"]').forEach(function (r) { r.checked = matches(presets[name][r.value]); });
+						});
+						toggleGroups();
+					}
+					form.addEventListener('change', function (e) {
+						var name = e.target.name, value = e.target.value;
+						if (name in presets) Object.keys(presets[name][value]).forEach(function (k) { set(k, presets[name][value][k]); });
+						else if (name in defaults) set(name, value);
+						toggleGroups();
+						// Plugins that measured the old width (charts, maps) need a nudge.
+						window.dispatchEvent(new Event('resize'));
+						history.pushState({}, '', url);
+					});
+					form.querySelector('[data-theme-reset]').addEventListener('click', function () {
+						Object.keys(defaults).forEach(function (key) { apply(key, defaults[key]); store.remove('tabler-' + key); url.searchParams.delete(key); });
+						check();
+						window.dispatchEvent(new Event('resize'));
+						history.pushState({}, '', url);
+					});
+					check();
+				});
+			});
+		</script>
+	}
+}

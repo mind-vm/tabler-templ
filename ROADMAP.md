@@ -9,8 +9,8 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 | | Status |
 |---|---|
 | Components | 66 done, 1 partial, 0 open (of 67) |
-| Blocks | 141 done, 0 partial, 37 open (of 178) |
-| Preview pages | 143 done, 2 partial, 1 open (of 146) |
+| Blocks | 142 done, 0 partial, 37 open (of 179) |
+| Preview pages | 144 done, 1 partial, 1 open (of 146) |
 
 ## Plan
 
@@ -102,6 +102,10 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 ## Blocks
 
 Composed parts of the preview, from [`shared/components`](https://github.com/tabler/tabler/blob/dev/shared/components).
+
+### demo
+
+- [x] [demo/ThemeSettings](https://github.com/tabler/tabler/blob/dev/shared/components/demo/ThemeSettings.astro) — `blocks/layout`
 
 ### cards
 
@@ -462,7 +466,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 - [x] [placeholder](https://preview.tabler.io/placeholder.html) Placeholder
 - [x] [progress](https://preview.tabler.io/progress.html) Progress
 - [x] [prose](https://preview.tabler.io/prose.html) Prose
-- [ ] [screenshot](https://preview.tabler.io/screenshot.html) Screenshot — partial, the preview's settings button is left out
+- [x] [screenshot](https://preview.tabler.io/screenshot.html) Screenshot
 - [x] [scroll-spy](https://preview.tabler.io/scroll-spy.html) Scroll Spy
 - [x] [segmented-control](https://preview.tabler.io/segmented-control.html) Segmented control
 - [x] [shape](https://preview.tabler.io/shape.html) Shape

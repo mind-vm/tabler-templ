@@ -132,7 +132,7 @@ var Pages = []Page{
 	{Name: "placeholder", Title: "Placeholder", Group: "Components and elements", Description: "Placeholders mimic the shape of content that hasn't loaded yet.", Status: Done},
 	{Name: "progress", Title: "Progress", Group: "Components and elements", Description: "2.4GB of 5GB", Status: Done},
 	{Name: "prose", Title: "Prose", Group: "Components and elements", Description: "Wrap long-form content in .prose to style headings, paragraphs, lists, and tables without adding classes to every element.", Status: Done},
-	{Name: "screenshot", Title: "Screenshot", Group: "Components and elements", Status: Partial, Note: "the preview's settings button is left out"},
+	{Name: "screenshot", Title: "Screenshot", Group: "Components and elements", Status: Done},
 	{Name: "scroll-spy", Title: "Scroll Spy", Group: "Components and elements", Status: Done},
 	{Name: "segmented-control", Title: "Segmented control", Group: "Components and elements", Description: "A segmented control lets users pick one option from a small, always-visible set.", Status: Done},
 	{Name: "shape", Title: "Shape", Group: "Components and elements", Description: "Shapes put an icon on a soft, tinted square, for feature lists and other places where an icon needs a background.", Status: Done},
