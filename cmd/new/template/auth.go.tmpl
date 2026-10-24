@@ -1,0 +1,97 @@
+package main
+
+import (
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/base64"
+	"encoding/hex"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// auth is a single account from the environment and a signed session cookie. Replace it with your users
+// and sessions; the handlers only use check, signIn, signOut, user and require.
+type auth struct {
+	email, password string
+	secret          []byte
+}
+
+const (
+	sessionCookie = "session"
+	sessionTTL    = 7 * 24 * time.Hour
+)
+
+func newAuth() *auth {
+	a := &auth{email: env("APP_EMAIL", "admin@example.com"), password: env("APP_PASSWORD", "admin")}
+	if s := env("SESSION_SECRET", ""); s != "" {
+		a.secret = []byte(s)
+	} else {
+		// Sessions end when the app restarts; set SESSION_SECRET to keep them.
+		a.secret = make([]byte, 32)
+		rand.Read(a.secret)
+	}
+	if a.password == "admin" {
+		log.Print("using the default password; set APP_EMAIL and APP_PASSWORD")
+	}
+	return a
+}
+
+func (a *auth) check(email, password string) bool {
+	ok := subtle.ConstantTimeCompare([]byte(strings.ToLower(strings.TrimSpace(email))), []byte(strings.ToLower(a.email))) == 1
+	return subtle.ConstantTimeCompare([]byte(password), []byte(a.password)) == 1 && ok
+}
+
+func (a *auth) sign(value string) string {
+	m := hmac.New(sha256.New, a.secret)
+	m.Write([]byte(value))
+	return hex.EncodeToString(m.Sum(nil))
+}
+
+func (a *auth) signIn(w http.ResponseWriter, email string) {
+	expires := time.Now().Add(sessionTTL)
+	value := base64.RawURLEncoding.EncodeToString([]byte(email)) + "." + strconv.FormatInt(expires.Unix(), 10)
+	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: value + "." + a.sign(value), Path: "/", Expires: expires,
+		HttpOnly: true, Secure: env("COOKIE_SECURE", "") != "", SameSite: http.SameSiteLaxMode})
+}
+
+func (a *auth) signOut(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Path: "/", MaxAge: -1, HttpOnly: true, SameSite: http.SameSiteLaxMode})
+}
+
+// user is the signed-in user's email, or "".
+func (a *auth) user(r *http.Request) string {
+	c, err := r.Cookie(sessionCookie)
+	if err != nil {
+		return ""
+	}
+	parts := strings.Split(c.Value, ".")
+	if len(parts) != 3 || !hmac.Equal([]byte(a.sign(parts[0]+"."+parts[1])), []byte(parts[2])) {
+		return ""
+	}
+	exp, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil || time.Now().Unix() > exp {
+		return ""
+	}
+	email, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return ""
+	}
+	return string(email)
+}
+
+// require sends visitors who are not signed in to the sign-in page, and back afterwards.
+func (a *auth) require(h http.HandlerFunc) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if a.user(r) == "" {
+			http.Redirect(w, r, "/sign-in?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusSeeOther)
+			return
+		}
+		h(w, r)
+	})
+}

@@ -18,6 +18,7 @@ import (
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/wysiwyg"
 	"github.com/mind-vm/tabler-templ/prose"
 )
 
@@ -155,12 +156,12 @@ templ mailToolbar() {
 }
 
 templ emailInboxPage() {
-	@appFrame("email-inbox", "Inbox", "") {
+	@appFrameLibs("email-inbox", "Inbox", "", wysiwyg.Library()) {
 		@mail.Inbox(mail.InboxProps{Folders: mailFolders(), Toolbar: mailToolbar(),
 			Footer: mail.Pager(mail.PagerProps{Text: "Showing 1 - " + strconv.Itoa(len(adMails)) + " of " + strconv.Itoa(len(adMails))})}) {
 			@mail.List(mailMessages())
 		}
-		@mail.Compose(mail.ComposeProps{Value: "Hello, <b>Tabler</b>!"})
+		@mail.Compose(mail.ComposeProps{Message: wysiwyg.Editor(wysiwyg.Props{ID: "modal-new-email-message", Name: "message", Value: "Hello, <b>Tabler</b>!"})})
 	}
 }
 

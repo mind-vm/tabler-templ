@@ -13,10 +13,14 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/modals"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/datepicker"
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/modal"
 	"github.com/mind-vm/tabler-templ/nav"
+	"github.com/mind-vm/tabler-templ/selectbox"
+	"github.com/mind-vm/tabler-templ/signature"
+	"github.com/mind-vm/tabler-templ/wysiwyg"
 )
 
 // The preview shows its modals open inside the page instead of over it.
@@ -163,7 +167,7 @@ func cancelThen(text, icon string, cancelClass string) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 45, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 49, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -491,7 +495,7 @@ func modalsPage() templ.Component {
 								var templ_7745c5c3_Var23 string
 								templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(l.Text)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 104, Col: 17}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 108, Col: 17}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 								if templ_7745c5c3_Err != nil {
@@ -531,7 +535,7 @@ func modalsPage() templ.Component {
 						var templ_7745c5c3_Var25 string
 						templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(lorem)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 116, Col: 16}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 120, Col: 16}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 						if templ_7745c5c3_Err != nil {
@@ -564,7 +568,7 @@ func modalsPage() templ.Component {
 						var templ_7745c5c3_Var27 string
 						templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(lorem)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 124, Col: 16}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 128, Col: 16}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 						if templ_7745c5c3_Err != nil {
@@ -606,7 +610,7 @@ func modalsPage() templ.Component {
 						var templ_7745c5c3_Var29 string
 						templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(lorem)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 137, Col: 16}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 141, Col: 16}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 						if templ_7745c5c3_Err != nil {
@@ -645,7 +649,7 @@ func modalsPage() templ.Component {
 								var templ_7745c5c3_Var31 string
 								templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 147, Col: 17}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 151, Col: 17}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 								if templ_7745c5c3_Err != nil {
@@ -1049,15 +1053,15 @@ func modalsPage() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<h2 id=\"modal-signature-title\" class=\"card-title\">Confirm transfer</h2><p class=\"card-subtitle\">Please confirm the transfer of funds by signing below.</p><form><div class=\"mb-3\"><div class=\"form-label required\">Signature</div><div class=\"position-relative user-select-none\"><div class=\"signature position-relative\"><div class=\"position-absolute top-0 end-0 p-2\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<h2 id=\"modal-signature-title\" class=\"card-title\">Confirm transfer</h2><p class=\"card-subtitle\">Please confirm the transfer of funds by signing below.</p><form><div class=\"mb-3\"><div class=\"form-label required\">Signature</div><div class=\"position-relative user-select-none\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = button.Button(button.Props{Type: "button", Icon: "ti-trash", IconOnly: true, Label: "Clear signature"}).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = signature.Pad(signature.Props{ID: "signature-default", Clear: true, Width: 684, Height: 400}).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div><canvas width=\"684\" height=\"400\" class=\"signature-canvas\"></canvas></div></div></div></form><div class=\"text-secondary fs-5\">I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on documents, including legally binding contracts - just the same as a pen-and-paper signature or initial.</div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div></div></form><div class=\"text-secondary fs-5\">I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on documents, including legally binding contracts - just the same as a pen-and-paper signature or initial.</div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1145,7 +1149,7 @@ func modalsPage() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = form.Textarea(form.TextareaProps{ID: "hugerte-email-message", Value: "Hello, <b>Tabler</b>!"}).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = wysiwyg.Editor(wysiwyg.Props{ID: "hugerte-email-message", Value: "Hello, <b>Tabler</b>!"}).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1365,7 +1369,7 @@ func modalsPage() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = form.Select(form.SelectProps{ID: "select-task-assigned", Options: people8(), Selected: "4"}).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-task-assigned", Options: people8(), Selected: "4"}).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1425,7 +1429,7 @@ func modalsPage() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = form.Select(form.SelectProps{ID: "select-task-category", Multiple: true, SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"},
+							templ_7745c5c3_Err = form.Select(form.SelectProps{Attributes: selectbox.Attrs(nil), ID: "select-task-category", Multiple: true, SelectedValues: []string{"HTML", "JavaScript", "Bootstrap"},
 								Options: []form.Option{{Value: "HTML", Label: "HTML"}, {Value: "JavaScript", Label: "JavaScript"}, {Value: "CSS", Label: "CSS"},
 									{Value: "jQuery", Label: "jQuery"}, {Value: "Bootstrap", Label: "Bootstrap"}, {Value: "Ruby", Label: "Ruby"}}}).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
@@ -1478,7 +1482,7 @@ func modalsPage() templ.Component {
 						return templ_7745c5c3_Err
 					}
 					m = inline("modal-edit-profile")
-					m.Title = "Edit profile"
+					m.Title, m.Size = "Edit profile", modal.SizeLarge
 					templ_7745c5c3_Var60 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 						templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 						templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -1893,7 +1897,7 @@ func modalsPage() templ.Component {
 					var templ_7745c5c3_Var75 string
 					templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs("<dialog>")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 469, Col: 36}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 468, Col: 36}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 					if templ_7745c5c3_Err != nil {
@@ -1906,7 +1910,7 @@ func modalsPage() templ.Component {
 					var templ_7745c5c3_Var76 string
 					templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(`<form method="dialog">`)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 469, Col: 276}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/modals.templ`, Line: 468, Col: 276}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 					if templ_7745c5c3_Err != nil {
@@ -2022,7 +2026,7 @@ func modalsPage() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = preview("modals").Render(templ.WithChildren(ctx, templ_7745c5c3_Var18), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = previewLibs("modals", signature.Library(), wysiwyg.Library(), datepicker.Library(), selectbox.Library()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var18), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

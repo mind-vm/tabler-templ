@@ -30,6 +30,8 @@ type CardProps struct {
 	Featured    bool            // highlighted (featured)
 	Label       templ.Component // above the title, e.g. a "Popular" badge
 	Button      templ.Component // at the bottom, e.g. a full-width button
+	// Content replaces the Features list, e.g. a list with icons (marketing.CheckList).
+	Content templ.Component
 	// TitleLevel renders the title as <h2> when 2; default <h3>.
 	TitleLevel int
 }
@@ -59,7 +61,9 @@ templ Card(p CardProps) {
 				</div>
 			}
 		</div>
-		if len(p.Features) > 0 {
+		if p.Content != nil {
+			@p.Content
+		} else if len(p.Features) > 0 {
 			<ul class="pricing-features my-4">
 				for _, f := range p.Features {
 					<li>

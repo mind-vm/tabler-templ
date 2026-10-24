@@ -1,0 +1,60 @@
+// Package lightbox opens pictures (or videos) full-screen with fslightbox, as the Tabler preview does: a
+// Link around a thumbnail opens its picture, and the links of one Gallery can be swiped through. Load
+// the script once with Library.
+//
+//	@lightbox.Library()
+//	@lightbox.Link(lightbox.Props{Gallery: "photos", Href: "/photos/1.jpg", Label: "Beach"}) {
+//		<img src="/photos/1-small.jpg" alt=""/>
+//	}
+package lightbox
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+// Version is the fslightbox version Tabler 1.7 is built against.
+const Version = "3.8.0"
+
+// LibraryURL is fslightbox on jsDelivr.
+const LibraryURL = "https://cdn.jsdelivr.net/npm/fslightbox@" + Version + "/index.js"
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	// Gallery groups the links whose pictures can be swiped through; default "gallery".
+	Gallery string
+	Href    string // the full-size picture or video
+	Label   string // aria-label, e.g. the picture's title
+}
+
+// Link opens its picture in the lightbox; the children are the thumbnail.
+templ Link(p Props) {
+	<a
+		data-fslightbox={ kit.Or(p.Gallery, "gallery") }
+		href={ templ.SafeURL(p.Href) }
+		if p.Label != "" {
+			aria-label={ p.Label }
+		}
+		if p.Class != "" {
+			class={ p.Class }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</a>
+	@script()
+}
+
+// Library loads fslightbox; put it in the head. Its styles are in Tabler's tabler-vendors.css.
+templ Library() {
+	<script src={ LibraryURL } defer></script>
+}
+
+var once = templ.NewOnceHandle()
+
+// script picks up links swapped in by htmx.
+templ script() {
+	@once.Once() {
+		<script>
+			document.addEventListener('htmx:afterSettle', function () { window.refreshFsLightbox && window.refreshFsLightbox(); });
+		</script>
+	}
+}

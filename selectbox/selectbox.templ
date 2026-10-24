@@ -1,0 +1,155 @@
+// Package selectbox renders Tabler's advanced select: a form-select that Tom Select turns into a
+// searchable dropdown, for one or several values, with option groups and indicators (an avatar, a flag,
+// a badge) in front of the options. Load the plugin with Library in the head.
+//
+//	@selectbox.Select(selectbox.Props{ID: "country", Name: "country", Options: []selectbox.Option{
+//		{Value: "pl", Text: "Poland", Indicator: flag.Flag("pl", flag.Props{Size: flag.SizeXS})},
+//	}})
+package selectbox
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Version is the Tom Select version Library loads.
+const Version = "2.6.2"
+
+// LibraryURL and StylesheetURL are Tom Select on jsDelivr.
+const (
+	LibraryURL    = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/js/tom-select.base.min.js"
+	StylesheetURL = "https://cdn.jsdelivr.net/npm/tom-select@" + Version + "/dist/css/tom-select.bootstrap5.min.css"
+)
+
+// Option is an option of a Select.
+type Option struct {
+	Value    string
+	Text     string
+	Selected bool
+	// Indicator is shown in front of the text, e.g. an avatar, a flag or a badge.
+	Indicator templ.Component
+}
+
+// Group is a group of options (optgroup).
+type Group struct {
+	Label   string
+	Options []Option
+}
+
+type Props struct {
+	ID          string
+	Name        string
+	Class       string
+	Attributes  templ.Attributes // on the select
+	Placeholder string
+	AriaLabel   string
+	Multiple    bool
+	State       string // "valid" or "invalid"
+	Options     []Option
+	Groups      []Group
+	Disabled    bool
+	Required    bool
+	// Create lets the user add values of their own, e.g. tags.
+	Create   bool
+	MaxItems int
+	// Settings are Tom Select settings merged over the defaults.
+	Settings map[string]any
+}
+
+func settings(p Props) string {
+	s := map[string]any{}
+	if p.Create {
+		s["create"] = true
+	}
+	if p.MaxItems > 0 {
+		s["maxItems"] = p.MaxItems
+	}
+	for k, v := range p.Settings {
+		s[k] = v
+	}
+	return Attrs(s)["data-tabler-select"].(string)
+}
+
+// Attrs make any select, e.g. a form.Select, an advanced select, with Tom Select settings merged over
+// the defaults. Library starts it.
+func Attrs(settings map[string]any) templ.Attributes {
+	s := map[string]any{"copyClassesToDropdown": false, "dropdownParent": "body"}
+	for k, v := range settings {
+		s[k] = v
+	}
+	return templ.Attributes{"data-tabler-select": plugin.JSON(s)}
+}
+
+templ option(o Option) {
+	if o.Indicator != nil {
+		{{ html, _ := templ.ToGoHTML(ctx, o.Indicator) }}
+		<option value={ o.Value } data-custom-properties={ string(html) } selected?={ o.Selected }>{ o.Text }</option>
+	} else {
+		<option value={ o.Value } selected?={ o.Selected }>{ o.Text }</option>
+	}
+}
+
+// Select is an advanced select.
+templ Select(p Props) {
+	<select
+		class={ kit.Classes("form-select", p.Class, kit.If(p.State != "", "is-"+p.State)) }
+		if p.Placeholder != "" {
+			data-placeholder={ p.Placeholder }
+		}
+		if p.AriaLabel != "" {
+			aria-label={ p.AriaLabel }
+		}
+		if p.ID != "" {
+			id={ p.ID }
+		}
+		if p.Name != "" {
+			name={ p.Name }
+		}
+		multiple?={ p.Multiple }
+		disabled?={ p.Disabled }
+		required?={ p.Required }
+		data-tabler-select={ settings(p) }
+		{ p.Attributes... }
+	>
+		for _, g := range p.Groups {
+			<optgroup label={ g.Label }>
+				for _, o := range g.Options {
+					@option(o)
+				}
+			</optgroup>
+		}
+		for _, o := range p.Options {
+			@option(o)
+		}
+	</select>
+	@Script()
+}
+
+// Script starts the selects; Select renders it.
+func Script() templ.Component {
+	return plugin.Start("selectbox", `function (root) {
+		if (!window.TomSelect) return;
+		var render = function (data, escape) {
+			if (data.customProperties) {
+				return '<div class="dropdown-item"><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+			}
+			return '<div>' + escape(data.text) + '</div>';
+		};
+		window.tabler_select = window.tabler_select || {};
+		root.querySelectorAll('select[data-tabler-select]').forEach(function (el) {
+			if (el.tomselect) return;
+			var settings = JSON.parse(el.getAttribute('data-tabler-select'));
+			settings.render = Object.assign({ item: render, option: render }, settings.render);
+			var ts = new TomSelect(el, settings);
+			if (el.id) window.tabler_select[el.id] = ts;
+		});
+	}`)
+}
+
+// Library loads Tom Select and its stylesheet and starts every advanced select on the page; put it in
+// the head, before Tabler's stylesheet (Tabler's vendor styles override the plugin's).
+templ Library() {
+	@plugin.Stylesheet(StylesheetURL)
+	@plugin.Script(LibraryURL)
+	@Script()
+}

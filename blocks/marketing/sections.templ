@@ -1,0 +1,516 @@
+package marketing
+
+import (
+	"math"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/iconlist"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+func itoa(i int) string { return strconv.Itoa(i) }
+
+// Divider is the shape at the top of a Section.
+type Divider string
+
+const (
+	NoDivider Divider = ""
+	Waves     Divider = "waves" // three layered waves
+	Arc       Divider = "arc"
+)
+
+type SectionProps struct {
+	Class string
+	// Background is the section's color: "light", "white" or "dark" (section-{background}).
+	Background string
+	Divider    Divider
+}
+
+// Section is a band of a marketing page; the children are usually a container with a SectionHeader.
+templ Section(p SectionProps) {
+	<section class={ kit.Classes("section", kit.If(p.Background != "", "section-"+p.Background), p.Class) }>
+		@divider(p.Divider)
+		{ children... }
+	</section>
+}
+
+templ divider(d Divider) {
+	switch d {
+		case Waves:
+			<svg class="section-divider" xmlns="http://www.w3.org/2000/svg" viewBox="0 24 150 28" preserveAspectRatio="none">
+				<path class="wave-1" d="M-110 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
+				<path class="wave-2" d="M-110 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
+				<path class="wave-3" d="M-110 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
+			</svg>
+		case Arc:
+			<svg class="section-divider" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 36" preserveAspectRatio="none">
+				<path d="M 145 36 m -145 -18 s 32.36 18 72.27 18 s 72.73 -18 72.73 -18 v 18 h -145 z"></path>
+			</svg>
+	}
+}
+
+type HeaderProps struct {
+	Class       string // e.g. "mb-6"
+	Title       string
+	TitleClass  string // e.g. "text-secondary"
+	Description string
+	// DescriptionDiv renders the description as a <div> instead of a <p>.
+	DescriptionDiv bool
+}
+
+// SectionHeader is the centered title and description of a section.
+templ SectionHeader(p HeaderProps) {
+	<div class={ kit.Classes("section-header", p.Class) }>
+		<h2 class={ kit.Classes("section-title", p.TitleClass) }>{ p.Title }</h2>
+		if p.Description != "" {
+			if p.DescriptionDiv {
+				<div class="section-description">{ p.Description }</div>
+			} else {
+				<p class="section-description">{ p.Description }</p>
+			}
+		}
+	</div>
+}
+
+// Logo is a customer's logo in Logos.
+type Logo struct {
+	Name  string // aria-label of the link
+	Href  string
+	Image templ.Component // e.g. an inline SVG in currentColor, or an <img>
+}
+
+// Logos is a row of customer logos below a muted title (Tabler's Companies section); put it in a Section.
+templ Logos(title string, logos []Logo) {
+	<div class="container">
+		if title != "" {
+			@SectionHeader(HeaderProps{Class: "mb-6", Title: title, TitleClass: "text-secondary"})
+		}
+		<div class="row g-lg-8 align-items-center justify-content-center">
+			for _, l := range logos {
+				<div class="col-auto">
+					<a href={ templ.URL(kit.Or(l.Href, "#")) } class="link-secondary" aria-label={ l.Name }>
+						@l.Image
+					</a>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Feature is a feature with an icon in a shape.
+type Feature struct {
+	Icon  string
+	Title string
+	Text  string
+}
+
+// Features are features side by side, centered under their icons; put them in a Section.
+templ Features(fs []Feature) {
+	<div class="container">
+		<div class="row align-items-center text-center g-lg-10">
+			for _, f := range fs {
+				<div class="col-md-6 col-lg">
+					<div class="shape shape-md mb-3">
+						@icon.Icon(f.Icon)
+					</div>
+					<h2 class="h2">{ f.Title }</h2>
+					<p class="text-secondary">{ f.Text }</p>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// FeatureList are features one below the other, the icon at the start, e.g. next to an image in a Split.
+templ FeatureList(fs []Feature) {
+	<div class="space-y-6">
+		for _, f := range fs {
+			<div>
+				<div class="row">
+					<div class="col-auto">
+						<div class="shape shape-md">
+							@icon.Icon(f.Icon)
+						</div>
+					</div>
+					<div class="col">
+						<h3 class="h2 mb-2">{ f.Title }</h3>
+						<p class="text-secondary m-0">{ f.Text }</p>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+type SplitProps struct {
+	Header HeaderProps // the section header; without a Title none
+	// Media is the half next to the children, e.g. an image or a Placeholder.
+	Media templ.Component
+	// MediaEnd puts Media on the end side (below on small screens).
+	MediaEnd bool
+}
+
+// Split is a section content in two halves: Media and the children (e.g. a FeatureList).
+templ Split(p SplitProps) {
+	<div class="container">
+		if p.Header.Title != "" {
+			@SectionHeader(p.Header)
+		}
+		<div class="row g-lg-10">
+			if !p.MediaEnd {
+				<div class="col-lg-6 mb-3 mb-lg-0">
+					@p.Media
+				</div>
+			}
+			<div class="col-lg-6">
+				{ children... }
+			</div>
+			if p.MediaEnd {
+				<div class="col-lg-6 mt-3 mt-lg-0">
+					@p.Media
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Placeholder is Tabler's crossed-out box for an image still to come (500×400, full width).
+templ Placeholder() {
+	<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="500" height="400" viewBox="0 0 500 400" fill="transparent" stroke="var(--tblr-border-color, #b8cef1)" style="width: 100%; height: auto">
+		<rect x=".5" y=".5" width="499" height="399" rx="2"></rect>
+		<line x1="0" y1="0" x2="500" y2="400"></line>
+		<line x1="0" y1="400" x2="500" y2="0"></line>
+	</svg>
+}
+
+type CTAProps struct {
+	Title     string
+	TitleHTML templ.Component // instead of Title, e.g. with a line break
+	Text      string
+	// Actions are buttons in a centered list, e.g. a primary and a ghost button.
+	Actions []templ.Component
+}
+
+// CTA is a call to action: a big title, a text and buttons, centered; put it in a Section.
+templ CTA(p CTAProps) {
+	<div class="container-narrow text-center">
+		<h3 class="h1">
+			if p.TitleHTML != nil {
+				@p.TitleHTML
+			} else {
+				{ p.Title }
+			}
+		</h3>
+		if p.Text != "" {
+			<p class="text-secondary">{ p.Text }</p>
+		}
+		if len(p.Actions) > 0 {
+			<div class="btn-list justify-content-center mt-6">
+				for _, a := range p.Actions {
+					@a
+				}
+			</div>
+		}
+	</div>
+}
+
+// Counter is a big number with a label.
+type Counter struct {
+	Value string
+	Label string
+}
+
+// Counters are big numbers in a row, e.g. customers and years in business; put them in a Section.
+templ Counters(cs []Counter) {
+	<div class="container">
+		<div class="row justify-content-lg-center">
+			for _, c := range cs {
+				<div class="col-sm-6 col-lg-3">
+					<div class="text-center">
+						<h2 class="display-5 m-0 fw-bold">{ c.Value }</h2>
+						<p class="text-secondary m-0">{ c.Label }</p>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type SubscribeProps struct {
+	Title       string
+	Description string
+	Action      string // default "./"
+	Method      string // default "get"
+	Name        string // of the email field, default "email"
+	Placeholder string // default "Your Email"
+	Button      string // default "Subscribe"
+}
+
+// Subscribe is a newsletter sign-up: a header and an email field with a button; put it in a Section.
+templ Subscribe(p SubscribeProps) {
+	<div class="container">
+		@SectionHeader(HeaderProps{Class: "mb-6", Title: p.Title, Description: p.Description})
+	</div>
+	<div class="container-tight">
+		<form class="row" action={ templ.URL(kit.Or(p.Action, "./")) } method={ kit.Or(p.Method, "get") } novalidate>
+			<div class="col">
+				<input class="w-100 form-control" name={ kit.Or(p.Name, "email") } placeholder={ kit.Or(p.Placeholder, "Your Email") } type="email"/>
+			</div>
+			<div class="col-auto">
+				<button type="submit" class="btn btn-primary">
+					@icon.Icon("ti-mail")
+					{ " " + kit.Or(p.Button, "Subscribe") }
+				</button>
+			</div>
+		</form>
+	</div>
+}
+
+// Testimonial is a customer's quote.
+type Testimonial struct {
+	Avatar avatar.Props
+	Name   string
+	Role   string // e.g. a job title
+	Text   string
+	Href   string // the card links to it, default "#"
+}
+
+type TestimonialsProps struct {
+	Header HeaderProps // without a Title none
+	// NameLevel is the heading level of the names, default 3 (2 on a page without a section header).
+	NameLevel int
+}
+
+// columns splits ts into three columns of about the same length, filled top to bottom.
+func columns(ts []Testimonial) [][]Testimonial {
+	size := int(math.Max(1, math.Round(float64(len(ts))/3)))
+	var out [][]Testimonial
+	for i := 0; i < len(ts); i += size {
+		out = append(out, ts[i:min(i+size, len(ts))])
+	}
+	return out
+}
+
+// Testimonials are quote cards in three columns; put them in a Section.
+templ Testimonials(p TestimonialsProps, ts []Testimonial) {
+	<div class="container">
+		if p.Header.Title != "" {
+			@SectionHeader(p.Header)
+		}
+		<div class="row g-lg-6">
+			for _, col := range columns(ts) {
+				<div class="col-md-6 col-lg-4">
+					<div class="row g-lg-6">
+						for _, t := range col {
+							<div class="col-12">
+								<a href={ templ.URL(kit.Or(t.Href, "#")) } class="card bg-surface-secondary">
+									<div class="card-body">
+										<div class="row mb-3">
+											<div class="col-auto">
+												@avatar.Avatar(withSize(t.Avatar))
+											</div>
+											<div class="col">
+												if p.NameLevel == 2 {
+													<h2 class="h3 m-0">{ t.Name }</h2>
+												} else {
+													<h3 class="h3 m-0">{ t.Name }</h3>
+												}
+												<div class="text-secondary">{ t.Role }</div>
+											</div>
+										</div>
+										<p>{ t.Text }</p>
+									</div>
+								</a>
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+func withSize(a avatar.Props) avatar.Props {
+	if a.Size == "" {
+		a.Size = avatar.SizeMedium
+	}
+	return a
+}
+
+// Question is a question with its answer: a text, or Points as a list.
+type Question struct {
+	Question string
+	Answer   string
+	Points   []string
+}
+
+// FAQGrid are questions in three columns under a section header; put it in a Section.
+templ FAQGrid(header HeaderProps, qs []Question) {
+	<div class="container">
+		if header.Title != "" {
+			@SectionHeader(header)
+		}
+		<div class="row g-lg-4">
+			for _, q := range qs {
+				<div class="col-md-4 prose">
+					<h3 class="h2">{ q.Question }</h3>
+					if len(q.Points) > 0 {
+						<ul class="text-secondary">
+							for _, pt := range q.Points {
+								<li>{ pt }</li>
+							}
+						</ul>
+					} else {
+						<p class="text-secondary">{ q.Answer }</p>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type FAQListProps struct {
+	Title       string
+	Description string
+	More        templ.Component // below the questions, e.g. a "Read more questions" button
+}
+
+// FAQList are questions one below the other, with a sticky title at the start; put it in a Section.
+templ FAQList(p FAQListProps, qs []Question) {
+	<div class="container">
+		<div class="row g-xl-6">
+			<div class="col-lg-4">
+				<div class="section-header text-start sticky-top">
+					<div class="section-title">{ p.Title }</div>
+					if p.Description != "" {
+						<p class="section-description">{ p.Description }</p>
+					}
+				</div>
+			</div>
+			<div class="col-lg">
+				<div class="space-y-5">
+					for _, q := range qs {
+						<div>
+							<div class="h3 mb-1">{ q.Question }</div>
+							<div class="text-secondary">{ q.Answer }</div>
+						</div>
+					}
+				</div>
+				if p.More != nil {
+					<div class="mt-5">
+						@p.More
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+type BannerProps struct {
+	Title       string
+	Text        string
+	Features    []string
+	Currency    string // e.g. "$"
+	Price       string
+	Description []string // next to the price, e.g. "per team", "per year"
+	Action      templ.Component
+}
+
+// Banner is a wide offer: title, features, price and a button in one row (Tabler's pricing banner); put
+// it in a Section.
+templ Banner(p BannerProps) {
+	<div class="container">
+		<div class="bg-body-tertiary p-6 rounded-4">
+			<div class="row g-4 align-items-center">
+				<div class="col-lg">
+					<h3 class="h2">{ p.Title }</h3>
+					<p class="m-0 text-secondary">{ p.Text }</p>
+				</div>
+				<div class="col-lg">
+					@CheckList(p.Features, "m-0")
+				</div>
+				<div class="col-sm-6 col-lg">
+					@Price(p.Currency, p.Price, p.Description, "m-0")
+				</div>
+				if p.Action != nil {
+					<div class="col-sm-6 col-lg-auto">
+						@p.Action
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// CheckList is a list of features with green checks, e.g. the Content of a pricing.Card.
+templ CheckList(features []string, class string) {
+	@iconlist.List(iconlist.Props{Color: "green", Class: class}) {
+		for _, f := range features {
+			@iconlist.Item() {
+				{ f }
+			}
+		}
+	}
+}
+
+// Price is a price with its currency and description lines (pricing-price).
+templ Price(currency, price string, description []string, class string) {
+	<div class={ kit.Classes("pricing-price", class) }>
+		if currency != "" {
+			<span class="pricing-price-currency">{ currency }</span>
+		}
+		{ price }
+		if len(description) > 0 {
+			<div class="pricing-price-description">
+				for _, d := range description {
+					<div>{ d }</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+// Property is a home for sale or rent.
+type Property struct {
+	Name    string // aria-label of the photo link
+	Href    string
+	Image   string
+	Price   string
+	Address string
+	Beds    int
+	Baths   int
+}
+
+type PropertyProps struct {
+	// Texts, default "beds", "baths", "See details".
+	BedsLabel, BathsLabel, Action string
+}
+
+// PropertyCard is a card of a property: photo, price, address, beds and baths, and a button.
+templ PropertyCard(h Property, props ...PropertyProps) {
+	{{ p := kit.First(props) }}
+	<div class="card">
+		<a href={ templ.URL(kit.Or(h.Href, "#")) } aria-label={ h.Name }>
+			<div class="img-bg ratio ratio-4x3 card-img-top" style={ templ.SafeCSS("background-image: url(" + h.Image + ")") }></div>
+		</a>
+		<div class="card-body">
+			<div class="h1 mb-2 fw-bold">{ h.Price }</div>
+			<div>
+				<div class="text-secondary">{ h.Address }</div>
+				<div class="d-flex mb-4 text-secondary">
+					<div class="d-block d-flex align-items-center me-3">
+						@icon.Icon("ti-bed", icon.Props{Class: "me-1"})
+						{ itoa(h.Beds) + " " + kit.Or(p.BedsLabel, "beds") }
+					</div>
+					<div class="d-block d-flex align-items-center">
+						@icon.Icon("ti-bath", icon.Props{Class: "me-1"})
+						{ itoa(h.Baths) + " " + kit.Or(p.BathsLabel, "baths") }
+					</div>
+				</div>
+				<a href={ templ.URL(kit.Or(h.Href, "#")) } class="btn btn-primary py-2 px-3">{ kit.Or(p.Action, "See details") }</a>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,362 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/marketing"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/payment"
+	"github.com/mind-vm/tabler-templ/pricing"
+	"github.com/mind-vm/tabler-templ/prose"
+)
+
+// marketingPages are the preview's marketing pages (tabler-marketing.css).
+func marketingPages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"marketing":              mktHomePage(),
+		"marketing/hero":         mktHeroPage(),
+		"marketing/about":        mktAboutPage(),
+		"marketing/pricing":      mktPricingPage(),
+		"marketing/real-estate":  mktRealEstatePage(),
+		"marketing/testimonials": mktTestimonialsPage(),
+		"marketing/text":         mktTextPage(),
+	}
+}
+
+templ mktAssets(typed bool) {
+	@assets()
+	<link rel="stylesheet" href={ marketing.MarketingCSS(tablerVersion) }/>
+	if typed {
+		@marketing.TypedLibrary()
+	}
+}
+
+var mktLinks = []struct{ Text, Page string }{
+	{"Home", "marketing"}, {"Testimonials", "marketing/testimonials"}, {"Pricing", "marketing/pricing"},
+	{"About", "marketing/about"}, {"Text", "marketing/text"}, {"App", "marketing/hero"}, {"Real estate", "marketing/real-estate"},
+}
+
+// mktNavLinks are the preview's marketing links; like the preview, Home is always the active one.
+func mktNavLinks() []marketing.Link {
+	var ls []marketing.Link
+	for i, l := range mktLinks {
+		ls = append(ls, marketing.Link{Text: l.Text, Href: "/" + l.Page, Active: i == 0})
+	}
+	return ls
+}
+
+templ mktBrand() {
+	<a href="/" aria-label="Tabler" class="navbar-brand navbar-brand-autodark">
+		@logoSVG()
+	</a>
+}
+
+templ mktBuyNow() {
+	<a href="#" class="btn btn-primary">Buy now</a>
+}
+
+templ mktPayment(code, label string) {
+	<a href="#">
+		@payment.Payment(code, payment.Props{Label: label})
+	</a>
+}
+
+templ mktSocial(name, label string) {
+	<a class={ "btn btn-icon btn-" + name } href="#" aria-label={ label }>
+		@icon.Icon("ti-brand-" + name)
+	</a>
+}
+
+templ mktCopyright() {
+	©<a href="https://codecalm.net" class="link-secondary" target="_blank" rel="noopener noreferrer">codecalm.net</a>
+}
+
+templ mktFooter() {
+	@marketing.Footer(marketing.FooterProps{
+		Columns: []marketing.Column{
+			{Title: "Our products", Links: []marketing.Link{{Text: "UI Kit", Href: "/"}, {Text: "Open source icons", Href: "/"}, {Text: "Email templates", Href: "/"}, {Text: "Pricing", Href: "/"}}},
+			{Title: "Support", Links: []marketing.Link{{Text: "Blog", Href: "/"}, {Text: "Documentation", Href: "/"}, {Text: "Support", Href: "/"}, {Text: "Status", Href: "https://status.tabler.io", External: true}}},
+			{Title: "Tabler", Links: []marketing.Link{{Text: "About", Href: "/"}, {Text: "Blog", Href: "/"}, {Text: "Changelog", Href: "/"}, {Text: "Github", Href: "https://github.com/tabler/tabler", External: true}}},
+		},
+		Text: "Tabler comes with tons of well-designed components and features. Start your adventure with Tabler and make your dashboard great again. For free!",
+		Start: marketing.Inline("Payment & Security", mktPayment("paypal", "PayPal"), mktPayment("visa", "Visa"),
+			mktPayment("mastercard", "Mastercard"), mktPayment("americanexpress", "American Express")),
+		End: marketing.Inline("Follow us on", mktSocial("facebook", "Facebook"), mktSocial("instagram", "Instagram"),
+			mktSocial("twitter", "Twitter"), mktSocial("linkedin", "LinkedIn")),
+	})
+	@marketing.Legal(marketing.LegalProps{Copyright: mktCopyright(),
+		Links: []marketing.Link{{Text: "Terms of service", Href: "/terms-of-service"}, {Text: "Privacy policy", Href: "#"}}}) {
+		{ "Made with " }
+		@icon.Icon("ti-heart", icon.Props{Color: "red", Inline: true})
+		in Poland.
+	}
+}
+
+// mktPage is the preview's marketing layout.
+templ mktPage(title string, typed bool) {
+	@marketing.Page(marketing.PageProps{
+		Title:   title + " · tabler-templ",
+		Head:    mktAssets(typed),
+		Scripts: scripts(),
+		Navbar:  marketing.Navbar(marketing.NavbarProps{Brand: mktBrand(), Links: mktNavLinks(), Action: mktBuyNow(), ID: "navbarTogglerDemo01"}),
+		Footer:  mktFooter(),
+	}) {
+		{ children... }
+	}
+}
+
+templ mktButton(text, class string) {
+	<a href="#" class={ "btn btn-lg " + class }>{ text }</a>
+}
+
+templ mktPreviewButton() {
+	<a href="#" class="btn btn-lg btn-primary" target="_blank" rel="noopener noreferrer">Preview template</a>
+}
+
+templ mktBrowserHero() {
+	@marketing.Hero(marketing.HeroProps{Header: true, Class: "pb-0", TitleHTML: templ.Raw("Develop beautiful web apps with&nbsp;Tabler"),
+		Description:      "Tabler is a free and open source web application UI kit based on Bootstrap 5, with hundreds responsive components and multiple layouts.",
+		DescriptionClass: "mt-4", Actions: []templ.Component{mktButton("See features", ""), mktPreviewButton()}}) {
+		@marketing.Image() {
+			@marketing.Browser(marketing.BrowserProps{URL: "https://preview.tabler.io", Tooltip: "Open preview of Tabler dashboard!"}) {
+				@marketing.Screenshot(marketing.ScreenshotProps{Light: photo("marketing/preview.png"), Light2x: photo("marketing/preview@2x.png"),
+					Dark: photo("marketing/preview-dark.png"), Dark2x: photo("marketing/preview-dark@2x.png"), Width: 1060, Height: 663})
+			}
+		}
+	}
+}
+
+templ mktTypedTitle() {
+	Better email communication,<br/>
+	@marketing.Typed(marketing.TypedProps{ID: "typed", Strings: []string{"more effective", "more efficient", "more productive"}})
+}
+
+templ mktCarousel() {
+	<div id="carousel-controls" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+		<div class="carousel-inner">
+			for i, name := range []string{"boy-with-key", "boy-girl", "computer-fix"} {
+				<div class={ "carousel-item", templ.KV("active", i == 0) }>
+					<img src={ photo("illustrations/light/" + name + ".png") } class="d-block mx-auto" height="350" style="height: 350px" alt=""/>
+				</div>
+			}
+		</div>
+		<a class="carousel-control-prev text-secondary" href="#carousel-controls" role="button" data-bs-slide="prev">
+			@icon.Icon("ti-chevron-left", icon.Props{Class: "icon-md"})
+			<span class="visually-hidden">Previous</span>
+		</a>
+		<a class="carousel-control-next text-secondary" href="#carousel-controls" role="button" data-bs-slide="next">
+			@icon.Icon("ti-chevron-right", icon.Props{Class: "icon-md"})
+			<span class="visually-hidden">Next</span>
+		</a>
+	</div>
+}
+
+var mktFeatures = []marketing.Feature{
+	{Icon: "ti-devices", Title: "Mobile-optimized", Text: "Our email templates are fully responsive, so you can be sure they will look great on any device and screen size."},
+	{Icon: "ti-mailbox", Title: "Compatible with 90+ email clients", Text: "Tested across 90+ email clients and devices, Tabler emails will help you make your email communication professional and reliable."},
+	{Icon: "ti-palette", Title: "Unique, minimal design", Text: "Draw recipients’ attention with beautiful, minimal email designs based on Bootstrap and Material Design principles."},
+}
+
+var mktFeatureList = []marketing.Feature{
+	{Icon: "ti-tools", Title: "Designed with users in mind", Text: "Tabler is fully responsive and compatible with all modern browsers. Thanks to its modern, user-friendly design you can create a fully functional interface that users will love. Every UI element has been created with attention to detail to make your interface beautiful!"},
+	{Icon: "ti-brand-bootstrap", Title: "Built for developers", Text: "Having in mind what it takes to write high-quality code, we want to help you speed up the development process and keep your code clean. Based on Bootstrap 5, Tabler is a cutting-edge solution, compatible with all modern browsers and fully responsive."},
+	{Icon: "ti-paint", Title: "Fully customizable", Text: "You can easily customize the UI elements to make them fit the needs of your project. And don’t worry if you don’t have much experience - Tabler is easy to get started!"},
+}
+
+var mktSplitHeader = marketing.HeaderProps{Title: "Everything you need to deploy your app", DescriptionDiv: true,
+	Description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+
+var mktTestimonialsHeader = marketing.HeaderProps{Title: "Trusted by hundreds", Description: "Our Users send us bunch of smilies with our services, and we love them 😍"}
+
+templ mktGetStarted() {
+	<button type="button" class="btn btn-primary">Get started</button>
+}
+
+templ mktLearnMore() {
+	<button type="button" class="btn btn-ghost">
+		Learn more
+		@icon.Icon("ti-chevron-right", icon.Props{Class: "icon-end"})
+	</button>
+}
+
+templ mktMoreQuestions() {
+	<a class="btn" href="#">Read more questions</a>
+}
+
+// mktSections are the sections the marketing home and the hero page share after the hero.
+templ mktSections(companiesClass string) {
+	@marketing.Section(marketing.SectionProps{Background: "light", Class: companiesClass, Divider: marketing.Waves}) {
+		@marketing.Logos("Trusted by over 3,000 companies", mktLogos)
+	}
+	@marketing.Section(marketing.SectionProps{}) {
+		@marketing.Features(mktFeatures)
+	}
+	@marketing.Section(marketing.SectionProps{Background: "light"}) {
+		@marketing.Split(marketing.SplitProps{Header: mktSplitHeader, Media: marketing.Placeholder()}) {
+			@marketing.FeatureList(mktFeatureList)
+		}
+	}
+	@marketing.Section(marketing.SectionProps{}) {
+		@marketing.CTA(marketing.CTAProps{TitleHTML: templ.Raw("Enhance your efficiency with our application,<br />available for use immediately."),
+			Text:    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt, ipsa? Voluptates sunt, ipsum esse quis obcaecati atque placeat consectetur beatae, tenetur ducimus iure minima expedita recusandae doloribus nam. Pariatur, facilis?",
+			Actions: []templ.Component{mktGetStarted(), mktLearnMore()}})
+	}
+	@marketing.Section(marketing.SectionProps{Background: "light"}) {
+		@marketing.Split(marketing.SplitProps{Header: mktSplitHeader, Media: marketing.Placeholder(), MediaEnd: true}) {
+			@marketing.FeatureList(mktFeatureList)
+		}
+	}
+	@marketing.Section(marketing.SectionProps{}) {
+		@marketing.Testimonials(marketing.TestimonialsProps{Header: mktTestimonialsHeader}, mktTestimonials[:9])
+	}
+	@marketing.Section(marketing.SectionProps{Background: "light"}) {
+		@marketing.Counters([]marketing.Counter{{Value: "48", Label: "templates"}, {Value: "12", Label: "years in business"},
+			{Value: "2,5k+", Label: "copies sold"}, {Value: "99%", Label: "happy customers"}})
+	}
+	@marketing.Section(marketing.SectionProps{}) {
+		@marketing.Subscribe(marketing.SubscribeProps{Title: "Subscribe on our newsletter", Description: "Get daily news on upcoming offers from many suppliers all over the world"})
+	}
+	@marketing.Section(marketing.SectionProps{Background: "light"}) {
+		@marketing.FAQList(marketing.FAQListProps{Title: "Frequently asked questions", Description: "Can’t find the answer you’re looking for? Reach out to our customer support team.", More: mktMoreQuestions()}, []marketing.Question{
+			{Question: "Can I use Tabler in commercial projects?", Answer: "Of course! Tabler is under MIT license, so you can confidently use it in commercial projects. However, remember to include a note that your project uses Tabler."},
+			{Question: "How do I get notified of new Tabler versions?", Answer: "You may watch the releases on GitHub or follow me on Twitter."},
+			{Question: "Can Tabler be used with WordPress?", Answer: "Tabler is an HTML template that can be used for any purpose. However, it is not made to be easily installed on WordPress. It will require some effort and enough knowledge of the WordPress script to do so."},
+		})
+	}
+}
+
+templ mktHomePage() {
+	@mktPage("Marketing", false) {
+		@mktBrowserHero()
+		@mktSections("mt-n12 pt-12")
+	}
+}
+
+templ mktHeroPage() {
+	@mktPage("Hero", true) {
+		@marketing.SideHero(marketing.SideHeroProps{Subheader: "Tabler Emails", TitleHTML: mktTypedTitle(),
+			Description: "54 eye-catching, customizable and responsive email templates to improve your email communication. No coding skills needed.",
+			Actions:     []templ.Component{mktButton("Buy for $29", "btn-primary"), mktButton("Browse gallery", "")}, Media: mktCarousel()})
+		@mktSections("mt-4 pt-4")
+	}
+}
+
+templ mktAboutPage() {
+	@mktPage("About", false) {
+		@marketing.Hero(marketing.HeroProps{Title: "About Us", DescriptionClass: "hero-description-wide",
+			Description: "Tabler is a digital firm specializing in website development. Our themes are employed by businesses of all scales, ranging from emerging startups to established public companies, to construct and oversee their online presence."})
+		<div class="section pt-0">
+			<div class="container">
+				<div class="row gx-3">
+					@mktTile("col mb-3")
+					@mktTile("col-3 d-none d-md-block mb-3")
+					@mktTile("col mb-3")
+					<div class="w-100"></div>
+					@mktTile("col mb-3 mb-md-0")
+					@mktTile("col-4 d-none d-md-block mb-3 mb-md-0")
+					@mktTile("col")
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ mktTile(class string) {
+	<div class={ class }>
+		<div class="bg-cover rounded bg-body-tertiary" style="height: 15rem;"></div>
+	</div>
+}
+
+var mktPlanFeatures = []string{"Up to 5 developers", "All marketing + app components", "Figma UI Kit", "Lifetime free updates"}
+
+templ mktPlanButton(primary bool) {
+	<a href="#" class={ "btn w-100", templ.KV("btn-primary", primary) }>Get started</a>
+}
+
+templ mktPopular() {
+	<div class="badge bg-primary text-primary-fg">Popular</div>
+}
+
+func mktPlan(title, price string, featured bool) pricing.CardProps {
+	p := pricing.CardProps{Title: title, Currency: "$", Price: price, Description: []string{"per user", "per year"},
+		Featured: featured, Content: marketing.CheckList(mktPlanFeatures, "my-5"), Button: mktPlanButton(featured), TitleLevel: 2}
+	if featured {
+		p.Label = mktPopular()
+	}
+	return p
+}
+
+templ mktPricingPage() {
+	@mktPage("Pricing", false) {
+		@marketing.Hero(marketing.HeroProps{Header: true, Title: "Simple, transparent pricing",
+			Description: "Get early access to 100+ components and free updates every month. Make it yours today!"})
+		@marketing.Section(marketing.SectionProps{Class: "pt-0"}) {
+			<div class="container">
+				@pricing.Pricing() {
+					@pricing.Card(mktPlan("Free", "99", false))
+					@pricing.Card(mktPlan("All features", "199", true))
+					@pricing.Card(mktPlan("Other", "99", false))
+				}
+			</div>
+		}
+		@marketing.Section(marketing.SectionProps{}) {
+			@marketing.Banner(marketing.BannerProps{Title: "Team License", Text: "Get Marketing + Application UI for you and your team",
+				Features: mktPlanFeatures, Currency: "$", Price: "599", Description: []string{"per team", "per year"}, Action: mktTeamButton()})
+		}
+		@marketing.Section(marketing.SectionProps{Background: "light"}) {
+			@marketing.FAQGrid(marketing.HeaderProps{Title: "Frequently Asked Questions"}, []marketing.Question{
+				{Question: "How is Tabler Pro different from Tabler?", Answer: "Tabler offers fundamental components that you can piece together to build your app or website. However, Tabler Pro offers an elevated convenience by providing pre-assembled components and page templates, acting as ready-to-use building blocks that can be swiftly integrated into your app, thereby saving development time."},
+				{Question: "Is this a yearly subscription?", Answer: "Certainly, you have lifelong access to all our components. This implies that you will receive new components and updates every month, continuing as long as we have new component ideas to share."},
+				{Question: "I want to buy this but I can't afford it. Is there a discount?", Answer: "Should you be a student or find the cost excessively high in your local currency, please reach out to us at support@tabler.io detailing your circumstances, and we will contemplate offering you a discount."},
+				{Question: "What can I do with this license?", Points: []string{"To build your websites or SaaS project that end-users need to pay", "To build an open-source tool or documentation website"}},
+				{Question: "What version of Tabler is used?", Answer: "The elements in Tabler Pro are created using Tabler v1.2 and later versions. If your current version is v0.8, we advise you to update to the latest version to make the most of the Pro components."},
+				{Question: "What restrictions does this license have?", Points: []string{"Create a clone of Tabler PRO to sell", "Create products like templates, themes, Figma or Sketch UI kits, page builders based on the PRO components", "Recreate the components for other UI libraries or CSS frameworks"}},
+			})
+		}
+	}
+}
+
+templ mktTeamButton() {
+	<a href="#" class="btn btn-primary w-100">Get started</a>
+}
+
+templ mktRealEstatePage() {
+	@mktPage("Real estate", false) {
+		@marketing.CoverHero(marketing.CoverHeroProps{Image: photo("marketing/photo-1564013799919-ab600027ffc6.jpg"), Title: "Find your forever home",
+			Description: "It's time to find the home of your dreams, and you search begins here. We make it easy to find the property that fits your needs and budget."}) {
+			@marketing.SearchForm(marketing.SearchFormProps{ID: "inputEmail", Placeholder: "Search properties near you..."})
+		}
+		@marketing.Section(marketing.SectionProps{Background: "white", Divider: marketing.Arc}) {
+			<div class="container">
+				<div class="row g-lg-6">
+					for _, h := range mktProperties {
+						<div class="col-md-6 col-lg-4">
+							@marketing.PropertyCard(h)
+						</div>
+					}
+				</div>
+			</div>
+		}
+	}
+}
+
+templ mktTestimonialsPage() {
+	@mktPage("Testimonials", false) {
+		@marketing.Hero(marketing.HeroProps{Header: true, Title: mktTestimonialsHeader.Title, Description: mktTestimonialsHeader.Description})
+		@marketing.Section(marketing.SectionProps{Class: "pt-0"}) {
+			@marketing.Testimonials(marketing.TestimonialsProps{NameLevel: 2}, mktTestimonials)
+		}
+	}
+}
+
+templ mktTextPage() {
+	@mktPage("Text", false) {
+		@marketing.Hero(marketing.HeroProps{Title: "Who's that then?", DescriptionClass: "hero-description-wide",
+			Description: "Why do you think that she is a witch? How do you know she is a witch? And the hat. She's a witch! The swallow may fly south with the sun, and the house martin or the plover may seek warmer climes in winter, yet these are not strangers to our land."})
+		@marketing.Section(marketing.SectionProps{Class: "pt-0"}) {
+			<div class="container container-narrow">
+				@prose.Prose() {
+					@templ.Raw(mktText)
+				}
+			</div>
+		}
+	}
+}

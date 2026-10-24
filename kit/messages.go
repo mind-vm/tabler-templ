@@ -48,6 +48,8 @@ type Messages struct {
 	HidePassword string
 	// Password strength meter.
 	PasswordStrength string
+	// Read out after the label of a required field, e.g. " (required)".
+	Required string
 }
 
 var (
@@ -58,7 +60,8 @@ var (
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
-		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength"}
+		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
+		Required: " (required)"}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		Previous: "Zurück", Next: "Weiter", First: "Erste", Last: "Letzte", FirstPage: "Erste Seite", LastPage: "Letzte Seite", Page: "Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
@@ -66,7 +69,8 @@ var (
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
-		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke"}
+		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",
+		Required: " (Pflichtfeld)"}
 )
 
 type messagesKey struct{}

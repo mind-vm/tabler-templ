@@ -1,0 +1,958 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+	"strconv"
+	"time"
+
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/calendar"
+	"github.com/mind-vm/tabler-templ/colorpicker"
+	"github.com/mind-vm/tabler-templ/confetti"
+	"github.com/mind-vm/tabler-templ/datatable"
+	"github.com/mind-vm/tabler-templ/datepicker"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/dropzone"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+	"github.com/mind-vm/tabler-templ/rating"
+	"github.com/mind-vm/tabler-templ/signature"
+	"github.com/mind-vm/tabler-templ/signal"
+	"github.com/mind-vm/tabler-templ/sortable"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/tour"
+	"github.com/mind-vm/tabler-templ/wysiwyg"
+)
+
+// previewLibs is preview with the plugin libraries a page needs in the head, before Tabler's stylesheet
+// (like the preview: Tabler's vendor styles override the plugins' own).
+templ previewLibs(name string, libs ...templ.Component) {
+	{{ p, _ := catalog.Find(name) }}
+	{{ fp := frameProps(name, p.Title) }}
+	{{ fp.Head = templ.Join(append(libs, assets())...) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: p.Title, Description: p.Description, Actions: originalLink(name)}) }}
+	@layout.Page(fp) {
+		{ children... }
+	}
+}
+
+// appFrameLibs is appFrame with plugin libraries in the head.
+templ appFrameLibs(name, title, containerClass string, libs ...templ.Component) {
+	{{ fp := frameProps(name, title) }}
+	{{ fp.Head = templ.Join(append(libs, assets())...) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: title, Actions: originalLink(name)}) }}
+	{{ fp.ContainerClass = containerClass }}
+	@layout.Page(fp) {
+		{ children... }
+	}
+}
+
+func intp(i int) *int { return &i }
+
+// dpCard is a card of the datepicker page.
+templ dpCard(col, title, subtitle string) {
+	<div class={ col }>
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ dpLabel(id, text string) {
+	<label class="form-label" for={ id }>{ text }</label>
+}
+
+templ datepickerPage() {
+	{{ year := strconv.Itoa(time.Now().Year()) }}
+	{{ rangeDates := []string{year + "-06-10", year + "-06-18"} }}
+	@previewLibs("datepicker", datepicker.Library()) {
+		<div class="row row-cards">
+			@dpCard("col-md-6 col-lg-4", "Basic", "Add `data-bs-toggle=\"datepicker\"` to a text input. The calendar opens on focus.") {
+				@dpLabel("datepicker-basic", "Date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-basic"})
+			}
+			@dpCard("col-md-6 col-lg-4", "With icon", "Wrap the field in `.input-icon`. The popup lines up with the wrapper, not the input.") {
+				@dpLabel("datepicker-icon", "Date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-icon", Layout: datepicker.LayoutIcon, Class: "mb-3"})
+				@dpLabel("datepicker-icon-prepend", "Date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-icon-prepend", Layout: datepicker.LayoutIconPrepend})
+			}
+			@dpCard("col-md-6 col-lg-4", "Initial value", "A `value` in `YYYY-MM-DD` is shown on load and the calendar opens on that month.") {
+				@dpLabel("datepicker-value", "Birth date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-value", Value: "1990-06-20"})
+			}
+			@dpCard("col-md-6 col-lg-4", "Min and max", "Limit the pickable dates with `data-bs-date-min` and `data-bs-date-max`.") {
+				@dpLabel("datepicker-min-max", "Event date ("+year+" only)")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-min-max", Min: year + "-01-01", Max: year + "-12-31", Placeholder: "Select a date in " + year})
+			}
+			@dpCard("col-md-6 col-lg-4", "Date range", "Set `data-bs-selection-mode=\"multiple-ranged\"` to pick a start and an end date.") {
+				@dpLabel("datepicker-range", "Stay")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-range", Mode: datepicker.ModeRange, Selected: rangeDates, Placeholder: "Select start and end"})
+			}
+			@dpCard("col-md-6 col-lg-4", "Multiple dates", "Set `data-bs-selection-mode=\"multiple\"` to pick any number of dates.") {
+				@dpLabel("datepicker-multiple", "Days off")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-multiple", Mode: datepicker.ModeMultiple, Placeholder: "Select dates"})
+			}
+			@dpCard("col-md-6 col-lg-4", "Two months", "Add `data-bs-display-months-count=\"2\"` to show two months side by side.") {
+				@dpLabel("datepicker-two-months", "Stay")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-two-months", Mode: datepicker.ModeRange, Months: 2, Placeholder: "Select start and end"})
+			}
+			@dpCard("col-md-6 col-lg-4", "Week starts on Sunday", "Set `data-bs-first-weekday=\"0\"`. The default is Monday.") {
+				@dpLabel("datepicker-sunday", "Date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-sunday", FirstWeekday: intp(0)})
+			}
+			@dpCard("col-md-6 col-lg-4", "Week numbers", "Add `data-bs-week-numbers=\"true\"` to show the week number in front of each row.") {
+				@dpLabel("datepicker-week-numbers", "Delivery date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-week-numbers", WeekNumbers: true})
+			}
+			@dpCard("col-md-6 col-lg-4", "Placement", "Align the popup with `data-bs-placement`: left, center, right or auto.") {
+				@dpLabel("datepicker-center", "Centered")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-center", Placement: "center", Class: "mb-3"})
+				@dpLabel("datepicker-right", "Right aligned")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-right", Placement: "right"})
+			}
+			@dpCard("col-md-6 col-lg-4", "Button trigger", "Any element works as a trigger. Mark the text with `data-bs-datepicker-display` so the icon stays.") {
+				<div class="btn-list">
+					<button type="button" class="btn" { datepicker.Attrs(datepicker.Props{})... }>
+						@icon.Icon("ti-calendar")
+						<span data-bs-datepicker-display>Select date</span>
+					</button>
+					<button type="button" class="btn" { datepicker.Attrs(datepicker.Props{Mode: datepicker.ModeRange})... }>
+						@icon.Icon("ti-calendar-event")
+						<span data-bs-datepicker-display>Select range</span>
+					</button>
+				</div>
+			}
+			@dpCard("col-md-6 col-lg-4", "Events", "Listen to `change.bs.datepicker` to read the picked dates as `YYYY-MM-DD`.") {
+				@dpLabel("datepicker-events", "Date")
+				@datepicker.Input(datepicker.Props{ID: "datepicker-events", Mode: datepicker.ModeRange, Placeholder: "Select start and end"})
+				<div class="form-text" id="datepicker-events-output">No dates picked yet.</div>
+			}
+		</div>
+		<div class="row row-cards mt-4">
+			@dpCard("col-md-6 col-lg-4", "Inline calendar", "Add `data-bs-inline=\"true\"` to render the calendar in place. It takes the card as its surface.") {
+				@datepicker.Input(datepicker.Props{ID: "datepicker-inline", Inline: true})
+			}
+			@dpCard("col-md-6 col-lg-4", "Inline range", "Inline calendars take the same options. This one picks a start and an end date.") {
+				@datepicker.Input(datepicker.Props{ID: "datepicker-inline-range", Inline: true, Mode: datepicker.ModeRange, Selected: rangeDates})
+			}
+			@dpCard("col-md-6 col-lg-4", "Inline in a form", "A hidden input inside the calendar submits the picked dates with the form.") {
+				<form onsubmit="return false">
+					@datepicker.Input(datepicker.Props{ID: "datepicker-inline-form", Inline: true, Name: "selected_date"})
+					<button type="submit" class="btn btn-primary mt-3">Submit</button>
+				</form>
+			}
+			@dpCard("col-md-6 col-lg-4", "Inline with week numbers", "Week numbers work in an inline calendar too, and with every selection mode.") {
+				@datepicker.Input(datepicker.Props{ID: "datepicker-inline-week-numbers", Inline: true, WeekNumbers: true, Mode: datepicker.ModeRange, Selected: rangeDates})
+			}
+			@dpCard("col-md-12 col-lg-8", "Inline with two months", "Add `data-bs-display-months-count=\"2\"` for a wide calendar.") {
+				@datepicker.Input(datepicker.Props{ID: "datepicker-inline-two-months", Inline: true, Mode: datepicker.ModeRange, Months: 2})
+			}
+		</div>
+		<script>
+			document.getElementById('datepicker-events').addEventListener('change.bs.datepicker', (event) => {
+				const output = document.getElementById('datepicker-events-output')
+				output.textContent = event.dates.length ? `Picked: ${event.dates.join(', ')}` : 'No dates picked yet.'
+			})
+		</script>
+	}
+}
+
+templ dropzonePage() {
+	@previewLibs("dropzone", dropzone.Library()) {
+		<div class="row row-cards">
+			<div class="col-md-6">
+				@section("Basic Usage", "Drag a file in or click to browse — a single drop target for one upload.") {
+					@dropzone.Dropzone(dropzone.Props{ID: "dropzone-default"})
+				}
+			</div>
+			<div class="col-md-6">
+				@section("Multiple File Upload", "Accept and preview several files at once from the same drop target.") {
+					@dropzone.Dropzone(dropzone.Props{ID: "dropzone-multiple", Multiple: true})
+				}
+			</div>
+			<div class="col-md-6">
+				@section("Custom Dropzone", "Swap in your own label and helper text for the drop target.") {
+					@dropzone.Dropzone(dropzone.Props{ID: "dropzone-custom", Title: "Your text here", Text: "Your custom description here"})
+				}
+			</div>
+		</div>
+	}
+}
+
+var colorTitles = []string{"Blue", "Azure", "Indigo", "Purple", "Pink", "Red", "Orange", "Yellow", "Lime", "Green", "Teal", "Cyan"}
+
+templ colorpickerPage() {
+	@previewLibs("colorpicker", colorpicker.Library()) {
+		@section("Basic", "Click a swatch to open the picker and choose any color.") {
+			<div class="row g-3">
+				for i, c := range colorpicker.Swatches {
+					<div class="col-2">
+						<div>
+							@colorpicker.Input(colorpicker.Props{ID: "colorpicker-" + strconv.Itoa(i+1), Value: c, Format: "hex", Label: colorTitles[i] + " color value"})
+						</div>
+					</div>
+				}
+			</div>
+		}
+	}
+}
+
+templ wysiwygPage() {
+	@previewLibs("wysiwyg", wysiwyg.Library()) {
+		@section("Rich text editor", "A formatting toolbar for headings, lists, and links, dropped into a normal form field.") {
+			@form.Field(form.FieldProps{Label: "Your name", For: "wysiwyg-name"}) {
+				@form.Input(form.InputProps{ID: "wysiwyg-name", Placeholder: "Name"})
+			}
+			@form.Field(form.FieldProps{Label: "Description", For: "hugerte-description"}) {
+				@wysiwyg.Editor(wysiwyg.Props{ID: "hugerte-description", Value: "Hello, <b>Tabler</b>!"})
+			}
+		}
+	}
+}
+
+// sampleEvents are the preview's calendar events, in the current month.
+func sampleEvents() []calendar.Event {
+	now := time.Now()
+	at := func(day, hour, minute int) time.Time {
+		return time.Date(now.Year(), now.Month(), day, hour, minute, 0, 0, time.Local)
+	}
+	ev := func(title string, d1, h1, m1, d2, h2, m2 int) calendar.Event {
+		return calendar.Event{Title: title, Start: at(d1, h1, m1), End: at(d2, h2, m2)}
+	}
+	offsite := ev("Offsite Retreat", 2, 9, 0, 4, 17, 0)
+	offsite.Color, offsite.Background, offsite.Border = "var(--tblr-red)", "var(--tblr-red-lt)", "var(--tblr-red-200)"
+	return []calendar.Event{offsite,
+		ev("Monthly Planning", 1, 10, 0, 1, 11, 30), ev("Marketing Strategy Call", 4, 14, 0, 4, 15, 0),
+		ev("Design Sprint", 7, 9, 0, 7, 12, 0), ev("Dev Team Check-in", 10, 11, 0, 10, 11, 30),
+		ev("Customer Feedback Review", 13, 13, 0, 13, 14, 0), ev("Mid-Month Review", 15, 10, 30, 15, 11, 30),
+		ev("Webinar: Product Update", 18, 16, 0, 18, 17, 0), ev("Sales Training", 21, 9, 30, 21, 11, 0),
+		ev("Company All-Hands", 25, 15, 0, 25, 16, 0), ev("End-of-Month Wrap-up", 31, 10, 0, 31, 11, 0)}
+}
+
+templ fullcalendarPage() {
+	@previewLibs("fullcalendar", calendar.Library()) {
+		@section("Full calendar", "Drag to create an event, click one to edit it — populated here with sample events.") {
+			@calendar.Calendar(calendar.Props{ID: "calendar-default", Events: sampleEvents()})
+		}
+	}
+}
+
+templ ratingCol(title, subtitle string) {
+	<div class="col-md-6 col-lg-4">
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ starsRatingPage() {
+	@previewLibs("stars-rating", rating.Library()) {
+		<div class="row row-cards mb-5">
+			@ratingCol("Basic", "Click a star to set the value.") {
+				@rating.Rating(rating.Props{ID: "rating-basic", Value: 4})
+			}
+			@ratingCol("Icons", "Swap the star for any icon by passing a different SVG to the `stars` option.") {
+				<div class="space-y">
+					@rating.Rating(rating.Props{ID: "rating-icon-star", Value: 4})
+					@rating.Rating(rating.Props{ID: "rating-icon-heart", Icon: "ti-heart", Value: 4, Color: "red"})
+					@rating.Rating(rating.Props{ID: "rating-icon-ghost", Icon: "ti-ghost", Value: 4, Color: "azure"})
+					@rating.Rating(rating.Props{ID: "rating-icon-circle", Icon: "ti-circle", Value: 4, Color: "green"})
+				</div>
+			}
+			@ratingCol("Sizes", "Match the rating to surrounding text with an `icon-sm` or `icon-lg` class on the star.") {
+				<div class="space-y">
+					@rating.Rating(rating.Props{ID: "rating-size-sm", Value: 3, Size: icon.SizeSmall})
+					@rating.Rating(rating.Props{ID: "rating-size-md", Value: 3, Size: icon.SizeMedium})
+					@rating.Rating(rating.Props{ID: "rating-size-lg", Value: 3, Size: icon.SizeLarge})
+				</div>
+			}
+			@ratingCol("Colors", "Color the star with a `text-*` class, any theme or extended color, to match the rest of the page.") {
+				<div class="space-y">
+					@rating.Rating(rating.Props{ID: "rating-color-default", Value: 3})
+					@rating.Rating(rating.Props{ID: "rating-color-primary", Color: "primary", Value: 3})
+					@rating.Rating(rating.Props{ID: "rating-color-red", Color: "red", Value: 3})
+					@rating.Rating(rating.Props{ID: "rating-color-lime", Color: "lime", Value: 3})
+				</div>
+			}
+		</div>
+	}
+}
+
+const signatureAgree = "I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on documents, including legally binding contracts - just the same as a pen-and-paper signature or initial."
+
+templ signaturesPage() {
+	@previewLibs("signatures", signature.Library()) {
+		<div class="row row-cards">
+			<div class="col-lg-6">
+				@card.Card() {
+					@card.Body() {
+						@card.Title() {
+							Confirm transfer
+						}
+						@card.Subtitle() {
+							Please confirm the transfer of funds by signing below.
+						}
+						<form>
+							@form.Field(form.FieldProps{Label: "First name", Required: true, For: "signature-first-name"}) {
+								@form.Input(form.InputProps{ID: "signature-first-name", Name: "first_name"})
+							}
+							@form.Field(form.FieldProps{Label: "Last name", Required: true, For: "signature-last-name"}) {
+								@form.Input(form.InputProps{ID: "signature-last-name", Name: "last_name"})
+							}
+							@form.Field(form.FieldProps{Label: "Signature", Required: true}) {
+								@signature.Pad(signature.Props{ID: "signature-default", Clear: true, Value: signatureImage})
+							}
+						</form>
+						<div class="text-secondary fs-5">{ signatureAgree }</div>
+						<div class="mt-4">
+							<div class="btn-list">
+								<button type="button" class="btn">Cancel</button>
+								<button type="button" class="btn btn-primary ms-auto">Confirm transfer</button>
+							</div>
+						</div>
+					}
+				}
+			</div>
+			<div class="col-lg-6">
+				<div class="row row-cards">
+					<div class="col-12">
+						@card.Card() {
+							@card.Body() {
+								@card.Title() {
+									Advanced demo
+								}
+								@signature.Pad(signature.Props{ID: "signature-advanced", Clear: true})
+								<div class="mt-4">
+									<div class="row">
+										<div class="col">
+											<label class="form-label visually-hidden" for="signature-advanced-color">Pen color</label>
+											<input type="color" id="signature-advanced-color" class="w-100 form-control form-control-color"/>
+										</div>
+										<div class="col">
+											<button class="btn w-100" id="signature-advanced-svg">Download SVG</button>
+										</div>
+										<div class="col">
+											<button class="btn w-100" id="signature-advanced-png">Download PNG</button>
+										</div>
+									</div>
+								</div>
+							}
+						}
+					</div>
+					<div class="col-12">
+						@card.Card() {
+							@card.Body() {
+								<button type="button" data-bs-toggle="modal" data-bs-target="#modal-signature" class="btn">Open signature modal</button>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal" tabindex="-1" id="modal-signature" role="dialog" aria-modal="true" aria-labelledby="modal-signature-save-title">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-body">
+						<h2 class="modal-title" id="modal-signature-save-title">Save your signature</h2>
+						@signature.Pad(signature.Props{ID: "signature-modal", Clear: true})
+						<div class="text-secondary fs-5 mt-4">{ signatureAgree }</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary ms-auto" data-bs-dismiss="modal">Save my signature</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				const download = (dataURL, filename) => {
+					const a = document.createElement('a')
+					a.style.display = 'none'
+					a.href = dataURL
+					a.download = filename
+					document.body.appendChild(a)
+					a.click()
+					a.remove()
+				}
+				const advanced = (window.tabler_signature ?? {})['signature-advanced']
+				if (!advanced) return
+				document.getElementById('signature-advanced-color').addEventListener('input', (e) => { advanced.penColor = e.target.value })
+				document.getElementById('signature-advanced-svg').addEventListener('click', () => download(advanced.toDataURL('image/svg+xml'), 'signature.svg'))
+				document.getElementById('signature-advanced-png').addEventListener('click', () => download(advanced.toDataURL(), 'signature.png'))
+			})
+		</script>
+	}
+}
+
+templ confettiButton(text string, p confetti.Props) {
+	<button type="button" class="btn" { confetti.Attrs(p)... }>{ text }</button>
+}
+
+templ confettiPage() {
+	@preview("confetti") {
+		@confetti.Burst(confetti.Props{})
+		<div class="row row-cards">
+			@ratingCol("Basic", "Add `data-bs-toggle=\"confetti\"` to a button. A click pours the shower; it thins out and clears by itself.") {
+				@confettiButton("Celebrate", confetti.Props{})
+			}
+			@ratingCol("Amount and length", "Set `data-bs-count` for the number of pieces and `data-bs-duration` for how long they keep pouring, in milliseconds.") {
+				<div class="btn-list">
+					@confettiButton("A few", confetti.Props{Count: 60, Duration: 800})
+					@confettiButton("A lot", confetti.Props{Count: 600, Duration: 6000})
+				</div>
+			}
+			@ratingCol("Colors", "By default the pieces use the Tabler palette. Pass a comma-separated list in `data-bs-colors` to use your own.") {
+				<div class="btn-list">
+					@confettiButton("Warm", confetti.Props{Colors: []string{"#f76707", "#f59f00", "#d63939", "#d6336c"}})
+					@confettiButton("Cool", confetti.Props{Colors: []string{"#066fd1", "#4299e1", "#4263eb", "#17a2b8"}})
+					@confettiButton("Mono", confetti.Props{Colors: []string{"#182433", "#667382", "#dce1e7"}})
+				</div>
+			}
+			@ratingCol("Speed", "Set `data-bs-speed` to scale the fall. `1` is the default, a lower value floats, a higher one drops.") {
+				<div class="btn-list">
+					@confettiButton("Float", confetti.Props{Speed: 0.5})
+					@confettiButton("Default", confetti.Props{})
+					@confettiButton("Drop", confetti.Props{Speed: 2})
+				</div>
+			}
+			@ratingCol("Target and events", "Point `data-bs-target` at another element. `start.bs.confetti` and `end.bs.confetti` fire on that element, not on the trigger.") {
+				<div class="d-flex align-items-center gap-3">
+					@confettiButton("Ship it", confetti.Props{Target: "#confetti-shipped", Count: 150, Duration: 1500})
+					<span class="badge" id="confetti-shipped">Idle</span>
+				</div>
+				<script>
+					document.addEventListener('DOMContentLoaded', () => {
+						const badge = document.getElementById('confetti-shipped')
+						badge.addEventListener('start.bs.confetti', () => { badge.textContent = 'Pouring…' })
+						badge.addEventListener('end.bs.confetti', () => { badge.textContent = 'Done' })
+					})
+				</script>
+			}
+			@ratingCol("From JavaScript", "Call `burst()` on a `tabler.Confetti` instance when something else finishes, for example a form that was saved.") {
+				<form id="confetti-form" class="d-flex align-items-end gap-2">
+					<div class="flex-fill">
+						<label class="form-label" for="confetti-project">Project name</label>
+						<input type="text" id="confetti-project" class="form-control" value="Tabler" autocomplete="off"/>
+					</div>
+					<button type="submit" class="btn">Create</button>
+				</form>
+				<script>
+					document.addEventListener('DOMContentLoaded', () => {
+						const form = document.getElementById('confetti-form')
+						const confetti = tabler.Confetti.getOrCreateInstance(form, { count: 150, duration: 1500 })
+						form.addEventListener('submit', (event) => {
+							event.preventDefault()
+							confetti.burst()
+						})
+					})
+				</script>
+			}
+		</div>
+	}
+}
+
+var longMonths = []string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+
+templ datatablesPage() {
+	@previewLibs("datatables", datatable.Library()) {
+		@card.Card() {
+			@card.Header() {
+				<div>
+					@card.Title() {
+						Sortable table
+					}
+					@card.Subtitle() {
+						Click a column header to sort the rows by that value.
+					}
+				</div>
+			}
+			@card.Body(card.Props{Class: "p-0"}) {
+				@datatable.Table(datatable.Props{ID: "table-default", Fields: []datatable.Field{{Name: "sort-name"}, {Name: "sort-type"}, {Name: "sort-city"},
+					{Name: "sort-score"}, {Name: "sort-date", Attr: "data-date"}, {Name: "sort-progress", Attr: "data-progress"}, {Name: "sort-quantity"}}}) {
+					<table class="table">
+						<thead>
+							<tr>
+								<th>
+									@datatable.SortButton("sort-name", "Name")
+								</th>
+								<th>
+									@datatable.SortButton("sort-city", "City")
+								</th>
+								<th>
+									@datatable.SortButton("sort-type", "Type")
+								</th>
+								<th>
+									@datatable.SortButton("sort-score", "Score")
+								</th>
+								<th>
+									@datatable.SortButton("sort-date", "Date")
+								</th>
+								<th>
+									@datatable.SortButton("sort-quantity", "Quantity")
+								</th>
+								<th>
+									@datatable.SortButton("sort-progress", "Progress")
+								</th>
+							</tr>
+						</thead>
+						<tbody class="table-tbody">
+							for i, rc := range rollercoasters {
+								{{ x := float64(i + 1) }}
+								{{ pr := randomNumber(x, 0, 100) }}
+								{{ d := randomDate(x) }}
+								<tr>
+									<td class="sort-name">{ rc.Name }</td>
+									<td class="sort-city">{ rc.City }</td>
+									<td class="sort-type">{ rc.Type }</td>
+									<td class="sort-score">{ rc.Score }</td>
+									<td class="sort-date" data-date={ strconv.FormatInt(d.Unix(), 10) }>
+										{ longMonths[d.Month()-1] + " " + fmt.Sprintf("%02d", d.Day()) + ", " + strconv.Itoa(d.Year()) }
+									</td>
+									<td class="sort-quantity">{ strconv.Itoa(int(randomNumber(x, 1, 200))) }</td>
+									<td class="sort-progress" data-progress={ strconv.Itoa(int(pr)) }>
+										<div class="row align-items-center">
+											<div class="col-12 col-lg-auto">{ strconv.Itoa(int(pr)) }%</div>
+											<div class="col">
+												@progress.Progress(progress.Props{Value: pr, Width: "5rem"})
+											</div>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				}
+			}
+		}
+	}
+}
+
+// sortCard is a card of the sortable page; the children are its body (or a table).
+templ sortCard(col, title, subtitle string) {
+	@sortCardWith(col, title, withCode(subtitle)) {
+		{ children... }
+	}
+}
+
+templ sortCardWith(col, title string, subtitle templ.Component) {
+	<div class={ col }>
+		@card.Card(card.Props{Class: "h-100"}) {
+			@card.Header() {
+				<div>
+					@card.Title() {
+						{ title }
+					}
+					@card.Subtitle() {
+						@subtitle
+					}
+				</div>
+			}
+			{ children... }
+		}
+	</div>
+}
+
+templ sortSection(title, description string) {
+	<div class="col-12">
+		<h2 class="page-section-title">{ title }</h2>
+		<p class="page-section-description">{ description }</p>
+	</div>
+}
+
+templ sortList(o sortable.Options, items ...string) {
+	<ul class="list-group" { sortable.Attrs(o)... }>
+		for _, it := range items {
+			<li class="list-group-item">{ it }</li>
+		}
+	</ul>
+}
+
+func sortAvatar(i int, size avatar.Size, class string) avatar.Props {
+	p := sortPeople[i]
+	if p.Photo == "" {
+		return avatar.Props{Initials: initialsOf(p.FullName), Size: size, Class: class}
+	}
+	return avatar.Props{Src: photo(p.Photo), Size: size, Class: class}
+}
+
+func initialsOf(name string) string {
+	var s string
+	for _, w := range strings.Fields(name) {
+		s += string([]rune(w)[:1])
+	}
+	return s
+}
+
+var sortPriorities = map[string]struct {
+	Value int
+	Color string
+}{"High": {3, "red"}, "Medium": {2, "orange"}, "Low": {1, "blue"}}
+
+templ sortHandle() {
+	<span class="sortable-handle cursor-move text-secondary" aria-hidden="true">
+		@icon.Icon("ti-grip-vertical")
+	</span>
+}
+
+templ sortablePage() {
+	{{ topics := sortable.Options{"group": "topics", "animation": 150, "direction": "horizontal", "emptyInsertThreshold": 40} }}
+	{{ nested := sortable.Options{"group": "nested", "animation": 150, "forceFallback": true, "fallbackOnBody": true, "swapThreshold": 0.65} }}
+	@previewLibs("sortable", sortable.Library()) {
+		<div class="row row-cards">
+			@sortSection("Basics", "Add data-sortable with SortableJS options as JSON to any list to make its children draggable.")
+			@sortCard("col-md-6", "Basic usage", "Drag to reorder items within a single list.") {
+				@card.Body() {
+					@sortList(sortable.Options{"animation": 150}, "Element A", "Element B", "Element C", "Element D")
+				}
+			}
+			@sortCard("col-md-6", "Two lists with drag and drop", "Give lists the same `group` to move items between them.") {
+				@card.Body() {
+					<div class="row g-3">
+						<div class="col-sm-6">
+							@sortList(sortable.Options{"group": "shared", "animation": 150}, "Item 1", "Item 2", "Item 3")
+						</div>
+						<div class="col-sm-6">
+							@sortList(sortable.Options{"group": "shared", "animation": 150}, "Item A", "Item B", "Item C")
+						</div>
+					</div>
+				}
+			}
+			@sortCard("col-md-6", "Horizontal lists", "Set `direction` to `horizontal` for rows of tags, and drag them between the two rows.") {
+				@card.Body() {
+					<div class="subheader mb-2">Selected</div>
+					<div class="tag-list mb-4" { sortable.Attrs(topics)... }>
+						for _, t := range []string{"Design", "Development", "Marketing"} {
+							<span class="tag cursor-move">{ t }</span>
+						}
+					</div>
+					<div class="subheader mb-2">Available</div>
+					<div class="tag-list" { sortable.Attrs(topics)... }>
+						for _, t := range []string{"Sales", "Support", "Analytics", "Legal", "Finance", "Research", "Security", "Hiring"} {
+							<span class="tag cursor-move">{ t }</span>
+						}
+					</div>
+				}
+			}
+			@sortCard("col-md-6", "Fixed items", "Set `filter` to a selector to make matching items impossible to drag.") {
+				@card.Body() {
+					<ul class="list-group" { sortable.Attrs(sortable.Options{"animation": 150, "filter": ".sortable-fixed"})... }>
+						<li class="list-group-item sortable-fixed text-secondary d-flex align-items-center gap-2">
+							@icon.Icon("ti-lock")
+							Inbox (pinned)
+						</li>
+						<li class="list-group-item">Projects</li>
+						<li class="list-group-item">Reports</li>
+						<li class="list-group-item">Archive</li>
+						<li class="list-group-item sortable-fixed text-secondary d-flex align-items-center gap-2">
+							@icon.Icon("ti-lock")
+							Trash (pinned)
+						</li>
+					</ul>
+				}
+			}
+			@sortSection("Handles and tables", "Limit dragging to a grip icon, or reorder the rows of a table.")
+			@sortCard("col-md-6", "Drag handle", "Set `handle` so only the grip starts a drag, and the rest of the row stays clickable.") {
+				@card.Body() {
+					<ul class="list-group" { sortable.Attrs(sortable.Options{"animation": 150, "handle": ".sortable-handle"})... }>
+						for i, p := range sortPeople[:5] {
+							<li class="list-group-item">
+								<div class="row align-items-center g-3">
+									<div class="col-auto">
+										@sortHandle()
+									</div>
+									<div class="col-auto">
+										@avatar.Avatar(sortAvatar(i, "", ""))
+									</div>
+									<div class="col text-truncate">
+										<a href="#" class="text-reset d-block text-truncate">{ p.FullName }</a>
+										<div class="text-secondary text-truncate">{ p.JobTitle }</div>
+									</div>
+								</div>
+							</li>
+						}
+					</ul>
+				}
+			}
+			@sortCard("col-md-6", "Sortable table", "Put `data-sortable` on the `tbody` to reorder rows.") {
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table">
+						<thead>
+							<tr>
+								<th class="w-1"><span class="visually-hidden">Drag</span></th>
+								<th>Name</th>
+								<th>Title</th>
+								<th>Country</th>
+							</tr>
+						</thead>
+						<tbody { sortable.Attrs(sortable.Options{"animation": 150, "handle": ".sortable-handle"})... }>
+							for _, p := range sortPeople[:5] {
+								<tr>
+									<td>
+										@sortHandle()
+									</td>
+									<td>{ p.FullName }</td>
+									<td class="text-secondary">{ p.JobTitle }</td>
+									<td class="text-secondary">{ p.Country }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+			@sortCard("col-md-6", "Grid of avatars", "Sortable also works on a wrapping layout, not just on vertical lists.") {
+				@card.Body() {
+					<div class="d-flex flex-wrap gap-3" { sortable.Attrs(sortable.Options{"animation": 150})... }>
+						for i := 5; i < 11; i++ {
+							<div class="card card-sm cursor-move flex-fill">
+								<div class="card-body text-center">
+									@avatar.Avatar(sortAvatar(i, avatar.SizeLarge, "mb-2"))
+									<div class="text-truncate">{ sortPeople[i].FirstName }</div>
+								</div>
+							</div>
+						}
+					</div>
+				}
+			}
+			@sortCard("col-md-6", "Disabled list", "Set `disabled` to `true` to lock a list, for example while the user has no edit rights.") {
+				@card.Body() {
+					<ul class="list-group" { sortable.Attrs(sortable.Options{"animation": 150, "disabled": true})... }>
+						for i := 1; i <= 3; i++ {
+							<li class="list-group-item d-flex align-items-center gap-2">
+								@icon.Icon("ti-lock", icon.Props{Class: "text-secondary"})
+								Read-only item { strconv.Itoa(i) }
+							</li>
+						}
+					</ul>
+				}
+			}
+			@sortSection("Boards", "Connect several lists to build a kanban board, a pick list or a nested tree.")
+			<div class="col-12">
+				@card.Card() {
+					@card.Header() {
+						<div>
+							@card.Title() {
+								Kanban board
+							}
+							@card.Subtitle() {
+								@withCode("Drag tasks between columns that share one `group`. Set `forceFallback` to `true` to drag a tilted copy with a shadow instead of the browser preview.")
+							}
+						</div>
+					}
+					@card.Body() {
+						<div class="row g-3">
+							for _, col := range sortBoard {
+								<div class="col-md-4">
+									<h4 class="mb-2">{ col.Name }</h4>
+									<div class="d-flex flex-column gap-2" { sortable.Attrs(sortable.Options{"group": "kanban", "animation": 150, "emptyInsertThreshold": 40, "forceFallback": true})... }>
+										for _, t := range col.Tasks {
+											<div class="card card-sm cursor-move">
+												<div class="card-body">
+													<div class="mb-3">{ t.Name }</div>
+													<div class="d-flex align-items-center justify-content-between">
+														<span class="d-flex align-items-center gap-2 text-secondary">
+															@signal.Signal(signal.Props{Value: sortPriorities[t.Priority].Value, Color: sortPriorities[t.Priority].Color})
+															{ t.Priority }
+														</span>
+														@avatar.Avatar(sortAvatar(t.Assigned-1, avatar.SizeXS, ""))
+													</div>
+												</div>
+											</div>
+										}
+									</div>
+								</div>
+							}
+						</div>
+					}
+				}
+			</div>
+			@sortCard("col-md-6 col-xl-4", "Clone from a list", "Use `pull: \"clone\"` and `put: false` on the source so items are copied, not moved.") {
+				@card.Body() {
+					<div class="row g-3">
+						<div class="col-sm-6">
+							<div class="subheader mb-2">Templates</div>
+							@sortList(sortable.Options{"group": map[string]any{"name": "clone", "pull": "clone", "put": false}, "sort": false, "animation": 150}, "Heading", "Paragraph", "Image", "Button")
+						</div>
+						<div class="col-sm-6">
+							<div class="subheader mb-2">Page</div>
+							@sortList(sortable.Options{"group": "clone", "animation": 150}, "Paragraph")
+						</div>
+					</div>
+				}
+			}
+			@sortCard("col-md-6 col-xl-4", "One-way transfer", "Set `put: false` on a list to make it a source only, and use it to build a pick list.") {
+				@card.Body() {
+					<div class="row g-3">
+						<div class="col-sm-6">
+							<div class="subheader mb-2">Available</div>
+							@sortList(sortable.Options{"group": map[string]any{"name": "transfer", "put": false}, "sort": false, "animation": 150}, "Email alerts", "SMS alerts", "Weekly digest", "Push notifications")
+						</div>
+						<div class="col-sm-6">
+							<div class="subheader mb-2">Selected</div>
+							@sortList(sortable.Options{"group": "transfer", "animation": 150}, "In-app messages")
+						</div>
+					</div>
+				}
+			}
+			@sortCard("col-12 col-xl-4", "Nested lists", "Put a sortable list inside an item and give all lists one `group` to move items between levels.") {
+				@card.Body() {
+					<ul class="list-group" { sortable.Attrs(nested)... }>
+						for _, g := range []struct {
+							Name  string
+							Items []string
+						}{{"Design", []string{"Wireframes", "Prototype"}}, {"Development", []string{"Frontend", "Backend", "Tests"}}, {"Launch", []string{"Release notes"}}} {
+							<li class="list-group-item">
+								<div>{ g.Name }</div>
+								<ul class="list-group mt-2" { sortable.Attrs(nested)... }>
+									for _, it := range g.Items {
+										<li class="list-group-item">{ it }</li>
+									}
+								</ul>
+							</li>
+						}
+					</ul>
+				}
+			}
+			@sortSection("Selection and swapping", "The bundled SortableJS build also ships the MultiDrag and Swap plugins.")
+			@sortCardWith("col-md-6", "Multiple selection", multiDragSubtitle()) {
+				@card.Body() {
+					@sortList(sortable.Options{"multiDrag": true, "animation": 150}, "Invoice #1001", "Invoice #1002", "Invoice #1003", "Invoice #1004", "Invoice #1005")
+				}
+			}
+			@sortCard("col-md-6", "Swap", "Set `swap` to `true` to exchange two items instead of shifting the rest.") {
+				@card.Body() {
+					@sortList(sortable.Options{"swap": true, "animation": 150}, "First place", "Second place", "Third place", "Fourth place")
+				}
+			}
+		</div>
+	}
+}
+
+templ multiDragSubtitle() {
+	Set <code>multiDrag</code> to <code>true</code>. Hold <kbd>Ctrl</kbd> or <kbd>⌘</kbd> and click to select items, then drag them together.
+}
+
+templ tourCard(id, title string) {
+	@card.Card(card.Props{ID: id}) {
+		@card.Header() {
+			@card.Title(card.Props{Level: 2}) {
+				{ title }
+			}
+		}
+		@card.Body() {
+			{ children... }
+		}
+	}
+}
+
+templ tourIconCard(id, ic, title, text string) {
+	<div class="col-md-4">
+		@card.Card(card.Props{ID: id}) {
+			@card.Body(card.Props{Class: "text-center"}) {
+				<div class="mb-3">
+					@icon.Icon(ic, icon.Props{Size: icon.SizeLarge})
+				</div>
+				@card.Title(card.Props{Level: 2}) {
+					{ title }
+				}
+				<p class="text-secondary">{ text }</p>
+			}
+		}
+	</div>
+}
+
+var tourSteps = []tour.Step{
+	{Element: "#start-tour", Title: "Welcome to the Tour!", Description: "This button starts the interactive tour. Click it to begin exploring the page.", Side: "bottom", Align: "start"},
+	{Element: "#tour-card-1", Title: "Welcome Section", Description: "This is the first card in our tour. It demonstrates how Driver.js highlights elements on the page.", Side: "right", Align: "start"},
+	{Element: "#tour-card-2", Title: "Features Section", Description: "This card shows additional features and demonstrates the tour's ability to navigate between different elements.", Side: "left", Align: "start"},
+	{Element: "#tour-card-3", Title: "Data Table", Description: "This table shows how Driver.js works with larger elements. You can highlight entire sections of your page.", Side: "top", Align: "center"},
+	{Element: "#tour-card-4", Title: "Settings Card", Description: "This card demonstrates how the tour works with smaller, centered elements.", Side: "top", Align: "center"},
+	{Element: "#tour-card-5", Title: "Users Card", Description: "Another example card showing user management features.", Side: "top", Align: "center"},
+	{Element: "#tour-card-6", Title: "Analytics Card", Description: "The final step of the tour. This card shows analytics features.", Side: "top", Align: "center"},
+}
+
+templ tourPage() {
+	@previewLibs("tour", tour.Library()) {
+		@tour.Tour(tour.Props{ID: "tour-demo", Steps: tourSteps})
+		<div class="row row-cards">
+			<div class="col-12">
+				@card.Card() {
+					@card.Header() {
+						@card.Title(card.Props{Level: 2}) {
+							Product Tour Example
+						}
+						<div class="card-actions">
+							<button type="button" id="start-tour" class="btn btn-primary" { tour.StartAttrs("tour-demo")... }>
+								@icon.Icon("ti-player-play")
+								Start Tour
+							</button>
+						</div>
+					}
+					@card.Body() {
+						<p>Click the "Start Tour" button to begin an interactive tour of this page. The tour will guide you through different elements and features.</p>
+					}
+				}
+			</div>
+			<div class="col-md-6">
+				@tourCard("tour-card-1", "Welcome Section") {
+					<p>This is the first card in our tour. It demonstrates how Driver.js highlights elements on the page.</p>
+					<div class="btn-list">
+						<button type="button" class="btn btn-primary">Action Button</button>
+						<button type="button" class="btn">Secondary</button>
+					</div>
+				}
+			</div>
+			<div class="col-md-6">
+				@tourCard("tour-card-2", "Features Section") {
+					<p>This card shows additional features and demonstrates the tour's ability to navigate between different elements.</p>
+					<div class="form-selectgroup">
+						<label class="form-selectgroup-item">
+							<input type="radio" name="options" value="1" class="form-selectgroup-input" checked/>
+							<span class="form-selectgroup-label">Option 1</span>
+						</label>
+						<label class="form-selectgroup-item">
+							<input type="radio" name="options" value="2" class="form-selectgroup-input"/>
+							<span class="form-selectgroup-label">Option 2</span>
+						</label>
+					</div>
+				}
+			</div>
+			<div class="col-12">
+				@tourCard("tour-card-3", "Navigation Example") {
+					<p>This is a full-width card that demonstrates how the tour works with larger elements.</p>
+					<div class="table-responsive">
+						<table class="table table-vcenter">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Status</th>
+									<th>Role</th>
+									<th class="w-1"><span class="visually-hidden">Actions</span></th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, r := range [][4]string{{"John Doe", "success", "Active", "Developer"}, {"Jane Smith", "warning", "Pending", "Designer"}} {
+									<tr>
+										<td>{ r[0] }</td>
+										<td><span class={ "badge bg-" + r[1] + " text-" + r[1] + "-fg" }>{ r[2] }</span></td>
+										<td>{ r[3] }</td>
+										<td>
+											<a href="#" class="btn btn-sm">Edit</a>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+			</div>
+			@tourIconCard("tour-card-4", "ti-settings", "Settings", "Configure your application settings here.")
+			@tourIconCard("tour-card-5", "ti-users", "Users", "Manage your team members and permissions.")
+			@tourIconCard("tour-card-6", "ti-chart-bar", "Analytics", "View your application statistics and reports.")
+		</div>
+	}
+}

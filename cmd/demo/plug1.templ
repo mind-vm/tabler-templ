@@ -1,0 +1,282 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/maps"
+	"github.com/mind-vm/tabler-templ/internal/catalog"
+	"github.com/mind-vm/tabler-templ/lightbox"
+	"github.com/mind-vm/tabler-templ/mapview"
+	"github.com/mind-vm/tabler-templ/player"
+	"github.com/mind-vm/tabler-templ/trending"
+	"github.com/mind-vm/tabler-templ/vectormap"
+)
+
+// plugin1Pages are the map, lightbox and inline player pages.
+func plugin1Pages() map[string]templ.Component {
+	return map[string]templ.Component{
+		"maps-vector":   mapsVectorPage(),
+		"maps":          mapsPage(),
+		"map-fullsize":  mapFullsizePage(),
+		"map-blocks":    mapBlocksPage(),
+		"lightbox":      lightboxPage(),
+		"inline-player": inlinePlayerPage(),
+	}
+}
+
+// pluginPreview is preview with a plugin's assets in the head, before Tabler's CSS as in the preview.
+templ pluginPreview(name string, head templ.Component) {
+	{{ p, _ := catalog.Find(name) }}
+	{{ fp := frameProps(name, p.Title) }}
+	{{ fp.Head = templ.Join(head, assets()) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: p.Title, Description: p.Description, Actions: originalLink(name)}) }}
+	@layout.Page(fp) {
+		{ children... }
+	}
+}
+
+templ titledCard(col, title, subtitle string) {
+	<div class={ col }>
+		@section(title, subtitle) {
+			{ children... }
+		}
+	</div>
+}
+
+templ mapsVectorPage() {
+	@pluginPreview("maps-vector", vectormap.Library()) {
+		<div class="row row-cards">
+			for _, m := range []struct{ ID, Title string }{{"world", "World map"}, {"world-markers", "Map with markers"}, {"world-lines", "Map with markers and lines"},
+				{"world-colors", "Map with a color scale"}, {"world-select", "Map with selection"}, {"world-zoom", "Map with zoom"}} {
+				@titledCard("col-md-6", m.Title, "") {
+					@vectormap.Map(vectorMapProps(m.ID))
+				}
+			}
+		</div>
+	}
+}
+
+func vectorMapProps(id string) vectormap.Props {
+	p := vectorMaps[id]
+	if id == "world" {
+		p.Legend = true
+	}
+	return p
+}
+
+func mapAt(id, label string, lng, lat, zoom float64) mapview.Props {
+	return mapview.Props{ID: id, Label: label, Center: &mapview.LngLat{Lng: lng, Lat: lat}, Zoom: zoom, Ratio: "16x9"}
+}
+
+func withRatio(p mapview.Props, ratio string) mapview.Props {
+	p.Ratio = ratio
+	return p
+}
+
+templ mapsPage() {
+	@pluginPreview("maps", mapview.Library()) {
+		<div class="row row-cards">
+			for _, id := range []string{"simple", "light", "markers", "card"} {
+				{{ m := libreMaps[id] }}
+				if m.Card {
+					<div class="col-lg-12">
+						<div class="card">
+							@mapview.Map(withRatio(m.Props, "21x9")) {
+								for _, mk := range m.Markers {
+									@mapview.Marker(mk)
+								}
+							}
+						</div>
+					</div>
+				} else {
+					@titledCard("col-lg-6", m.Props.Label, "") {
+						@mapview.Map(withRatio(m.Props, "16x9"))
+					}
+				}
+			}
+			@titledCard("col-lg-6", "Marker styles", "Draw markers in HTML with `.map-marker`: a dot, a circle with an icon or a count, a pin, or an avatar. Add `.map-marker-label` for a short text, and `.map-marker-pulse` for a live position.") {
+				@mapview.Map(withRatio(mapAt("marker-styles", "Marker styles", 13.405, 52.522, 11), "4x3")) {
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Lng: 13.345, Lat: 52.54})
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Color: "red", Lng: 13.39, Lat: 52.545})
+					@mapview.Marker(mapview.MarkerProps{Lng: 13.445, Lat: 52.538, Icon: "ti-building-store", Label: "Store"})
+					@mapview.Marker(mapview.MarkerProps{Color: "green", Lng: 13.35, Lat: 52.512}) {
+						12
+					}
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Color: "green", Pulse: true, Lng: 13.375, Lat: 52.535})
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: 13.405, Lat: 52.52, Icon: "ti-home"})
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Color: "red", Lng: 13.47, Lat: 52.518, Icon: "ti-star"})
+					@mapview.Marker(mapview.MarkerProps{Lng: 13.43, Lat: 52.503}) {
+						@avatar.Avatar(avatar.Props{Size: avatar.SizeSmall, Src: photo("avatars/000m.jpg")})
+					}
+				}
+			}
+			@titledCard("col-lg-6", "Popup card", "Put the popup content in a `<template>` inside the marker. `.map-popup-card` makes room for an image.") {
+				@mapview.Map(withRatio(mapAt("popup-card", "Popup card", 13.4, 52.546, 11), "4x3")) {
+					for _, pl := range mapPlaces {
+						@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: pl.Lng, Lat: pl.Lat, Icon: "ti-map-pin", PopupOpen: pl.Open}) {
+							@mapview.Popup(mapview.PopupProps{Card: true, CloseButton: true}) {
+								<div class="img-responsive img-responsive-21x9" style={ templ.SafeCSS("background-image: url(" + photo("photos/"+pl.Photo) + ")") }></div>
+								<div class="p-3">
+									<div class="fw-medium">{ pl.Name }</div>
+									<div class="text-secondary mb-3">{ pl.Text }</div>
+									<a href="#" class="btn btn-primary btn-sm">View details</a>
+								</div>
+							}
+						}
+					}
+				}
+			}
+			@titledCard("col-lg-6", "Route", "Draw a path with `data-bs-route`, a list of points, and mark its ends with markers.") {
+				@mapview.Map(mapview.Props{ID: "route", Label: "Route", Center: &mapview.LngLat{Lng: 13.4046, Lat: 52.513}, Zoom: 11.6, Ratio: "16x9", Route: berlinRoute}) {
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Lng: 13.3695, Lat: 52.5251})
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: 13.4397, Lat: 52.505, Icon: "ti-map-pin"})
+				}
+			}
+			@titledCard("col-lg-6", "Area", "Show a zone, a line or points with `data-bs-geojson`: a GeoJSON object, or the URL of a file.") {
+				@mapview.Map(mapview.Props{ID: "area", Label: "Area", Center: &mapview.LngLat{Lng: 13.405, Lat: 52.519}, Zoom: 11, Ratio: "16x9",
+					GeoJSON: map[string]any{"type": "Feature", "geometry": map[string]any{"type": "Polygon", "coordinates": [][][2]float64{berlinArea}}}})
+			}
+			@titledCard("col-12", "Shapes from a file", "Point `data-bs-geojson` at a GeoJSON file to draw its areas, lines and points. `data-bs-layer-color` sets their color, and `data-bs-labels` names the buttons.") {
+				@mapview.Map(mapview.Props{ID: "geojson-file", Label: "Shapes from a file", Center: &mapview.LngLat{Lng: 13.39, Lat: 52.5135}, Zoom: 12.2, Ratio: "21x9",
+					GeoJSON: photo("maps/berlin-places.geojson"), LayerColor: "--tblr-green", Controls: "true", Labels: map[string]string{"zoom-in": "Closer", "zoom-out": "Farther"}})
+			}
+			@titledCard("col-lg-6", "Clusters", "Group many points into clusters that split as you zoom in. Click a cluster to zoom to it.") {
+				@mapview.Map(mapview.Props{ID: "clusters", Label: "Clusters", Center: &mapview.LngLat{Lng: 9, Lat: 48.5}, Zoom: 3, Ratio: "16x9", Controls: "zoom,fullscreen", Clusters: storePoints()})
+			}
+			@titledCard("col-lg-6", "City switcher", "Put buttons over the map and move it to a place with `flyTo`.") {
+				@mapview.Map(mapview.Props{ID: "cities", Label: "City switcher", Center: &mapview.LngLat{Lng: 13.405, Lat: 52.52}, Zoom: 10, Ratio: "16x9", Overlay: citySwitcher()})
+			}
+			@titledCard("col-lg-12", "Bubble map", "Size circles by a value, for example users per city. Hover a circle to see the number.") {
+				@mapview.Map(mapview.Props{ID: "bubbles", Label: "Bubble map", Center: &mapview.LngLat{Lng: 20, Lat: 20}, Zoom: 1, Ratio: "21x9",
+					Bubbles: mapCities, BubbleUnit: "users", BubbleRadius: [2]float64{4, 24}, BubbleScale: 1600})
+			}
+			@titledCard("col-lg-6", "Globe", "Show the map as a 3D globe with `data-bs-globe=\"true\"`, and connect places with arcs.") {
+				@mapview.Map(mapview.Props{ID: "globe", Label: "Globe", Center: &mapview.LngLat{Lng: 62, Lat: 32}, Zoom: 1.3, Ratio: "4x3", Globe: true, Arcs: globeArcs(), HideLabels: true}) {
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Lng: globeHub.Lng, Lat: globeHub.Lat, Label: "London"})
+					for _, d := range globeDestinations {
+						@mapview.Marker(mapview.MarkerProps{Kind: mapview.Dot, Lng: d.At.Lng, Lat: d.At.Lat, Label: d.Name, Attributes: templ.Attributes{"style": "--tblr-map-marker-size: 0.625rem"}})
+					}
+				}
+			}
+			@titledCard("col-lg-6", "Draggable marker", "Add `data-bs-draggable=\"true\"` to let people move a marker, for example to pick an address.") {
+				@mapview.Map(withRatio(mapAt("draggable", "Draggable marker", 13.405, 52.52, 12), "4x3")) {
+					@mapview.Marker(mapview.MarkerProps{Kind: mapview.Pin, Lng: 13.405, Lat: 52.52, Icon: "ti-map-pin", Draggable: true})
+				}
+			}
+		</div>
+	}
+}
+
+templ citySwitcher() {
+	<div class="btn-list position-absolute top-0 start-0 w-auto h-auto m-2" role="group" aria-label="City" id="map-cities-switcher">
+		for i, c := range mapCities[:4] {
+			<button type="button" class={ "btn btn-sm btn-pill", templ.KV("btn-primary", i == 0) } aria-pressed={ boolString(i == 0) } { mapview.FlyTo("cities", mapview.LngLat{Lng: c.Lng, Lat: c.Lat}, 10)... }>{ c.Name }</button>
+		}
+	</div>
+}
+
+func boolString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
+templ mapFullsizePage() {
+	{{ fp := frameProps("map-fullsize", "Full Size Map") }}
+	{{ fp.Head = templ.Join(mapview.Library(), assets()) }}
+	{{ fp.Position = layout.Vertical }}
+	{{ fp.Full = true }}
+	@layout.Page(fp) {
+		<h1 class="visually-hidden">Full Size Map</h1>
+		@mapview.Map(mapview.Props{ID: "fullsize", Class: "map flex-fill", Label: "Map of Berlin", Center: &mapview.LngLat{Lng: 13.4049, Lat: 52.518827}, Zoom: 12, Controls: "zoom,north,locate,fullscreen"})
+	}
+}
+
+templ mapBlocksPage() {
+	@pluginPreview("map-blocks", templ.Join(mapview.Library(), vectormap.Library())) {
+		<div class="row row-cards">
+			<div class="col-12">
+				@maps.StoreLocator(maps.LocatorProps{Title: "Store locator", Map: mapview.Props{ID: "stores", Label: "Store locator", Center: &mapview.LngLat{Lng: 13.39, Lat: 52.519}, Zoom: 11.3, Controls: "true"}}, stores)
+			</div>
+			<div class="col-lg-6">
+				@maps.Delivery(maps.DeliveryProps{Title: "Delivery tracker",
+					Map:   mapview.Props{ID: "delivery", Label: "Delivery tracker", Center: &mapview.LngLat{Lng: 13.4046, Lat: 52.5215}, Zoom: 11.6, Route: berlinRoute, RouteProgress: ptr(5)},
+					Order: "Order #4821", Status: "Arriving in 12 min", Progress: 62, Courier: avatar.Props{Src: photo("avatars/002m.jpg")},
+					Name: "Mateusz Nowak", Distance: "3.4 km"})
+			</div>
+			<div class="col-lg-6">
+				@maps.LiveUsers(maps.LiveProps{Title: "Live users",
+					Map:   mapview.Props{ID: "live-users", Label: "Live users", Center: &mapview.LngLat{Lng: 30, Lat: 32}, Zoom: 0.45, Bubbles: mapCities, BubbleUnit: "users", BubbleRadius: [2]float64{3, 14}, BubbleScale: 1600},
+					Label: "Active users", Value: "3,544", Trend: &trending.Props{Value: 12.5, Text: "+12.5"}, Note: "vs last hour",
+					Top:   []maps.Stat{{Value: "1,580", Label: "New York"}, {Value: "1,240", Label: "London"}, {Value: "1,100", Label: "Mumbai"}}})
+			</div>
+			<div class="col-12">
+				@maps.Homes(maps.HomesProps{Title: "Homes for sale", Map: mapview.Props{ID: "homes", Label: "Homes for sale", Center: &mapview.LngLat{Lng: 13.39, Lat: 52.515}, Zoom: 11.4, Controls: "true"}}, homes())
+			</div>
+			<div class="col-lg-6">
+				@maps.AddressPicker(maps.AddressProps{Title: "Delivery address", Field: "address-position", Pin: mapview.LngLat{Lng: 13.4094, Lat: 52.5219},
+					Map: mapview.Props{ID: "address", Label: "Delivery address", Center: &mapview.LngLat{Lng: 13.4094, Lat: 52.5219}, Zoom: 15, Controls: "true"}}) {
+					@addressForm()
+				}
+			</div>
+			<div class="col-lg-6">
+				@maps.ServerStatus(maps.StatusProps{Title: "Server status", Map: mapview.Props{ID: "servers", Label: "Server status", Center: &mapview.LngLat{Lng: 40, Lat: 20}, Zoom: 0.45}}, serverRegions)
+			</div>
+			<div class="col-12">
+				@maps.UsersByCountry(maps.CountriesProps{Title: "Users by country", Map: vectorMaps["world"]}, userCountries)
+			</div>
+		</div>
+	}
+}
+
+templ addressForm() {
+	<div class="mb-3">
+		<label class="form-label" for="address-street">Street</label>
+		<input type="text" class="form-control" id="address-street" value="Karl-Liebknecht-Straße 9"/>
+	</div>
+	<div class="row g-2 mb-3">
+		<div class="col-4">
+			<label class="form-label" for="address-postcode">Postal code</label>
+			<input type="text" class="form-control" id="address-postcode" value="10178"/>
+		</div>
+		<div class="col-8">
+			<label class="form-label" for="address-city">City</label>
+			<input type="text" class="form-control" id="address-city" value="Berlin"/>
+		</div>
+	</div>
+	<div class="mb-3">
+		<label class="form-label" for="address-position">Position</label>
+		<input type="text" class="form-control" id="address-position" value={ maps.Position(mapview.LngLat{Lng: 13.4094, Lat: 52.5219}) } readonly/>
+		<small class="form-hint">Drag the pin on the map to the entrance.</small>
+	</div>
+	<button type="button" class="btn btn-primary">Save address</button>
+}
+
+templ lightboxPage() {
+	@pluginPreview("lightbox", lightbox.Library()) {
+		<div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 g-3">
+			for _, ph := range lightboxPhotos {
+				<div class="col">
+					@lightbox.Link(lightbox.Props{Href: photo("photos/" + ph[0]), Label: ph[1]}) {
+						<div class="img-responsive img-responsive-1x1 rounded border" style={ templ.SafeCSS("background-image: url(" + photo("photos/"+ph[0]) + ")") }></div>
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+templ inlinePlayerPage() {
+	@pluginPreview("inline-player", player.Library()) {
+		<div class="row row-cards">
+			@titledCard("col-lg-6", "Youtube Player", "") {
+				@player.Player(player.Props{ID: "youtube", Provider: player.YouTube, EmbedID: "bTqVqk7FSmY"})
+			}
+			@titledCard("col-lg-6", "Vimeo Player", "") {
+				@player.Player(player.Props{ID: "charlotte", Provider: player.Vimeo, EmbedID: "707012696"})
+			}
+		</div>
+	}
+}
+

@@ -1,0 +1,140 @@
+// Package views holds the app's pages, built from tabler-templ's components and blocks.
+package views
+
+import (
+	"encoding/json"
+	"io"
+	"context"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/assets"
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/auth"
+	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+)
+
+// AppName is shown in the title, the navigation and the sign-in page.
+const AppName = "[[.Name]]"
+
+// Page is what every page in the frame gets from its handler.
+type Page struct {
+	Title  string
+	Active string // the menu entry of the page: "dashboard", "projects"
+	User   string // the signed-in user's email
+	Flash  string // a message from the last action, e.g. "Changes saved."
+}
+
+// head loads Tabler (with ApexCharts for the dashboard) and the CSS of the app blocks in use.
+templ head() {
+	@assets.Head(assets.Props{Charts: true})
+	@listpage.Styles()
+	@create.Styles()
+	@detail.Styles()
+}
+
+templ scripts() {
+	@assets.Scripts()
+	@detail.Script(detail.ScriptConfig{})
+}
+
+// logo is the app's mark and name; replace it with your logo (an <img class="navbar-brand-image">).
+templ logo() {
+	<span class="d-inline-flex align-items-center gap-2">
+		<span class="avatar avatar-sm bg-primary text-white">{ strings.ToUpper(AppName[:1]) }</span>
+		<span>{ AppName }</span>
+	</span>
+}
+
+templ brand() {
+	@layout.Brand(layout.BrandProps{Href: "/", Label: AppName, Class: "pe-0 pe-md-3"}) {
+		@logo()
+	}
+}
+
+templ signInLogo() {
+	@auth.Logo(auth.LogoProps{Href: "/", Label: AppName}) {
+		@logo()
+	}
+}
+
+func menu(active string) []layout.Entry {
+	return []layout.Entry{
+		{Title: "Dashboard", Href: "/", Icon: "ti-home", Active: active == "dashboard"},
+		{Title: "Projects", Href: "/projects", Icon: "ti-briefcase", Active: active == "projects"},
+	}
+}
+
+templ userMenu(email string) {
+	@layout.UserMenu(layout.UserProps{Name: email, Avatar: avatar.Props{Initials: strings.ToUpper(email[:min(2, len(email))])}}) {
+		<form method="post" action="/sign-out">
+			<button type="submit" class="dropdown-item">Sign out</button>
+		</form>
+	}
+}
+
+templ actions(p Page) {
+	@layout.ThemeToggle(layout.ThemeToggleProps{})
+	if p.User != "" {
+		@userMenu(p.User)
+	}
+}
+
+// Frame is the app's page frame: Tabler's horizontal layout with the menu, the page header (title and
+// Actions) and the flash message; the children are the content.
+templ Frame(p Page, headerActions templ.Component) {
+	@layout.Page(layout.PageProps{
+		Title:   p.Title + " · " + AppName,
+		Head:    head(),
+		Scripts: scripts(),
+		Navbar: layout.Navbar(layout.NavbarProps{
+			Brand:   brand(),
+			Actions: actions(p),
+		}, menu(p.Active)),
+		Header: layout.PageHeader(layout.PageHeaderProps{Title: p.Title, Actions: headerActions}),
+		Footer: layout.Footer(layout.FooterProps{Links: []layout.Link{{Text: "tabler-templ", Href: "https://github.com/mind-vm/tabler-templ", External: true}}}),
+	}) {
+		if p.Flash != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantSuccess, Dismissible: true}) {
+				{ p.Flash }
+			}
+		}
+		{ children... }
+	}
+}
+
+// SignInForm is the state of the sign-in page.
+type SignInForm struct {
+	Email string
+	Error string
+	Next  string // where to go after signing in
+}
+
+// SignIn is the sign-in page.
+templ SignIn(f SignInForm) {
+	@auth.Page(auth.PageProps{Title: "Sign in · " + AppName, Head: assets.Head(), Scripts: assets.Scripts(),
+		Brand: signInLogo()}) {
+		@auth.SignInCard(auth.SignInCardProps{Form: auth.SignInFormProps{
+			Action: "/sign-in", Error: f.Error, UserValue: f.Email, Hidden: hidden("next", f.Next),
+		}})
+	}
+}
+
+func hidden(name, value string) []auth.Hidden {
+	if value == "" {
+		return nil
+	}
+	return []auth.Hidden{{Name: name, Value: value}}
+}
+
+// dialogState reopens a detail dialog after a failed save (the dialog script reads it).
+func dialogState(id, err string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		b, _ := json.Marshal(map[string]any{"id": id, "error": err}) // escapes <, > and &
+		_, e := io.WriteString(w, "<script>window.kitDialogState="+string(b)+";</script>")
+		return e
+	})
+}

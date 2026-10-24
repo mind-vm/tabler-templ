@@ -1,0 +1,325 @@
+package marketing
+
+import (
+	"encoding/json"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type HeroProps struct {
+	Class string // e.g. "pb-0" when an image follows
+	// Header renders a <header> (the page's first hero); otherwise a <div>.
+	Header      bool
+	Title       string
+	TitleHTML   templ.Component // instead of Title, e.g. with a Typed span
+	Description string
+	// DescriptionClass is added to hero-description, e.g. "mt-4" or "hero-description-wide".
+	DescriptionClass string
+	// Actions are buttons in a centered row below the description.
+	Actions []templ.Component
+}
+
+// Hero is a centered page title with a description and buttons; the children follow below, e.g. a Browser
+// in a hero-img.
+templ Hero(p HeroProps) {
+	if p.Header {
+		<header class={ kit.Classes("hero", p.Class) }>
+			@heroInner(p) {
+				{ children... }
+			}
+		</header>
+	} else {
+		<div class={ kit.Classes("hero", p.Class) }>
+			@heroInner(p) {
+				{ children... }
+			}
+		</div>
+	}
+}
+
+templ heroTitle(title string, html templ.Component) {
+	<h1 class="hero-title">
+		if html != nil {
+			@html
+		} else {
+			{ title }
+		}
+	</h1>
+}
+
+templ heroInner(p HeroProps) {
+	<div class="container">
+		@heroTitle(p.Title, p.TitleHTML)
+		if p.Description != "" {
+			<p class={ kit.Classes("hero-description", p.DescriptionClass) }>{ p.Description }</p>
+		}
+		if len(p.Actions) > 0 {
+			<div class="my-5">
+				<div class="row g-3 justify-content-center">
+					for _, a := range p.Actions {
+						<div class="col-auto">
+							@a
+						</div>
+					}
+				</div>
+			</div>
+		}
+		{ children... }
+	</div>
+}
+
+// Image puts the children (e.g. a Browser) under a hero's text (hero-img).
+templ Image() {
+	<div class="hero-img">
+		{ children... }
+	</div>
+}
+
+type BrowserProps struct {
+	URL     string // shown in the address bar, which links to it
+	Tooltip string // on the address bar
+}
+
+// Browser is a browser window around the children, e.g. a screenshot (Screenshot).
+templ Browser(p BrowserProps) {
+	<div class="browser">
+		<div class="browser-header">
+			<div class="row align-items-center">
+				<div class="col-auto col-md-2">
+					<div class="browser-dots browser-dots-colored">
+						<div class="browser-dot"></div>
+						<div class="browser-dot"></div>
+						<div class="browser-dot"></div>
+					</div>
+				</div>
+				<div class="col-8">
+					<a
+						href={ templ.URL(p.URL) }
+						class="browser-input"
+						target="_blank"
+						rel="noopener noreferrer"
+						if p.Tooltip != "" {
+							data-bs-toggle="tooltip"
+							data-bs-placement="top"
+							title={ p.Tooltip }
+						}
+					>
+						@icon.Icon("ti-lock", icon.Props{Color: "green", Size: icon.SizeSmall, Class: "me-2"})
+						{ p.URL }
+					</a>
+				</div>
+			</div>
+		</div>
+		{ children... }
+	</div>
+}
+
+type ScreenshotProps struct {
+	Light, Light2x string // the image and its 2x version for the light theme
+	Dark, Dark2x   string // for the dark theme; optional
+	Alt            string
+	Width, Height  int
+}
+
+// Screenshot is a responsive image in a light and a dark version, each shown in its theme.
+templ Screenshot(p ScreenshotProps) {
+	@screenshot(p.Light, p.Light2x, p.Alt, p.Width, p.Height, kit.If(p.Dark != "", "hide-theme-dark"))
+	if p.Dark != "" {
+		@screenshot(p.Dark, p.Dark2x, p.Alt, p.Width, p.Height, "hide-theme-light")
+	}
+}
+
+templ screenshot(src, src2x, alt string, w, h int, class string) {
+	<img
+		src={ src }
+		if src2x != "" {
+			srcset={ src + " 1x, " + src2x + " 2x" }
+		}
+		alt={ alt }
+		class={ kit.Classes("img-fluid", class) }
+		if w > 0 {
+			width={ itoa(w) }
+			height={ itoa(h) }
+		}
+		loading="lazy"
+	/>
+}
+
+type SideHeroProps struct {
+	Class       string
+	Subheader   string
+	Title       string
+	TitleHTML   templ.Component // instead of Title, e.g. a line break and a Typed span
+	Description string
+	Actions     []templ.Component
+	// Media is the column next to the text, e.g. a carousel of illustrations.
+	Media templ.Component
+}
+
+// SideHero is a hero with the text on the start side and Media next to it.
+templ SideHero(p SideHeroProps) {
+	<header class={ kit.Classes("hero", p.Class) }>
+		<div class="container">
+			<div class="row g-lg-8 align-items-center">
+				<div class="col-md-6 text-center text-md-start">
+					if p.Subheader != "" {
+						<div class="hero-subheader">{ p.Subheader }</div>
+					}
+					@heroTitle(p.Title, p.TitleHTML)
+					if p.Description != "" {
+						<p class="hero-description mt-4">{ p.Description }</p>
+					}
+					if len(p.Actions) > 0 {
+						<div class="mt-6 mt-lg-7">
+							<div class="row justify-content-center justify-content-md-start">
+								for _, a := range p.Actions {
+									<div class="col-auto">
+										@a
+									</div>
+								}
+							</div>
+						</div>
+					}
+				</div>
+				<div class="col-md-6">
+					<div>
+						if p.Media != nil {
+							@p.Media
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+}
+
+type CoverHeroProps struct {
+	Class       string
+	Image       string // the background photo
+	Title       string
+	Description string
+	// Color tints the photo, default "primary" at 90%.
+	Color string
+}
+
+// CoverHero is a hero on a tinted photo with white text; the children follow, e.g. a SearchForm.
+templ CoverHero(p CoverHeroProps) {
+	<header class={ kit.Classes("img-bg", p.Class) } style={ templ.SafeCSS("background-image: url(" + p.Image + ")") }>
+		<div class={ "hero position-relative bg-" + kit.Or(p.Color, "primary") + " py-12" } style="--tblr-bg-opacity: 0.9">
+			<div class="container-narrow">
+				<h1 class="hero-title text-white">{ p.Title }</h1>
+				if p.Description != "" {
+					<p class="hero-description mb-5 text-white text-opacity-50">{ p.Description }</p>
+				}
+				{ children... }
+			</div>
+		</div>
+	</header>
+}
+
+type SearchFormProps struct {
+	Action      string
+	Method      string // default "get"
+	ID          string // of the input
+	Name        string // of the input, default "q"
+	Value       string
+	Placeholder string
+	Button      string // default "Search"
+	// ButtonColor is the button's color, default "teal".
+	ButtonColor string
+}
+
+// SearchForm is a search field with a button, centered in a hero.
+templ SearchForm(p SearchFormProps) {
+	<div class="row gx-lg-5 justify-content-center">
+		<div class="col-xl-6 col-lg-8 text-center">
+			<form
+				novalidate=""
+				class="row row-cols-1 row-cols-md-auto g-3 align-items-center"
+				if p.Action != "" {
+					action={ templ.URL(p.Action) }
+					method={ kit.Or(p.Method, "get") }
+				}
+			>
+				<div class="col flex-grow-1">
+					<input
+						if p.ID != "" {
+							id={ p.ID }
+						}
+						if p.Action != "" {
+							name={ kit.Or(p.Name, "q") }
+						}
+						type="text"
+						if p.Value != "" {
+							value={ p.Value }
+						}
+						placeholder={ p.Placeholder }
+						class="form-control"
+						aria-label={ p.Placeholder }
+					/>
+				</div>
+				<div class="col"><button type="submit" class={ "btn btn-" + kit.Or(p.ButtonColor, "teal") + " fw-medium" }>{ kit.Or(p.Button, "Search") }</button></div>
+			</form>
+		</div>
+	</div>
+}
+
+type TypedProps struct {
+	ID      string   // required
+	Class   string   // default "text-primary"
+	Strings []string // typed one after the other; the first is rendered
+	// Speeds in milliseconds, default Tabler's: type 100, back 50, back delay 1000, start delay 1000.
+	TypeSpeed, BackSpeed, BackDelay, StartDelay int
+}
+
+// TypedLibraryURL is typed.js on jsDelivr; load it (deferred) for Typed.
+const TypedLibraryURL = "https://cdn.jsdelivr.net/npm/typed.js@3.0.0/dist/typed.umd.js"
+
+// TypedLibrary loads typed.js; put it in the page's head.
+templ TypedLibrary() {
+	<script src={ TypedLibraryURL } defer></script>
+}
+
+func typedConfig(p TypedProps) string {
+	or := func(v, d int) int {
+		if v == 0 {
+			return d
+		}
+		return v
+	}
+	b, _ := json.Marshal(map[string]any{
+		"strings": p.Strings, "typeSpeed": or(p.TypeSpeed, 100), "backSpeed": or(p.BackSpeed, 50),
+		"backDelay": or(p.BackDelay, 1000), "startDelay": or(p.StartDelay, 1000), "loop": true, "fade": true,
+	})
+	return string(b)
+}
+
+// Typed is a text that types and deletes Strings in a loop (typed.js), e.g. inside a hero title.
+templ Typed(p TypedProps) {
+	<span class={ kit.Or(p.Class, "text-primary") } id={ p.ID } data-typed={ typedConfig(p) }>
+		if len(p.Strings) > 0 {
+			{ p.Strings[0] }
+		}
+	</span>
+	@typedScript()
+}
+
+var typedOnce = templ.NewOnceHandle()
+
+templ typedScript() {
+	@typedOnce.Once() {
+		<script>
+			(function () {
+				function init() {
+					if (!window.Typed) return;
+					document.querySelectorAll('[data-typed]').forEach(function (el) {
+						if (el.typed) return;
+						el.typed = new Typed('#' + el.id, JSON.parse(el.getAttribute('data-typed')));
+					});
+				}
+				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', init, { once: true });
+			})();
+		</script>
+	}
+}

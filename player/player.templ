@@ -1,0 +1,106 @@
+// Package player embeds a YouTube or Vimeo video, or a video file, with Plyr, the inline player of the
+// Tabler preview: Plyr's own controls in Tabler's primary color. Load Plyr once with Library.
+//
+//	@player.Library()
+//	@player.Player(player.Props{ID: "intro", Provider: player.YouTube, EmbedID: "bTqVqk7FSmY"})
+//
+// Players in content swapped in later (e.g. by htmx) start on htmx:afterSettle.
+package player
+
+import "github.com/mind-vm/tabler-templ/kit"
+
+// Version is the Plyr version Tabler 1.7 is built against.
+const Version = "3.8.5"
+
+// Provider is where the video comes from.
+type Provider string
+
+const (
+	YouTube Provider = "youtube"
+	Vimeo   Provider = "vimeo"
+)
+
+type Props struct {
+	ID         string // the element is player-<ID>
+	Class      string
+	Attributes templ.Attributes
+	Provider   Provider // default YouTube
+	EmbedID    string   // the video's id at the provider
+	// Src is a video file played instead of an embed, with Poster as its still.
+	Src, Poster string
+	// Options are Plyr options, e.g. {"autoplay": true}.
+	Options map[string]any
+}
+
+// Player is a video player.
+templ Player(p Props) {
+	if p.Src != "" {
+		<video
+			if p.ID != "" {
+				id={ "player-" + p.ID }
+			}
+			class={ p.Class }
+			playsinline
+			controls
+			if p.Poster != "" {
+				data-poster={ p.Poster }
+			}
+			data-tabler-player
+			if p.Options != nil {
+				data-plyr-config={ templ.JSONString(p.Options) }
+			}
+			{ p.Attributes... }
+		>
+			<source src={ p.Src }/>
+		</video>
+	} else {
+		<div
+			if p.ID != "" {
+				id={ "player-" + p.ID }
+			}
+			if p.Class != "" {
+				class={ p.Class }
+			}
+			data-plyr-provider={ kit.Or(string(p.Provider), string(YouTube)) }
+			data-plyr-embed-id={ p.EmbedID }
+			data-tabler-player
+			if p.Options != nil {
+				data-plyr-config={ templ.JSONString(p.Options) }
+			}
+			{ p.Attributes... }
+		></div>
+	}
+	@Script()
+}
+
+// Library loads Plyr and its stylesheet; put it in the head.
+templ Library() {
+	<link rel="stylesheet" href={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.css" }/>
+	<script src={ "https://cdn.jsdelivr.net/npm/plyr@" + Version + "/dist/plyr.min.js" } defer></script>
+}
+
+var once = templ.NewOnceHandle()
+
+// Script starts every player on the page; Player renders it once per page. The players are in
+// window.tabler_player by element id.
+templ Script() {
+	@once.Once() {
+		<script>
+			(function () {
+				if (window.tablerPlayers) return;
+				function init(root) {
+					if (!window.Plyr) return;
+					window.tabler_player = window.tabler_player || {};
+					(root || document).querySelectorAll('[data-tabler-player]').forEach(function (el) {
+						if (el.plyr) return;
+						el.plyr = new Plyr(el);
+						if (el.id) window.tabler_player[el.id] = el.plyr;
+					});
+				}
+				window.tablerPlayers = { init: init };
+				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
+				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
+			})();
+		</script>
+	}
+}

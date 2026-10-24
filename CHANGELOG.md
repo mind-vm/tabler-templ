@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Breaking (look):** `form.Field`'s `Hint` renders Tabler 1.6+'s `form-text` instead of the deprecated
+  `form-hint` (4px closer to the control). A required field's label carries Tabler's hidden " (required)"
+  for screen readers by default (`kit.Messages.Required`; `RequiredLabel: "-"` for none).
+- Plugin packages, each loading its library and starting itself (also after htmx swaps): `datepicker`,
+  `selectbox`, `inputmask`, `rangeslider`, `wysiwyg`, `dropzone`, `colorpicker`, `signature`, `rating`,
+  `calendar`, `datatable`, `sortable`, `tour`, `confetti`, `mapview`, `lightbox`, `player`. Form elements,
+  form layout, modals and the mail compose dialog now use them; the plugin pages are rebuilt.
+- New blocks `blocks/marketing` (the seven marketing pages) and `blocks/maps` (map cards).
+  `pricing.CardProps.Content` replaces a card's feature list.
+
+- New command `cmd/new`: creates a running app (frame, sign-in, dashboard with charts, list with search and
+  pages, create page, detail page with edit dialog), with its own test. New package `assets`: Tabler's
+  stylesheets and scripts from jsDelivr for a page's Head and Scripts.
+- Fix: `blocks/detail`'s dialog script found no modal API with Tabler 1.x (it exposes `window.tabler`, not
+  `window.bootstrap`), so dialogs did not reopen after a failed save.
+
 Existing components follow Tabler 1.7's markup and cover the variants of Tabler's own components
 (`shared/ui/*.astro`). The demo's buttons, alerts and pagination pages now match the preview.
 

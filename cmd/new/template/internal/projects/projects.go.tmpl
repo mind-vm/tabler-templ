@@ -1,0 +1,210 @@
+// Package projects is the example data of the app: projects in memory. Replace the Store with your
+// database; the handlers only use its methods.
+package projects
+
+import (
+	"errors"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+)
+
+// Status is where a project stands.
+type Status string
+
+const (
+	Planned Status = "planned"
+	Active  Status = "active"
+	Paused  Status = "paused"
+	Done    Status = "done"
+)
+
+// Statuses in their order, for selects and filters.
+var Statuses = []Status{Planned, Active, Paused, Done}
+
+// Label is the status as shown.
+func (s Status) Label() string {
+	switch s {
+	case Planned:
+		return "Planned"
+	case Active:
+		return "Active"
+	case Paused:
+		return "Paused"
+	case Done:
+		return "Done"
+	}
+	return string(s)
+}
+
+// Color is the Tabler color of the status' badge.
+func (s Status) Color() string {
+	switch s {
+	case Active:
+		return "green"
+	case Paused:
+		return "yellow"
+	case Done:
+		return "secondary"
+	}
+	return "blue"
+}
+
+type Project struct {
+	ID      int
+	Name    string
+	Client  string
+	Owner   string
+	Status  Status
+	Budget  int // in whole currency units
+	Due     time.Time
+	Notes   string
+	Created time.Time
+}
+
+// Code is the project's short reference, e.g. P-1004.
+func (p Project) Code() string { return "P-" + strconv.Itoa(1000+p.ID) }
+
+// Form holds a project form's values as entered and its errors by field name.
+type Form struct {
+	Name, Client, Owner, Status, Budget, Due, Notes string
+	Errors                                          map[string]string
+}
+
+// FormOf fills a form from a project, for editing.
+func FormOf(p Project) Form {
+	f := Form{Name: p.Name, Client: p.Client, Owner: p.Owner, Status: string(p.Status), Notes: p.Notes}
+	if p.Budget > 0 {
+		f.Budget = strconv.Itoa(p.Budget)
+	}
+	if !p.Due.IsZero() {
+		f.Due = p.Due.Format(time.DateOnly)
+	}
+	return f
+}
+
+// Apply checks the form and writes it into p; it returns false and fills f.Errors when something is wrong.
+func (f *Form) Apply(p *Project) bool {
+	f.Errors = map[string]string{}
+	name := strings.TrimSpace(f.Name)
+	if name == "" {
+		f.Errors["name"] = "Enter a name."
+	}
+	status := Status(f.Status)
+	if !slices.Contains(Statuses, status) {
+		f.Errors["status"] = "Choose a status."
+	}
+	budget := 0
+	if s := strings.TrimSpace(f.Budget); s != "" {
+		n, err := strconv.Atoi(strings.ReplaceAll(s, ",", ""))
+		if err != nil || n < 0 {
+			f.Errors["budget"] = "Enter a whole amount, e.g. 12000."
+		}
+		budget = n
+	}
+	var due time.Time
+	if s := strings.TrimSpace(f.Due); s != "" {
+		d, err := time.Parse(time.DateOnly, s)
+		if err != nil {
+			f.Errors["due"] = "Enter a date."
+		}
+		due = d
+	}
+	if len(f.Errors) > 0 {
+		return false
+	}
+	p.Name, p.Client, p.Owner = name, strings.TrimSpace(f.Client), strings.TrimSpace(f.Owner)
+	p.Status, p.Budget, p.Due, p.Notes = status, budget, due, strings.TrimSpace(f.Notes)
+	return true
+}
+
+// ErrNotFound is returned for an unknown project.
+var ErrNotFound = errors.New("project not found")
+
+// Store keeps the projects in memory; it is safe for concurrent use.
+type Store struct {
+	mu    sync.Mutex
+	next  int
+	items []Project
+}
+
+// NewStore returns a store with example projects.
+func NewStore() *Store {
+	s := &Store{}
+	clients := []string{"Acme Ltd", "Globex", "Initech", "Umbrella", "Hooli", "Stark Industries", "Wayne Enterprises"}
+	owners := []string{"Paweł Kuna", "Jeffie Lewzey", "Mallory Hulme", "Dunn Slane", "Emmy Levet"}
+	kinds := []string{"Website relaunch", "Mobile app", "Data migration", "Brand refresh", "Customer portal", "Analytics dashboard"}
+	start := time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC)
+	for i := range 32 {
+		s.Add(Project{
+			Name:    fmt.Sprintf("%s %d", kinds[i%len(kinds)], i/len(kinds)+1),
+			Client:  clients[i%len(clients)],
+			Owner:   owners[i%len(owners)],
+			Status:  []Status{Active, Planned, Active, Done, Paused, Active, Done, Planned}[i%8],
+			Budget:  5000 + (i*3700)%60000,
+			Due:     start.AddDate(0, 0, 14*i),
+			Created: start.AddDate(0, 0, -3*(32-i)),
+		})
+	}
+	return s
+}
+
+// All returns the projects, newest first.
+func (s *Store) All() []Project {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := slices.Clone(s.items)
+	slices.Reverse(out)
+	return out
+}
+
+func (s *Store) Get(id int) (Project, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, p := range s.items {
+		if p.ID == id {
+			return p, nil
+		}
+	}
+	return Project{}, ErrNotFound
+}
+
+// Add stores a new project and returns it with its ID.
+func (s *Store) Add(p Project) Project {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.next++
+	p.ID = s.next
+	if p.Created.IsZero() {
+		p.Created = time.Now()
+	}
+	s.items = append(s.items, p)
+	return p
+}
+
+func (s *Store) Update(p Project) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.items {
+		if s.items[i].ID == p.ID {
+			s.items[i] = p
+			return nil
+		}
+	}
+	return ErrNotFound
+}
+
+func (s *Store) Delete(id int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.items {
+		if s.items[i].ID == id {
+			s.items = slices.Delete(s.items, i, i+1)
+			return nil
+		}
+	}
+	return ErrNotFound
+}
