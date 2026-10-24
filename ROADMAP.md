@@ -8,9 +8,9 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 
 | | Status |
 |---|---|
-| Components | 35 done, 4 partial, 24 open (of 63) |
-| Blocks | 1 done, 7 partial, 170 open (of 178) |
-| Preview pages | 13 done, 3 partial, 130 open (of 146) |
+| Components | 37 done, 4 partial, 22 open (of 63) |
+| Blocks | 8 done, 5 partial, 165 open (of 178) |
+| Preview pages | 24 done, 2 partial, 120 open (of 146) |
 
 ## Plan
 
@@ -43,11 +43,11 @@ From the Tabler docs ([components](https://docs.tabler.io/ui/components), [forms
 - [ ] [Chat](https://docs.tabler.io/ui/components/chat)
 - [ ] [Confetti](https://docs.tabler.io/ui/components/confetti)
 - [x] [Data grid](https://docs.tabler.io/ui/components/datagrid) (Datagrid, DatagridItem) — `datagrid`
-- [ ] [Divider](https://docs.tabler.io/ui/components/divider) (HrText)
+- [x] [Divider](https://docs.tabler.io/ui/components/divider) (HrText) — `divider`
 - [x] [Dropdown](https://docs.tabler.io/ui/components/dropdown) — `dropdown`
 - [x] [Empty state](https://docs.tabler.io/ui/components/empty) (Empty) — `empty`
 - [ ] [Hover gallery](https://docs.tabler.io/ui/components/hover-gallery) (HoverGallery)
-- [ ] [Icon list](https://docs.tabler.io/ui/components/icon-list) (IconList, IconListItem)
+- [x] [Icon list](https://docs.tabler.io/ui/components/icon-list) (IconList, IconListItem) — `iconlist`
 - [ ] [Icon](https://docs.tabler.io/ui/components/icon) (Icon) — `icon`, partial, filled icons: the webfont cannot mix outline and filled glyphs
 - [ ] [Image label](https://docs.tabler.io/ui/components/image-label) (ImageLabel)
 - [ ] [Legend](https://docs.tabler.io/ui/components/legend) (Legend, LegendList)
@@ -102,8 +102,8 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 ### cards
 
 - [ ] [cards/ActivityCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ActivityCard.astro)
-- [ ] [cards/AuthLockCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthLockCard.astro)
-- [ ] [cards/AuthenticateAccount](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthenticateAccount.astro)
+- [x] [cards/AuthLockCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthLockCard.astro) — `blocks/auth`
+- [x] [cards/AuthenticateAccount](https://github.com/tabler/tabler/blob/dev/shared/components/cards/AuthenticateAccount.astro) — `blocks/auth`
 - [ ] [cards/BodyPlaceholder](https://github.com/tabler/tabler/blob/dev/shared/components/cards/BodyPlaceholder.astro)
 - [ ] [cards/Card](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Card.astro)
 - [ ] [cards/CardBackgroundIcon](https://github.com/tabler/tabler/blob/dev/shared/components/cards/CardBackgroundIcon.astro)
@@ -120,7 +120,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/DeleteConfirm](https://github.com/tabler/tabler/blob/dev/shared/components/cards/DeleteConfirm.astro)
 - [ ] [cards/DevelopmentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/DevelopmentActivity.astro)
 - [ ] [cards/EmptyTeam](https://github.com/tabler/tabler/blob/dev/shared/components/cards/EmptyTeam.astro)
-- [ ] [cards/ForgotPasswordCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ForgotPasswordCard.astro)
+- [x] [cards/ForgotPasswordCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ForgotPasswordCard.astro) — `blocks/auth`
 - [ ] [cards/GalleryPhoto](https://github.com/tabler/tabler/blob/dev/shared/components/cards/GalleryPhoto.astro)
 - [ ] [cards/Gauge](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Gauge.astro)
 - [ ] [cards/HappyBirthday](https://github.com/tabler/tabler/blob/dev/shared/components/cards/HappyBirthday.astro)
@@ -145,9 +145,9 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 - [ ] [cards/ProjectProgress](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectProgress.astro)
 - [ ] [cards/ProjectSummary](https://github.com/tabler/tabler/blob/dev/shared/components/cards/ProjectSummary.astro)
 - [ ] [cards/RecentActivity](https://github.com/tabler/tabler/blob/dev/shared/components/cards/RecentActivity.astro)
-- [ ] [cards/SignInCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInCard.astro) — `blocks/signin`, partial, card with user name and password; no forgot-password link, password toggle or social buttons yet
-- [ ] [cards/SignInForm](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInForm.astro) — `blocks/signin`, partial, see SignInCard
-- [ ] [cards/SignUpCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignUpCard.astro)
+- [x] [cards/SignInCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInCard.astro) — `blocks/auth`
+- [x] [cards/SignInForm](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignInForm.astro) — `blocks/auth`
+- [x] [cards/SignUpCard](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SignUpCard.astro) — `blocks/auth`
 - [ ] [cards/SmallStats](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SmallStats.astro)
 - [ ] [cards/SocialTraffic](https://github.com/tabler/tabler/blob/dev/shared/components/cards/SocialTraffic.astro)
 - [ ] [cards/Sponsor](https://github.com/tabler/tabler/blob/dev/shared/components/cards/Sponsor.astro)
@@ -226,7 +226,7 @@ Composed parts of the preview, from [`shared/components`](https://github.com/tab
 
 ### navbar
 
-- [ ] [navbar/Logo](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Logo.astro)
+- [x] [navbar/Logo](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Logo.astro) — `blocks/auth`, auth.Logo
 - [ ] [navbar/Navbar](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/Navbar.astro)
 - [ ] [navbar/NavbarMenu](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenu.astro)
 - [ ] [navbar/NavbarMenuItem](https://github.com/tabler/tabler/blob/dev/shared/components/navbar/NavbarMenuItem.astro)
@@ -307,6 +307,7 @@ Blocks of this module without a counterpart in the preview, grown from the apps 
 - `blocks/create`: create page: post form with footer
 - `blocks/detail`: detail page: sections with edit dialogs that reopen after a failed save
 - `blocks/history`: change history as a timeline
+- `blocks/signin`: sign-in page with its own look and an account picker (Tabler's own look: blocks/auth)
 
 ## Preview pages
 
@@ -314,19 +315,19 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 
 ### Authentication and account
 
-- [ ] [2-step-verification-code](https://preview.tabler.io/2-step-verification-code.html) 2-Step Verification
-- [ ] [2-step-verification](https://preview.tabler.io/2-step-verification.html) 2-Step Verification
-- [ ] [auth-lock](https://preview.tabler.io/auth-lock.html) Account locked
-- [ ] [forgot-password](https://preview.tabler.io/forgot-password.html) Forgot password
+- [x] [2-step-verification-code](https://preview.tabler.io/2-step-verification-code.html) 2-Step Verification
+- [x] [2-step-verification](https://preview.tabler.io/2-step-verification.html) 2-Step Verification
+- [x] [auth-lock](https://preview.tabler.io/auth-lock.html) Account locked
+- [x] [forgot-password](https://preview.tabler.io/forgot-password.html) Forgot password
 - [ ] [license](https://preview.tabler.io/license.html) License
-- [ ] [onboarding](https://preview.tabler.io/onboarding.html) Onboarding
-- [ ] [sign-in-cover](https://preview.tabler.io/sign-in-cover.html) Sign in with cover
-- [ ] [sign-in-illustration](https://preview.tabler.io/sign-in-illustration.html) Sign in with illustration
-- [ ] [sign-in-link](https://preview.tabler.io/sign-in-link.html) Sign in link
-- [ ] [sign-in](https://preview.tabler.io/sign-in.html) Sign in — partial, blocks/signin; no forgot-password link, password toggle or social buttons
-- [ ] [sign-up](https://preview.tabler.io/sign-up.html) Sign up
+- [x] [onboarding](https://preview.tabler.io/onboarding.html) Onboarding
+- [x] [sign-in-cover](https://preview.tabler.io/sign-in-cover.html) Sign in with cover
+- [x] [sign-in-illustration](https://preview.tabler.io/sign-in-illustration.html) Sign in with illustration
+- [x] [sign-in-link](https://preview.tabler.io/sign-in-link.html) Sign in link
+- [x] [sign-in](https://preview.tabler.io/sign-in.html) Sign in
+- [x] [sign-up](https://preview.tabler.io/sign-up.html) Sign up
 - [ ] [terms-of-service](https://preview.tabler.io/terms-of-service.html) Terms of service
-- [ ] [trial-ended](https://preview.tabler.io/trial-ended.html) Trial ended
+- [x] [trial-ended](https://preview.tabler.io/trial-ended.html) Trial ended
 
 ### Errors, empty and maintenance
 

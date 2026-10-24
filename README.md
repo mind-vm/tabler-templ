@@ -57,9 +57,11 @@ rebuilt ones are linked, open ones grey.
 go run ./cmd/demo -addr localhost:8080
 ```
 
-| Buttons | Modals |
+| Buttons | Avatars |
 |---|---|
-| ![Buttons](docs/screenshots/buttons.png) | ![Modals](docs/screenshots/modals.png) |
+| ![Buttons](docs/screenshots/buttons.png) | ![Avatars](docs/screenshots/avatars.png) |
+| **Sign in** | **Onboarding** |
+| ![Sign in](docs/screenshots/sign-in.png) | ![Onboarding](docs/screenshots/onboarding.png) |
 
 `scripts/screenshots.sh` takes the screenshots in `docs/screenshots/` with Playwright (the only place that
 uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
@@ -125,6 +127,8 @@ does not ship or link them: serve them yourself (embedded in your binary or from
 | `empty` | `Empty` (icon, illustration or big header text, title, subtitle, action) |
 | `ribbon` | `Ribbon` (top, bottom, start, end, bookmark, color, text or icon) |
 | `tracking` | `Tracking(Props, []Block)`: colored blocks with tooltips, squares |
+| `divider` | `Text`: rule with a label ("or"), start/end, colors |
+| `iconlist` | `List` (inline, marker color, size, row gap), `Item` (icon, color) |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
@@ -146,6 +150,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
+| `blocks/auth` | Tabler's sign-in and account pages: `Page` (centered, optional illustration `Aside`), `CoverPage` (form beside a cover image), `OnboardingPage` (top bar with progress); `SignInForm`, `SignInCard` (other providers), `SignUpCard` (password strength, terms), `ForgotPasswordCard`, `LockCard`, `VerifyCard` (OTP code), `FormCard` (own fields), `Card`, `Message`, `Note`, `Logo`. All texts are props (Tabler's English by default) |
 | `blocks/landing` | `Page` (public start page without sidebar: top bar with brand, anchor links and actions, footer slot), `Hero` (title, lead, actions, optional visual), `Section` (full-width band with heading, `Muted` to set it apart), `Features` (icon, title, text in a grid), `Steps` (numbered), `CallToAction`, `Footer` (text and links); no script |
 | `blocks/tabscard` | `Card(Props, []Tab)`: the tabbed card of the preview (tabs in the header, one panel each; icons, end tab, disabled, fill, reverse, fade, a dropdown tab) |
 | `blocks/stats` | `Row([]Stat)` and `Tile`: key figures in a strip (label with optional marker, value, small extra, link to act on it) |

@@ -1,0 +1,71 @@
+// Package iconlist renders Tabler's icon list (list-icon): a list whose markers are icons, e.g. the
+// features of a plan with check marks.
+package iconlist
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Class      string
+	Attributes templ.Attributes
+	Inline     bool   // entries in a row that wraps (list-icon-inline)
+	Color      string // marker color of the whole list, e.g. "green", "success"
+	Size       string // marker size, e.g. "1.5rem" (--tblr-list-icon-size)
+	RowGap     string // gap between entries, e.g. "1rem" (--tblr-list-icon-row-gap)
+}
+
+func style(p Props) string {
+	s := ""
+	add := func(k, v string) {
+		if v != "" {
+			if s != "" {
+				s += "; "
+			}
+			s += k + ": " + v
+		}
+	}
+	if p.Size != "" {
+		add("--tblr-list-icon-size", p.Size)
+	}
+	if p.RowGap != "" {
+		add("--tblr-list-icon-row-gap", p.RowGap)
+	}
+	if p.Color != "" {
+		add("--tblr-list-icon-color", "var(--tblr-"+p.Color+")")
+	}
+	return s
+}
+
+templ List(props ...Props) {
+	{{ p := kit.First(props) }}
+	<ul
+		class={ kit.Classes("list-icon", kit.If(p.Inline, "list-icon-inline"), p.Class) }
+		if style(p) != "" {
+			style={ style(p) }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</ul>
+}
+
+type ItemProps struct {
+	Class string
+	Icon  string // default "ti-check"
+	Color string // marker color of this entry, e.g. "red"
+}
+
+// Item is an entry: the icon marker and the children as text.
+templ Item(props ...ItemProps) {
+	{{ p := kit.First(props) }}
+	<li
+		if p.Class != "" {
+			class={ p.Class }
+		}
+	>
+		@icon.Icon(kit.Or(p.Icon, "ti-check"), icon.Props{Color: p.Color})
+		{ children... }
+	</li>
+}

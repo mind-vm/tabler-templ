@@ -1,0 +1,54 @@
+package auth
+
+import "github.com/mind-vm/tabler-templ/progress"
+
+type OnboardingProps struct {
+	Title string               // the page heading, e.g. "Let's set up your account"
+	Steps progress.StepsProps  // the progress in the top bar
+	Skip  templ.Component      // right side of the top bar, e.g. a link to skip
+	// Actions are the buttons below the card, e.g. Back and Continue (spread apart).
+	Actions templ.Component
+}
+
+// OnboardingPage is a setup step after signing up: a top bar with the brand, the progress and a skip
+// link, a heading and a card with the step's fields (the children), and the buttons below it.
+templ OnboardingPage(p PageProps, o OnboardingProps) {
+	@document(p, "") {
+		<nav class="navbar">
+			<div class="container">
+				<div class="row w-100 align-items-center">
+					<div class="col me-auto">
+						if p.Brand != nil {
+							@p.Brand
+						}
+					</div>
+					<div class="col-2">
+						@progress.Steps(o.Steps)
+					</div>
+					<div class="col text-end">
+						if o.Skip != nil {
+							@o.Skip
+						}
+					</div>
+				</div>
+			</div>
+		</nav>
+		<main class="py-5" id="content">
+			<div class="container container-tight">
+				<div class="page-header">
+					<h1 class="page-title">{ o.Title }</h1>
+				</div>
+				<div class="card mt-5">
+					<div class="card-body space-y-4">
+						{ children... }
+					</div>
+				</div>
+				if o.Actions != nil {
+					<div class="btn-list justify-content-between mt-4">
+						@o.Actions
+					</div>
+				}
+			</div>
+		</main>
+	}
+}

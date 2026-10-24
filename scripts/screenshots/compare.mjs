@@ -12,7 +12,9 @@ for (const [label, url] of [["ours", `${base}/${name}`], ["tabler", `${orig}/${n
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
   const path = join(out, `${name.replaceAll("/", "-")}.${label}.png`);
-  await page.locator(".page-body .container-xl, .page-center .container").first().screenshot({ path });
+  // The page body of pages with a frame; the whole main element of single pages (sign-in, onboarding …).
+  const body = page.locator(".page-body .container-xl")
+  await ((await body.count()) ? body.first() : page.locator("main").first()).screenshot({ path })
   console.log(path);
 }
 await browser.close();

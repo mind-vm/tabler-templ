@@ -1,6 +1,9 @@
 package main
 
-import "github.com/mind-vm/tabler-templ/kit"
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/progress"
+)
 
 // The preview's sample photos come from the Tabler repository through jsDelivr (pinned to the commit the
 // catalog was built from), so this repository holds no images. preview.tabler.io refuses hotlinks.
@@ -15,3 +18,5 @@ var kitAttrs = kit.Attrs
 
 // kitIf returns class when cond holds.
 var kitIf = kit.If
+
+func progressSteps5() progress.StepsProps { return progress.StepsProps{Count: 5, Active: 1} }
