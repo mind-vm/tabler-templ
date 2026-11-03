@@ -5,8 +5,8 @@ go 1.26.5
 tool github.com/a-h/templ/cmd/templ
 
 require (
-	github.com/a-h/templ v0.3.1070
-	github.com/andybalholm/brotli v1.2.6
+	github.com/a-h/templ v0.3.1100
+	github.com/andybalholm/brotli v1.2.7
 	github.com/stretchr/testify v1.12.1
 	github.com/tdewolff/font v0.0.0-20261010204837-88a7f6b56918
 )

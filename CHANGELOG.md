@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.10.1
+
+- **Tabler 1.7.3** (from 1.7.1): fixes only, no markup changes. Datepicker no longer throws when a range
+  start is clicked again; `data-bs-dismiss="offcanvas"` closes responsive offcanvas; table variants in dark
+  mode; `.card-table` corners in `.table-responsive-*`; `.modal-header` padding; Tom Select styling; Autosize
+  no longer moves the scroll position. Icons stay at 3.49.0, as Tabler pins them.
+- **templ v0.3.1100** (from v0.3.1070), with upstream security fixes in attribute and JavaScript escaping.
+  Rendered `style` attributes now end with a `;`.
+
 ## v0.10.0
 
 Serving Tabler yourself, with nothing loaded from a CDN at runtime:
