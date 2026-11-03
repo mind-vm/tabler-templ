@@ -7,9 +7,9 @@
 package versions
 
 const (
-	Tabler = "1.7.1" // npm: @tabler/core
+	Tabler = "1.7.3" // npm: @tabler/core
 	// TablerCommit is the commit of the Tabler release; the demo reads Tabler's images and data at it.
-	TablerCommit = "a23c8417799dfae0a890fac78b03ddcb5e365e87"
+	TablerCommit = "096491dea4886f78891c2e29310351d5aee6c460"
 	Icons        = "3.49.0" // npm: @tabler/icons
 
 	ApexCharts      = "7.0.0"  // npm: apexcharts
