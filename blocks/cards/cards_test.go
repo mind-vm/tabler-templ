@@ -65,7 +65,7 @@ func TestUsersList(t *testing.T) {
 
 func TestPeopleAndTopUsers(t *testing.T) {
 	h := render(t, cards.People(cards.PeopleProps{Title: "People", MaxHeight: "35rem"}, []cards.Group{{Letter: "A", Users: []cards.User{{Name: "Ann"}}}}))
-	assert.Contains(t, h, `style="max-height: 35rem"`)
+	assert.Contains(t, h, `style="max-height: 35rem;"`)
 	assert.Contains(t, h, `<div class="list-group-header sticky-top">A</div>`)
 
 	h = render(t, cards.TopUsers("Top users", []cards.User{{Name: "Ann", Status: "green", StatusLabel: "Online", Meta: "now"}}))

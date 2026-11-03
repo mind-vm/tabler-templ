@@ -35,7 +35,7 @@ func TestClipboard(t *testing.T) {
 
 func TestSparklineStyle(t *testing.T) {
 	h := render(t, context.Background(), sparkline.Sparkline(sparkline.Props{Values: []float64{1, -1}, NegativeColor: "orange", StrokeWidth: "1", SpotSize: "1.5"}))
-	assert.Contains(t, h, `style="--tblr-sparkline-negative: var(--tblr-orange); --tblr-sparkline-stroke-width: 1; --tblr-sparkline-spot-size: 1.5"`)
+	assert.Contains(t, h, `style="--tblr-sparkline-negative: var(--tblr-orange); --tblr-sparkline-stroke-width: 1; --tblr-sparkline-spot-size: 1.5;"`)
 	assert.NotContains(t, render(t, context.Background(), sparkline.Sparkline(sparkline.Props{Values: []float64{1}})), "style=")
 }
 
