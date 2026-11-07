@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **`window.tablerCharts.destroy(element)`** tears down the charts in an element before it is removed or
+  replaced: the ApexCharts instances, their resize listeners and their `window.tabler_chart` entries, and
+  charts still queued to be drawn. For content that is swapped repeatedly, e.g. streamed or polled panels.
+
 ## v0.10.1
 
 - **Tabler 1.7.3** (from 1.7.1): fixes only, no markup changes. Datepicker no longer throws when a range
