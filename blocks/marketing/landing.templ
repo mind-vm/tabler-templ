@@ -1,0 +1,624 @@
+package marketing
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// The sections below go beyond Tabler's marketing preview: an announcement pill, feature cards, a bento
+// grid, numbered steps, a colored call-to-action box, plans with a monthly/yearly switch, a team, a big
+// quote, an integration grid and a contact section. They use Tabler's classes and a few rules of their own
+// (LandingStyles), which each of them renders once per page.
+
+var stylesOnce = templ.NewOnceHandle()
+
+// LandingStyles are the rules of the sections in this file; every section renders them once per page, so
+// calling it is only needed to put them in the head.
+templ LandingStyles() {
+	@stylesOnce.Once() {
+		@csp.Style(landingCSS)
+	}
+}
+
+const landingCSS = `.mkt-announcement{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;padding:.25rem .75rem .25rem .25rem;font-size:.875rem;color:var(--tblr-body-color);background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:2rem;text-decoration:none;box-shadow:var(--tblr-shadow-card,none)}
+.mkt-announcement:hover{text-decoration:none;border-color:var(--tblr-primary)}
+.mkt-announcement .badge{border-radius:2rem}
+.mkt-card-feature{height:100%;transition:transform .15s ease,box-shadow .15s ease}
+a.mkt-card-feature:hover{transform:translateY(-2px);box-shadow:var(--tblr-shadow-dropdown,0 .5rem 1rem rgba(0,0,0,.08))}
+.mkt-bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.5rem}
+.mkt-bento-tile{display:flex;flex-direction:column;min-height:14rem;padding:1.75rem;border-radius:var(--tblr-border-radius-xl,1rem);background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);overflow:hidden}
+.mkt-bento-tile h3{margin:0 0 .5rem;font-size:1.25rem}
+.mkt-bento-tile p{margin:0;color:var(--tblr-secondary)}
+.mkt-bento-color h3{color:inherit}
+.mkt-bento-tile.mkt-bento-color p{color:inherit;opacity:.8}
+.mkt-bento-media{margin-top:auto;padding-top:1.5rem}
+.mkt-bento-span-2{grid-column:span 2}.mkt-bento-span-3{grid-column:span 3}.mkt-bento-span-4{grid-column:span 4}.mkt-bento-span-6{grid-column:span 6}
+.mkt-bento-tall{grid-row:span 2}
+.mkt-steps{counter-reset:mkt-step;display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:2rem;margin:0;padding:0;list-style:none}
+.mkt-steps li{position:relative;padding-top:3.5rem}
+.mkt-steps li::before{counter-increment:mkt-step;content:counter(mkt-step);position:absolute;top:0;left:0;display:flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;font-weight:700;color:var(--tblr-primary-fg,#fff);background:var(--tblr-primary);border-radius:50%}
+.mkt-steps li:not(:last-child)::after{content:"";position:absolute;top:1.25rem;left:3.25rem;right:-1.25rem;border-top:2px dashed var(--tblr-border-color)}
+.mkt-steps h3{margin-bottom:.375rem}
+.mkt-steps p{margin:0;color:var(--tblr-secondary)}
+.mkt-cta-box{position:relative;padding:3.5rem 3rem;border-radius:var(--tblr-border-radius-xl,1rem);overflow:hidden}
+.mkt-cta-box h2{font-size:2rem;color:inherit}
+.mkt-cta-box p{font-size:1.125rem;opacity:.85}
+.mkt-cta-box::after{content:"";position:absolute;right:-6rem;top:-6rem;width:20rem;height:20rem;border-radius:50%;background:rgba(255,255,255,.08);pointer-events:none}
+.mkt-plans-switch{display:flex;justify-content:center;margin-bottom:2.5rem}
+.mkt-plans .mkt-price-yearly{display:none}
+.mkt-plans:has(.mkt-yearly:checked) .mkt-price-yearly{display:block}
+.mkt-plans:has(.mkt-yearly:checked) .mkt-price-monthly{display:none}
+.mkt-plan{height:100%;display:flex;flex-direction:column}
+.mkt-plan .card-body{display:flex;flex-direction:column}
+.mkt-plan-price{font-size:2.5rem;font-weight:700;line-height:1}
+.mkt-plan-price small{font-size:.875rem;font-weight:400;color:var(--tblr-secondary)}
+.mkt-plan-featured{border-color:var(--tblr-primary);box-shadow:0 0 0 1px var(--tblr-primary)}
+.mkt-quote{max-width:48rem;margin:0 auto;text-align:center}
+.mkt-quote blockquote{margin:0 0 2rem;font-size:clamp(1.25rem,1rem + 1vw,1.75rem);line-height:1.5;font-weight:500;color:var(--tblr-emphasis-color,var(--tblr-body-color))}
+.mkt-integrations{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:1rem}
+.mkt-integration{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:1.5rem 1rem;text-align:center;color:inherit;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}
+a.mkt-integration:hover{text-decoration:none;border-color:var(--tblr-primary)}
+.mkt-integration .ti{font-size:2rem}
+.mkt-integration small{color:var(--tblr-secondary)}
+.mkt-team-card{text-align:center;height:100%}
+@media (max-width:991.98px){.mkt-bento{grid-template-columns:repeat(2,minmax(0,1fr))}.mkt-bento-span-2,.mkt-bento-span-3{grid-column:span 1}.mkt-bento-span-4,.mkt-bento-span-6{grid-column:span 2}.mkt-bento-tall{grid-row:auto}.mkt-steps li::after{display:none}}
+@media (max-width:575.98px){.mkt-bento{grid-template-columns:minmax(0,1fr)}.mkt-bento [class*=mkt-bento-span]{grid-column:auto}.mkt-cta-box{padding:2.5rem 1.5rem}}`
+
+type AnnouncementProps struct {
+	Badge string // e.g. "New"
+	// BadgeColor is the badge's color, default "primary".
+	BadgeColor string
+	Text       string
+	Href       string // default "#"
+}
+
+// Announcement is a pill link above a hero title, e.g. "New · Version 2.0 is out →"; pass it as a hero's
+// Announcement.
+templ Announcement(p AnnouncementProps) {
+	@LandingStyles()
+	<a href={ templ.URL(kit.Or(p.Href, "#")) } class="mkt-announcement">
+		if p.Badge != "" {
+			<span class={ "badge bg-" + kit.Or(p.BadgeColor, "primary") + " text-" + kit.Or(p.BadgeColor, "primary") + "-fg" }>{ p.Badge }</span>
+		}
+		<span>{ p.Text }</span>
+		@icon.Icon("ti-arrow-right", icon.Props{Inline: true})
+	</a>
+}
+
+// FeatureCard is a feature in a FeatureCards grid.
+type FeatureCard struct {
+	Icon  string
+	Color string // of the icon's shape, e.g. "green"; default primary
+	Title string
+	Text  string
+	Href  string // makes the card a link
+	Link  string // a "Learn more" line at the bottom, shown when Href is set
+}
+
+type FeatureCardsProps struct {
+	Header HeaderProps // without a Title none
+	// Columns per row on large screens: 2, 3 (default) or 4.
+	Columns int
+}
+
+func cols(n int) string {
+	switch n {
+	case 2:
+		return "col-md-6"
+	case 4:
+		return "col-md-6 col-lg-3"
+	}
+	return "col-md-6 col-lg-4"
+}
+
+// FeatureCards are features in cards with an icon in a shape; put them in a Section.
+templ FeatureCards(p FeatureCardsProps, fs []FeatureCard) {
+	@LandingStyles()
+	<div class="container">
+		if p.Header.Title != "" {
+			@SectionHeader(p.Header)
+		}
+		<div class="row row-cards g-4">
+			for _, f := range fs {
+				<div class={ cols(p.Columns) }>
+					if f.Href != "" {
+						<a href={ templ.URL(f.Href) } class="card card-link mkt-card-feature">
+							@featureCardBody(f)
+						</a>
+					} else {
+						<div class="card mkt-card-feature">
+							@featureCardBody(f)
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ featureCardBody(f FeatureCard) {
+	<div class="card-body">
+		<div class={ kit.Classes("shape shape-md mb-3", kit.If(f.Color != "", "shape-"+f.Color)) }>
+			@icon.Icon(f.Icon)
+		</div>
+		<h3 class="h3 mb-2">{ f.Title }</h3>
+		<p class="text-secondary mb-0">{ f.Text }</p>
+		if f.Href != "" && f.Link != "" {
+			<div class="mt-3 text-primary fw-medium">
+				{ f.Link }
+				@icon.Icon("ti-arrow-right", icon.Props{Inline: true})
+			</div>
+		}
+	</div>
+}
+
+// Tile is a cell of a Bento grid.
+type Tile struct {
+	Icon  string
+	Title string
+	Text  string
+	// Span is the width in sixths on large screens: 2, 3, 4 or 6 (default 2).
+	Span int
+	Tall bool // two rows high on large screens
+	// Color fills the tile, e.g. "primary" or "dark" (bg-{color} with its fg text); default the surface.
+	Color string
+	Media templ.Component // at the bottom, e.g. a screenshot, a chart or a list
+}
+
+func span(n int) int {
+	switch n {
+	case 3, 4, 6:
+		return n
+	}
+	return 2
+}
+
+func ifElse(cond bool, a, b string) string {
+	if cond {
+		return a
+	}
+	return b
+}
+
+// Bento is a grid of tiles of different sizes (a "bento box"); put it in a Section.
+templ Bento(header HeaderProps, tiles []Tile) {
+	@LandingStyles()
+	<div class="container">
+		if header.Title != "" {
+			@SectionHeader(header)
+		}
+		<div class="mkt-bento">
+			for _, t := range tiles {
+				<div
+					class={ kit.Classes("mkt-bento-tile", "mkt-bento-span-"+itoa(span(t.Span)), kit.If(t.Tall, "mkt-bento-tall"),
+					kit.If(t.Color != "", "mkt-bento-color border-0 bg-"+t.Color+" text-"+t.Color+"-fg")) }
+				>
+					if t.Icon != "" {
+						<div class="mb-3">
+							@icon.Icon(t.Icon, icon.Props{Class: "icon-lg"})
+						</div>
+					}
+					<h3>{ t.Title }</h3>
+					if t.Text != "" {
+						<p>{ t.Text }</p>
+					}
+					if t.Media != nil {
+						<div class="mkt-bento-media">
+							@t.Media
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Step is a step of Steps.
+type Step struct {
+	Title string
+	Text  string
+}
+
+// Steps are numbered steps in a row joined by a dashed line ("how it works"); put them in a Section.
+templ Steps(header HeaderProps, steps []Step) {
+	@LandingStyles()
+	<div class="container">
+		if header.Title != "" {
+			@SectionHeader(header)
+		}
+		<ol class="mkt-steps">
+			for _, s := range steps {
+				<li>
+					<h3 class="h2">{ s.Title }</h3>
+					<p>{ s.Text }</p>
+				</li>
+			}
+		</ol>
+	</div>
+}
+
+type CTABoxProps struct {
+	Title string
+	Text  string
+	// Actions are buttons below the text, e.g. a white and an outline button.
+	Actions []templ.Component
+	// Color of the box, default "primary"; "dark" for a dark band.
+	Color string
+	// Media is a column at the end, e.g. an illustration; without it the text is centered.
+	Media templ.Component
+}
+
+// CTABox is a call to action in a colored, rounded box; put it in a Section.
+templ CTABox(p CTABoxProps) {
+	@LandingStyles()
+	{{ color := kit.Or(p.Color, "primary") }}
+	<div class="container">
+		<div class={ "mkt-cta-box bg-" + color + " text-" + color + "-fg" }>
+			<div class={ kit.Classes("row g-5 align-items-center", kit.If(p.Media == nil, "justify-content-center text-center")) }>
+				<div class={ ifElse(p.Media != nil, "col-lg-7", "col-lg-9") }>
+					<h2 class="mb-3">{ p.Title }</h2>
+					if p.Text != "" {
+						<p class="mb-0">{ p.Text }</p>
+					}
+					if len(p.Actions) > 0 {
+						<div class={ kit.Classes("btn-list mt-5", kit.If(p.Media == nil, "justify-content-center")) }>
+							for _, a := range p.Actions {
+								@a
+							}
+						</div>
+					}
+				</div>
+				if p.Media != nil {
+					<div class="col-lg-5 text-center">
+						@p.Media
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// PlanPrice is a price of a Plan: the amount and the line next to it, e.g. "$29" and "/month".
+type PlanPrice struct {
+	Amount string
+	Period string
+	Note   string // below, e.g. "billed yearly"
+}
+
+// Plan is a column of Plans.
+type Plan struct {
+	Name        string
+	Description string
+	Monthly     PlanPrice
+	Yearly      PlanPrice // shown when the switch is on yearly; empty: Monthly in both
+	Features    []string
+	Missing     []string // struck through below the features
+	Featured    bool
+	Badge       string // e.g. "Most popular"; on a featured plan by default
+	Button      string // default "Get started"
+	Href        string // default "#"
+}
+
+type PlansProps struct {
+	Header HeaderProps // without a Title none
+	// ID names the switch's radio group; required when a page has more than one Plans.
+	ID string
+	// Monthly and Yearly label the switch, default "Monthly" and "Yearly"; Save is a badge on Yearly,
+	// e.g. "-20%". NoSwitch drops the switch (the monthly prices only).
+	Monthly, Yearly, Save string
+	NoSwitch              bool
+}
+
+// Plans are plan cards with a monthly/yearly switch (pure CSS, :has()); put them in a Section.
+templ Plans(p PlansProps, plans []Plan) {
+	@LandingStyles()
+	{{ id := kit.Or(p.ID, "plans") }}
+	<div class="container mkt-plans">
+		if p.Header.Title != "" {
+			@SectionHeader(p.Header)
+		}
+		if !p.NoSwitch {
+			<div class="mkt-plans-switch">
+				<div class="btn-group" role="group" aria-label="Billing period">
+					<input type="radio" class="btn-check" name={ id } id={ id + "-monthly" } autocomplete="off" checked/>
+					<label class="btn" for={ id + "-monthly" }>{ kit.Or(p.Monthly, "Monthly") }</label>
+					<input type="radio" class="btn-check mkt-yearly" name={ id } id={ id + "-yearly" } autocomplete="off"/>
+					<label class="btn" for={ id + "-yearly" }>
+						{ kit.Or(p.Yearly, "Yearly") }
+						if p.Save != "" {
+							<span class="badge bg-green-lt ms-2">{ p.Save }</span>
+						}
+					</label>
+				</div>
+			</div>
+		}
+		<div class="row row-cards g-4 justify-content-center">
+			for _, pl := range plans {
+				<div class={ cols(len(plans)) }>
+					@plan(pl)
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ plan(p Plan) {
+	<div class={ kit.Classes("card mkt-plan", kit.If(p.Featured, "mkt-plan-featured")) }>
+		{{ badge := kit.Or(p.Badge, kit.If(p.Featured, "Most popular")) }}
+		if p.Featured {
+			<div class="card-status-top bg-primary"></div>
+		}
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-2">
+				<h3 class="h2 m-0">{ p.Name }</h3>
+				if badge != "" {
+					<span class="badge bg-primary-lt ms-auto">{ badge }</span>
+				}
+			</div>
+			if p.Description != "" {
+				<p class="text-secondary">{ p.Description }</p>
+			}
+			@planPrice(p.Monthly, "mkt-price-monthly")
+			@planPrice(yearly(p), "mkt-price-yearly")
+			<ul class="list-unstyled space-y-2 my-4">
+				for _, f := range p.Features {
+					<li class="d-flex">
+						@icon.Icon("ti-check", icon.Props{Color: "green", Class: "me-2 flex-shrink-0"})
+						{ f }
+					</li>
+				}
+				for _, f := range p.Missing {
+					<li class="d-flex text-secondary">
+						@icon.Icon("ti-x", icon.Props{Class: "me-2 flex-shrink-0"})
+						<s>{ f }</s>
+					</li>
+				}
+			</ul>
+			<a href={ templ.URL(kit.Or(p.Href, "#")) } class={ kit.Classes("btn w-100 mt-auto", kit.If(p.Featured, "btn-primary")) }>{ kit.Or(p.Button, "Get started") }</a>
+		</div>
+	</div>
+}
+
+func yearly(p Plan) PlanPrice {
+	if p.Yearly.Amount == "" {
+		return p.Monthly
+	}
+	return p.Yearly
+}
+
+templ planPrice(pr PlanPrice, class string) {
+	<div class={ class }>
+		<div class="mkt-plan-price">
+			{ pr.Amount }
+			if pr.Period != "" {
+				<small>{ pr.Period }</small>
+			}
+		</div>
+		<div class="small text-secondary mt-1">
+			if pr.Note != "" {
+				{ pr.Note }
+			} else {
+				&nbsp;
+			}
+		</div>
+	</div>
+}
+
+// Member is a person of Team.
+type Member struct {
+	Avatar avatar.Props
+	Name   string
+	Role   string
+	Text   string
+	// Links are icon buttons below, e.g. {Icon: "ti-brand-linkedin", Href: "…", Label: "LinkedIn"}.
+	Links []IconLink
+}
+
+// IconLink is a link shown as an icon.
+type IconLink struct {
+	Icon  string
+	Href  string
+	Label string
+}
+
+// Team are people in cards with their photo, role and links; put it in a Section.
+templ Team(header HeaderProps, people []Member) {
+	@LandingStyles()
+	<div class="container">
+		if header.Title != "" {
+			@SectionHeader(header)
+		}
+		<div class="row row-cards g-4">
+			for _, m := range people {
+				<div class="col-sm-6 col-lg-3">
+					<div class="card mkt-team-card">
+						<div class="card-body p-4">
+							{{ a := m.Avatar }}
+							if a.Size == "" {
+								{{ a.Size = avatar.SizeXL }}
+							}
+							{{ a.Class = kit.Classes("mb-3", a.Class) }}
+							@avatar.Avatar(a)
+							<h3 class="m-0 mb-1">{ m.Name }</h3>
+							<div class="text-secondary">{ m.Role }</div>
+							if m.Text != "" {
+								<p class="text-secondary small mt-3 mb-0">{ m.Text }</p>
+							}
+							if len(m.Links) > 0 {
+								<div class="mt-3 d-flex justify-content-center gap-2">
+									for _, l := range m.Links {
+										<a href={ templ.URL(l.Href) } class="btn btn-icon btn-ghost-secondary" aria-label={ l.Label }>
+											@icon.Icon(l.Icon)
+										</a>
+									}
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+type QuoteProps struct {
+	Text   string
+	Avatar avatar.Props
+	Name   string
+	Role   string
+	Logo   templ.Component // above the quote, e.g. the customer's logo
+	Stars  int             // 1–5 yellow stars above the quote; 0 none
+}
+
+// Quote is a single big testimonial, centered; put it in a Section.
+templ Quote(p QuoteProps) {
+	@LandingStyles()
+	<div class="container">
+		<figure class="mkt-quote">
+			if p.Logo != nil {
+				<div class="mb-4 text-secondary">
+					@p.Logo
+				</div>
+			}
+			if p.Stars > 0 {
+				<div class="mb-3 text-yellow" aria-label={ itoa(p.Stars) + " of 5 stars" }>
+					for range p.Stars {
+						@icon.Icon("ti-star-filled")
+					}
+				</div>
+			}
+			<blockquote>“{ p.Text }”</blockquote>
+			<figcaption class="d-inline-flex align-items-center gap-3 text-start">
+				{{ a := p.Avatar }}
+				if a.Size == "" {
+					{{ a.Size = avatar.SizeMedium }}
+				}
+				@avatar.Avatar(a)
+				<div>
+					<div class="fw-bold">{ p.Name }</div>
+					<div class="text-secondary">{ p.Role }</div>
+				</div>
+			</figcaption>
+		</figure>
+	</div>
+}
+
+// Integration is a tile of Integrations.
+type Integration struct {
+	Icon  string // e.g. "ti-brand-slack"
+	Color string // of the icon, e.g. "purple"
+	Name  string
+	Text  string // a short line, e.g. "Chat"
+	Href  string
+}
+
+// Integrations are icon tiles of connected tools; put them in a Section.
+templ Integrations(header HeaderProps, items []Integration) {
+	@LandingStyles()
+	<div class="container">
+		if header.Title != "" {
+			@SectionHeader(header)
+		}
+		<div class="mkt-integrations">
+			for _, it := range items {
+				if it.Href != "" {
+					<a href={ templ.URL(it.Href) } class="mkt-integration">
+						@integration(it)
+					</a>
+				} else {
+					<div class="mkt-integration">
+						@integration(it)
+					</div>
+				}
+			}
+		</div>
+	</div>
+}
+
+templ integration(it Integration) {
+	@icon.Icon(it.Icon, icon.Props{Color: it.Color})
+	<div>
+		<div class="fw-medium">{ it.Name }</div>
+		if it.Text != "" {
+			<small>{ it.Text }</small>
+		}
+	</div>
+}
+
+// ContactItem is a line of a Contact section, e.g. an email address with an icon.
+type ContactItem struct {
+	Icon  string
+	Title string
+	Text  string
+	Href  string // makes Text a link, e.g. "mailto:…"
+}
+
+type ContactProps struct {
+	Title       string
+	Description string
+	Items       []ContactItem
+	Action      string // of the form, default "#"
+	Method      string // default "post"
+	// Labels of the form, default "Name", "Email", "Message" and "Send message".
+	NameLabel, EmailLabel, MessageLabel, Button string
+}
+
+// Contact is a contact section: the title and ways to reach you at the start, a message form at the end;
+// put it in a Section.
+templ Contact(p ContactProps) {
+	<div class="container">
+		<div class="row g-6 align-items-start">
+			<div class="col-lg-5">
+				<h2 class="section-title text-start">{ p.Title }</h2>
+				if p.Description != "" {
+					<p class="section-description text-start">{ p.Description }</p>
+				}
+				<div class="space-y-4 mt-5">
+					for _, it := range p.Items {
+						<div class="d-flex gap-3">
+							<span class="shape shape-md flex-shrink-0">
+								@icon.Icon(it.Icon)
+							</span>
+							<div>
+								<div class="fw-bold">{ it.Title }</div>
+								if it.Href != "" {
+									<a href={ templ.URL(it.Href) } class="text-secondary">{ it.Text }</a>
+								} else {
+									<div class="text-secondary">{ it.Text }</div>
+								}
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+			<div class="col-lg-7">
+				<form class="card card-lg" action={ templ.URL(kit.Or(p.Action, "#")) } method={ kit.Or(p.Method, "post") }>
+					<div class="card-body">
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label class="form-label" for="contact-name">{ kit.Or(p.NameLabel, "Name") }</label>
+								<input class="form-control" id="contact-name" name="name" autocomplete="name"/>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label" for="contact-email">{ kit.Or(p.EmailLabel, "Email") }</label>
+								<input class="form-control" id="contact-email" name="email" type="email" autocomplete="email"/>
+							</div>
+							<div class="col-12">
+								<label class="form-label" for="contact-message">{ kit.Or(p.MessageLabel, "Message") }</label>
+								<textarea class="form-control" id="contact-message" name="message" rows="5"></textarea>
+							</div>
+							<div class="col-12">
+								<button type="submit" class="btn btn-primary w-100">
+									@icon.Icon("ti-send")
+									{ " " + kit.Or(p.Button, "Send message") }
+								</button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}

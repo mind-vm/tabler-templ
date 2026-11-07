@@ -89,6 +89,7 @@ func handler() http.Handler {
 		json.NewEncoder(w).Encode(names)
 	})
 	themesRoutes(mux)
+	landingRoutes(mux)
 	if vendorDir != "" {
 		mux.Handle("GET /npm/", http.StripPrefix("/npm/", http.FileServer(http.Dir(vendorDir))))
 	}

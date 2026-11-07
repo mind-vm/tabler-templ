@@ -5,6 +5,13 @@
 - **`window.tablerCharts.destroy(element)`** tears down the charts in an element before it is removed or
   replaced: the ApexCharts instances, their resize listeners and their `window.tabler_chart` entries, and
   charts still queued to be drawn. For content that is swapped repeatedly, e.g. streamed or polled panels.
+- **Landing sections in `blocks/marketing`:** `Announcement` (a pill above a hero title, via the new
+  `Announcement` field of `Hero` and `SideHero`), `FeatureCards` (2–4 columns, optionally linked), `Bento`
+  (tiles of different widths, heights and colors), `Steps` (numbered, joined by a dashed line), `CTABox`
+  (a colored box, centered or with media), `Plans` (plan cards with a monthly/yearly switch in pure CSS),
+  `Team`, `Quote` (one big testimonial with stars), `Integrations` and `Contact` (ways to reach you and a
+  form). The demo shows every landing block at `/landing` and two complete pages at `/landing/saas` and
+  `/landing/app`.
 
 ## v0.10.1
 
