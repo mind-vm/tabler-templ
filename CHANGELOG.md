@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## v0.11.0
+
+Landing pages: ten new sections in `blocks/marketing` and a demo with two complete landing pages, plus a
+way to tear down charts in swapped content.
 
 - **`window.tablerCharts.destroy(element)`** tears down the charts in an element before it is removed or
   replaced: the ApexCharts instances, their resize listeners and their `window.tabler_chart` entries, and
