@@ -10,6 +10,8 @@
 // A chart is drawn when it comes near the screen, one chart at a time, so a page with many charts stays
 // responsive. Charts in content swapped in later (e.g. by htmx) start on htmx:afterSettle, or call
 // window.tablerCharts.init(element); window.tablerCharts.flush() draws all at once (it returns a promise).
+// Before removing or replacing content with charts in it, call window.tablerCharts.destroy(element): it
+// frees the drawn charts and drops the ones still waiting to be drawn.
 package chart
 
 import (
@@ -378,6 +380,25 @@ templ Script() {
 					return Promise.all(all);
 				}
 				window.addEventListener('beforeprint', flush);
+				// destroy tears down the charts in root (root itself included) before it leaves the page. ApexCharts
+				// keeps its instance, its resize listener and the window.tabler_chart entry after the element is
+				// gone; content that is replaced again and again (a stream, a polled panel) piles them up, and a
+				// chart that waits in the queue would still be drawn into a detached element.
+				function destroy(root) {
+					if (!root || !root.querySelectorAll) return;
+					var els = [].slice.call(root.querySelectorAll('[data-tabler-chart]'));
+					if (root.matches && root.matches('[data-tabler-chart]')) els.push(root);
+					els.forEach(function (el) {
+						if (io) io.unobserve(el);
+						var i = queue.indexOf(el);
+						if (i >= 0) queue.splice(i, 1);
+						el.tablerQueued = el.tablerWatched = false;
+						if (!el.tablerChart) return;
+						try { el.tablerChart.destroy(); } catch (e) { console.error(e); }
+						if (window.tabler_chart && window.tabler_chart[el.id] === el.tablerChart) delete window.tabler_chart[el.id];
+						el.tablerChart = null;
+					});
+				}
 				// The colors are literal now, so a new color mode or theme (Tabler's theme switch, the settings
 				// panel) redraws the drawn charts with their colors resolved again, one after another.
 				var restyling = false;
@@ -395,7 +416,7 @@ templ Script() {
 						})();
 					});
 				}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-bs-theme-primary', 'data-bs-theme-base', 'data-bs-theme-pack', 'data-bs-navbar-theme'] });
-				window.tablerCharts = { init: init, flush: flush, formatters: formatters };
+				window.tablerCharts = { init: init, flush: flush, destroy: destroy, formatters: formatters };
 				document.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });
 				document.addEventListener('htmx:afterSettle', function (e) { init(e.target); });
 				document.addEventListener('click', function (e) {
