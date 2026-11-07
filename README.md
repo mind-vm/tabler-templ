@@ -259,7 +259,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/music` | `Tracks` (track list with like and menu), `Info` |
 | `blocks/wizard` | `Step`: a wizard step with media, progress and actions around its fields |
 | `blocks/maps` | Map cards: `StoreLocator` (list with search driving the markers), `Delivery` (route and order status), `LiveUsers`, `Homes` (price markers), `AddressPicker` (draggable pin fills a field), `ServerStatus`, `UsersByCountry` |
-| `blocks/marketing` | Marketing pages: `Page`, `Navbar`, `Footer`, `Legal`; heroes (`Hero` with `Browser`/`Screenshot`, `SideHero`, `CoverHero` with `SearchForm`, `Typed`); sections (`Section` with wave or arc dividers, `SectionHeader`, `Logos`, `Features`, `FeatureList`, `Split`, `CTA`, `Counters`, `Subscribe`, `Testimonials`, `FAQGrid`, `FAQList`, `Banner`, `CheckList`, `Price`, `PropertyCard`) |
+| `blocks/marketing` | Marketing pages: `Page`, `Navbar`, `Footer`, `Legal`; heroes (`Hero` with `Browser`/`Screenshot`, `SideHero`, `CoverHero` with `SearchForm`, `Typed`); sections (`Section` with wave or arc dividers, `SectionHeader`, `Logos`, `Features`, `FeatureList`, `Split`, `CTA`, `Counters`, `Subscribe`, `Testimonials`, `FAQGrid`, `FAQList`, `Banner`, `CheckList`, `Price`, `PropertyCard`); landing sections (`Announcement` pill for a hero, `FeatureCards`, `Bento`, `Steps`, `CTABox`, `Plans` with a monthly/yearly switch in pure CSS, `Team`, `Quote`, `Integrations`, `Contact`); demo at `/landing`, `/landing/saas`, `/landing/app` |
 | `blocks/legal` | `Card` and `Page` around prose (license, terms), `LicenseSummary` |
 | `blocks/faq` | `FAQ`: sections of questions in accordions |
 | `blocks/profile` | `Header` (avatar, name, bio, facts, actions), `Info` |

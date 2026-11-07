@@ -27,12 +27,19 @@ templ themesLink() {
 	</a>
 }
 
+templ indexActions() {
+	<div class="btn-list">
+		@landingLink()
+		@themesLink()
+	</div>
+}
+
 templ index() {
 	{{ p := frameProps("", "Tabler preview") }}
 	{{
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Tabler preview in Go and templ",
 			Description: "Every page of the Tabler preview, rebuilt with tabler-templ. Linked pages are rebuilt (marked partial where parts are still missing); grey ones are still open, see ROADMAP.md.",
-			Actions: themesLink()})
+			Actions:     indexActions()})
 	}}
 	@layout.Page(p) {
 		<div class="row row-cards">

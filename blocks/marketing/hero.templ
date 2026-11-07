@@ -1,8 +1,8 @@
 package marketing
 
 import (
-	"github.com/mind-vm/tabler-templ/cdn"
 	"encoding/json"
+	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 
 	"github.com/mind-vm/tabler-templ/icon"
@@ -13,10 +13,12 @@ import (
 type HeroProps struct {
 	Class string // e.g. "pb-0" when an image follows
 	// Header renders a <header> (the page's first hero); otherwise a <div>.
-	Header      bool
-	Title       string
-	TitleHTML   templ.Component // instead of Title, e.g. with a Typed span
-	Description string
+	Header bool
+	// Announcement is above the title, e.g. an Announcement pill.
+	Announcement templ.Component
+	Title        string
+	TitleHTML    templ.Component // instead of Title, e.g. with a Typed span
+	Description  string
 	// DescriptionClass is added to hero-description, e.g. "mt-4" or "hero-description-wide".
 	DescriptionClass string
 	// Actions are buttons in a centered row below the description.
@@ -53,6 +55,9 @@ templ heroTitle(title string, html templ.Component) {
 
 templ heroInner(p HeroProps) {
 	<div class="container">
+		if p.Announcement != nil {
+			@p.Announcement
+		}
 		@heroTitle(p.Title, p.TitleHTML)
 		if p.Description != "" {
 			<p class={ kit.Classes("hero-description", p.DescriptionClass) }>{ p.Description }</p>
@@ -150,12 +155,13 @@ templ screenshot(src, src2x, alt string, w, h int, class string) {
 }
 
 type SideHeroProps struct {
-	Class       string
-	Subheader   string
-	Title       string
-	TitleHTML   templ.Component // instead of Title, e.g. a line break and a Typed span
-	Description string
-	Actions     []templ.Component
+	Class        string
+	Announcement templ.Component // above the subheader, e.g. an Announcement pill
+	Subheader    string
+	Title        string
+	TitleHTML    templ.Component // instead of Title, e.g. a line break and a Typed span
+	Description  string
+	Actions      []templ.Component
 	// Media is the column next to the text, e.g. a carousel of illustrations.
 	Media templ.Component
 }
@@ -166,6 +172,9 @@ templ SideHero(p SideHeroProps) {
 		<div class="container">
 			<div class="row g-lg-8 align-items-center">
 				<div class="col-md-6 text-center text-md-start">
+					if p.Announcement != nil {
+						@p.Announcement
+					}
 					if p.Subheader != "" {
 						<div class="hero-subheader">{ p.Subheader }</div>
 					}
