@@ -55,7 +55,22 @@ ins.assistant-new{text-decoration:none;background:var(--tblr-green-lt);color:var
 .assistant-diff-rejected td{color:var(--tblr-secondary)}
 .assistant-diff-pending{animation:assistant-sweep 1.2s ease-out both}
 @keyframes assistant-sweep{from{background:var(--tblr-yellow-lt)}to{background:transparent}}
-@media (prefers-reduced-motion:reduce){.assistant-diff-pending{animation:none}}`
+@media (prefers-reduced-motion:reduce){.assistant-diff-pending{animation:none}}
+.assistant-action{padding:.5rem .75rem;border:1px solid var(--tblr-border-color);border-left:3px solid var(--tblr-primary);border-radius:var(--tblr-border-radius);background:var(--tblr-bg-surface)}
+.assistant-action-refused{border-left-color:var(--tblr-danger)}
+.assistant-action-fields{display:grid;grid-template-columns:auto 1fr;gap:0 .75rem;margin:.375rem 0 0 1.75rem;font-size:.8125rem}
+.assistant-action-fields dt{font-weight:400;color:var(--tblr-secondary)}
+.assistant-action-fields dd{margin:0;overflow-wrap:anywhere}
+.assistant-action [data-action-note]:empty{display:none}
+.assistant-filled{background-color:var(--tblr-yellow-lt)!important;border-color:var(--tblr-yellow)!important}
+.assistant-shown{outline:3px solid var(--tblr-primary);outline-offset:4px;border-radius:var(--tblr-border-radius);animation:assistant-pulse 1s ease-in-out 3}
+@keyframes assistant-pulse{50%{outline-color:transparent}}
+@media (prefers-reduced-motion:reduce){.assistant-shown{animation:none}}
+.assistant-copilot{--tblr-offcanvas-width:min(440px,100vw)}
+@media (min-width:1200px){body:has(.assistant-copilot.show,.assistant-copilot.showing){padding-right:440px}}
+.assistant-copilot .offcanvas-body{padding-bottom:0}
+.assistant-copilot .assistant-message{max-width:90%}
+.assistant-turns:has(.assistant-turn) .assistant-intro{display:none}`
 
 // Styles are the conversation's few rules (once per page; Conversation renders them).
 templ Styles() {
@@ -89,6 +104,7 @@ templ Script() {
 				var sendButton = composer.querySelector('button');
 				var model = composer.querySelector('select[name="model"]');
 				var running = false;
+				var actions = []; // run once the stream has ended: an action may leave the page
 
 				var nodes = function (html) {
 					var t = document.createElement('template');
@@ -133,6 +149,18 @@ templ Script() {
 					if (window.htmx) added.forEach(function (el) { window.htmx.process(el); });
 				}
 
+				// Earlier turns drawn by the server (Transcript): start at the latest, also when a panel
+				// around the conversation opens later.
+				var toEnd = function () {
+					var last = currentTurn();
+					if (last) last.scrollIntoView({ block: 'start' });
+				};
+				if (currentTurn()) {
+					toEnd();
+					var panel = root.closest('.offcanvas');
+					if (panel) panel.addEventListener('shown.bs.offcanvas', toEnd);
+				}
+
 				// The working line counts the seconds since it appeared.
 				setInterval(function () {
 					var now = Date.now();
@@ -166,6 +194,7 @@ templ Script() {
 							if (!data) continue;
 							var e = JSON.parse(data);
 							if (e.type === 'html') apply(e.args);
+							else if (e.type === 'action') actions.push(e.args);
 						}
 					}
 				}
@@ -176,8 +205,12 @@ templ Script() {
 					running = true;
 					input.value = '';
 					input.disabled = sendButton.disabled = true;
+					actions = [];
 					try {
 						await run(message);
+						if (window.kitAssistant) {
+							for (var a = 0; a < actions.length; a++) if (!window.kitAssistant.run(actions[a])) break;
+						}
 					} catch (err) {
 						var turn = currentTurn();
 						var status = turn && turn.querySelector('[data-slot="status"]');

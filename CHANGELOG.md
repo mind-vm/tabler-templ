@@ -6,6 +6,25 @@
   its text, an autolink its address as text, an image its alt text. For a model's answer that must not
   lead to another site or load a file from outside (prompt injection). `Markdown` and `HTML` are
   unchanged.
+- **`blocks/assistant`, acting on the page:** an assistant beside an app may open pages, fill in forms
+  and point at elements, but never save.
+  - `Catalog` is the app's allowlist. `Check` turns an agent's request into an `Action` or refuses it
+    (`ErrAction`): unknown names, other roles, fields the form lacks, IDs that are not IDs, paths
+    outside `Pages`, sensitive field names and values that look like an IBAN or e-mail address.
+    `Problems` checks the catalog in the app's tests; `Prompt` describes it for the model.
+  - `Stream.Action` sends the action's card and an `action` event. `ActionScript` runs the actions once
+    the stream has ended: it finds `form[data-form]`, opens its dialog, fills in and marks the fields
+    and puts a banner over the form; `[data-tour]` elements are highlighted. An action for another
+    page runs there after loading. A cancelable `assistant:action` event lets the app take over.
+  - `ActionCard`, `ActionRefused`, `AnswerStrict` (Markdown without links and images).
+  - `Copilot` and `CopilotButton`: the conversation in an offcanvas at the right, without backdrop,
+    open from page to page; on wide screens the page makes room for it.
+  - `Transcript` with `Stream.Record` and `Stream.Turn`: the server keeps the conversation and
+    `Transcript.View` draws it again, e.g. on the next page.
+  - The intro hides once a conversation has turns; the conversation starts at the latest turn.
+- **Demo app `/copilot`** (`examples/copilot`): orders and customers with a copilot, offline with a
+  scripted agent: an overdue list, a new order filled in, an order set to done on its own page, and
+  two refusals (bank details, a prompt injection in an order's note).
 
 ## v0.12.0
 

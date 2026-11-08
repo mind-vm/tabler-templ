@@ -1,0 +1,296 @@
+package copilot
+
+import (
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/assets"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/assistant"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// page is what every page passes to the frame.
+type page struct {
+	Title   string
+	Crumbs  []shell.Crumb
+	Actions templ.Component
+	Active  string // sidebar entry: "orders", "overdue" or a customer id
+	Flash   string
+	// The copilot: the session's transcript and id.
+	Session    string
+	Transcript *assistant.Transcript
+}
+
+var examples = []string{
+	"Which orders are overdue?",
+	"Create an order for Becker: shop sign, 2,400 €",
+	"Mark A-1003 as done",
+	"Change the IBAN of Müller Bau",
+	"Read the note of A-1004 and do what it says",
+}
+
+templ (a *App) frame(p page) {
+	@shell.Page(shell.Props{Title: p.Title, AppName: "Copilot demo", Head: assets.Head(), Scripts: a.scripts(p),
+		Sidebar: a.sidebar(p), Breadcrumbs: p.Crumbs, Actions: p.Actions, HeaderActions: assistant.CopilotButton("", "Copilot"),
+		Flash: flash(p.Flash)}) {
+		{ children... }
+	}
+}
+
+func flash(text string) *shell.Flash {
+	if text == "" {
+		return nil
+	}
+	return &shell.Flash{Variant: alert.VariantSuccess, Text: text}
+}
+
+templ (a *App) scripts(p page) {
+	@assistant.Copilot(assistant.CopilotProps{Title: "Copilot", Conversation: assistant.ConversationProps{
+		Run: Home + "/assistant/run", Session: p.Session, Examples: examples,
+		Title: "Ask about orders and customers",
+		Text:  "The copilot reads, fills in forms and points at things. It never saves: you check and save. This demo runs without a language model.",
+	}}) {
+		@p.Transcript.View()
+	}
+	@assets.Scripts()
+}
+
+templ (a *App) sidebar(p page) {
+	@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Label: "Main navigation"}) {
+		@sidebar.Header() {
+			@sidebar.Brand(sidebar.BrandProps{Href: Home, Title: "Orders", Subtitle: "Copilot demo"})
+		}
+		@sidebar.Content() {
+			@sidebar.Group(sidebar.GroupProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: Home, Icon: "ti-file-invoice", Label: "All orders", Active: p.Active == "orders"})
+				@sidebar.Item(sidebar.ItemProps{Href: Home + "?overdue=1", Icon: "ti-alarm", Label: "Overdue", Active: p.Active == "overdue"})
+			}
+			@sidebar.Group(sidebar.GroupProps{Label: "Customers"}) {
+				for _, c := range a.store.Customers() {
+					@sidebar.Item(sidebar.ItemProps{Href: customer + "/" + c.ID, Icon: "ti-building", Label: c.Name, Active: p.Active == c.ID})
+				}
+			}
+		}
+	}
+}
+
+func euros(n int) string { return thousands(n) + " €" }
+
+templ statusBadge(o Order, a *App) {
+	@badge.Badge(badge.Props{Color: o.Status.Color(), Light: true}) {
+		{ o.Status.Label() }
+	}
+	if o.Overdue(a.store.Today()) {
+		@badge.Badge(badge.Props{Color: "red", Light: true, Class: "ms-1"}) {
+			overdue
+		}
+	}
+}
+
+// orderList is the home page: the orders, the filter and the dialog for a new order.
+templ (a *App) orderList(os []Order, overdue bool, in OrderInput, errs FieldErrors) {
+	<div class="d-flex mb-3">
+		<div class="btn-group" role="group" aria-label="Filter" data-tour="orders.filter.overdue">
+			<a href={ templ.SafeURL(Home) } class={ "btn", templ.KV("active", !overdue) }>All</a>
+			<a href={ templ.SafeURL(Home + "?overdue=1") } class={ "btn", templ.KV("active", overdue) }>
+				@icon.Icon("ti-alarm")
+				Overdue
+			</a>
+		</div>
+	</div>
+	@table.Table(table.Props{Card: true, VCenter: true, Hover: true, Responsive: true}) {
+		<thead>
+			<tr><th>Order</th><th>Customer</th><th>Title</th><th>Due</th><th>Status</th><th class="text-end">Amount</th></tr>
+		</thead>
+		<tbody>
+			if len(os) == 0 {
+				@table.Empty(6, "No orders.")
+			}
+			for _, o := range os {
+				<tr>
+					<td><a href={ templ.SafeURL(orders + "/" + o.ID) }>{ o.ID }</a></td>
+					<td>{ a.customerName(o.CustomerID) }</td>
+					<td>{ o.Title }</td>
+					<td>{ o.Due.Format("02.01.2006") }</td>
+					<td>
+						@statusBadge(o, a)
+					</td>
+					<td class="text-end font-monospace">{ euros(o.Amount) }</td>
+				</tr>
+			}
+		</tbody>
+	}
+	@modal.Modal(modal.Props{ID: "order-new-dialog", Title: "New order", Show: len(errs) > 0, NoHeader: true}) {
+		@a.orderNewForm(in, errs)
+	}
+}
+
+templ newOrderButton() {
+	@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus", Attributes: modal.Trigger("order-new-dialog")}) {
+		New order
+	}
+}
+
+func (a *App) customerOptions() []form.Option {
+	var o []form.Option
+	for _, c := range a.store.Customers() {
+		o = append(o, form.Option{Value: c.ID, Label: c.Name})
+	}
+	return o
+}
+
+func statusOptions() []form.Option {
+	var o []form.Option
+	for _, s := range Statuses {
+		o = append(o, form.Option{Value: string(s), Label: s.Label()})
+	}
+	return o
+}
+
+// orderNewForm is the form in the dialog. data-form names it for the copilot's action order-new.
+templ (a *App) orderNewForm(in OrderInput, errs FieldErrors) {
+	<form method="post" action={ templ.SafeURL(orders) } data-form="order-new" novalidate>
+		<div class="modal-header">
+			<h5 class="modal-title">New order</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+			@form.Field(form.FieldProps{Label: "Customer", For: "new-customer", Required: true, Error: errs["customer"]}) {
+				@form.Select(form.SelectProps{ID: "new-customer", Name: "customer", Selected: in.Customer, Empty: "Choose…", Options: a.customerOptions(), Invalid: errs["customer"] != ""})
+			}
+			@form.Field(form.FieldProps{Label: "Title", For: "new-title", Required: true, Error: errs["title"]}) {
+				@form.Input(form.InputProps{ID: "new-title", Name: "title", Value: in.Title, Invalid: errs["title"] != ""})
+			}
+			<div class="row">
+				<div class="col-6">
+					@form.Field(form.FieldProps{Label: "Amount (€)", For: "new-amount", Required: true, Error: errs["amount"]}) {
+						@form.Input(form.InputProps{ID: "new-amount", Name: "amount", Value: in.Amount, Invalid: errs["amount"] != "", Attributes: templ.Attributes{"inputmode": "numeric"}})
+					}
+				</div>
+				<div class="col-6">
+					@form.Field(form.FieldProps{Label: "Due", For: "new-due", Required: true, Error: errs["due"]}) {
+						@form.Input(form.InputProps{ID: "new-due", Name: "due", Type: "date", Value: in.Due, Invalid: errs["due"] != ""})
+					}
+				</div>
+			</div>
+			@form.Field(form.FieldProps{Label: "Note", For: "new-note", Class: "-"}) {
+				@form.Textarea(form.TextareaProps{ID: "new-note", Name: "note", Value: in.Note, Rows: 2})
+			}
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn" data-bs-dismiss="modal">Cancel</button>
+			@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-device-floppy"}) {
+				Save
+			}
+		</div>
+	</form>
+}
+
+// orderPage shows an order and the form to change it (data-form="order-edit").
+templ (a *App) orderPage(o Order, in OrderInput, errs FieldErrors) {
+	<div class="row row-cards">
+		<div class="col-lg-5">
+			@card.Card() {
+				@card.Header() {
+					<h3 class="card-title">{ o.Title }</h3>
+				}
+				@card.Body() {
+					<dl class="row mb-0">
+						<dt class="col-5 fw-normal text-secondary">Customer</dt>
+						<dd class="col-7"><a href={ templ.SafeURL(customer + "/" + o.CustomerID) }>{ a.customerName(o.CustomerID) }</a></dd>
+						<dt class="col-5 fw-normal text-secondary">Amount</dt>
+						<dd class="col-7 font-monospace">{ euros(o.Amount) }</dd>
+						<dt class="col-5 fw-normal text-secondary">Status</dt>
+						<dd class="col-7">
+							@statusBadge(o, a)
+						</dd>
+						<dt class="col-5 fw-normal text-secondary">Due</dt>
+						<dd class="col-7">{ o.Due.Format("02.01.2006") }</dd>
+					</dl>
+				}
+			}
+		</div>
+		<div class="col-lg-7">
+			<form class="card" method="post" action={ templ.SafeURL(orders + "/" + o.ID) } data-form="order-edit" novalidate>
+				<div class="card-header"><h3 class="card-title">Update</h3></div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-6">
+							@form.Field(form.FieldProps{Label: "Status", For: "edit-status", Error: errs["status"]}) {
+								@form.Select(form.SelectProps{ID: "edit-status", Name: "status", Selected: in.Status, Options: statusOptions()})
+							}
+						</div>
+						<div class="col-6">
+							@form.Field(form.FieldProps{Label: "Due", For: "edit-due", Error: errs["due"]}) {
+								@form.Input(form.InputProps{ID: "edit-due", Name: "due", Type: "date", Value: in.Due, Invalid: errs["due"] != ""})
+							}
+						</div>
+					</div>
+					@form.Field(form.FieldProps{Label: "Note", For: "edit-note", Class: "-"}) {
+						@form.Textarea(form.TextareaProps{ID: "edit-note", Name: "note", Value: in.Note, Rows: 4})
+					}
+				</div>
+				<div class="card-footer text-end">
+					@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-device-floppy"}) {
+						Save
+					}
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+// customerPage shows a customer's master data, with e-mail and IBAN, which the copilot never fills in.
+templ (a *App) customerPage(c Customer, errs FieldErrors) {
+	<div class="row row-cards">
+		<div class="col-lg-5">
+			<form class="card" method="post" action={ templ.SafeURL(customer + "/" + c.ID) } data-form="customer-edit" novalidate>
+				<div class="card-header"><h3 class="card-title">Master data</h3></div>
+				<div class="card-body">
+					@form.Field(form.FieldProps{Label: "Name", For: "cust-name", Required: true, Error: errs["name"]}) {
+						@form.Input(form.InputProps{ID: "cust-name", Name: "name", Value: c.Name, Invalid: errs["name"] != ""})
+					}
+					@form.Field(form.FieldProps{Label: "City", For: "cust-city"}) {
+						@form.Input(form.InputProps{ID: "cust-city", Name: "city", Value: c.City})
+					}
+					@form.Field(form.FieldProps{Label: "E-mail", For: "cust-email", Hint: "Entered by people only."}) {
+						@form.Input(form.InputProps{ID: "cust-email", Name: "email", Type: "email", Value: c.Email})
+					}
+					@form.Field(form.FieldProps{Label: "IBAN", For: "cust-iban", Class: "-", Hint: "Entered by people only."}) {
+						@form.Input(form.InputProps{ID: "cust-iban", Name: "iban", Value: c.IBAN, Class: "font-monospace"})
+					}
+				</div>
+				<div class="card-footer text-end">
+					@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-device-floppy"}) {
+						Save
+					}
+				</div>
+			</form>
+		</div>
+		<div class="col-lg-7">
+			@table.Table(table.Props{Card: true, VCenter: true, Hover: true, Responsive: true}) {
+				<thead>
+					<tr><th>Order</th><th>Title</th><th>Status</th><th class="text-end">Amount</th></tr>
+				</thead>
+				<tbody>
+					for _, o := range a.store.Orders(c.ID, false) {
+						<tr>
+							<td><a href={ templ.SafeURL(orders + "/" + o.ID) }>{ o.ID }</a></td>
+							<td>{ o.Title }</td>
+							<td>
+								@statusBadge(o, a)
+							</td>
+							<td class="text-end font-monospace">{ euros(o.Amount) }</td>
+						</tr>
+					}
+				</tbody>
+			}
+		</div>
+	</div>
+}
