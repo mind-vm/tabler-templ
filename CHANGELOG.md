@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **`motion`, enter and leave animations** with Motion (motion.dev, formerly Framer Motion), its build
+  without React:
+  - `Attrs` make an element fade, slide, zoom or pop in when the page loads, when htmx swaps it in, or
+    when it scrolls into view (`InView`). `Stagger` brings its children in one after another, `Bounce`
+    uses a spring.
+  - `Exit` animates an element out when htmx replaces or deletes it; give the swap a delay
+    (`hx-swap="outerHTML swap:200ms"`).
+  - `Counter` counts a number up, formatted for the page language.
+  - Visitors who ask for reduced motion see everything at once. Motion loads from `cdn.Base`
+    (`versions.Motion`), and `cmd/vendor` fetches it.
+- **`sound`, interface sounds** made by the browser (Web Audio), with no library or sound file:
+  - `Message`, `Notify`, `Success`, `Warning`, `Error` and `Click`; `Config.Files` adds an app's own.
+  - Play one on click (`Attrs`), when a fragment is swapped in (`Play`), or from the server with
+    `HX-Trigger: {"sound":"message"}`.
+  - `Toggle` switches the sounds on and off and keeps the choice in the browser.
+- Demo: `/motion` and `/sound`.
+
 - **Less CSS per page:**
   - The blocks `listpage`, `detail`, `create`, `history` and `stats` render their CSS themselves, where
     they are used and once per page.

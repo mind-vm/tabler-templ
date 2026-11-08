@@ -92,6 +92,8 @@ func handler() http.Handler {
 	landingRoutes(mux)
 	assistantRoutes(mux)
 	enterpriseRoutes(mux)
+	motionRoutes(mux)
+	soundRoutes(mux)
 	if vendorDir != "" {
 		mux.Handle("GET /npm/", http.StripPrefix("/npm/", http.FileServer(http.Dir(vendorDir))))
 	}

@@ -219,6 +219,8 @@ after htmx swaps.
 | `sortable` | `Attrs` to make lists, rows, grids and boards sortable (Tabler's Sortable) |
 | `tour` | `Tour` (steps on elements), `StartAttrs` (Driver.js) |
 | `confetti` | `Attrs` for a button, `Burst` on render (Tabler's own) |
+| `motion` | `Attrs` to fade, slide or pop elements in (on load, htmx swap or scroll) and out (htmx), `Counter`; Motion without React |
+| `sound` | Interface sounds by Web Audio: `Attrs` (on click), `Play` (in a swapped fragment), `HX-Trigger` events, `Toggle` |
 | `mapview` | `Map` (MapLibre via Tabler's map script: style, dark style, globe, route, GeoJSON, bubbles, clusters, arcs), `Marker` (dot, circle, pin, pulse, draggable, popup), `Popup`, `FlyTo` |
 | `lightbox` | `Link` around a thumbnail, galleries (fslightbox) |
 | `player` | `Player` for YouTube, Vimeo or a file (Plyr) |
