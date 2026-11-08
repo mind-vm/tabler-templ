@@ -50,6 +50,10 @@ type Messages struct {
 	PasswordStrength string
 	// Read out after the label of a required field, e.g. " (required)".
 	Required string
+	// Split view and action bar: the back link on small screens, the inspector toggle, unsaved changes.
+	Back           string
+	ToggleDetails  string
+	UnsavedChanges string
 }
 
 var (
@@ -61,7 +65,8 @@ var (
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
 		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
-		Required: " (required)"}
+		Required: " (required)",
+		Back:     "Back", ToggleDetails: "Show or hide details", UnsavedChanges: "Unsaved changes"}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		Previous: "Zurück", Next: "Weiter", First: "Erste", Last: "Letzte", FirstPage: "Erste Seite", LastPage: "Letzte Seite", Page: "Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
@@ -70,7 +75,8 @@ var (
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
 		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",
-		Required: " (Pflichtfeld)"}
+		Required: " (Pflichtfeld)",
+		Back:     "Zurück", ToggleDetails: "Details ein- oder ausblenden", UnsavedChanges: "Ungespeicherte Änderungen"}
 )
 
 type messagesKey struct{}

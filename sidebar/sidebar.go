@@ -49,6 +49,16 @@ const css = `:root{--kit-sidebar-width:15rem;--kit-sidebar-width-collapsed:3.75r
 .kit-sidebar-user-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kit-sidebar-user-detail{font-size:.75rem;color:var(--tblr-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kit-sidebar-footer .dropdown-menu{min-width:15rem}
+.kit-sidebar-group-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:none;text-align:left;cursor:pointer}
+.kit-sidebar-group-toggle:hover{color:var(--tblr-body-color)}
+.kit-sidebar-group-chevron{transition:transform .15s ease}
+.kit-sidebar-group[data-closed] .kit-sidebar-group-chevron{transform:rotate(-90deg)}
+.kit-sidebar-group[data-closed]>.kit-sidebar-menu{display:none}
+.kit-sidebar-switcher{flex:1 1 auto;min-width:0}
+.kit-sidebar-switcher-button{width:100%;border:0;border-radius:var(--tblr-border-radius);background:none;text-align:left}
+.kit-sidebar-switcher-button:hover,.kit-sidebar-switcher-button[aria-expanded=true]{background:var(--kit-sidebar-hover,rgba(var(--tblr-body-color-rgb),.05))}
+.kit-sidebar-switcher-logo{border-radius:var(--tblr-border-radius);background:var(--tblr-primary);color:var(--tblr-primary-fg,#fff)}
+.kit-sidebar-switcher .dropdown-menu{min-width:15rem}
 @media (min-width:992px){
 .kit-sidebar{position:fixed;top:0;bottom:0;left:0;z-index:1030;display:flex;width:var(--kit-sidebar-width);transition:width .15s ease}
 .kit-sidebar~.page-wrapper{margin-left:var(--kit-sidebar-width);transition:margin-left .15s ease}
@@ -59,11 +69,14 @@ const css = `:root{--kit-sidebar-width:15rem;--kit-sidebar-width-collapsed:3.75r
 .kit-sidebar[data-collapsed] .kit-sidebar-label{height:0;padding:0;margin:.5rem 0;visibility:hidden}
 .kit-sidebar[data-collapsed] :is(.kit-sidebar-link,.kit-sidebar-brand,.kit-sidebar-user){justify-content:center;padding-left:0;padding-right:0}
 .kit-sidebar[data-collapsed] .kit-sidebar-link{position:relative}
+.kit-sidebar[data-collapsed] .kit-sidebar-group[data-closed]>.kit-sidebar-menu{display:flex}
+.kit-sidebar[data-collapsed] .kit-sidebar-switcher-button{justify-content:center;padding-left:0;padding-right:0}
 .kit-sidebar[data-collapsed] .kit-sidebar-badge{position:absolute;top:.25rem;right:.25rem;min-width:0;width:.5rem;height:.5rem;padding:0;font-size:0;background:var(--tblr-red)!important}
 }
 @media (max-width:991.98px){.kit-sidebar.offcanvas-lg{--tblr-offcanvas-width:17rem}.kit-sidebar-inner{border-right:0}}
 @media print{.kit-sidebar{display:none!important}.kit-sidebar~.page-wrapper{margin-left:0!important}}`
 
-// script toggles the desktop state, keeps the tooltips (title) of collapsed links and writes the cookie.
+// script toggles the desktop state, keeps the tooltips (title) of collapsed links and writes the cookie;
+// it also folds collapsible groups.
 // The mobile sheet is Tabler's own offcanvas.
-const script = `(function(){document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-kit-sidebar-toggle]");if(!b)return;var s=document.getElementById(b.getAttribute("data-kit-sidebar-toggle"));if(!s)return;var c=!s.hasAttribute("data-collapsed");s.toggleAttribute("data-collapsed",c);b.setAttribute("aria-expanded",String(!c));s.querySelectorAll("[data-kit-tooltip]").forEach(function(l){if(c)l.setAttribute("title",l.getAttribute("data-kit-tooltip"));else l.removeAttribute("title")});document.cookie="` + CookieName + `="+(c?"collapsed":"expanded")+"; path=/; max-age=31536000; samesite=lax"})})();`
+const script = `(function(){document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-kit-sidebar-toggle]");if(!b)return;var s=document.getElementById(b.getAttribute("data-kit-sidebar-toggle"));if(!s)return;var c=!s.hasAttribute("data-collapsed");s.toggleAttribute("data-collapsed",c);b.setAttribute("aria-expanded",String(!c));s.querySelectorAll("[data-kit-tooltip]").forEach(function(l){if(c)l.setAttribute("title",l.getAttribute("data-kit-tooltip"));else l.removeAttribute("title")});document.cookie="` + CookieName + `="+(c?"collapsed":"expanded")+"; path=/; max-age=31536000; samesite=lax"});document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-kit-sidebar-group]");if(!g)return;var w=g.parentElement,o=w.hasAttribute("data-closed");w.toggleAttribute("data-closed",!o);g.setAttribute("aria-expanded",String(o))})})();`

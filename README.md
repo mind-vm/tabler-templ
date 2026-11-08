@@ -191,7 +191,7 @@ in front compresses already.
 | `prose` | `Prose` (rich text), `HTML` (checked HTML, e.g. rendered Markdown), `Callout` |
 | `markdown` | `Markdown(src)`: GitHub-flavoured Markdown (tables, task lists, autolinks) in a `Prose`, `HTML(src)`; raw HTML and `javascript:` links are dropped, so it is safe for user or model text (goldmark) |
 | `social` | `Social`: brand icons of the socials stylesheet (sizes, grey) |
-| `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
+| `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Switcher` (workspace or team with a dropdown, in place of the brand), `Content`, `Group` (optionally `Collapsible`), `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline, filled icons (`Filled` or a `-filled` name, from the filled webfont) – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
 | `kit` | `Classes`, `If`, `Attrs`, `Default`, `Messages` |
 
@@ -232,7 +232,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 
 | Package | Block |
 |---|---|
-| `blocks/shell` | `Page`: the HTML document with sidebar, sticky header (sidebar buttons, breadcrumbs, actions), page header (heading, extra, subtitle, actions), flash message and content; `Header`, `Breadcrumbs`, `PageHeader`, `Styles` for own frames |
+| `blocks/shell` | `Page`: the HTML document with sidebar, sticky header (sidebar buttons, breadcrumbs, actions), page header (heading, extra, subtitle, actions, `Tabs`), flash message and content; `Compact` tightens the spacing for pages dense with data; `Header`, `Breadcrumbs`, `PageHeader`, `Styles` for own frames |
 | `blocks/listpage` | `New(r, Config, filters…)` reads search, filters and page from the URL; `Paginate` cuts out a page (25 rows); `Card` = `Search` (search field, filter selects, Reset) + children + `Footer` ("1–25 of 80" and page numbers) |
 | `blocks/detail` | `Section` (card with title, extra and at most one action), `Actions`, `EditButton`, `Fields`/`Field`; `Dialog` (a section's edit dialog: context line, error, `Section` hint, `Large` for lists) and `Script(ScriptConfig)`: hidden fields in its forms, footer with Cancel, focus, reopening with error and values after a failed save, reopening a large dialog after saving a row, values from the opening button; `window.kitDialog.open/matchForm` |
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
@@ -251,6 +251,8 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/dashboard` | Cards of Tabler's dashboard: `Welcome`, `Usage` (storage), `ChartTable` with `Goal` and `Commits`, `Banner`, `Visits` (pages with sparklines), `Bars` (traffic by source), `Tasks`, `Checklist`, `Leaderboard`, `Sponsor` |
 | `blocks/crm` | `Deals`, `Funnel` (pipeline), `Activity`, `Risks` (churn) |
 | `blocks/crypto` | `Markets` (coin table), `Orders` (order book), `OrderForm` (buy/sell), `ChartCard` with a time-frame `Switch` |
+| `blocks/split` | Back-office panes: `Split` (a list beside its detail, an inspector on the right; each pane scrolls on its own and fills the window; on small screens list or detail with a back link), `ListItem` (title, time, text, badge, unread), `AsideToggle`; demo at `/enterprise` |
+| `blocks/actionbar` | `Bar`: a form's buttons in a bar that sticks to the bottom of the window, says "Unsaved changes" once a field changed and, with `Guard`, asks before leaving the page |
 | `blocks/assistant` | An AI assistant's conversation, rendered on the server and streamed as fragments: `Conversation` (intro with example prompts, composer, the client script), `Turn` (slots for steps, questions, blocks, answer, status), `Step` (a folded script or tool call with its result), `Ask`/`Answered` (text, confirm, choice or a form of questions), `BlockView` (markdown, table, chart, stats; a block sent again under its id replaces the earlier one), `Answer` (Markdown), `Failure`, `Usage`; `Open` starts the event stream, `Fragment` renders without page-wide scripts. The payloads follow thinking-core's `ext.BlocksPack`; demo at `/assistant` |
 | `blocks/activity` | `Feed` (avatar, text, time, unread), `Card` (scrolling activity card) |
 | `blocks/uptime` | Monitor page: `Header`, `SystemStatus` (services with history), `Incidents`, `Availability` |
