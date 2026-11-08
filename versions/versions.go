@@ -31,3 +31,8 @@ const (
 	Plyr            = "3.8.5"  // npm: plyr
 	Typed           = "3.0.0"  // npm: typed.js
 )
+
+// Libraries the kit adds itself, not from Tabler's lockfile (the versions tool leaves them alone).
+const (
+	Motion = "14.6.0" // motion (motion.dev, formerly Framer Motion), its vanilla build
+)

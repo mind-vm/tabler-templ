@@ -21,6 +21,7 @@ import (
 	"github.com/mind-vm/tabler-templ/inputmask"
 	"github.com/mind-vm/tabler-templ/lightbox"
 	"github.com/mind-vm/tabler-templ/mapview"
+	"github.com/mind-vm/tabler-templ/motion"
 	"github.com/mind-vm/tabler-templ/player"
 	"github.com/mind-vm/tabler-templ/rangeslider"
 	"github.com/mind-vm/tabler-templ/rating"
@@ -45,7 +46,7 @@ func TestSelfHosted(t *testing.T) {
 		chart.Library(), calendar.Library(), colorpicker.Library(), datatable.Library(), datepicker.Library(),
 		dropzone.Library(), inputmask.Library(), lightbox.Library(), mapview.Library(), player.Library(),
 		rangeslider.Library(), rating.Library(), selectbox.Library(), signature.Library(), sortable.Library(),
-		tour.Library(), vectormap.Library("world", "europe"), wysiwyg.Library(), marketing.TypedLibrary(),
+		tour.Library(), vectormap.Library("world", "europe"), wysiwyg.Library(), marketing.TypedLibrary(), motion.Library(),
 		player.Player(player.Props{ID: "v", Src: "/movie.mp4"}),
 		mapview.Map(mapview.Props{ID: "m"}),
 	)
@@ -70,7 +71,7 @@ func TestSelfHosted(t *testing.T) {
 
 func TestRegistered(t *testing.T) {
 	groups := cdn.Groups()
-	for _, want := range []string{"tabler", "chart", "flags", "wysiwyg", "theme:graphite", "mapview", "player"} {
+	for _, want := range []string{"tabler", "chart", "flags", "wysiwyg", "theme:graphite", "mapview", "player", "motion"} {
 		found := false
 		for _, g := range groups {
 			found = found || g == want

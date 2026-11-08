@@ -1,0 +1,32 @@
+package sound
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Play plays s when it is rendered into the page by htmx (a fragment, an out-of-band swap or a streamed
+// message). On the first page load it is silent: the browser has not allowed sound yet.
+templ Play(s Sound) {
+	<template data-sound-play={ string(s) }></template>
+}
+
+// ToggleProps style the button that switches the sounds on and off.
+type ToggleProps struct {
+	Class string // default "btn btn-icon"
+	Label string // accessible name and tooltip; default "Sounds"
+	Text  string // a visible label after the icon
+}
+
+// Toggle switches the sounds on and off; it shows a speaker, crossed out while they are off.
+templ Toggle(p ToggleProps) {
+	{{ label := kit.Or(p.Label, "Sounds") }}
+	@toggleStyles
+	<button type="button" class={ kit.Or(p.Class, "btn btn-icon") } data-sound-toggle aria-pressed="true" aria-label={ label } title={ label }>
+		@icon.Icon("ti-volume", icon.Props{Class: "sound-on"})
+		@icon.Icon("ti-volume-off", icon.Props{Class: "sound-off"})
+		if p.Text != "" {
+			<span class="ms-2">{ p.Text }</span>
+		}
+	</button>
+}

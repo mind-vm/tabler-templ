@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **`motion`, enter and leave animations** with Motion (motion.dev, formerly Framer Motion), its build
+  without React:
+  - `Attrs` make an element fade, slide, zoom or pop in when the page loads, when htmx swaps it in, or
+    when it scrolls into view (`InView`). `Stagger` brings its children in one after another, `Bounce`
+    uses a spring.
+  - `Exit` animates an element out when htmx replaces or deletes it; give the swap a delay
+    (`hx-swap="outerHTML swap:200ms"`).
+  - `Counter` counts a number up, formatted for the page language.
+  - Visitors who ask for reduced motion see everything at once. Motion loads from `cdn.Base`
+    (`versions.Motion`), and `cmd/vendor` fetches it.
+- **`sound`, interface sounds** made by the browser (Web Audio), with no library or sound file:
+  - `Message`, `Notify`, `Success`, `Warning`, `Error` and `Click`; `Config.Files` adds an app's own.
+  - Play one on click (`Attrs`), when a fragment is swapped in (`Play`), or from the server with
+    `HX-Trigger: {"sound":"message"}`.
+  - `Toggle` switches the sounds on and off and keeps the choice in the browser.
+- Demo: `/motion` and `/sound`.
+
+## Unreleased
+
 - **`blocks/assistant`, more parts** (after the examples on beautifului.dev):
   - `Thinking` folds the agent's trace (reasoning, searches, reads, code) under "Thinking…" or "Thought
     for 4s". `ToolChips` folds tool calls into one line with a chip per call.
