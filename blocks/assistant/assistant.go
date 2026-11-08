@@ -137,6 +137,38 @@ type Texts struct {
 	YouAnswered   string
 	MissingAnswer string // fmt with the question: "Answer “%s” first."
 	Usage         string // fmt with steps, prompt and completion tokens, blocks
+	Thinking      string // a running Thinking's title
+	ThoughtFor    string // fmt with the duration: "Thought for %s"
+	Sources       string // fmt with the count: "%d sources"
+	FollowUps     string
+	ToolCalls     string // fmt with the count: "%d tool calls"
+	Copy          string
+	Copied        string
+	Chunks        string // fmt with the count: "%d chunks"
+	Characters    string // fmt with the count: "%d characters"
+	Insights      string
+	Of            string // fmt with the position and the count: "%d / %d"
+	Previous      string
+	Next          string
+	Accept        string
+	Alternatives  string
+	Confidence    string // fmt with Texts.High, Medium or Low: "%s confidence"
+	High          string
+	Medium        string
+	Low           string
+	Chose         string // a decided Recommendation, before the choice
+	Skip          string
+	Continue      string
+	Back          string
+	Skipped       string
+	Reject        string
+	AcceptAll     string
+	RejectAll     string
+	Accepted      string
+	Rejected      string
+	Pending       string // fmt with the count: "%d pending"
+	Model         string // aria-label of the model picker
+	Selection     string // aria-label of the selection toolbar
 }
 
 // English are the default texts.
@@ -163,6 +195,38 @@ var English = Texts{
 	YouAnswered:   "You answered",
 	MissingAnswer: "Answer “%s” first.",
 	Usage:         "%d steps · %d+%d tokens · %d blocks",
+	Thinking:      "Thinking",
+	ThoughtFor:    "Thought for %s",
+	Sources:       "%d sources",
+	FollowUps:     "Follow-ups",
+	ToolCalls:     "%d tool calls",
+	Copy:          "Copy",
+	Copied:        "Copied",
+	Chunks:        "%d chunks",
+	Characters:    "%d characters",
+	Insights:      "Insights",
+	Of:            "%d / %d",
+	Previous:      "Previous",
+	Next:          "Next",
+	Accept:        "Accept",
+	Alternatives:  "Alternatives",
+	Confidence:    "%s confidence",
+	High:          "High",
+	Medium:        "Medium",
+	Low:           "Low",
+	Chose:         "You chose",
+	Skip:          "Skip",
+	Continue:      "Continue",
+	Back:          "Back",
+	Skipped:       "skipped",
+	Reject:        "Reject",
+	AcceptAll:     "Accept all",
+	RejectAll:     "Reject all",
+	Accepted:      "Accepted",
+	Rejected:      "Rejected",
+	Pending:       "%d pending",
+	Model:         "Model",
+	Selection:     "Ask about the selection",
 }
 
 type textsKey struct{}

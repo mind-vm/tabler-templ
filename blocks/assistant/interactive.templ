@@ -1,0 +1,240 @@
+package assistant
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/spinner"
+)
+
+// htmxForm are the attributes of a form that posts to url and is replaced by the response.
+func htmxForm(url string) templ.Attributes {
+	return templ.Attributes{"hx-post": url, "hx-target": "this", "hx-swap": "outerHTML", "hx-disabled-elt": "find button"}
+}
+
+// RecommendationCard draws a Recommendation: the question, the recommendation with its confidence and
+// Accept, the alternatives folded; once decided, the decision. The form posts to r.Post and is replaced
+// by the response — render RecommendationCard(r.Decide(form)).
+templ RecommendationCard(r Recommendation) {
+	{{ word, color := Level(r.Confidence, T(ctx)) }}
+	<form id={ r.ID } class="card assistant-recommendation" { htmxForm(r.Post)... }>
+		<div class="card-body">
+			<div class="d-flex align-items-center gap-2 mb-2">
+				@icon.Icon("ti-sparkles", icon.Props{Class: "text-purple", Inline: true})
+				<div class="fw-bold flex-fill">{ r.Question }</div>
+				@badge.Badge(badge.Props{Color: color, Light: true}) {
+					{ fmt.Sprintf(T(ctx).Confidence, word) }
+				}
+			</div>
+			@markdown.Markdown(r.Text)
+			@progress.Progress(progress.Props{Value: r.Confidence * 100, Color: color, Size: progress.SizeSmall, Class: "mt-3",
+				Label: fmt.Sprintf(T(ctx).Confidence, word)})
+			if r.Decided() {
+				<div class="mt-3 text-secondary small">
+					@icon.Icon("ti-check", icon.Props{Class: "text-green"})
+					{ T(ctx).Chose }
+					<span class="fw-medium text-reset">{ kit.Or(r.Chosen, kit.Or(r.Accept, T(ctx).Accept)) }</span>
+				</div>
+			} else {
+				<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+					if len(r.Options) > 0 {
+						<details class="assistant-alternatives">
+							<summary class="btn">
+								{ T(ctx).Alternatives }
+								@icon.Icon("ti-chevron-down", icon.Props{Class: "assistant-chevron ms-1"})
+							</summary>
+							<div class="d-flex flex-column gap-1 mt-2">
+								for _, o := range r.Options {
+									<button type="submit" name="choice" value={ o } class="btn btn-ghost-secondary justify-content-start text-start">{ o }</button>
+								}
+							</div>
+						</details>
+					}
+					@button.Button(button.Props{Variant: button.VariantPrimary, Class: "ms-auto", Icon: "ti-check",
+						Attributes: templ.Attributes{"name": "accept", "value": "true"}}) {
+						{ kit.Or(r.Accept, T(ctx).Accept) }
+					}
+				</div>
+			}
+		</div>
+	</form>
+}
+
+// ApprovalCard draws an Approval: one question with "N / M", Back, Skip and Continue; once done, the
+// answers. The form posts to a.Post and is replaced by the response — render ApprovalCard(a.Advance(form)).
+templ ApprovalCard(a Approval) {
+	<form id={ a.ID } class="card assistant-approval" { htmxForm(a.Post)... }>
+		<input type="hidden" name="step" value={ strconv.Itoa(a.Step) }/>
+		<input type="hidden" name="answers" value={ a.answersJSON() }/>
+		<div class="card-body">
+			<div class="d-flex align-items-center gap-2 mb-2">
+				@badge.Badge(badge.Props{Color: "blue", Light: true, Icon: "ti-message-question"}) {
+					{ kit.Or(a.Title, T(ctx).Asking) }
+				}
+				if !a.Done() {
+					<span class="ms-auto text-secondary small">{ fmt.Sprintf(T(ctx).Of, a.Step+1, len(a.Questions)) }</span>
+				}
+			</div>
+			if a.Done() {
+				<div class="d-flex flex-column gap-1">
+					for _, q := range a.Questions {
+						<div>
+							<span class="text-secondary">{ kit.Or(q.Header, q.Question) }:</span>
+							if v, ok := a.Answers[q.ID]; ok {
+								<span class="fw-medium">{ v }</span>
+							} else {
+								<span class="text-secondary fst-italic">{ T(ctx).Skipped }</span>
+							}
+						</div>
+					}
+				</div>
+			} else {
+				{{ q := a.Current() }}
+				<p class="fw-bold mb-2">{ q.Question }</p>
+				<div class="d-flex flex-column gap-2">
+					for _, o := range q.Options {
+						<label class="assistant-option">
+							<input type="radio" name="answer" value={ o.Label } class="form-check-input m-0" checked?={ a.Answers[q.ID] == o.Label }/>
+							<span>
+								<span class="d-block">{ o.Label }</span>
+								if o.Description != "" {
+									<span class="d-block text-secondary small">{ o.Description }</span>
+								}
+							</span>
+						</label>
+					}
+					if q.AllowOther {
+						<label class="assistant-option">
+							<input type="radio" name="answer" value={ otherValue } class="form-check-input m-0"/>
+							<input type="text" name="other" class="form-control form-control-sm" placeholder={ T(ctx).OtherHint } aria-label={ T(ctx).YourAnswer }/>
+						</label>
+					}
+				</div>
+				<div class="d-flex align-items-center gap-2 mt-3">
+					if a.Step > 0 {
+						<button type="submit" name="action" value="back" class="btn btn-ghost-secondary" formnovalidate>
+							@icon.Icon("ti-arrow-left")
+							{ T(ctx).Back }
+						</button>
+					}
+					<button type="submit" name="action" value="skip" class="btn btn-ghost-secondary ms-auto" formnovalidate>{ T(ctx).Skip }</button>
+					<button type="submit" name="action" value="continue" class="btn btn-primary">{ T(ctx).Continue }</button>
+				</div>
+			}
+		</div>
+	</form>
+}
+
+// DiffCard draws a Diff: the proposed edits as a table, the old value struck through before the new
+// one, with Accept and Reject per row and for all pending rows. Each button posts row and decision to
+// d.Post; the response replaces the card — render DiffCard(d.Resolve(form)).
+templ DiffCard(d Diff) {
+	{{ pending := d.Pending() }}
+	<div id={ d.ID } class="card assistant-diff">
+		<div class="card-header py-2">
+			<div class="d-flex align-items-center gap-2 w-100">
+				@icon.Icon("ti-table", icon.Props{Class: "text-secondary"})
+				<h3 class="card-title">{ d.Title }</h3>
+				if pending > 0 {
+					@badge.Badge(badge.Props{Color: "yellow", Light: true}) {
+						{ fmt.Sprintf(T(ctx).Pending, pending) }
+					}
+					<div class="ms-auto d-flex gap-2">
+						<button type="button" class="btn btn-sm btn-ghost-secondary" { diffAction(d, "*", "reject")... }>{ T(ctx).RejectAll }</button>
+						<button type="button" class="btn btn-sm btn-primary" { diffAction(d, "*", "accept")... }>{ T(ctx).AcceptAll }</button>
+					</div>
+				}
+			</div>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-vcenter card-table">
+				<thead>
+					<tr>
+						for _, c := range d.Columns {
+							<th>{ c }</th>
+						}
+						<th class="w-1"></th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, r := range d.Rows {
+						<tr class={ "assistant-diff-" + kit.Or(r.State, "pending") }>
+							for _, c := range r.Cells {
+								<td>
+									if !c.Changed() {
+										{ c.Old }
+									} else if r.State == "rejected" {
+										{ c.Old }
+									} else if r.State == "accepted" {
+										<span class="assistant-new">{ c.New }</span>
+									} else {
+										if c.Old != "" {
+											<del class="assistant-old">{ c.Old }</del>
+										}
+										<ins class="assistant-new">{ c.New }</ins>
+									}
+								</td>
+							}
+							<td class="text-nowrap text-end">
+								switch r.State {
+									case "accepted":
+										@badge.Badge(badge.Props{Color: "green", Light: true, Icon: "ti-check"}) {
+											{ T(ctx).Accepted }
+										}
+									case "rejected":
+										@badge.Badge(badge.Props{Color: "secondary", Light: true, Icon: "ti-x"}) {
+											{ T(ctx).Rejected }
+										}
+									default:
+										<button type="button" class="btn btn-sm btn-icon btn-ghost-danger" aria-label={ T(ctx).Reject } title={ T(ctx).Reject } { diffAction(d, r.ID, "reject")... }>
+											@icon.Icon("ti-x")
+										</button>
+										<button type="button" class="btn btn-sm btn-icon btn-ghost-success" aria-label={ T(ctx).Accept } title={ T(ctx).Accept } { diffAction(d, r.ID, "accept")... }>
+											@icon.Icon("ti-check")
+										</button>
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+func diffAction(d Diff, row, decision string) templ.Attributes {
+	return templ.Attributes{"hx-post": d.Post, "hx-target": "#" + d.ID, "hx-swap": "outerHTML",
+		"hx-vals": `{"row":` + strconv.Quote(row) + `,"decision":"` + decision + `"}`}
+}
+
+// TaskListCard draws a TaskList. While a task is pending or running and Poll is set, it fetches itself
+// from Poll every l.Every and is replaced by the response; a finished list stops asking.
+templ TaskListCard(l TaskList) {
+	<div
+		id={ l.ID }
+		class="card assistant-tasks"
+		if l.Poll != "" && l.Running() {
+			hx-get={ l.Poll }
+			hx-trigger={ l.trigger() }
+			hx-swap="outerHTML"
+		}
+	>
+		if l.Title != "" {
+			<div class="card-header py-2">
+				<h3 class="card-title">{ l.Title }</h3>
+				if l.Running() && l.Poll != "" {
+					<div class="card-actions">
+						@spinner.Spinner(spinner.Props{Small: true})
+					</div>
+				}
+			</div>
+		}
+		@taskRows(l)
+	</div>
+}
