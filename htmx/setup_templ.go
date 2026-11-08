@@ -30,7 +30,8 @@ type SetupProps struct {
 	DialogSize string
 }
 
-// Setup is the page's htmx client, once per page at the end of <body>, after Tabler's script:
+// Setup is the page's htmx client, once per page at the end of <body>, after Tabler's script (a second
+// Setup on the page renders its elements but adds no listeners):
 //   - the toast container (Toast, Error) and an empty dialog (a Tabler modal) that opens when content is
 //     swapped into it (hx-target={ htmx.Target(htmx.DialogContentID) }) and closes on CloseDialog;
 //   - htmx's configuration: 422 responses are swapped in (forms with errors), eval is off;
@@ -67,7 +68,7 @@ func Setup(props ...SetupProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression(DialogID).Resolve(ctx)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 35, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 36, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -120,7 +121,7 @@ func Setup(props ...SetupProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.NewAttributeExpression(DialogContentID).Resolve(ctx)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 37, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 38, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -155,7 +156,7 @@ func Setup(props ...SetupProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.NewAttributeExpression(kit.Or(p.Offline, kit.T(ctx).Offline)).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 40, Col: 116}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 116}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
@@ -168,7 +169,7 @@ func Setup(props ...SetupProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templruntime.NewAttributeExpression(kit.Or(p.ErrorText, kit.T(ctx).ErrorGeneric)).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 40, Col: 176}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 176}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -181,13 +182,52 @@ func Setup(props ...SetupProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templruntime.NewAttributeExpression(EventCloseDialog).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 40, Col: 214}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 214}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" data-toasts=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templruntime.NewAttributeExpression(ToastsID).Resolve(ctx)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 239}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" data-dialog=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.NewAttributeExpression(DialogID).Resolve(ctx)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 264}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" data-dialog-content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.NewAttributeExpression(DialogContentID).Resolve(ctx)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `htmx/setup.templ`, Line: 41, Col: 304}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -201,7 +241,7 @@ func Setup(props ...SetupProps) templ.Component {
 			}
 			templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">\n\t\t(function () {\n\t\t\t'use strict';\n\t\t\tvar me = document.currentScript;\n\t\t\tif (!window.htmx) { console.warn('htmx.Setup: htmx is not loaded (htmx.Library in the head)'); return; }\n\t\t\tvar bs = function () { return window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap; };\n\t\t\tvar cfg = htmx.config;\n\t\t\tcfg.allowEval = me.hasAttribute('data-allow-eval');\n\t\t\tcfg.historyRestoreAsHxRequest = false;\n\t\t\tcfg.responseHandling = [\n\t\t\t\t{ code: '204', swap: false },\n\t\t\t\t{ code: '[23]..', swap: true },\n\t\t\t\t{ code: '422', swap: true },\n\t\t\t\t{ code: '[45]..', swap: false, error: true },\n\t\t\t\t{ code: '...', swap: false }\n\t\t\t];\n\t\t\tvar toasts = document.getElementById('htmx-toasts');\n\t\t\tvar showToasts = function () {\n\t\t\t\ttoasts.querySelectorAll('.toast:not([data-kit-shown])').forEach(function (el) {\n\t\t\t\t\tel.setAttribute('data-kit-shown', '');\n\t\t\t\t\tvar b = bs();\n\t\t\t\t\tif (b && b.Toast) {\n\t\t\t\t\t\tb.Toast.getOrCreateInstance(el).show();\n\t\t\t\t\t\tel.addEventListener('hidden.bs.toast', function () { el.remove(); });\n\t\t\t\t\t} else {\n\t\t\t\t\t\tel.classList.add('show');\n\t\t\t\t\t\tvar d = parseInt(el.getAttribute('data-bs-delay') || '5000', 10);\n\t\t\t\t\t\tif (el.getAttribute('data-bs-autohide') !== 'false') setTimeout(function () { el.remove(); }, d);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t};\n\t\t\tvar say = function (text) {\n\t\t\t\tvar el = document.createElement('div');\n\t\t\t\tel.className = 'toast toast-danger kit-htmx-toast';\n\t\t\t\tel.setAttribute('role', 'alert');\n\t\t\t\tel.setAttribute('data-bs-delay', '6000');\n\t\t\t\tvar body = document.createElement('div');\n\t\t\t\tbody.className = 'toast-body';\n\t\t\t\tbody.textContent = text;\n\t\t\t\tel.appendChild(body);\n\t\t\t\ttoasts.appendChild(el);\n\t\t\t\tshowToasts();\n\t\t\t};\n\t\t\tvar dialog = document.getElementById('htmx-dialog');\n\t\t\tvar modal = function () { var b = bs(); return b && b.Modal ? b.Modal.getOrCreateInstance(dialog) : null; };\n\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) {\n\t\t\t\tshowToasts();\n\t\t\t\tvar root = e.detail.elt;\n\t\t\t\tvar b = bs();\n\t\t\t\tif (root && root.querySelectorAll && b) {\n\t\t\t\t\tif (b.Tooltip) root.querySelectorAll('[data-bs-toggle=\"tooltip\"]').forEach(function (el) { b.Tooltip.getOrCreateInstance(el); });\n\t\t\t\t\tif (b.Popover) root.querySelectorAll('[data-bs-toggle=\"popover\"]').forEach(function (el) { b.Popover.getOrCreateInstance(el); });\n\t\t\t\t}\n\t\t\t\tif (root && root.id === 'htmx-dialog-content' && root.children.length && !dialog.classList.contains('show')) {\n\t\t\t\t\tvar m = modal();\n\t\t\t\t\tif (m) m.show();\n\t\t\t\t}\n\t\t\t});\n\t\t\tdocument.addEventListener('htmx:oobAfterSwap', showToasts);\n\t\t\tdocument.addEventListener('htmx:beforeSwap', function (e) {\n\t\t\t\tvar t = e.detail.target;\n\t\t\t\tif (t && window.tablerCharts && window.tablerCharts.destroy && e.detail.shouldSwap) window.tablerCharts.destroy(t);\n\t\t\t});\n\t\t\tdocument.body.addEventListener(me.getAttribute('data-close-event'), function () { var m = modal(); if (m) m.hide(); });\n\t\t\tdialog.addEventListener('hidden.bs.modal', function () {\n\t\t\t\tif (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(dialog);\n\t\t\t\tdocument.getElementById('htmx-dialog-content').replaceChildren();\n\t\t\t});\n\t\t\t// An action in a toast (e.g. Undo) closes it once it succeeded; closing it before would remove the\n\t\t\t// element and htmx would cancel the request.\n\t\t\tdocument.addEventListener('htmx:afterRequest', function (e) {\n\t\t\t\tvar el = e.detail.elt, t = el && el.closest && el.closest('#htmx-toasts .toast');\n\t\t\t\tif (!t || !e.detail.successful) return;\n\t\t\t\tvar b = bs();\n\t\t\t\tif (b && b.Toast) b.Toast.getOrCreateInstance(t).hide(); else t.remove();\n\t\t\t});\n\t\t\tdocument.addEventListener('htmx:sendError', function () { say(me.getAttribute('data-offline')); });\n\t\t\tdocument.addEventListener('htmx:responseError', function () { say(me.getAttribute('data-error')); });\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">\n\t\t(function () {\n\t\t\t'use strict';\n\t\t\tvar me = document.currentScript;\n\t\t\tif (!window.htmx) { console.warn('htmx.Setup: htmx is not loaded (htmx.Library in the head)'); return; }\n\t\t\t// Once per page: a second Setup (or one swapped in again with hx-boost) adds no listeners.\n\t\t\tif (window.kitHtmxSetup) return;\n\t\t\twindow.kitHtmxSetup = true;\n\t\t\tvar ids = { toasts: me.dataset.toasts, dialog: me.dataset.dialog, content: me.dataset.dialogContent };\n\t\t\tvar offline = me.dataset.offline, failed = me.dataset.error, closeEvent = me.dataset.closeEvent;\n\t\t\t// Elements are looked up when needed, so a page whose body was swapped still finds them.\n\t\t\tvar el = function (id) { return document.getElementById(id); };\n\t\t\tvar warned = false;\n\t\t\tvar bs = function () {\n\t\t\t\tvar b = window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap;\n\t\t\t\tif (!b && !warned) { warned = true; console.warn('htmx.Setup: Tabler\\'s script is not loaded; toasts fall back to plain ones and the dialog does not open'); }\n\t\t\t\treturn b;\n\t\t\t};\n\t\t\tvar cfg = htmx.config;\n\t\t\tcfg.allowEval = me.hasAttribute('data-allow-eval');\n\t\t\tcfg.historyRestoreAsHxRequest = false;\n\t\t\tcfg.responseHandling = [\n\t\t\t\t{ code: '204', swap: false },\n\t\t\t\t{ code: '[23]..', swap: true },\n\t\t\t\t{ code: '422', swap: true },\n\t\t\t\t{ code: '[45]..', swap: false, error: true },\n\t\t\t\t{ code: '...', swap: false }\n\t\t\t];\n\t\t\tvar showToasts = function () {\n\t\t\t\tvar box = el(ids.toasts);\n\t\t\t\tif (!box) return;\n\t\t\t\tbox.querySelectorAll('.toast:not([data-kit-shown])').forEach(function (t) {\n\t\t\t\t\tt.setAttribute('data-kit-shown', '');\n\t\t\t\t\tvar b = bs();\n\t\t\t\t\tif (b && b.Toast) {\n\t\t\t\t\t\tb.Toast.getOrCreateInstance(t).show();\n\t\t\t\t\t\tt.addEventListener('hidden.bs.toast', function () { t.remove(); });\n\t\t\t\t\t} else {\n\t\t\t\t\t\tt.classList.add('show');\n\t\t\t\t\t\tvar d = parseInt(t.getAttribute('data-bs-delay') || '5000', 10);\n\t\t\t\t\t\tif (t.getAttribute('data-bs-autohide') !== 'false') setTimeout(function () { t.remove(); }, d);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t};\n\t\t\tvar say = function (text) {\n\t\t\t\tvar box = el(ids.toasts);\n\t\t\t\tif (!box) return;\n\t\t\t\tvar t = document.createElement('div');\n\t\t\t\tt.className = 'toast toast-danger kit-htmx-toast';\n\t\t\t\tt.setAttribute('role', 'alert');\n\t\t\t\tt.setAttribute('data-bs-delay', '6000');\n\t\t\t\tvar body = document.createElement('div');\n\t\t\t\tbody.className = 'toast-body';\n\t\t\t\tbody.textContent = text;\n\t\t\t\tt.appendChild(body);\n\t\t\t\tbox.appendChild(t);\n\t\t\t\tshowToasts();\n\t\t\t};\n\t\t\tvar modal = function () { var b = bs(), d = el(ids.dialog); return b && b.Modal && d ? b.Modal.getOrCreateInstance(d) : null; };\n\t\t\t// htmx.Error answers with its real status and retargets the toast container: swap those in.\n\t\t\tdocument.addEventListener('htmx:beforeSwap', function (e) {\n\t\t\t\tvar xhr = e.detail.xhr;\n\t\t\t\tif (xhr && xhr.status >= 400 && xhr.getResponseHeader('HX-Retarget') === '#' + ids.toasts) {\n\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\te.detail.isError = false;\n\t\t\t\t\te.detail.target = el(ids.toasts);\n\t\t\t\t}\n\t\t\t\tvar t = e.detail.target;\n\t\t\t\tif (t && window.tablerCharts && window.tablerCharts.destroy && e.detail.shouldSwap) window.tablerCharts.destroy(t);\n\t\t\t});\n\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) {\n\t\t\t\tshowToasts();\n\t\t\t\tvar root = e.detail.elt;\n\t\t\t\tvar b = bs();\n\t\t\t\tif (root && root.querySelectorAll && b) {\n\t\t\t\t\tif (b.Tooltip) root.querySelectorAll('[data-bs-toggle=\"tooltip\"]').forEach(function (x) { b.Tooltip.getOrCreateInstance(x); });\n\t\t\t\t\tif (b.Popover) root.querySelectorAll('[data-bs-toggle=\"popover\"]').forEach(function (x) { b.Popover.getOrCreateInstance(x); });\n\t\t\t\t}\n\t\t\t\tvar d = el(ids.dialog);\n\t\t\t\tif (root && root.id === ids.content && root.children.length && d && !d.classList.contains('show')) {\n\t\t\t\t\tvar m = modal();\n\t\t\t\t\tif (m) m.show();\n\t\t\t\t}\n\t\t\t});\n\t\t\tdocument.addEventListener('htmx:oobAfterSwap', showToasts);\n\t\t\tdocument.addEventListener(closeEvent, function () { var m = modal(); if (m) m.hide(); });\n\t\t\tdocument.addEventListener('hidden.bs.modal', function (e) {\n\t\t\t\tif (!e.target || e.target.id !== ids.dialog) return;\n\t\t\t\tif (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(e.target);\n\t\t\t\tvar c = el(ids.content);\n\t\t\t\tif (c) c.replaceChildren();\n\t\t\t});\n\t\t\t// An action in a toast (e.g. Undo) closes it once it succeeded; closing it before would remove the\n\t\t\t// element and htmx would cancel the request.\n\t\t\tdocument.addEventListener('htmx:afterRequest', function (e) {\n\t\t\t\tvar x = e.detail.elt, t = x && x.closest && x.closest('#' + ids.toasts + ' .toast');\n\t\t\t\tif (!t || !e.detail.successful) return;\n\t\t\t\tvar b = bs();\n\t\t\t\tif (b && b.Toast) b.Toast.getOrCreateInstance(t).hide(); else t.remove();\n\t\t\t});\n\t\t\tdocument.addEventListener('htmx:sendError', function () { say(offline); });\n\t\t\tdocument.addEventListener('htmx:responseError', function () { say(failed); });\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

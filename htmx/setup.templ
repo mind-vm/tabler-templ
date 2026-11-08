@@ -21,7 +21,8 @@ type SetupProps struct {
 	DialogSize string
 }
 
-// Setup is the page's htmx client, once per page at the end of <body>, after Tabler's script:
+// Setup is the page's htmx client, once per page at the end of <body>, after Tabler's script (a second
+// Setup on the page renders its elements but adds no listeners):
 //   - the toast container (Toast, Error) and an empty dialog (a Tabler modal) that opens when content is
 //     swapped into it (hx-target={ htmx.Target(htmx.DialogContentID) }) and closes on CloseDialog;
 //   - htmx's configuration: 422 responses are swapped in (forms with errors), eval is off;
@@ -37,12 +38,24 @@ templ Setup(props ...SetupProps) {
 			<div class="modal-content" id={ DialogContentID }></div>
 		</div>
 	</div>
-	<script { csp.Nonce(ctx)... } data-allow-eval?={ p.AllowEval } data-offline={ kit.Or(p.Offline, kit.T(ctx).Offline) } data-error={ kit.Or(p.ErrorText, kit.T(ctx).ErrorGeneric) } data-close-event={ EventCloseDialog }>
+	<script { csp.Nonce(ctx)... } data-allow-eval?={ p.AllowEval } data-offline={ kit.Or(p.Offline, kit.T(ctx).Offline) } data-error={ kit.Or(p.ErrorText, kit.T(ctx).ErrorGeneric) } data-close-event={ EventCloseDialog } data-toasts={ ToastsID } data-dialog={ DialogID } data-dialog-content={ DialogContentID }>
 		(function () {
 			'use strict';
 			var me = document.currentScript;
 			if (!window.htmx) { console.warn('htmx.Setup: htmx is not loaded (htmx.Library in the head)'); return; }
-			var bs = function () { return window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap; };
+			// Once per page: a second Setup (or one swapped in again with hx-boost) adds no listeners.
+			if (window.kitHtmxSetup) return;
+			window.kitHtmxSetup = true;
+			var ids = { toasts: me.dataset.toasts, dialog: me.dataset.dialog, content: me.dataset.dialogContent };
+			var offline = me.dataset.offline, failed = me.dataset.error, closeEvent = me.dataset.closeEvent;
+			// Elements are looked up when needed, so a page whose body was swapped still finds them.
+			var el = function (id) { return document.getElementById(id); };
+			var warned = false;
+			var bs = function () {
+				var b = window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap;
+				if (!b && !warned) { warned = true; console.warn('htmx.Setup: Tabler\'s script is not loaded; toasts fall back to plain ones and the dialog does not open'); }
+				return b;
+			};
 			var cfg = htmx.config;
 			cfg.allowEval = me.hasAttribute('data-allow-eval');
 			cfg.historyRestoreAsHxRequest = false;
@@ -53,68 +66,80 @@ templ Setup(props ...SetupProps) {
 				{ code: '[45]..', swap: false, error: true },
 				{ code: '...', swap: false }
 			];
-			var toasts = document.getElementById('htmx-toasts');
 			var showToasts = function () {
-				toasts.querySelectorAll('.toast:not([data-kit-shown])').forEach(function (el) {
-					el.setAttribute('data-kit-shown', '');
+				var box = el(ids.toasts);
+				if (!box) return;
+				box.querySelectorAll('.toast:not([data-kit-shown])').forEach(function (t) {
+					t.setAttribute('data-kit-shown', '');
 					var b = bs();
 					if (b && b.Toast) {
-						b.Toast.getOrCreateInstance(el).show();
-						el.addEventListener('hidden.bs.toast', function () { el.remove(); });
+						b.Toast.getOrCreateInstance(t).show();
+						t.addEventListener('hidden.bs.toast', function () { t.remove(); });
 					} else {
-						el.classList.add('show');
-						var d = parseInt(el.getAttribute('data-bs-delay') || '5000', 10);
-						if (el.getAttribute('data-bs-autohide') !== 'false') setTimeout(function () { el.remove(); }, d);
+						t.classList.add('show');
+						var d = parseInt(t.getAttribute('data-bs-delay') || '5000', 10);
+						if (t.getAttribute('data-bs-autohide') !== 'false') setTimeout(function () { t.remove(); }, d);
 					}
 				});
 			};
 			var say = function (text) {
-				var el = document.createElement('div');
-				el.className = 'toast toast-danger kit-htmx-toast';
-				el.setAttribute('role', 'alert');
-				el.setAttribute('data-bs-delay', '6000');
+				var box = el(ids.toasts);
+				if (!box) return;
+				var t = document.createElement('div');
+				t.className = 'toast toast-danger kit-htmx-toast';
+				t.setAttribute('role', 'alert');
+				t.setAttribute('data-bs-delay', '6000');
 				var body = document.createElement('div');
 				body.className = 'toast-body';
 				body.textContent = text;
-				el.appendChild(body);
-				toasts.appendChild(el);
+				t.appendChild(body);
+				box.appendChild(t);
 				showToasts();
 			};
-			var dialog = document.getElementById('htmx-dialog');
-			var modal = function () { var b = bs(); return b && b.Modal ? b.Modal.getOrCreateInstance(dialog) : null; };
+			var modal = function () { var b = bs(), d = el(ids.dialog); return b && b.Modal && d ? b.Modal.getOrCreateInstance(d) : null; };
+			// htmx.Error answers with its real status and retargets the toast container: swap those in.
+			document.addEventListener('htmx:beforeSwap', function (e) {
+				var xhr = e.detail.xhr;
+				if (xhr && xhr.status >= 400 && xhr.getResponseHeader('HX-Retarget') === '#' + ids.toasts) {
+					e.detail.shouldSwap = true;
+					e.detail.isError = false;
+					e.detail.target = el(ids.toasts);
+				}
+				var t = e.detail.target;
+				if (t && window.tablerCharts && window.tablerCharts.destroy && e.detail.shouldSwap) window.tablerCharts.destroy(t);
+			});
 			document.addEventListener('htmx:afterSettle', function (e) {
 				showToasts();
 				var root = e.detail.elt;
 				var b = bs();
 				if (root && root.querySelectorAll && b) {
-					if (b.Tooltip) root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { b.Tooltip.getOrCreateInstance(el); });
-					if (b.Popover) root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) { b.Popover.getOrCreateInstance(el); });
+					if (b.Tooltip) root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (x) { b.Tooltip.getOrCreateInstance(x); });
+					if (b.Popover) root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (x) { b.Popover.getOrCreateInstance(x); });
 				}
-				if (root && root.id === 'htmx-dialog-content' && root.children.length && !dialog.classList.contains('show')) {
+				var d = el(ids.dialog);
+				if (root && root.id === ids.content && root.children.length && d && !d.classList.contains('show')) {
 					var m = modal();
 					if (m) m.show();
 				}
 			});
 			document.addEventListener('htmx:oobAfterSwap', showToasts);
-			document.addEventListener('htmx:beforeSwap', function (e) {
-				var t = e.detail.target;
-				if (t && window.tablerCharts && window.tablerCharts.destroy && e.detail.shouldSwap) window.tablerCharts.destroy(t);
-			});
-			document.body.addEventListener(me.getAttribute('data-close-event'), function () { var m = modal(); if (m) m.hide(); });
-			dialog.addEventListener('hidden.bs.modal', function () {
-				if (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(dialog);
-				document.getElementById('htmx-dialog-content').replaceChildren();
+			document.addEventListener(closeEvent, function () { var m = modal(); if (m) m.hide(); });
+			document.addEventListener('hidden.bs.modal', function (e) {
+				if (!e.target || e.target.id !== ids.dialog) return;
+				if (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(e.target);
+				var c = el(ids.content);
+				if (c) c.replaceChildren();
 			});
 			// An action in a toast (e.g. Undo) closes it once it succeeded; closing it before would remove the
 			// element and htmx would cancel the request.
 			document.addEventListener('htmx:afterRequest', function (e) {
-				var el = e.detail.elt, t = el && el.closest && el.closest('#htmx-toasts .toast');
+				var x = e.detail.elt, t = x && x.closest && x.closest('#' + ids.toasts + ' .toast');
 				if (!t || !e.detail.successful) return;
 				var b = bs();
 				if (b && b.Toast) b.Toast.getOrCreateInstance(t).hide(); else t.remove();
 			});
-			document.addEventListener('htmx:sendError', function () { say(me.getAttribute('data-offline')); });
-			document.addEventListener('htmx:responseError', function () { say(me.getAttribute('data-error')); });
+			document.addEventListener('htmx:sendError', function () { say(offline); });
+			document.addEventListener('htmx:responseError', function () { say(failed); });
 		})();
 	</script>
 }

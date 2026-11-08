@@ -128,7 +128,7 @@ func TestDiffResolve(t *testing.T) {
 	if strings.Contains(out, `<del class="assistant-old">Fig</del>`) {
 		t.Fatal("an unchanged cell shown as an edit")
 	}
-	if !strings.Contains(out, `hx-vals="{&#34;row&#34;:&#34;r1&#34;,&#34;decision&#34;:&#34;accept&#34;}"`) {
+	if !strings.Contains(out, `hx-vals="{&#34;decision&#34;:&#34;accept&#34;,&#34;row&#34;:&#34;r1&#34;}"`) {
 		t.Fatalf("row action not posted:\n%s", out)
 	}
 	if out := frag(t, DiffCard(all)); strings.Contains(out, "hx-post") {

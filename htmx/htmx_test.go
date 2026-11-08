@@ -91,11 +91,8 @@ func req(method string, htmx bool) *http.Request {
 
 func TestRespondHTMX(t *testing.T) {
 	w := httptest.NewRecorder()
-	err := Respond(w, req("POST", true), text("<div id=x></div>"), Status(422), Trigger("todo:changed"), Trigger("todo:count", 3),
+	Respond(w, req("POST", true), text("<div id=x></div>"), Status(422), Trigger("todo:changed"), Trigger("todo:count", 3),
 		PushURL("/todos?q=a"), Toast(toast.Props{Color: "success"}, "Saved <b>"), FullPage(frame))
-	if err != nil {
-		t.Fatal(err)
-	}
 	h := w.Header()
 	if w.Code != 422 || h.Get("Vary") != "HX-Request" || h.Get("HX-Push-Url") != "/todos?q=a" {
 		t.Fatalf("status %d headers %v", w.Code, h)
@@ -139,7 +136,7 @@ func TestRespondWithoutHTMX(t *testing.T) {
 func TestError(t *testing.T) {
 	w := httptest.NewRecorder()
 	Error(w, req("POST", true), Fail(http.StatusConflict, "Changed by someone else."))
-	if w.Code != 200 || w.Header().Get("HX-Retarget") != "#htmx-toasts" || w.Header().Get("HX-Reswap") != "beforeend" ||
+	if w.Code != 409 || w.Header().Get("HX-Retarget") != "#htmx-toasts" || w.Header().Get("Vary") != "HX-Request" || w.Header().Get("HX-Reswap") != "beforeend" ||
 		!strings.Contains(w.Body.String(), "Changed by someone else.") || !strings.Contains(w.Body.String(), "toast-danger") {
 		t.Fatalf("htmx error: %d %v %s", w.Code, w.Header(), w.Body.String())
 	}
@@ -150,8 +147,46 @@ func TestError(t *testing.T) {
 	}
 	w = httptest.NewRecorder()
 	Error(w, req("POST", false), Fail(http.StatusConflict, "Conflict."))
-	if w.Code != 409 || !strings.Contains(w.Body.String(), "Conflict.") {
+	if w.Code != 409 || !strings.Contains(w.Body.String(), "Conflict.") || w.Header().Get("Vary") != "HX-Request" {
 		t.Fatalf("plain error: %d %s", w.Code, w.Body.String())
+	}
+	// A rule turns a domain error into a status and a message.
+	notFound := errors.New("not found")
+	w = httptest.NewRecorder()
+	Error(w, req("GET", true), fmt.Errorf("load: %w", notFound), Is(notFound, http.StatusNotFound, "Gone."))
+	if w.Code != 404 || !strings.Contains(w.Body.String(), "Gone.") {
+		t.Fatalf("rule: %d %s", w.Code, w.Body.String())
+	}
+}
+
+func TestLocalPath(t *testing.T) {
+	for s, want := range map[string]bool{"/": true, "/c/1?next=/x": true, "": false, "c": false, "//evil.example": false,
+		"/\\evil.example": false, "\\evil": false, "https://evil.example": false, "/a\nb": false} {
+		if LocalPath(s) != want {
+			t.Errorf("LocalPath(%q) = %v", s, !want)
+		}
+	}
+	w := httptest.NewRecorder()
+	Redirect(w, req("POST", true), "/\\evil.example")
+	if w.Code != 500 || w.Header().Get("HX-Redirect") != "" {
+		t.Fatalf("unsafe redirect: %d %v", w.Code, w.Header())
+	}
+	w = httptest.NewRecorder()
+	RedirectExternal(w, req("POST", false), "https://example.com/")
+	if w.Code != 303 || w.Header().Get("Location") != "https://example.com/" {
+		t.Fatalf("external: %d %v", w.Code, w.Header())
+	}
+}
+
+func TestOnAndFrame(t *testing.T) {
+	if On("a:b", "c:d") != "a:b from:body, c:d from:body" {
+		t.Fatalf("On %q", On("a:b", "c:d"))
+	}
+	f := Frame(func(title string, body templ.Component) templ.Component { return frame(body) })
+	w := httptest.NewRecorder()
+	Respond(w, req("GET", false), text("x"), f.Page("T"))
+	if w.Body.String() != "<html>x</html>" {
+		t.Fatalf("frame: %s", w.Body.String())
 	}
 }
 
@@ -174,7 +209,7 @@ func TestSetup(t *testing.T) {
 		t.Fatal(err)
 	}
 	out := b.String()
-	for _, want := range []string{`id="htmx-toasts"`, `id="htmx-dialog"`, `id="htmx-dialog-content"`, `nonce="n"`,
+	for _, want := range []string{`data-toasts="htmx-toasts"`, "window.kitHtmxSetup", `id="htmx-toasts"`, `id="htmx-dialog"`, `id="htmx-dialog-content"`, `nonce="n"`,
 		"responseHandling", "data-offline=\"No connection to the server.\"", "kit:close-dialog", "tablerCharts.destroy"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("Setup lacks %q", want)

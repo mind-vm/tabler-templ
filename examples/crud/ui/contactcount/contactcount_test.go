@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -32,7 +32,7 @@ func TestCount(t *testing.T) {
 	w := do(t, mux, "GET", Count.URL()+htmx.Query("instance", "side", "status", "active", "label", "active"), "", true)
 	b := w.Body.String()
 	if !strings.Contains(b, `id="`+RootID("side")+`"`) || !strings.Contains(b, "12") || !strings.Contains(b, " active") ||
-		!strings.Contains(b, contactform.EventSaved+" from:body") {
+		!strings.Contains(b, events.Saved+" from:body") {
 		t.Fatalf("count:\n%s", b)
 	}
 	if RootID("") == RootID("side") {

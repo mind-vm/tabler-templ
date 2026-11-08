@@ -1,13 +1,11 @@
 // Package contactdelete deletes a contact after asking: the question opens in the page's dialog
-// (a page without JavaScript), the deletion fires EventDeleted and shows a toast with Undo, which
-// restores the contact and fires EventRestored.
+// (a page without JavaScript), the deletion fires events.Deleted and shows a toast with Undo,
+// which restores the contact and fires events.Restored.
 package contactdelete
 
 import (
 	"context"
 	"net/http"
-
-	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
 	"github.com/mind-vm/tabler-templ/htmx"
@@ -22,12 +20,6 @@ var (
 	Restore = htmx.Route("POST", base+"/{id}/restore")
 )
 
-// Events; the detail is the contact id.
-const (
-	EventDeleted  = "contact:deleted"
-	EventRestored = "contact:restored"
-)
-
 // Service is what the component needs from the domain.
 type Service interface {
 	Get(ctx context.Context, id string) (contacts.Contact, error)
@@ -36,7 +28,7 @@ type Service interface {
 }
 
 type Options struct {
-	Frame func(title string, body templ.Component) templ.Component
+	Frame htmx.Frame
 	// Done is where the browser goes after deleting from a page that shows the contact itself (the
 	// question's "next"), and after deleting without htmx.
 	Done string

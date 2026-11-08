@@ -11,6 +11,7 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -55,7 +56,7 @@ func TestCreate(t *testing.T) {
 	// Valid: nothing swapped, dialog closed, event and toast.
 	w = do(t, mux, "POST", Create.URL(), "name=Zoe&status=lead", true)
 	trig := w.Header().Get("HX-Trigger")
-	if w.Code != 200 || w.Header().Get("HX-Reswap") != "none" || !strings.Contains(trig, EventSaved) || !strings.Contains(trig, htmx.EventCloseDialog) ||
+	if w.Code != 200 || w.Header().Get("HX-Reswap") != "none" || !strings.Contains(trig, events.Saved) || !strings.Contains(trig, htmx.EventCloseDialog) ||
 		!strings.Contains(w.Body.String(), "Zoe saved.") {
 		t.Fatalf("valid: %d %v\n%s", w.Code, w.Header(), w.Body.String())
 	}
@@ -77,5 +78,14 @@ func TestConflict(t *testing.T) {
 	w := do(t, mux, "POST", Update.URL("1"), form, true)
 	if w.Header().Get("HX-Retarget") != htmx.Target(htmx.ToastsID) || !strings.Contains(w.Body.String(), "Someone else changed") {
 		t.Fatalf("conflict: %v\n%s", w.Header(), w.Body.String())
+	}
+}
+
+// A broken version field is a 400, not an update against version 0.
+func TestBadVersion(t *testing.T) {
+	mux := setup(t)
+	w := do(t, mux, "POST", Update.URL("1"), "name=Ada&status=active&version=x", true)
+	if w.Code != 400 || !strings.Contains(w.Body.String(), "out of date") {
+		t.Fatalf("bad version: %d\n%s", w.Code, w.Body.String())
 	}
 }

@@ -21,6 +21,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/assistant"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/htmx"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/listgroup"
 )
@@ -142,7 +143,8 @@ func assistantPage() templ.Component {
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
 		p := frameProps("", "Assistant")
-		p.Head = templ.Join(p.Head, htmxLibrary())
+		p.Head = templ.Join(p.Head, htmx.Library())
+		p.Scripts = templ.Join(p.Scripts, htmx.Setup())
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Assistant", Pretitle: "blocks/assistant",
 			Description: "An agent's run streamed as server-rendered fragments: thinking, steps, a question, result blocks, a Markdown answer with sources and follow-ups. Select text in an answer to ask about it.",
 			Actions:     assistantPartsLink()})

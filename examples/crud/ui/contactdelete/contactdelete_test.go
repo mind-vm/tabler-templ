@@ -11,6 +11,7 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -46,11 +47,11 @@ func TestDeleteAndUndo(t *testing.T) {
 		t.Fatalf("question:\n%s", w.Body.String())
 	}
 	w := do(t, mux, "POST", Delete.URL("1"), "", true)
-	if !strings.Contains(w.Header().Get("HX-Trigger"), EventDeleted) || !strings.Contains(w.Body.String(), Restore.URL("1")) {
+	if !strings.Contains(w.Header().Get("HX-Trigger"), events.Deleted) || !strings.Contains(w.Body.String(), Restore.URL("1")) {
 		t.Fatalf("delete: %v\n%s", w.Header(), w.Body.String())
 	}
 	w = do(t, mux, "POST", Restore.URL("1"), "", true)
-	if !strings.Contains(w.Header().Get("HX-Trigger"), EventRestored) || !strings.Contains(w.Body.String(), "Ada Lovelace restored.") {
+	if !strings.Contains(w.Header().Get("HX-Trigger"), events.Restored) || !strings.Contains(w.Body.String(), "Ada Lovelace restored.") {
 		t.Fatalf("restore: %v\n%s", w.Header(), w.Body.String())
 	}
 	// From the contact's own page: leave it after deleting. An outside "next" is ignored.

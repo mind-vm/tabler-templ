@@ -16,20 +16,12 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/assistant"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
-	"github.com/mind-vm/tabler-templ/cdn"
-	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/htmx"
 )
 
 // The parts gallery shows every piece of blocks/assistant on its own, the interactive ones live: the
 // handlers below are the whole server side — parse the form, call the block's method, render the
-// block. htmx is loaded by this page only, until the kit has an htmx package of its own.
-
-const htmxVersion = "2.0.4"
-
-func htmxLibrary() templ.Component {
-	return templ.Join(templ.Raw(`<meta name="htmx-config" content='{"includeIndicatorStyles":false}'/>`),
-		plugin.Script(cdn.URL("htmx.org", htmxVersion, "dist/htmx.min.js")))
-}
+// block. The page loads htmx with package htmx (Library in the head, Setup at the end of the body).
 
 func partsRecommendation() assistant.Recommendation {
 	return assistant.Recommendation{ID: "rec", Post: "/assistant/parts/recommend", Question: "Want me to place this restock order?",
@@ -175,7 +167,7 @@ func partsSection(title, text string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 147, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 139, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -188,7 +180,7 @@ func partsSection(title, text string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 148, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 140, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -220,7 +212,8 @@ func assistantPartsPage() templ.Component {
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
 		p := frameProps("", "Assistant parts")
-		p.Head = templ.Join(p.Head, htmxLibrary())
+		p.Head = templ.Join(p.Head, htmx.Library())
+		p.Scripts = templ.Join(p.Scripts, htmx.Setup())
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Assistant parts", Pretitle: "blocks/assistant",
 			Description: "The parts of an assistant's turn one by one. The interactive ones post with htmx to handlers that call the block's Go method and render the next state."})
 		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -350,7 +343,7 @@ func assistantPartsPage() templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.NewAttributeExpression(`{"row":"reset","decision":"accept"}`).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 198, Col: 149}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/assistant_parts.templ`, Line: 191, Col: 149}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {

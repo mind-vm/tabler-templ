@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **`htmx`, after an architecture review:**
+  - `Error` sends the real status (404, 409 …) instead of 200. `Setup` swaps these toasts in and does not
+    add a generic error toast. Domain errors map to a status and a message with rules: `htmx.Is(err,
+    code, message)`.
+  - `Redirect` only goes to local paths and refuses anything else with 500, so no `next` value can lead
+    to another site; `LocalPath` checks a path, and `RedirectExternal` is for URLs the app chose itself.
+  - `Setup` runs once per page, even when rendered twice or swapped in again. It reads the ids from the Go
+    constants, looks the elements up when needed, and warns when Tabler's script is missing.
+  - `Vary: HX-Request` on every answer (`Error`, `Redirect` too); `htmx.Vary` for pages written by hand.
+  - `Respond` logs render errors itself and returns nothing (breaking for callers that used its error).
+  - New: `On(events...)` for hx-trigger, `Frame` with `Page(title)` for `FullPage`. `Vals` and `Query`
+    panic on an odd number of arguments.
+  - htmx 2.0.11 (was 2.0.4).
+- **CRUD demo:** the event names live in `ui/events`, so no component imports another to learn them. The
+  error messages live once in `ui/uierr`. A version field that is not a number is a 400.
+- **Demo:** the assistant, assistant parts, motion and sound pages load htmx with `htmx.Library` and
+  `htmx.Setup` instead of their own copy.
+- **`blocks/assistant`:** the diff card builds its `hx-vals` with `htmx.Vals`, which escapes as JSON.
+
 - **`htmx` for components with their own endpoints:**
   - `Route` defines an endpoint once: `Pattern` goes to the mux, `URL` to the markup. `CheckRoutes` is the
     contract test.
