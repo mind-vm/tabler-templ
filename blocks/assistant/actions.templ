@@ -150,13 +150,14 @@ function keyed(f, fields) {
 }
 
 // pick chooses among several forms of one name: one per row of a list, or one per section of a record.
-// The row (kitDialog.matchForm, else the first keyed form) wins when it is keyed and shows as many of
+// The row (kitDialog.matchForm, else or without it the first keyed form) wins when it is keyed and shows as many of
 // the fields as the best form; otherwise the form that shows most of them. Sections of one record
 // carry the other sections' fields hidden, so a key alone would pick the wrong section.
 function pick(forms, fields, kind) {
 	if (forms.length <= 1) return forms[0] || null;
 	var best = Array.prototype.reduce.call(forms, function (b, f) { return visible(f, fields) > visible(b, fields) ? f : b; });
-	var row = window.kitDialog ? window.kitDialog.matchForm(forms, fields, kind) :
+	// matchForm finds nothing when detail.Script marks forms with another attribute than this script.
+	var row = (window.kitDialog && window.kitDialog.matchForm(forms, fields, kind)) ||
 		Array.prototype.find.call(forms, function (f) { return keyed(f, fields); });
 	if (row && keyed(row, fields) && visible(row, fields) >= visible(best, fields)) return row;
 	return best;
