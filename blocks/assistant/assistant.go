@@ -169,6 +169,15 @@ type Texts struct {
 	Pending       string // fmt with the count: "%d pending"
 	Model         string // aria-label of the model picker
 	Selection     string // aria-label of the selection toolbar
+	ActionOpen    string // an action card's title, before the action's: "Open page"
+	ActionFill    string
+	ActionShow    string
+	RunAgain      string // the card's button
+	Filled        string // banner over a form the assistant filled in
+	NotOnPage     string // fmt with the action's title: "%s is not on this page."
+	NotFilled     string // fmt with the fields: "Not filled in: %s. Please enter by hand."
+	Unchanged     string // the form already held the values
+	Refused       string // ActionRefused's title, before the action's name
 }
 
 // English are the default texts.
@@ -227,6 +236,15 @@ var English = Texts{
 	Pending:       "%d pending",
 	Model:         "Model",
 	Selection:     "Ask about the selection",
+	ActionOpen:    "Open page",
+	ActionFill:    "Fill in",
+	ActionShow:    "Show",
+	RunAgain:      "Run again",
+	Filled:        "Filled in by the assistant: check the values and save yourself.",
+	NotOnPage:     "%s is not on this page.",
+	NotFilled:     "Not filled in: %s. Please enter by hand.",
+	Unchanged:     "The form already holds these values; nothing changed.",
+	Refused:       "Not allowed",
 }
 
 type textsKey struct{}
@@ -271,12 +289,14 @@ func Fragment(ctx context.Context, c templ.Component) (string, error) {
 // Stream writes fragments as server-sent events in the shape Script reads:
 //
 //	data: {"type":"html","args":{"slot":"blocks","id":"block-1","mode":"","html":"…"}}
+//	data: {"type":"action","args":{"id":"action-1","name":"order-new","kind":"fill",…}}
 //
 // It is safe for use from several goroutines.
 type Stream struct {
-	mu sync.Mutex
-	w  http.ResponseWriter
-	f  http.Flusher
+	mu  sync.Mutex
+	w   http.ResponseWriter
+	f   http.Flusher
+	rec *Transcript
 }
 
 // Open starts the event stream. It returns nil when w cannot flush.
@@ -307,10 +327,17 @@ func (s *Stream) Send(ctx context.Context, slot, id, mode string, c templ.Compon
 
 // SendHTML sends an already rendered fragment.
 func (s *Stream) SendHTML(slot, id, mode, html string) error {
+	if s.rec != nil && slot != SlotTurn {
+		s.rec.add(slot, id, mode, html)
+	}
 	b, err := json.Marshal(map[string]any{"type": "html", "args": map[string]string{"slot": slot, "id": id, "mode": mode, "html": html}})
 	if err != nil {
 		return err
 	}
+	return s.write(b)
+}
+
+func (s *Stream) write(b []byte) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, err := fmt.Fprintf(s.w, "data: %s\n\n", b); err != nil {

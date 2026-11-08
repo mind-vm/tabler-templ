@@ -1,0 +1,284 @@
+package assistant
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"sort"
+
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/offcanvas"
+)
+
+func (a Action) icon() string {
+	switch a.Kind {
+	case ActionFill:
+		return "ti-forms"
+	case ActionShow:
+		return "ti-pointer"
+	}
+	return "ti-external-link"
+}
+
+func (a Action) verb(t Texts) string {
+	switch a.Kind {
+	case ActionFill:
+		return t.ActionFill
+	case ActionShow:
+		return t.ActionShow
+	}
+	return t.ActionOpen
+}
+
+func (a Action) fieldNames() []string {
+	n := make([]string, 0, len(a.Fields))
+	for k := range a.Fields {
+		n = append(n, k)
+	}
+	sort.Strings(n)
+	return n
+}
+
+// ActionCard is an action's card in the conversation: what it does, the values it fills in, a button
+// to run it again and a line where ActionScript reports what it could not do. Stream.Action sends it.
+templ ActionCard(a Action) {
+	<div class="assistant-action" id={ a.ID } data-action-card>
+		<div class="d-flex align-items-center gap-2">
+			@icon.Icon(a.icon(), icon.Props{Class: "text-primary"})
+			<span class="text-secondary">{ a.verb(T(ctx)) }:</span>
+			<span class="fw-medium">{ a.Title }</span>
+			@button.Button(button.Props{Type: "button", Size: button.SizeSmall, Variant: button.VariantGhost, Icon: "ti-player-play",
+				Class: "ms-auto", Attributes: templ.Attributes{"data-assistant-action": a.json()}}) {
+				{ T(ctx).RunAgain }
+			}
+		</div>
+		if len(a.Fields) > 0 {
+			<dl class="assistant-action-fields">
+				for _, f := range a.fieldNames() {
+					<dt>{ f }</dt>
+					<dd>{ a.Fields[f] }</dd>
+				}
+			</dl>
+		}
+		<div class="small text-warning" data-action-note></div>
+	</div>
+}
+
+// ActionRefused is the card for an action the Catalog refused: which one and why (the error of
+// Catalog.Check). It shows the reader that the assistant tried and the app said no.
+templ ActionRefused(id, name, reason string) {
+	<div class="assistant-action assistant-action-refused" id={ id }>
+		<div class="d-flex align-items-center gap-2">
+			@icon.Icon("ti-shield-x", icon.Props{Class: "text-danger"})
+			<span class="text-secondary">{ T(ctx).Refused }:</span>
+			<span class="fw-medium">{ name }</span>
+		</div>
+		<div class="small text-secondary mt-1 ms-4">{ reason }</div>
+	</div>
+}
+
+// AnswerStrict is Answer without links and images (markdown.Strict): for an assistant whose answers
+// must not lead to another site or load a file from outside, whatever the model was made to write.
+templ AnswerStrict(text string) {
+	@markdown.Strict(text)
+}
+
+var actionOnce = templ.NewOnceHandle()
+
+// ActionScript runs actions on the page, once per page. Put it on every page the assistant may act
+// on, also pages without a conversation, so an action that had to go to another page first finishes
+// there; Conversation and Copilot render it.
+//
+// It runs the actions of a finished stream in order, and an action card's button. Before running an
+// action it dispatches "assistant:action" on document with the action as detail; preventDefault
+// takes the action over. Open goes to the page. Fill finds form[data-form] (several: the one
+// kitDialog.matchForm picks), opens its dialog, collapse or details, fills in the fields, marks them
+// and puts a banner over the form; it never submits. Show scrolls to [data-tour] and highlights it.
+// An action for another page is kept in sessionStorage and run when that page has loaded.
+templ ActionScript() {
+	@actionOnce.Once() {
+		@actionScript()
+	}
+}
+
+func actionScript() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		t := T(ctx)
+		cfg, err := json.Marshal(map[string]string{"filled": t.Filled, "notOnPage": t.NotOnPage, "notFilled": t.NotFilled, "unchanged": t.Unchanged})
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(w, csp.Open(ctx, "script")+"(function(cfg){"+actionJS+"})("+string(cfg)+");</script>")
+		return err
+	})
+}
+
+const actionJS = `'use strict';
+if (window.kitAssistant) return;
+var KEY = 'assistant.pending', OPEN = 'assistant.copilot';
+// Tabler's script may come after this one: look Bootstrap up when needed.
+var boot = function () { return window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap; };
+var esc = function (s) { return window.CSS && CSS.escape ? CSS.escape(s) : s; };
+var store = function (k, v) { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
+var load = function (k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (_) { return null; } };
+var localPath = function (p) { return typeof p === 'string' && p.charAt(0) === '/' && p.charAt(1) !== '/' && p.charAt(1) !== '\\'; };
+
+function note(a, text) {
+	var card = a.id && document.getElementById(a.id);
+	var line = card && card.querySelector('[data-action-note]');
+	if (line) line.textContent = text;
+}
+
+function pick(forms, fields, kind) {
+	if (forms.length <= 1) return forms[0] || null;
+	if (window.kitDialog) return window.kitDialog.matchForm(forms, fields, kind);
+	return forms[0];
+}
+
+function reveal(f) {
+	var modal = f.closest('.modal');
+	var bs = boot();
+	if (modal && bs) { bs.Modal.getOrCreateInstance(modal).show(); return true; }
+	for (var p = f.parentElement; p; p = p.parentElement) {
+		if (p.classList.contains('collapse')) p.classList.add('show');
+		if (p.tagName === 'DETAILS') p.open = true;
+	}
+	return false;
+}
+
+function mark(el) { el.classList.add('assistant-filled'); }
+
+function fill(a) {
+	var fields = a.fields || {};
+	var f = pick(document.querySelectorAll('form[data-form="' + esc(a.form) + '"]'), fields, a.form);
+	if (!f) { note(a, cfg.notOnPage.replace('%s', a.title)); return; }
+	var inModal = reveal(f);
+	var missing = [], changed = 0;
+	Object.keys(fields).forEach(function (name) {
+		var el = f.elements.namedItem(name), v = String(fields[name]);
+		if (!el) { missing.push(name); return; }
+		if (!el.tagName) { // radio group
+			var hit = Array.prototype.find.call(el, function (r) { return r.value === v; });
+			if (!hit) { missing.push(name); return; }
+			if (!hit.checked) { hit.checked = true; changed++; hit.dispatchEvent(new Event('change', { bubbles: true })); mark(hit.closest('label') || hit); }
+			return;
+		}
+		if (el.type === 'hidden' || el.type === 'file' || el.type === 'password' || el.disabled || el.readOnly) { if (el.value !== v) missing.push(name); return; }
+		var before = el.type === 'checkbox' ? String(el.checked) : el.value;
+		if (el.tagName === 'SELECT') {
+			var opt = Array.prototype.find.call(el.options, function (o) { return o.value === v; }) ||
+				Array.prototype.find.call(el.options, function (o) { return o.textContent.trim().toLowerCase() === v.trim().toLowerCase(); });
+			if (!opt) { missing.push(name); return; }
+			el.value = opt.value;
+		} else if (el.type === 'checkbox') {
+			el.checked = /^(true|1|yes|ja|on)$/i.test(v);
+		} else {
+			el.value = v;
+		}
+		if ((el.type === 'checkbox' ? String(el.checked) : el.value) === before) return;
+		changed++;
+		el.dispatchEvent(new Event('input', { bubbles: true }));
+		el.dispatchEvent(new Event('change', { bubbles: true }));
+		mark(el);
+	});
+	if (changed && !f.querySelector('.assistant-banner')) {
+		var banner = document.createElement('div');
+		banner.className = 'alert alert-warning assistant-banner';
+		banner.setAttribute('role', 'status');
+		banner.textContent = cfg.filled;
+		var body = f.querySelector('.modal-body, .card-body');
+		if (body) body.prepend(banner); else f.prepend(banner);
+	}
+	if (!inModal) f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	var first = f.querySelector('.assistant-filled');
+	if (first && first.focus) setTimeout(function () { first.focus({ preventScroll: !inModal }); }, inModal ? 350 : 0);
+	if (missing.length) note(a, cfg.notFilled.replace('%s', missing.join(', ')));
+	else if (!changed) note(a, cfg.unchanged);
+	else note(a, '');
+}
+
+function show(a) {
+	var el = document.querySelector('[data-tour="' + esc(a.anchor) + '"]');
+	if (!el) { note(a, cfg.notOnPage.replace('%s', a.title)); return; }
+	el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	el.classList.remove('assistant-shown');
+	void el.offsetWidth;
+	el.classList.add('assistant-shown');
+	setTimeout(function () { el.classList.remove('assistant-shown'); }, 4000);
+	note(a, '');
+}
+
+// run returns false when it leaves the page: the actions after it would run on the old one.
+function run(a) {
+	if (!a || !localPath(a.path)) return true;
+	var ev = new CustomEvent('assistant:action', { detail: a, cancelable: true });
+	if (!document.dispatchEvent(ev)) return true;
+	if (location.pathname !== a.path) {
+		if (a.kind !== 'open') store(KEY, a);
+		location.href = a.path;
+		return false;
+	}
+	if (a.kind === 'fill') fill(a);
+	else if (a.kind === 'show') show(a);
+	return true;
+}
+
+window.kitAssistant = { run: run };
+
+document.addEventListener('click', function (e) {
+	var b = e.target.closest && e.target.closest('[data-assistant-action]');
+	if (!b) return;
+	try { run(JSON.parse(b.getAttribute('data-assistant-action'))); } catch (_) {}
+});
+
+function ready() {
+	// The copilot stays open from page to page.
+	var copilot = document.querySelector('[data-copilot]'), bs = boot();
+	if (copilot && bs && bs.Offcanvas) {
+		copilot.addEventListener('shown.bs.offcanvas', function () { store(OPEN, true); });
+		copilot.addEventListener('hidden.bs.offcanvas', function () { store(OPEN, null); });
+		if (load(OPEN)) { // already open on the last page: no slide-in
+			copilot.style.transition = 'none';
+			copilot.addEventListener('shown.bs.offcanvas', function () { copilot.style.transition = ''; }, { once: true });
+			bs.Offcanvas.getOrCreateInstance(copilot).show();
+		}
+	}
+	var pending = load(KEY);
+	store(KEY, null);
+	if (pending && pending.path === location.pathname) setTimeout(function () { run(pending); }, 50);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();`
+
+// CopilotProps configure Copilot.
+type CopilotProps struct {
+	ID    string // default "copilot"
+	Title string // the panel's title
+	// Conversation is the conversation in the panel; its intro and composer fit the panel's width.
+	Conversation ConversationProps
+}
+
+func (p CopilotProps) id() string { return kit.Or(p.ID, "copilot") }
+
+// Copilot is the assistant as a panel at the right of an app's pages: an offcanvas without backdrop,
+// so the page stays usable beside it, with a Conversation inside. It stays open from page to page
+// (sessionStorage). Render it on every page of the app, and CopilotButton where the reader opens it;
+// the children are earlier turns, as with Conversation.
+templ Copilot(p CopilotProps) {
+	@offcanvas.Offcanvas(offcanvas.Props{ID: p.id(), Placement: offcanvas.End, Scroll: true, NoBackdrop: true, Title: p.Title,
+		Class: "assistant-copilot", BodyClass: "d-flex flex-column", Attributes: templ.Attributes{"data-copilot": true}}) {
+		@Conversation(p.Conversation) {
+			{ children... }
+		}
+	}
+}
+
+// CopilotButton opens and closes the Copilot with id (empty: "copilot").
+templ CopilotButton(id, label string) {
+	@button.Button(button.Props{Type: "button", Icon: "ti-sparkles", Attributes: offcanvas.Trigger(kit.Or(id, "copilot"))}) {
+		{ label }
+	}
+}

@@ -1,0 +1,157 @@
+package assistant
+
+import (
+	"context"
+	"strings"
+	"sync"
+)
+
+// Transcript keeps what a Stream sent, turn by turn, so the page can draw the conversation again: after
+// a reload, or after an action went to another page of the app. The server keeps the conversation; the
+// browser keeps nothing but the session id.
+//
+//	s := assistant.Open(w).Record(transcript)
+//	s.Turn(ctx, message)          // starts a recorded turn
+//	…
+//	@assistant.Conversation(props) { @transcript.View() }
+//
+// It applies the fragments as Script does: ModeSet replaces a slot, an id the turn already shows is
+// replaced in place, an id of an earlier turn moves to this one. It is safe for use from several
+// goroutines. Keep one per conversation (session id) and drop it when the conversation ends.
+type Transcript struct {
+	mu    sync.Mutex
+	turns []recordedTurn
+	// Max is the number of turns kept; older ones are dropped. 0: 50.
+	Max int
+}
+
+type recordedTurn struct {
+	message string
+	slots   map[string][]piece
+}
+
+type piece struct{ id, html string }
+
+func (t *Transcript) max() int {
+	if t.Max > 0 {
+		return t.Max
+	}
+	return 50
+}
+
+func (t *Transcript) begin(message string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.turns = append(t.turns, recordedTurn{message: message, slots: map[string][]piece{}})
+	if n := len(t.turns) - t.max(); n > 0 {
+		t.turns = t.turns[n:]
+	}
+}
+
+func (t *Transcript) add(slot, id, mode, html string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if len(t.turns) == 0 {
+		return
+	}
+	cur := &t.turns[len(t.turns)-1]
+	p := piece{id: id, html: html}
+	if mode == ModeSet {
+		cur.slots[slot] = []piece{p}
+		return
+	}
+	if id != "" {
+		for s, ps := range cur.slots {
+			for i := range ps {
+				if ps[i].id == id {
+					cur.slots[s][i] = p
+					return
+				}
+			}
+		}
+		for ti := range t.turns[:len(t.turns)-1] {
+			for s, ps := range t.turns[ti].slots {
+				for i := range ps {
+					if ps[i].id == id {
+						t.turns[ti].slots[s] = append(ps[:i:i], ps[i+1:]...)
+						break
+					}
+				}
+			}
+		}
+	}
+	cur.slots[slot] = append(cur.slots[slot], p)
+}
+
+// Len is the number of turns kept.
+func (t *Transcript) Len() int {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return len(t.turns)
+}
+
+func (t *Transcript) snapshot() []recordedTurn {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	out := make([]recordedTurn, len(t.turns))
+	for i, rt := range t.turns {
+		slots := make(map[string][]piece, len(rt.slots))
+		for k, v := range rt.slots {
+			slots[k] = append([]piece(nil), v...)
+		}
+		out[i] = recordedTurn{message: rt.message, slots: slots}
+	}
+	return out
+}
+
+func (rt recordedTurn) html(slot string) string {
+	var b strings.Builder
+	for _, p := range rt.slots[slot] {
+		b.WriteString(p.html)
+	}
+	return b.String()
+}
+
+// Record makes the stream keep what it sends in t; it returns the stream. Start each turn with
+// Stream.Turn, so the transcript knows the message.
+func (s *Stream) Record(t *Transcript) *Stream {
+	if s != nil {
+		s.rec = t
+	}
+	return s
+}
+
+// Turn sends a new Turn for message and, when recording, starts a turn of the transcript.
+func (s *Stream) Turn(ctx context.Context, message string) error {
+	if s.rec != nil {
+		s.rec.begin(message)
+	}
+	return s.Send(ctx, SlotTurn, "", "", Turn(message))
+}
+
+// View draws the recorded turns, finished as they were sent; put it in Conversation (or Copilot) as
+// its children. The fragments are drawn as they were rendered, without escaping them again.
+templ (t *Transcript) View() {
+	if t != nil {
+		for _, rt := range t.snapshot() {
+			<div class="assistant-turn d-flex flex-column gap-3">
+				<div class="assistant-message align-self-end bg-primary-lt rounded-3 px-3 py-2">{ rt.message }</div>
+				<div data-slot="steps" class="d-flex flex-column gap-1">
+					@templ.Raw(rt.html(SlotSteps))
+				</div>
+				<div data-slot="asks" class="d-flex flex-column gap-3">
+					@templ.Raw(rt.html(SlotAsks))
+				</div>
+				<div data-slot="blocks" class="d-flex flex-column gap-3">
+					@templ.Raw(rt.html(SlotBlocks))
+				</div>
+				<div data-slot="answer">
+					@templ.Raw(rt.html(SlotAnswer))
+				</div>
+				<div data-slot="status">
+					@templ.Raw(rt.html(SlotStatus))
+				</div>
+			</div>
+		}
+	}
+}
