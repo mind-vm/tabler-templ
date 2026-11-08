@@ -30,4 +30,5 @@ const (
 	Fslightbox      = "3.8.0"  // npm: fslightbox
 	Plyr            = "3.8.5"  // npm: plyr
 	Typed           = "3.0.0"  // npm: typed.js
+	HTMX            = "2.0.4"  // npm: htmx.org (not a Tabler plugin: the interactive blocks use it)
 )

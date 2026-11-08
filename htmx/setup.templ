@@ -1,0 +1,127 @@
+package htmx
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/toast"
+)
+
+type SetupProps struct {
+	// AllowEval keeps htmx's eval (hx-on, js: in hx-vals); off by default, for a Content-Security-Policy
+	// without 'unsafe-eval'.
+	AllowEval bool
+	// Offline is shown when a request does not reach the server; default kit.T(ctx).Offline.
+	Offline string
+	// ErrorText is shown when the server answers with an error htmx would not swap in (e.g. a 500 from a
+	// handler that did not use Error); default kit.T(ctx).ErrorGeneric.
+	ErrorText string
+	// ToastPosition places the toast container, default bottom right.
+	ToastPosition toast.Position
+	// DialogSize is a modal size class for the dialog, e.g. "modal-lg"; default the normal width.
+	DialogSize string
+}
+
+// Setup is the page's htmx client, once per page at the end of <body>, after Tabler's script:
+//   - the toast container (Toast, Error) and an empty dialog (a Tabler modal) that opens when content is
+//     swapped into it (hx-target={ htmx.Target(htmx.DialogContentID) }) and closes on CloseDialog;
+//   - htmx's configuration: 422 responses are swapped in (forms with errors), eval is off;
+//   - toasts for a lost connection and for errors htmx would drop silently; a toast closes once an
+//     action in it (an Undo button with hx-post) succeeded;
+//   - Tabler after swaps: tooltips and popovers in new content start, charts in replaced content are torn
+//     down first.
+templ Setup(props ...SetupProps) {
+	{{ p := kit.First(props) }}
+	@toast.Container(toast.ContainerProps{Position: positionOr(p.ToastPosition), Attributes: templ.Attributes{"id": ToastsID, "aria-live": "polite"}})
+	<div class="modal modal-blur fade" id={ DialogID } tabindex="-1" aria-hidden="true">
+		<div class={ kit.Classes("modal-dialog modal-dialog-centered", p.DialogSize) } role="document">
+			<div class="modal-content" id={ DialogContentID }></div>
+		</div>
+	</div>
+	<script { csp.Nonce(ctx)... } data-allow-eval?={ p.AllowEval } data-offline={ kit.Or(p.Offline, kit.T(ctx).Offline) } data-error={ kit.Or(p.ErrorText, kit.T(ctx).ErrorGeneric) } data-close-event={ EventCloseDialog }>
+		(function () {
+			'use strict';
+			var me = document.currentScript;
+			if (!window.htmx) { console.warn('htmx.Setup: htmx is not loaded (htmx.Library in the head)'); return; }
+			var bs = function () { return window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap; };
+			var cfg = htmx.config;
+			cfg.allowEval = me.hasAttribute('data-allow-eval');
+			cfg.historyRestoreAsHxRequest = false;
+			cfg.responseHandling = [
+				{ code: '204', swap: false },
+				{ code: '[23]..', swap: true },
+				{ code: '422', swap: true },
+				{ code: '[45]..', swap: false, error: true },
+				{ code: '...', swap: false }
+			];
+			var toasts = document.getElementById('htmx-toasts');
+			var showToasts = function () {
+				toasts.querySelectorAll('.toast:not([data-kit-shown])').forEach(function (el) {
+					el.setAttribute('data-kit-shown', '');
+					var b = bs();
+					if (b && b.Toast) {
+						b.Toast.getOrCreateInstance(el).show();
+						el.addEventListener('hidden.bs.toast', function () { el.remove(); });
+					} else {
+						el.classList.add('show');
+						var d = parseInt(el.getAttribute('data-bs-delay') || '5000', 10);
+						if (el.getAttribute('data-bs-autohide') !== 'false') setTimeout(function () { el.remove(); }, d);
+					}
+				});
+			};
+			var say = function (text) {
+				var el = document.createElement('div');
+				el.className = 'toast toast-danger kit-htmx-toast';
+				el.setAttribute('role', 'alert');
+				el.setAttribute('data-bs-delay', '6000');
+				var body = document.createElement('div');
+				body.className = 'toast-body';
+				body.textContent = text;
+				el.appendChild(body);
+				toasts.appendChild(el);
+				showToasts();
+			};
+			var dialog = document.getElementById('htmx-dialog');
+			var modal = function () { var b = bs(); return b && b.Modal ? b.Modal.getOrCreateInstance(dialog) : null; };
+			document.addEventListener('htmx:afterSettle', function (e) {
+				showToasts();
+				var root = e.detail.elt;
+				var b = bs();
+				if (root && root.querySelectorAll && b) {
+					if (b.Tooltip) root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { b.Tooltip.getOrCreateInstance(el); });
+					if (b.Popover) root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) { b.Popover.getOrCreateInstance(el); });
+				}
+				if (root && root.id === 'htmx-dialog-content' && root.children.length && !dialog.classList.contains('show')) {
+					var m = modal();
+					if (m) m.show();
+				}
+			});
+			document.addEventListener('htmx:oobAfterSwap', showToasts);
+			document.addEventListener('htmx:beforeSwap', function (e) {
+				var t = e.detail.target;
+				if (t && window.tablerCharts && window.tablerCharts.destroy && e.detail.shouldSwap) window.tablerCharts.destroy(t);
+			});
+			document.body.addEventListener(me.getAttribute('data-close-event'), function () { var m = modal(); if (m) m.hide(); });
+			dialog.addEventListener('hidden.bs.modal', function () {
+				if (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(dialog);
+				document.getElementById('htmx-dialog-content').replaceChildren();
+			});
+			// An action in a toast (e.g. Undo) closes it once it succeeded; closing it before would remove the
+			// element and htmx would cancel the request.
+			document.addEventListener('htmx:afterRequest', function (e) {
+				var el = e.detail.elt, t = el && el.closest && el.closest('#htmx-toasts .toast');
+				if (!t || !e.detail.successful) return;
+				var b = bs();
+				if (b && b.Toast) b.Toast.getOrCreateInstance(t).hide(); else t.remove();
+			});
+			document.addEventListener('htmx:sendError', function () { say(me.getAttribute('data-offline')); });
+			document.addEventListener('htmx:responseError', function () { say(me.getAttribute('data-error')); });
+		})();
+	</script>
+}
+
+func positionOr(p toast.Position) toast.Position {
+	if p == toast.Static {
+		return toast.BottomEnd
+	}
+	return p
+}

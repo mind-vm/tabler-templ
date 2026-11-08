@@ -1,0 +1,74 @@
+package contactrow
+
+import (
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+// Color is the badge color of a status.
+func Color(s contacts.Status) string {
+	switch s {
+	case contacts.Active:
+		return "green"
+	case contacts.Lead:
+		return "blue"
+	}
+	return "secondary"
+}
+
+// Badge is a status as a badge.
+templ Badge(s contacts.Status) {
+	@badge.Badge(badge.Props{Color: Color(s), Light: true}) {
+		{ s.Label() }
+	}
+}
+
+// View is the status cell: badge and an edit button that swaps in Edit.
+templ View(c contacts.Contact) {
+	<td id={ CellID(c.ID) } class="text-nowrap">
+		@Badge(c.Status)
+		<button
+			type="button"
+			class="btn btn-ghost-secondary btn-icon btn-sm ms-1"
+			hx-get={ EditStatus.URL(c.ID) }
+			hx-target={ htmx.Target(CellID(c.ID)) }
+			hx-swap="outerHTML"
+			aria-label={ "Change status of " + c.Name }
+			title="Change status"
+		>
+			@icon.Icon("ti-pencil")
+		</button>
+	</td>
+}
+
+// Edit is the cell with a select; it saves on change, the x button goes back to View. (No key filter
+// such as keyup[key=='Escape']: htmx evaluates filters with eval, which Setup turns off.)
+templ Edit(c contacts.Contact) {
+	<td id={ CellID(c.ID) } class="text-nowrap">
+		<form
+			class="d-flex align-items-center gap-1"
+			hx-post={ SaveStatus.URL(c.ID) }
+			hx-target={ htmx.Target(CellID(c.ID)) }
+			hx-swap="outerHTML"
+			hx-trigger="change"
+		>
+			<select name="status" class="form-select form-select-sm" aria-label={ "Status of " + c.Name } autofocus>
+				for _, s := range contacts.Statuses {
+					<option value={ string(s) } selected?={ s == c.Status }>{ s.Label() }</option>
+				}
+			</select>
+			<button
+				type="button"
+				class="btn btn-ghost-secondary btn-icon btn-sm"
+				hx-get={ Status.URL(c.ID) }
+				hx-target={ htmx.Target(CellID(c.ID)) }
+				hx-swap="outerHTML"
+				aria-label="Cancel"
+			>
+				@icon.Icon("ti-x")
+			</button>
+		</form>
+	</td>
+}

@@ -1,0 +1,119 @@
+package contactdetail
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/blocks/split"
+	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactdelete"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactrow"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/placeholder"
+	"github.com/mind-vm/tabler-templ/tag"
+)
+
+// View is the split page; it asks for itself again after the events in refreshOn.
+templ View(p Props) {
+	<div id={ RootID } hx-get={ Page.URL(p.Contact.ID) } hx-trigger={ trigger() } hx-target="this" hx-swap="outerHTML">
+		@split.Split(split.Props{List: others(p), Detail: detail(p), Aside: facts(p.Contact), AsideTitle: "Details",
+			Selected: true, BackHref: p.Back, BackLabel: "All contacts"})
+	</div>
+}
+
+templ others(p Props) {
+	<div class="card-header">
+		<h3 class="card-title">Contacts</h3>
+	</div>
+	for _, c := range p.Others {
+		@split.ListItem(split.ListItemProps{Href: Page.URL(c.ID), Title: c.Name, Meta: c.Status.Label(), Text: c.Company, Active: c.ID == p.Contact.ID})
+	}
+}
+
+templ detail(p Props) {
+	{{ c := p.Contact }}
+	<div class="card-header">
+		<div class="min-w-0">
+			<h3 class="card-title">{ c.Name }</h3>
+			<div class="text-secondary">{ c.Company }</div>
+		</div>
+		<div class="card-actions btn-list">
+			@contactform.EditButton(c, contactform.ButtonProps{Class: "btn"})
+			@contactdelete.Button(c, p.Back, true)
+		</div>
+	</div>
+	<div class="card-body">
+		<dl class="row mb-0">
+			<dt class="col-4 col-md-3 text-secondary fw-normal">E-mail</dt>
+			<dd class="col-8 col-md-9">
+				if c.Email != "" {
+					<a href={ templ.SafeURL("mailto:" + c.Email) }>{ c.Email }</a>
+				} else {
+					<span class="text-secondary">–</span>
+				}
+			</dd>
+			<dt class="col-4 col-md-3 text-secondary fw-normal">Status</dt>
+			<dd class="col-8 col-md-9">
+				@contactrow.Badge(c.Status)
+			</dd>
+			<dt class="col-4 col-md-3 text-secondary fw-normal">Tags</dt>
+			<dd class="col-8 col-md-9">
+				@tag.List() {
+					for _, t := range c.Tags {
+						@tag.Tag(tag.Props{Text: t})
+					}
+				}
+			</dd>
+			<dt class="col-4 col-md-3 text-secondary fw-normal">Notes</dt>
+			<dd class="col-8 col-md-9" style="white-space:pre-line">
+				if c.Notes != "" {
+					{ c.Notes }
+				} else {
+					<span class="text-secondary">No notes yet.</span>
+				}
+			</dd>
+		</dl>
+	</div>
+}
+
+templ facts(c contacts.Contact) {
+	<div class="card-body">
+		<div class="datagrid">
+			<div class="datagrid-item">
+				<div class="datagrid-title">Updated</div>
+				<div class="datagrid-content">{ c.Updated.Format("Jan 2, 15:04") }</div>
+			</div>
+			<div class="datagrid-item">
+				<div class="datagrid-title">Version</div>
+				<div class="datagrid-content">{ strconv.Itoa(c.Version) }</div>
+			</div>
+		</div>
+	</div>
+	<div class="card-header border-top">
+		<h3 class="card-title">Activity</h3>
+	</div>
+	// Loaded when the inspector is drawn; without JavaScript, a link to the activity's page.
+	<div id={ ActivityID } hx-get={ Activity.URL(c.ID) } hx-trigger="load" hx-target="this" hx-swap="outerHTML" class="card-body">
+		@placeholder.Glow() {
+			@placeholder.Placeholder(placeholder.Props{Class: "col-9 mb-2"})
+			@placeholder.Placeholder(placeholder.Props{Class: "col-7 mb-2"})
+			@placeholder.Placeholder(placeholder.Props{Class: "col-8"})
+		}
+		<noscript><a href={ templ.SafeURL(Activity.URL(c.ID)) }>Show activity</a></noscript>
+	</div>
+}
+
+// ActivityList is the contact's history.
+templ ActivityList(ev []contacts.Event) {
+	<ul id={ ActivityID } class="list-unstyled card-body mb-0">
+		for _, e := range ev {
+			<li class="d-flex gap-2 mb-2">
+				@icon.Icon(e.Icon, icon.Props{Class: "text-secondary"})
+				<div>
+					<div>{ e.Text }</div>
+					<div class="text-secondary small">{ e.When.Format("Jan 2, 15:04") }</div>
+				</div>
+			</li>
+		}
+	</ul>
+}

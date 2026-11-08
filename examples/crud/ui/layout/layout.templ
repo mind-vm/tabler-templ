@@ -1,0 +1,92 @@
+// Package layout is the CRUD demo's page frame: the shell with a sidebar, Tabler and htmx in the head,
+// htmx.Setup (toasts, dialog, client configuration) at the end of the body, and two instances of the
+// contact count.
+package layout
+
+import (
+	"context"
+	"io"
+
+	"github.com/mind-vm/tabler-templ/assets"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactcount"
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/sidebar"
+)
+
+type Layout struct {
+	Counts contactcount.Service
+	Home   string // the list, e.g. "/crud"
+}
+
+type Page struct {
+	Title   string
+	Heading string // default Title
+	Crumbs  []shell.Crumb
+	Actions templ.Component
+	// Status is the sidebar entry to mark: "" for all contacts, or a status.
+	Status string
+	// List marks the page as the list (the sidebar's entries are active only there).
+	List bool
+}
+
+// Frame is the frame for a component's page without htmx: the title as heading and crumb.
+func (l Layout) Frame(title string, body templ.Component) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		return l.Page(Page{Title: title, Crumbs: []shell.Crumb{{Text: "Contacts", Href: l.Home}, {Text: title}}}).Render(templ.WithChildren(ctx, body), w)
+	})
+}
+
+templ head() {
+	@assets.Head()
+	@htmx.Library()
+}
+
+templ scripts() {
+	@assets.Scripts()
+	@htmx.Setup()
+}
+
+// Page renders a page; the children are its content.
+templ (l Layout) Page(p Page) {
+	@shell.Page(shell.Props{Title: p.Title, AppName: "CRUD demo", Head: head(), Scripts: scripts(), Sidebar: l.sidebar(p),
+		Breadcrumbs: p.Crumbs, Heading: p.Heading, Actions: p.Actions, HeadingExtra: l.headingCount(p),
+		HeaderActions: contactcount.Embed(l.Counts, contactcount.Props{Instance: "header", Label: "contacts", Color: "azure"})}) {
+		{ children... }
+	}
+}
+
+templ (l Layout) headingCount(p Page) {
+	if p.List {
+		@contactcount.Embed(l.Counts, contactcount.Props{Instance: "active", Status: contacts.Active, Label: "active", Color: "green"})
+	}
+}
+
+templ (l Layout) sidebar(p Page) {
+	@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Label: "Main navigation"}) {
+		@sidebar.Header() {
+			@sidebar.Brand(sidebar.BrandProps{Href: l.Home, Title: "Contacts", Subtitle: "CRUD demo", Logo: logo()})
+		}
+		@sidebar.Content() {
+			@sidebar.Group(sidebar.GroupProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: l.Home, Icon: "ti-address-book", Label: "All contacts", Active: p.List && p.Status == ""})
+			}
+			@sidebar.Group(sidebar.GroupProps{Label: "By status"}) {
+				for _, s := range contacts.Statuses {
+					@sidebar.Item(sidebar.ItemProps{Href: l.Home + "?status=" + string(s), Icon: "ti-point", Label: s.Label(), Active: p.List && p.Status == string(s)})
+				}
+			}
+			@sidebar.Group(sidebar.GroupProps{End: true}) {
+				@sidebar.Item(sidebar.ItemProps{Href: "/", Icon: "ti-arrow-left", Label: "Back to the preview"})
+			}
+		}
+	}
+}
+
+templ logo() {
+	<span class="avatar avatar-sm bg-primary text-white">
+		@icon.Icon("ti-address-book")
+	</span>
+}

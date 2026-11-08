@@ -21,6 +21,7 @@ import (
 	"github.com/mind-vm/tabler-templ/confetti"
 	"github.com/mind-vm/tabler-templ/datepicker"
 	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/htmx"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/lightbox"
 	"github.com/mind-vm/tabler-templ/mapview"
@@ -36,7 +37,6 @@ var openTag = regexp.MustCompile(`<(script|style)\b[^>]*>`)
 // TestNonceRendered renders the packages' scripts and styles with templ's nonce: every <script> and
 // <style> carries it.
 func TestNonceRendered(t *testing.T) {
-	ctx := templ.WithNonce(context.Background(), "n0nce")
 	for name, c := range map[string]templ.Component{
 		"assets":     templ.Join(assets.Head(), assets.Theme(), assets.Scripts()),
 		"chart":      templ.Join(chart.Library(), chart.Script()),
@@ -44,6 +44,7 @@ func TestNonceRendered(t *testing.T) {
 		"datepicker": templ.Join(datepicker.Library(), datepicker.Script()),
 		"detail":     templ.Join(detail.Styles(), detail.Script(detail.ScriptConfig{})),
 		"form":       form.PasswordToggleScript(),
+		"htmx":       templ.Join(htmx.Library(), htmx.Setup()),
 		"icon":       icon.Styles(),
 		"invoice":    invoice.PrintButton(),
 		"layout":     layout.ThemeSettings(layout.ThemeSettingsProps{}),
@@ -57,7 +58,8 @@ func TestNonceRendered(t *testing.T) {
 		"themes":     themes.Head(themes.All...),
 		"vectormap":  vectormap.Library("world"),
 	} {
-		html := render(t, ctx, c)
+		// A fresh context each: the once-per-page CSS (icon inside shell …) must not count as rendered.
+		html := render(t, templ.WithNonce(context.Background(), "n0nce"), c)
 		tags := openTag.FindAllString(html, -1)
 		if len(tags) == 0 {
 			t.Errorf("%s: no <script> or <style>", name)

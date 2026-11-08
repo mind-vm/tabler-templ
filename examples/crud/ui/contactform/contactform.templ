@@ -1,0 +1,154 @@
+package contactform
+
+import (
+	"strconv"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+type Props struct {
+	Contact contacts.Contact // ID "" for a new contact
+	Errors  contacts.FieldErrors
+	// InDialog renders the form for htmx's dialog: a close button, Cancel closes, the form posts with
+	// htmx. Otherwise it is a plain form on a page that posts and redirects.
+	InDialog bool
+	Cancel   string // where Cancel leads on a page
+}
+
+func (p Props) action() string {
+	if p.Contact.ID == "" {
+		return Create.URL()
+	}
+	return Update.URL(p.Contact.ID)
+}
+
+func (p Props) title() string {
+	if p.Contact.ID == "" {
+		return "New contact"
+	}
+	return "Edit contact"
+}
+
+// View is the form: in the dialog its parts are the modal's header, body and footer.
+templ View(p Props) {
+	<form
+		id={ FormID }
+		method="post"
+		action={ templ.SafeURL(p.action()) }
+		class={ templ.KV("card", !p.InDialog) }
+		novalidate
+		if p.InDialog {
+			hx-post={ p.action() }
+			hx-target={ htmx.Target(FormID) }
+			hx-swap="outerHTML"
+		}
+	>
+		<input type="hidden" name="version" value={ strconv.Itoa(p.Contact.Version) }/>
+		<div class={ templ.KV("modal-header", p.InDialog), templ.KV("card-header", !p.InDialog) }>
+			<h5 class={ templ.KV("modal-title", p.InDialog), templ.KV("card-title", !p.InDialog) }>{ p.title() }</h5>
+			if p.InDialog {
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			}
+		</div>
+		<div class={ templ.KV("modal-body", p.InDialog), templ.KV("card-body", !p.InDialog) }>
+			@form.Field(form.FieldProps{Label: "Name", For: "contact-name", Required: true, Error: p.Errors["name"]}) {
+				@form.Input(form.InputProps{ID: "contact-name", Name: "name", Value: p.Contact.Name, Required: true, Invalid: p.Errors["name"] != "",
+					Attributes: templ.Attributes{"autofocus": true, "autocomplete": "off"}})
+			}
+			<div class="row">
+				<div class="col-md-6">
+					@form.Field(form.FieldProps{Label: "Company", For: "contact-company"}) {
+						@form.Input(form.InputProps{ID: "contact-company", Name: "company", Value: p.Contact.Company})
+					}
+				</div>
+				<div class="col-md-6">
+					@form.Field(form.FieldProps{Label: "E-mail", For: "contact-email", Error: p.Errors["email"]}) {
+						@form.Input(form.InputProps{ID: "contact-email", Name: "email", Type: "email", Value: p.Contact.Email, Invalid: p.Errors["email"] != ""})
+					}
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					@form.Field(form.FieldProps{Label: "Status", For: "contact-status", Error: p.Errors["status"]}) {
+						@form.Select(form.SelectProps{ID: "contact-status", Name: "status", Selected: string(p.Contact.Status), Options: statusOptions()})
+					}
+				</div>
+				<div class="col-md-6">
+					@form.Field(form.FieldProps{Label: "Tags", For: "contact-tags", Hint: "Separated by commas."}) {
+						@form.Input(form.InputProps{ID: "contact-tags", Name: "tags", Value: strings.Join(p.Contact.Tags, ", ")})
+					}
+				</div>
+			</div>
+			@form.Field(form.FieldProps{Label: "Notes", For: "contact-notes", Class: "mb-0"}) {
+				@form.Textarea(form.TextareaProps{ID: "contact-notes", Name: "notes", Rows: 3, Value: p.Contact.Notes})
+			}
+		</div>
+		<div class={ templ.KV("modal-footer", p.InDialog), templ.KV("card-footer d-flex justify-content-end gap-2", !p.InDialog) }>
+			if p.InDialog {
+				<button type="button" class="btn me-auto" data-bs-dismiss="modal">Cancel</button>
+			} else {
+				<a href={ templ.SafeURL(p.Cancel) } class="btn">Cancel</a>
+			}
+			<button type="submit" class="btn btn-primary">
+				@icon.Icon("ti-device-floppy")
+				Save
+			</button>
+		</div>
+	</form>
+}
+
+func statusOptions() []form.Option {
+	out := make([]form.Option, len(contacts.Statuses))
+	for i, s := range contacts.Statuses {
+		out[i] = form.Option{Value: string(s), Label: s.Label()}
+	}
+	return out
+}
+
+type ButtonProps struct {
+	Class string // default "btn btn-primary" for New, "btn btn-ghost-secondary btn-icon btn-sm" for Edit
+}
+
+// NewButton opens the form for a new contact in the dialog; without JavaScript it is a link to the
+// form's page.
+templ NewButton(props ...ButtonProps) {
+	<a
+		href={ templ.SafeURL(New.URL()) }
+		class={ classOr(props, "btn btn-primary") }
+		hx-get={ New.URL() }
+		hx-target={ htmx.Target(htmx.DialogContentID) }
+		hx-swap="innerHTML"
+	>
+		@icon.Icon("ti-plus")
+		New contact
+	</a>
+}
+
+// EditButton opens the form for a contact in the dialog, a link to the page without JavaScript.
+templ EditButton(c contacts.Contact, props ...ButtonProps) {
+	<a
+		href={ templ.SafeURL(Edit.URL(c.ID)) }
+		class={ classOr(props, "btn btn-ghost-secondary btn-icon btn-sm") }
+		hx-get={ Edit.URL(c.ID) }
+		hx-target={ htmx.Target(htmx.DialogContentID) }
+		hx-swap="innerHTML"
+		aria-label={ "Edit " + c.Name }
+		title="Edit"
+	>
+		@icon.Icon("ti-pencil")
+		if len(props) > 0 && props[0].Class != "" {
+			Edit
+		}
+	</a>
+}
+
+func classOr(props []ButtonProps, def string) string {
+	if len(props) > 0 && props[0].Class != "" {
+		return props[0].Class
+	}
+	return def
+}

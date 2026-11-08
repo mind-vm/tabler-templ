@@ -54,6 +54,9 @@ type Messages struct {
 	Back           string
 	ToggleDetails  string
 	UnsavedChanges string
+	// htmx: the message for a failed request whose details stay on the server, and for a lost connection.
+	ErrorGeneric string
+	Offline      string
 }
 
 var (
@@ -66,7 +69,8 @@ var (
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
 		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
 		Required: " (required)",
-		Back:     "Back", ToggleDetails: "Show or hide details", UnsavedChanges: "Unsaved changes"}
+		Back:     "Back", ToggleDetails: "Show or hide details", UnsavedChanges: "Unsaved changes",
+		ErrorGeneric: "Something went wrong. Please try again.", Offline: "No connection to the server."}
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		Previous: "Zurück", Next: "Weiter", First: "Erste", Last: "Letzte", FirstPage: "Erste Seite", LastPage: "Letzte Seite", Page: "Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
@@ -76,7 +80,8 @@ var (
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
 		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",
 		Required: " (Pflichtfeld)",
-		Back:     "Zurück", ToggleDetails: "Details ein- oder ausblenden", UnsavedChanges: "Ungespeicherte Änderungen"}
+		Back:     "Zurück", ToggleDetails: "Details ein- oder ausblenden", UnsavedChanges: "Ungespeicherte Änderungen",
+		ErrorGeneric: "Etwas ist schiefgegangen. Bitte versuche es noch einmal.", Offline: "Keine Verbindung zum Server."}
 )
 
 type messagesKey struct{}

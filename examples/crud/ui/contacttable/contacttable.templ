@@ -1,0 +1,67 @@
+package contacttable
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactdelete"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactrow"
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/table"
+	"github.com/mind-vm/tabler-templ/tag"
+)
+
+// View is the list card. The search form and page links inside are boosted into the table; the table
+// asks for itself again (with the same query) after the events in refreshOn. hx-target and hx-swap are
+// inherited by everything inside, so the buttons that open the dialog set their own; hx-select is not
+// set for the same reason (it would empty the dialog).
+templ View(p Props) {
+	<div
+		id={ RootID }
+		hx-boost="true"
+		hx-target={ htmx.Target(RootID) }
+		hx-swap="outerHTML"
+		hx-get={ p.List.Link(p.List.Page) }
+		hx-trigger={ trigger() }
+	>
+		@listpage.Card(p.List) {
+			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Hover: true}) {
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Company</th>
+						<th class="d-none d-md-table-cell">E-mail</th>
+						<th>Status</th>
+						<th class="d-none d-lg-table-cell">Tags</th>
+						<th class="w-1"><span class="visually-hidden">Actions</span></th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(p.Rows) == 0 {
+						@table.Empty(6, p.List.Empty("No contacts yet.", "No contacts match."))
+					}
+					for _, c := range p.Rows {
+						<tr>
+							<td>
+								<a href={ templ.SafeURL(p.Detail(c.ID)) } hx-boost="false" class="fw-medium">{ c.Name }</a>
+							</td>
+							<td class="text-secondary">{ c.Company }</td>
+							<td class="d-none d-md-table-cell text-secondary">{ c.Email }</td>
+							@contactrow.View(c)
+							<td class="d-none d-lg-table-cell">
+								@tag.List() {
+									for _, t := range c.Tags {
+										@tag.Tag(tag.Props{Text: t})
+									}
+								}
+							</td>
+							<td class="text-nowrap">
+								@contactform.EditButton(c)
+								@contactdelete.Button(c, "", false)
+							</td>
+						</tr>
+					}
+				</tbody>
+			}
+		}
+	</div>
+}

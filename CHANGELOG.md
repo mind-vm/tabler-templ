@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- **`htmx` for components with their own endpoints:**
+  - `Route` defines an endpoint once: `Pattern` goes to the mux, `URL` to the markup. `CheckRoutes` is the
+    contract test.
+  - `ID`, `Target`, `Vals` and `Query` name a component instance's elements and requests.
+  - `Respond` writes a fragment with its headers first (`Vary: HX-Request`, status, `HX-Trigger` …).
+    Requests without htmx get the whole page (`FullPage`). Toasts and other fragments go out of band.
+  - `Error` and `Fail` answer failures as a danger toast, without details for 5xx. `Redirect` does
+    Post/Redirect/Get, or `HX-Redirect` for htmx.
+  - `Setup` is the page's client:
+    - toast container and dialog;
+    - 422 responses swapped in, `allowEval` off;
+    - toasts when offline or on an error;
+    - a toast closes once its action succeeded;
+    - tooltips and popovers start, and charts are torn down, around swaps.
+  - kit texts `ErrorGeneric` and `Offline`.
+- **CRUD demo (`examples/crud`, `/crud` in the demo):** contacts built from six co-located components
+  (table, form, inline status, delete with undo, live count, detail page). Each has its own contract,
+  handlers and tests, and it works without JavaScript too.
+- **Tests:** `TestNonceRendered` renders each package in a fresh context. Before, the once-per-page CSS
+  made it fail now and then, depending on the map order.
+
+## Unreleased
+
 - **Less CSS per page:**
   - The blocks `listpage`, `detail`, `create`, `history` and `stats` render their CSS themselves, where
     they are used and once per page.
