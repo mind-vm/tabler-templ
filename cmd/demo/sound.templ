@@ -1,0 +1,116 @@
+package main
+
+import (
+	"encoding/json"
+	"net/http"
+	"strconv"
+	"sync/atomic"
+
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/motion"
+	"github.com/mind-vm/tabler-templ/sound"
+)
+
+// The sound demo plays the sound package's sounds: on click, in a fragment htmx swaps in (sound.Play),
+// and from an HX-Trigger header the server sends.
+
+var soundMessages atomic.Int64
+
+var soundSenders = []string{"Paweł Kuna", "Jeffie Lewzey", "Mallory Hulme", "Dunn Slane", "Emmy Levet"}
+
+func soundRoutes(mux *http.ServeMux) {
+	mux.Handle("GET /sound", templ.Handler(soundPage()))
+	mux.HandleFunc("POST /sound/messages", func(w http.ResponseWriter, r *http.Request) {
+		soundMessage(int(soundMessages.Add(1))).Render(r.Context(), w)
+	})
+	mux.HandleFunc("POST /sound/save", func(w http.ResponseWriter, r *http.Request) {
+		trigger, _ := json.Marshal(map[string]string{sound.Event: r.FormValue("result")})
+		w.Header().Set("HX-Trigger", string(trigger))
+		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
+templ soundLink() {
+	<a href="/sound" class="btn">
+		@icon.Icon("ti-volume")
+		Sound
+	</a>
+}
+
+templ soundMessage(n int) {
+	{{ from := soundSenders[n%len(soundSenders)] }}
+	<div class="list-group-item" { motion.Attrs(motion.Props{Preset: motion.FadeDown})... }>
+		@sound.Play(sound.Message)
+		<div class="row align-items-center">
+			<div class="col-auto"><span class="avatar avatar-sm">{ string([]rune(from)[0]) }</span></div>
+			<div class="col">
+				<div class="fw-medium">{ from }</div>
+				<div class="text-secondary">Message { strconv.Itoa(n) }: could you take a look at the latest numbers?</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ soundButton(s sound.Sound, ic, class string) {
+	<button type="button" class={ "btn " + class } { sound.Attrs(s)... }>
+		@icon.Icon(ic)
+		{ string(s) }
+	</button>
+}
+
+templ soundPage() {
+	{{ p := frameProps("", "Sound") }}
+	{{ p.Head = templ.Join(htmxLibrary(), motion.Library(), assets()) }}
+	{{ p.Scripts = templ.Join(scripts(), sound.Script(sound.Config{})) }}
+	{{
+		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Sound",
+			Description: "Short interface sounds, made by the browser (Web Audio): on click, when htmx swaps a message in, or on a server event. Click anywhere once first: browsers only play sound after that.",
+			Actions:     sound.Toggle(sound.ToggleProps{Class: "btn", Text: "Sounds"})})
+	}}
+	@layout.Page(p) {
+		<div class="row row-cards">
+			<div class="col-lg-6">
+				<div class="card">
+					<div class="card-header"><h3 class="card-title">On click</h3></div>
+					<div class="card-body">
+						<p class="text-secondary">sound.Attrs(sound.Success) on any button or link.</p>
+						<div class="btn-list">
+							@soundButton(sound.Message, "ti-message", "")
+							@soundButton(sound.Notify, "ti-bell", "")
+							@soundButton(sound.Success, "ti-check", "btn-success")
+							@soundButton(sound.Warning, "ti-alert-triangle", "btn-warning")
+							@soundButton(sound.Error, "ti-x", "btn-danger")
+							@soundButton(sound.Click, "ti-pointer", "")
+						</div>
+					</div>
+				</div>
+				<div class="card mt-3">
+					<div class="card-header"><h3 class="card-title">From the server</h3></div>
+					<div class="card-body">
+						<p class="text-secondary">The handler answers with <code>HX-Trigger: {"{"}"sound":"success"{"}"}</code>, the page plays it.</p>
+						<div class="btn-list">
+							<button type="button" class="btn btn-primary" hx-post="/sound/save" hx-vals={ `{"result":"success"}` } hx-swap="none">Save</button>
+							<button type="button" class="btn" hx-post="/sound/save" hx-vals={ `{"result":"error"}` } hx-swap="none">Save with an error</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Incoming messages</h3>
+						<div class="card-actions btn-list">
+							<button type="button" class="btn btn-sm" hx-post="/sound/messages" hx-target="#sound-messages" hx-swap="afterbegin">Receive</button>
+							<button type="button" class="btn btn-sm" hx-post="/sound/messages" hx-trigger="click delay:3s" hx-target="#sound-messages" hx-swap="afterbegin">In 3 s</button>
+						</div>
+					</div>
+					<div class="card-body text-secondary small">
+						Each message carries sound.Play(sound.Message); try "In 3 s" and switch to another tab.
+					</div>
+					<div id="sound-messages" class="list-group list-group-flush"></div>
+				</div>
+			</div>
+		</div>
+	}
+}

@@ -1,0 +1,7 @@
+package motion
+
+// Counter is a span that counts up to To, formatted for the page's language. Without the animation it
+// shows To right away.
+templ Counter(p CounterProps) {
+	<span class={ p.Class } { counterAttrs(p)... }>{ counterText(p) }</span>
+}

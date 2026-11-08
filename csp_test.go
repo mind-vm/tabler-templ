@@ -26,8 +26,10 @@ import (
 	"github.com/mind-vm/tabler-templ/lightbox"
 	"github.com/mind-vm/tabler-templ/mapview"
 	"github.com/mind-vm/tabler-templ/modal"
+	"github.com/mind-vm/tabler-templ/motion"
 	"github.com/mind-vm/tabler-templ/player"
 	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/sound"
 	"github.com/mind-vm/tabler-templ/themes"
 	"github.com/mind-vm/tabler-templ/vectormap"
 )
@@ -52,6 +54,8 @@ func TestNonceRendered(t *testing.T) {
 		"maps":       maps.Script(),
 		"mapview":    templ.Join(mapview.Library(), mapview.Script()),
 		"modal":      modal.DialogScript(),
+		"motion":     motion.Library(),
+		"sound":      templ.Join(sound.Script(sound.Config{}), sound.Styles()),
 		"player":     templ.Join(player.Library(), player.Script()),
 		"shell":      shell.Styles(),
 		"sidebar":    templ.Join(sidebar.Styles(), sidebar.Script()),

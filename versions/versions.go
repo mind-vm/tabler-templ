@@ -32,3 +32,8 @@ const (
 	Typed           = "3.0.0"  // npm: typed.js
 	HTMX            = "2.0.4"  // npm: htmx.org (not a Tabler plugin: the interactive blocks use it)
 )
+
+// Libraries the kit adds itself, not from Tabler's lockfile (the versions tool leaves them alone).
+const (
+	Motion = "14.6.0" // npm: motion (motion.dev, formerly Framer Motion), its vanilla build
+)
