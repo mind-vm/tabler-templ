@@ -19,6 +19,30 @@
   - `Toggle` switches the sounds on and off and keeps the choice in the browser.
 - Demo: `/motion` and `/sound`.
 
+## Unreleased
+
+- **`blocks/assistant`, more parts** (after the examples on beautifului.dev):
+  - `Thinking` folds the agent's trace (reasoning, searches, reads, code) under "Thinking…" or "Thought
+    for 4s". `ToolChips` folds tool calls into one line with a chip per call.
+  - `Cite`, `Sources` and `FollowUps` go with the answer. A follow-up is sent with one click.
+  - New block types for `BlockView`: `code` (line numbers, copy, unified diff), `context` (retrieved
+    chunks with their source), `screen` (the agent's screen in a browser frame), `tasks` and `insights`
+    (paged without a script, with a sparkline and a follow-up question).
+  - Interactive blocks: a Go value holds the state, a method applies the form htmx posts and returns
+    the next state, and a templ component draws it. `Recommendation.Decide` with `RecommendationCard`
+    (confidence, Accept, alternatives), `Approval.Advance` with `ApprovalCard` (questions one at a time,
+    Back, Skip, Continue; the answers travel in the form), `Diff.Resolve` with `DiffCard` (proposed edits,
+    accepted or rejected per row or all at once), and `TaskListCard`, which polls while a task runs. The
+    package has no handlers and the page loads htmx itself.
+  - `Conversation`: a model picker (`Models`, posted as `model`), a toolbar for text selected in an
+    answer (`SelectionActions`), and the working line counts seconds. Streamed fragments are passed to
+    `htmx.process` when htmx is on the page.
+  - New texts in `Texts`, English defaults.
+  - Demo: `/assistant/parts` shows every part and runs the interactive ones; `/assistant` uses thinking,
+    sources, follow-ups, the model picker, selection actions and a recommendation.
+
+## Unreleased
+
 - **Less CSS per page:**
   - The blocks `listpage`, `detail`, `create`, `history` and `stats` render their CSS themselves, where
     they are used and once per page.

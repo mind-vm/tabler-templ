@@ -272,7 +272,7 @@ func soundPage() templ.Component {
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
 		p := frameProps("", "Sound")
-		p.Head = templ.Join(motionHTMX(), motion.Library(), assets())
+		p.Head = templ.Join(htmxLibrary(), motion.Library(), assets())
 		p.Scripts = templ.Join(scripts(), sound.Script(sound.Config{}))
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Sound",
 			Description: "Short interface sounds, made by the browser (Web Audio): on click, when htmx swaps a message in, or on a server event. Click anywhere once first: browsers only play sound after that.",

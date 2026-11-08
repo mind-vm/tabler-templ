@@ -6,10 +6,8 @@ import (
 	"sync/atomic"
 
 	"github.com/mind-vm/tabler-templ/blocks/layout"
-	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/internal/csp"
-	"github.com/mind-vm/tabler-templ/internal/plugin"
 	"github.com/mind-vm/tabler-templ/motion"
 )
 
@@ -25,12 +23,6 @@ func motionRoutes(mux *http.ServeMux) {
 		motionItem(int(motionItems.Add(1))).Render(r.Context(), w)
 	})
 	mux.HandleFunc("DELETE /motion/items/{id}", func(w http.ResponseWriter, r *http.Request) {})
-}
-
-// motionHTMX loads htmx for the motion and sound demos.
-func motionHTMX() templ.Component {
-	return templ.Join(templ.Raw(`<meta name="htmx-config" content='{"includeIndicatorStyles":false}'/>`),
-		plugin.Script(cdn.URL("htmx.org", "2.0.4", "dist/htmx.min.js")))
 }
 
 var motionItems atomic.Int64
@@ -82,7 +74,7 @@ templ motionStat(title string, c motion.CounterProps, note string) {
 
 templ motionPage() {
 	{{ p := frameProps("", "Motion") }}
-	{{ p.Head = templ.Join(motionHTMX(), motion.Library(), assets()) }}
+	{{ p.Head = templ.Join(htmxLibrary(), motion.Library(), assets()) }}
 	{{
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Motion",
 			Description: "Enter and leave animations with Motion (formerly Framer Motion), without React: on load, on htmx swaps and on scroll."})

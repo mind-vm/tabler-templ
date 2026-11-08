@@ -1,0 +1,453 @@
+package assistant
+
+import (
+	"fmt"
+	"net/url"
+	"slices"
+	"strconv"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/clipboard"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/mockup"
+	"github.com/mind-vm/tabler-templ/progress"
+	"github.com/mind-vm/tabler-templ/shimmer"
+	"github.com/mind-vm/tabler-templ/sparkline"
+	"github.com/mind-vm/tabler-templ/spinner"
+	"github.com/mind-vm/tabler-templ/status"
+)
+
+// Thought is one entry of a Thinking trace.
+type Thought struct {
+	// Kind picks the icon: "reasoning", "search", "code", "read" or "step" (default).
+	Kind  string
+	Title string
+	Text  string // plain text; code for Kind "code"
+}
+
+type ThinkingProps struct {
+	ID       string // send it again under the same ID as the trace grows
+	Thoughts []Thought
+	// Running shows the shimmering Texts.Thinking; otherwise the title is Texts.ThoughtFor with Duration.
+	Running  bool
+	Duration string // "4s"
+	Open     bool
+}
+
+// Thinking is the agent's trace — its reasoning, searches, code and steps — folded under one line:
+// "Thinking…" while it runs, "Thought for 4s" after. Send it into SlotSteps.
+templ Thinking(p ThinkingProps) {
+	<details class="assistant-thinking" id={ p.ID } open?={ p.Open }>
+		<summary class="d-inline-flex align-items-center gap-2 text-secondary">
+			@icon.Icon("ti-brain")
+			if p.Running {
+				@shimmer.Shimmer() {
+					{ T(ctx).Thinking }…
+				}
+			} else if p.Duration != "" {
+				<span>{ fmt.Sprintf(T(ctx).ThoughtFor, p.Duration) }</span>
+			} else {
+				<span>{ T(ctx).Thinking }</span>
+			}
+			@icon.Icon("ti-chevron-down", icon.Props{Class: "assistant-chevron"})
+		</summary>
+		<ol class="assistant-trace list-unstyled mt-2 mb-0">
+			for _, t := range p.Thoughts {
+				<li class="d-flex gap-2">
+					<span class="assistant-trace-icon text-secondary">
+						@icon.Icon(thoughtIcon(t.Kind))
+					</span>
+					<div class="flex-fill min-w-0">
+						if t.Title != "" {
+							<div class="fw-medium">{ t.Title }</div>
+						}
+						if t.Kind == "code" {
+							<pre class="mb-0 mt-1"><code>{ t.Text }</code></pre>
+						} else if t.Text != "" {
+							<div class="text-secondary">{ t.Text }</div>
+						}
+					</div>
+				</li>
+			}
+		</ol>
+	</details>
+}
+
+func thoughtIcon(kind string) string {
+	switch kind {
+	case "reasoning":
+		return "ti-bulb"
+	case "search":
+		return "ti-world-search"
+	case "code":
+		return "ti-code"
+	case "read":
+		return "ti-file-text"
+	default:
+		return "ti-point"
+	}
+}
+
+// Source is a page or document the answer draws on.
+type Source struct {
+	Title  string
+	URL    string
+	Domain string // default the URL's host
+}
+
+func (s Source) domain() string {
+	if s.Domain != "" {
+		return s.Domain
+	}
+	if u, err := url.Parse(s.URL); err == nil && u.Host != "" {
+		return strings.TrimPrefix(u.Host, "www.")
+	}
+	return s.Title
+}
+
+// Cite is an inline source chip, to follow a sentence of an answer.
+templ Cite(s Source) {
+	<a class="assistant-cite" href={ templ.SafeURL(s.URL) } title={ s.Title } target="_blank" rel="noopener">
+		<span class="assistant-cite-mark">{ initial(s.domain()) }</span>
+		{ s.domain() }
+	</a>
+}
+
+// Sources lists the sources of an answer, folded under "N sources" with their initials stacked. Send it
+// into SlotAnswer after the Answer (without ModeSet, so it is added).
+templ Sources(ss []Source) {
+	if len(ss) > 0 {
+		<details class="assistant-sources mt-2">
+			<summary class="d-inline-flex align-items-center gap-2 text-secondary small">
+				<span class="assistant-stack">
+					for _, s := range ss[:min(3, len(ss))] {
+						<span class="assistant-cite-mark">{ initial(s.domain()) }</span>
+					}
+				</span>
+				{ fmt.Sprintf(T(ctx).Sources, len(ss)) }
+			</summary>
+			<ol class="list-unstyled d-flex flex-column gap-1 mt-2 mb-0">
+				for i, s := range ss {
+					<li class="d-flex gap-2 align-items-baseline">
+						<span class="text-secondary small">{ strconv.Itoa(i + 1) }</span>
+						<a href={ templ.SafeURL(s.URL) } target="_blank" rel="noopener" class="text-reset">{ kit.Or(s.Title, s.URL) }</a>
+						<span class="text-secondary small">{ s.domain() }</span>
+					</li>
+				}
+			</ol>
+		</details>
+	}
+}
+
+func initial(s string) string {
+	for _, r := range s {
+		return strings.ToUpper(string(r))
+	}
+	return "?"
+}
+
+// FollowUps are questions the reader may ask next; a click sends one, like an example of the intro.
+templ FollowUps(questions []string) {
+	if len(questions) > 0 {
+		<div class="assistant-followups mt-3">
+			<div class="text-secondary small mb-1">{ T(ctx).FollowUps }</div>
+			<div class="list-group list-group-flush">
+				for _, q := range questions {
+					<button type="button" class="list-group-item list-group-item-action d-flex align-items-center gap-2 px-0" data-example={ q }>
+						@icon.Icon("ti-corner-down-right", icon.Props{Class: "text-secondary"})
+						{ q }
+					</button>
+				}
+			</div>
+		</div>
+	}
+}
+
+// ToolCall is one call of ToolChips.
+type ToolCall struct {
+	Name    string // "search_web", "Edit"
+	Detail  string // the argument worth showing: a query, a file
+	Icon    string // default ti-tool
+	Running bool
+	Failed  bool
+}
+
+// ToolChips folds the agent's tool calls into one compact line — "4 tool calls" and their icons — that
+// opens to a chip per call. Send it into SlotSteps under an id to update it as calls come in.
+templ ToolChips(id string, calls []ToolCall) {
+	<details class="assistant-tools" id={ id }>
+		<summary class="d-inline-flex align-items-center gap-2 text-secondary small">
+			<span class="assistant-stack">
+				for _, c := range calls[:min(4, len(calls))] {
+					<span class="assistant-cite-mark">
+						@icon.Icon(kit.Or(c.Icon, "ti-tool"))
+					</span>
+				}
+			</span>
+			{ fmt.Sprintf(T(ctx).ToolCalls, len(calls)) }
+			if slices.ContainsFunc(calls, func(c ToolCall) bool { return c.Running }) {
+				@spinner.Spinner(spinner.Props{Small: true})
+			}
+		</summary>
+		<div class="d-flex flex-wrap gap-2 mt-2">
+			for _, c := range calls {
+				<span class={ "assistant-chip", templ.KV("assistant-chip-failed", c.Failed) }>
+					@icon.Icon(kit.Or(c.Icon, "ti-tool"))
+					<span class="fw-medium">{ c.Name }</span>
+					if c.Detail != "" {
+						<span class="text-secondary text-truncate">{ c.Detail }</span>
+					}
+					if c.Running {
+						@spinner.Spinner(spinner.Props{Small: true})
+					}
+				</span>
+			}
+		</div>
+	</details>
+}
+
+// TaskRows draws a task list without polling: the "tasks" block, and the inside of TaskListCard.
+templ taskRows(l TaskList) {
+	<div class="list-group list-group-flush">
+		for i, t := range l.Tasks {
+			<div class="list-group-item">
+				<div class="d-flex align-items-center gap-3">
+					<span class={ "assistant-task-state", "assistant-task-" + kit.Or(t.Status, "pending") }>
+						switch t.Status {
+							case "running":
+								@spinner.Spinner(spinner.Props{Small: true})
+							case "done":
+								@icon.Icon("ti-check")
+							case "failed":
+								@icon.Icon("ti-x")
+							default:
+								{ strconv.Itoa(i + 1) }
+						}
+					</span>
+					<div class="flex-fill min-w-0">
+						<div class={ "text-truncate", templ.KV("text-secondary", t.Status == "pending") }>{ t.Title }</div>
+						if t.Status == "running" && t.Progress > 0 {
+							@progress.Progress(progress.Props{Value: t.Progress * 100, Size: progress.SizeSmall, Class: "mt-1"})
+						}
+					</div>
+					if t.Detail != "" {
+						<span class="text-secondary small text-nowrap">{ t.Detail }</span>
+					}
+				</div>
+				if len(t.Steps) > 0 {
+					<ul class="assistant-substeps text-secondary small mb-0 mt-1">
+						for _, s := range t.Steps {
+							<li>{ s }</li>
+						}
+					</ul>
+				}
+			</div>
+		}
+	</div>
+}
+
+// The result block types added to the four of BlockView. Payloads:
+//   - code: title (a file name), code, diff (true: a unified diff, lines coloured by + and -)
+//   - context: title, chunks ([]{title, source, kind ("pdf", "csv", "md" …), chars, text})
+//   - screen: title, url, image, status ("working", "done" …), caption
+//   - tasks: title, tasks ([]{title, status, detail, progress (0–1), steps})
+//   - insights: title, items ([]{text (Markdown), metric, delta (a fraction), values, question})
+
+templ codeBlock(b Block) {
+	{{
+		p := b.Payload
+		code := strings.TrimRight(str(p, "code"), "\n")
+		diff := p["diff"] == true
+		id := b.DOMID + "-code"
+	}}
+	@card.Card(card.Props{Class: "assistant-code"}) {
+		@card.Header(card.Props{Class: "py-2"}) {
+			<div class="d-flex align-items-center gap-2 w-100">
+				@icon.Icon(kit.If(diff, "ti-git-compare") + kit.If(!diff, "ti-file-code"), icon.Props{Class: "text-secondary"})
+				<span class="font-monospace small">{ kit.Or(str(p, "title"), str(p, "language")) }</span>
+				@clipboard.Button(clipboard.Props{Target: id, Small: true, Class: "ms-auto btn-ghost-secondary",
+					Label: T(ctx).Copy, Feedback: T(ctx).Copied, Icon: "ti-copy", FeedbackIcon: "ti-check"})
+			</div>
+		}
+		<pre class="assistant-lines m-0" id={ id }>
+			for _, l := range strings.Split(code, "\n") {
+				<span class={ "assistant-line", lineClass(l, diff) }>{ l }{ "\n" }</span>
+			}
+		</pre>
+	}
+}
+
+func lineClass(l string, diff bool) string {
+	if !diff {
+		return ""
+	}
+	switch {
+	case strings.HasPrefix(l, "+++") || strings.HasPrefix(l, "---"):
+		return "text-secondary"
+	case strings.HasPrefix(l, "+"):
+		return "assistant-line-add"
+	case strings.HasPrefix(l, "-"):
+		return "assistant-line-del"
+	case strings.HasPrefix(l, "@@"):
+		return "assistant-line-hunk"
+	}
+	return ""
+}
+
+templ contextBlock(p map[string]any) {
+	{{ chunks := rows(p, "chunks") }}
+	<div>
+		<div class="d-flex align-items-center gap-2 mb-2">
+			<h3 class="m-0">{ kit.Or(str(p, "title"), "Context") }</h3>
+			@badge.Badge(badge.Props{Color: "secondary", Light: true}) {
+				{ fmt.Sprintf(T(ctx).Chunks, len(chunks)) }
+			}
+		</div>
+		<div class="row row-cards">
+			for _, c := range chunks {
+				<div class="col-md-6">
+					@card.Card(card.Props{Size: card.SizeSmall, Class: "h-100"}) {
+						@card.Body() {
+							<div class="d-flex align-items-center gap-2 mb-1">
+								<span class="fw-medium text-truncate">{ str(c, "title") }</span>
+								if n, ok := number(c["chars"]); ok {
+									<span class="text-secondary small text-nowrap ms-auto">{ fmt.Sprintf(T(ctx).Characters, int(n)) }</span>
+								}
+							</div>
+							<p class="text-secondary small assistant-clamp mb-2">{ str(c, "text") }</p>
+							<div class="d-flex align-items-center gap-2 small">
+								@badge.Badge(badge.Props{Color: kindColor(str(c, "kind")), Light: true}) {
+									{ strings.ToUpper(kit.Or(str(c, "kind"), "doc")) }
+								}
+								<span class="text-truncate">{ str(c, "source") }</span>
+							</div>
+						}
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+func kindColor(kind string) string {
+	switch strings.ToLower(kind) {
+	case "pdf":
+		return "red"
+	case "csv", "xlsx", "xls":
+		return "green"
+	case "md", "txt", "doc", "docx":
+		return "blue"
+	case "html", "url", "web":
+		return "purple"
+	}
+	return "secondary"
+}
+
+templ screenBlock(p map[string]any) {
+	{{ st := str(p, "status") }}
+	@card.Card() {
+		@card.Header(card.Props{Class: "py-2"}) {
+			<div class="d-flex align-items-center gap-2 w-100">
+				@icon.Icon("ti-device-desktop", icon.Props{Class: "text-secondary"})
+				<span class="fw-medium">{ kit.Or(str(p, "title"), "Agent's screen") }</span>
+				if st != "" {
+					@status.Status(status.Props{Color: kit.If(st == "working", "blue") + kit.If(st != "working", "green"), Dot: true, Animated: st == "working", Class: "ms-auto"}) {
+						{ st }
+					}
+				}
+			</div>
+		}
+		@card.Body() {
+			@mockup.Browser(mockup.Props{URL: str(p, "url"), Secure: strings.HasPrefix(str(p, "url"), "https://")}) {
+				if img := str(p, "image"); img != "" {
+					<img src={ img } alt={ str(p, "caption") } class="d-block w-100"/>
+				}
+			}
+			if c := str(p, "caption"); c != "" {
+				<div class="text-secondary small mt-2">{ c }</div>
+			}
+		}
+	}
+}
+
+templ tasksBlock(p map[string]any) {
+	{{ l := tasksFrom(p) }}
+	@framed(l.Title) {
+		@taskRows(l)
+	}
+}
+
+// insightsBlock pages through its items without a script: a radio per item, each panel shown while its
+// radio is checked, and the pager's arrows are labels of the neighbours' radios.
+templ insightsBlock(b Block) {
+	{{
+		items := rows(b.Payload, "items")
+		name := b.DOMID + "-insight"
+	}}
+	@card.Card(card.Props{Class: "assistant-insights"}) {
+		for i, it := range items {
+			<input type="radio" class="assistant-insight-radio" name={ name } id={ name + "-" + strconv.Itoa(i) } checked?={ i == 0 } aria-label={ fmt.Sprintf(T(ctx).Of, i+1, len(items)) }/>
+			<div class="assistant-insight">
+				@card.Header(card.Props{Class: "py-2"}) {
+					<div class="d-flex align-items-center gap-2 w-100">
+						@icon.Icon("ti-sparkles", icon.Props{Class: "text-purple"})
+						<span class="fw-medium">{ kit.Or(str(b.Payload, "title"), T(ctx).Insights) }</span>
+						<div class="ms-auto d-flex align-items-center gap-1 small text-secondary">
+							<label for={ name + "-" + strconv.Itoa(max(0, i-1)) } class={ "btn btn-sm btn-icon btn-ghost-secondary", templ.KV("disabled", i == 0) } aria-label={ T(ctx).Previous }>
+								@icon.Icon("ti-chevron-left")
+							</label>
+							<span>{ fmt.Sprintf(T(ctx).Of, i+1, len(items)) }</span>
+							<label for={ name + "-" + strconv.Itoa(min(len(items)-1, i+1)) } class={ "btn btn-sm btn-icon btn-ghost-secondary", templ.KV("disabled", i == len(items)-1) } aria-label={ T(ctx).Next }>
+								@icon.Icon("ti-chevron-right")
+							</label>
+						</div>
+					</div>
+				}
+				@card.Body() {
+					<div class="row g-3 align-items-center">
+						<div class="col-md-7">
+							@markdown.Markdown(str(it, "text"))
+							if m := str(it, "metric"); m != "" {
+								<div class="d-flex align-items-baseline gap-2 mt-2">
+									<span class="h2 m-0">{ m }</span>
+									if d, ok := it["delta"].(float64); ok {
+										<span class={ "small", templ.KV("text-green", d >= 0), templ.KV("text-red", d < 0) }>
+											{ fmt.Sprintf("%+.2f%%", d*100) }
+										</span>
+									}
+								</div>
+							}
+						</div>
+						if vs := floats(it, "values"); len(vs) > 1 {
+							<div class="col-md-5">
+								@sparkline.Sparkline(sparkline.Props{Values: vs, Fill: true, Spot: "last", Size: "lg", Class: "w-100",
+									Color: kit.If(vs[len(vs)-1] >= vs[0], "green") + kit.If(vs[len(vs)-1] < vs[0], "red")})
+							</div>
+						}
+					</div>
+					if q := str(it, "question"); q != "" {
+						<button type="button" class="btn btn-sm btn-outline-primary mt-3" data-example={ q }>
+							@icon.Icon("ti-message-question")
+							{ q }
+						</button>
+					}
+				}
+			</div>
+		}
+	}
+}
+
+func floats(p map[string]any, k string) []float64 {
+	l, _ := p[k].([]any)
+	out := make([]float64, 0, len(l))
+	for _, e := range l {
+		if f, ok := number(e); ok {
+			out = append(out, f)
+		}
+	}
+	return out
+}

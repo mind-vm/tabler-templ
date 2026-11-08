@@ -61,7 +61,7 @@ templ soundButton(s sound.Sound, ic, class string) {
 
 templ soundPage() {
 	{{ p := frameProps("", "Sound") }}
-	{{ p.Head = templ.Join(motionHTMX(), motion.Library(), assets()) }}
+	{{ p.Head = templ.Join(htmxLibrary(), motion.Library(), assets()) }}
 	{{ p.Scripts = templ.Join(scripts(), sound.Script(sound.Config{})) }}
 	{{
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Sound",

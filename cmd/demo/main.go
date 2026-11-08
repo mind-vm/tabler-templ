@@ -91,6 +91,7 @@ func handler() http.Handler {
 	themesRoutes(mux)
 	landingRoutes(mux)
 	assistantRoutes(mux)
+	assistantPartsRoutes(mux)
 	enterpriseRoutes(mux)
 	motionRoutes(mux)
 	soundRoutes(mux)
