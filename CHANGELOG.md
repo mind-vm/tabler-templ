@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- **`blocks/assistant`, filling in forms** (lessons from the assistant of auftragsbutler):
+  - Several forms of one name: the row `kitDialog.matchForm` picks wins only when it carries the action's
+    key (a hidden or read-only field the action names, with the action's value) and shows as many of the
+    fields as the best form; otherwise the form that shows most of the fields. Sections of one record that
+    carry the other sections' fields hidden no longer get the wrong section. Without `kitDialog` the first
+    form with the key is the row, so a list's rows work without `detail.Script`.
+  - The first field filled in gets the focus once a dialog is shown (`shown.bs.modal`), not after a fixed
+    350 ms; a radio button gets it instead of its label.
+  - `assistant:reveal` on the form before it is shown, so the app can open a panel or tab the form sits in.
+  - A checkbox is also checked by "an" or by its own value.
+  - `WithActionOptions(ctx, ActionOptions{FormAttribute: "data-formular"})`: another attribute than
+    `data-form`, like `detail.ScriptConfig.FormAttribute`.
+- **`Catalog.RequireRoles`:** every action names its roles; `Problems` reports one without, and `Check`,
+  `Names` and `Prompt` do not offer it to anyone (otherwise an action without roles is for everyone).
+
 ## v0.13.0
 
 An assistant that acts on the page: a catalog of allowed actions (open a page, fill in a form, point at

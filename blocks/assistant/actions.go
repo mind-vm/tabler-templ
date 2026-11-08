@@ -69,6 +69,36 @@ type Catalog struct {
 	SensitiveValues *regexp.Regexp
 	// MaxValue is the longest value of a field; 0: 500 characters.
 	MaxValue int
+	// RequireRoles: every action names its roles. Problems reports an action without roles and Check
+	// refuses it, instead of offering it to everyone. For apps whose rights are per role.
+	RequireRoles bool
+}
+
+// ActionOptions configure ActionScript for a request (WithActionOptions).
+type ActionOptions struct {
+	// FormAttribute marks the forms a fill action finds by its Form, default "data-form"; set it like
+	// detail.ScriptConfig.FormAttribute when the app uses another attribute.
+	FormAttribute string
+}
+
+func (o ActionOptions) formAttribute() string {
+	if validFormAttribute.MatchString(o.FormAttribute) {
+		return o.FormAttribute
+	}
+	return "data-form"
+}
+
+type actionOptionsKey struct{}
+
+// WithActionOptions sets the options of ActionScript for the request.
+func WithActionOptions(ctx context.Context, o ActionOptions) context.Context {
+	return context.WithValue(ctx, actionOptionsKey{}, o)
+}
+
+// ActionOptionsFrom returns the request's options, the zero value if none were set.
+func ActionOptionsFrom(ctx context.Context) ActionOptions {
+	o, _ := ctx.Value(actionOptionsKey{}).(ActionOptions)
+	return o
 }
 
 // DefaultSensitiveFields: bank details, e-mail addresses, tax and routing numbers. A wrongly filled IBAN
@@ -84,6 +114,8 @@ var (
 	validAnchor = regexp.MustCompile(`^[a-z][a-z0-9-]*(\.[a-z0-9-]+)*$`)
 	validField  = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{0,63}$`)
 	validPage   = regexp.MustCompile(`^[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*$`)
+
+	validFormAttribute = regexp.MustCompile(`^data-[a-z][a-z0-9-]*$`)
 )
 
 // ErrAction is wrapped by every refusal of Check, so callers can tell a refused action from other
@@ -121,7 +153,7 @@ func (c *Catalog) spec(role, name string) (ActionSpec, error) {
 		return ActionSpec{}, refuse("there is no action %q (available: %s)", name, strings.Join(c.Names(role), ", "))
 	}
 	a := c.Actions[i]
-	if len(a.Roles) > 0 && !slices.Contains(a.Roles, role) {
+	if !c.offers(a, role) {
 		return ActionSpec{}, refuse("action %q is not available to the role %q", name, role)
 	}
 	return a, nil
@@ -192,11 +224,19 @@ func (c *Catalog) pagePath(p string) bool {
 	return false
 }
 
+// offers: role may get a; without roles everyone, unless RequireRoles.
+func (c *Catalog) offers(a ActionSpec, role string) bool {
+	if len(a.Roles) == 0 {
+		return !c.RequireRoles
+	}
+	return slices.Contains(a.Roles, role)
+}
+
 // Names are the actions available to role, sorted.
 func (c *Catalog) Names(role string) []string {
 	var n []string
 	for _, a := range c.Actions {
-		if len(a.Roles) == 0 || slices.Contains(a.Roles, role) {
+		if c.offers(a, role) {
 			n = append(n, a.Name)
 		}
 	}
@@ -208,7 +248,7 @@ func (c *Catalog) Names(role string) []string {
 func (c *Catalog) Prompt(role string) string {
 	var b strings.Builder
 	for _, a := range c.Actions {
-		if len(a.Roles) > 0 && !slices.Contains(a.Roles, role) {
+		if !c.offers(a, role) {
 			continue
 		}
 		fmt.Fprintf(&b, "- %s: %s", a.Name, a.Description)
@@ -242,6 +282,9 @@ func (c *Catalog) Problems() []error {
 		seen[a.Name] = true
 		if strings.TrimSpace(a.Title) == "" {
 			add("action %q: no title", a.Name)
+		}
+		if c.RequireRoles && len(a.Roles) == 0 {
+			add("action %q: no role", a.Name)
 		}
 		switch a.Kind {
 		case ActionOpen:

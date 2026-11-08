@@ -98,6 +98,42 @@ func TestProblems(t *testing.T) {
 	}
 }
 
+func TestRequireRoles(t *testing.T) {
+	c := &Catalog{RequireRoles: true, Pages: testCatalog.Pages, Actions: testCatalog.Actions}
+	if got := errors.Join(c.Problems()...); got == nil || !strings.Contains(got.Error(), `action "order-new": no role`) {
+		t.Errorf("an action without roles must be a problem: %v", got)
+	}
+	if _, err := c.Check("office", "order-new", map[string]string{"title": "x"}); !errors.Is(err, ErrAction) {
+		t.Errorf("an action without roles must be refused, got %v", err)
+	}
+	if _, err := c.Check("office", "order-edit", map[string]string{"id": "A-1"}); err != nil {
+		t.Errorf("an action of the role: %v", err)
+	}
+	if got := strings.Join(c.Names("office"), ","); got != "order-edit" {
+		t.Errorf("names: %s", got)
+	}
+	if p := c.Prompt("office"); strings.Contains(p, "order-new") {
+		t.Errorf("prompt offers an action without roles: %s", p)
+	}
+}
+
+func TestActionOptions(t *testing.T) {
+	for _, c := range []struct{ attr, want string }{
+		{"", `"formAttribute":"data-form"`},
+		{"data-formular", `"formAttribute":"data-formular"`},
+		{`x"]`, `"formAttribute":"data-form"`}, // not an attribute name: the default
+	} {
+		var b strings.Builder
+		ctx := WithActionOptions(context.Background(), ActionOptions{FormAttribute: c.attr})
+		if err := ActionScript().Render(ctx, &b); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(b.String(), c.want) {
+			t.Errorf("%q: missing %s", c.attr, c.want)
+		}
+	}
+}
+
 func TestStreamAction(t *testing.T) {
 	rec := httptest.NewRecorder()
 	s := Open(rec)

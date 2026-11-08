@@ -62,7 +62,8 @@ Browser läuft nur noch, was der Server nicht kann: die Aktionen auf der Seite.
 | `Katalog`, `Aktion`, `Pruefen` | `Catalog`, `ActionSpec`, `Check` |
 | `Oberflaechenaktion` (JSON) | `Action`, gesendet mit `Stream.Action` |
 | `HeikleFelder`, `HeikleWerte` | `DefaultSensitiveFields`, `DefaultSensitiveValues` |
-| `data-formular`, `data-tour` | `data-form`, `data-tour` |
+| `data-formular`, `data-tour` | `data-form` (anderes Attribut: `WithActionOptions`), `data-tour` |
+| Aktion nur mit Rolle | `Catalog.RequireRoles` |
 | `vorausfuellen` in `assistent.js` | `ActionScript` |
 | Verlauf in `sessionStorage` und Datenbank | `Transcript` auf dem Server |
 | Mini-Markdown in JS | `AnswerStrict` (goldmark, ohne Links und Bilder) |
