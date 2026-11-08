@@ -5,16 +5,11 @@ package contactdetail
 
 import (
 	"context"
-	"errors"
 	"net/http"
-	"strings"
-
-	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactdelete"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactrow"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/uierr"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -30,15 +25,8 @@ const (
 	ActivityID = "contactdetail-activity"
 )
 
-var refreshOn = []string{contactform.EventSaved, contactrow.EventStatusChanged, contactdelete.EventRestored}
-
-func trigger() string {
-	parts := make([]string, len(refreshOn))
-	for i, e := range refreshOn {
-		parts[i] = e + " from:body"
-	}
-	return strings.Join(parts, ", ")
-}
+// trigger: the page shows the contact again after it changed (a deletion leaves the page instead).
+func trigger() string { return htmx.On(events.Saved, events.StatusChanged, events.Restored) }
 
 // Service is what the component needs from the domain.
 type Service interface {
@@ -48,7 +36,7 @@ type Service interface {
 }
 
 type Options struct {
-	Frame func(title string, body templ.Component) templ.Component
+	Frame htmx.Frame
 	Back  string // the list
 }
 
@@ -72,16 +60,8 @@ type handler struct {
 
 func (h *handler) contact(w http.ResponseWriter, r *http.Request) (contacts.Contact, bool) {
 	c, err := h.svc.Get(r.Context(), r.PathValue("id"))
-	if errors.Is(err, contacts.ErrNotFound) {
-		if htmx.IsHTMX(r) {
-			htmx.Error(w, r, htmx.Fail(http.StatusNotFound, "This contact no longer exists."))
-		} else {
-			http.NotFound(w, r)
-		}
-		return c, false
-	}
 	if err != nil {
-		htmx.Error(w, r, err)
+		htmx.Error(w, r, err, uierr.Rules...)
 		return c, false
 	}
 	return c, true
@@ -98,7 +78,7 @@ func (h *handler) page(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	htmx.Respond(w, r, View(Props{Contact: c, Others: others, Back: h.o.Back}),
-		htmx.FullPage(func(b templ.Component) templ.Component { return h.o.Frame(c.Name, b) }))
+		h.o.Frame.Page(c.Name))
 }
 
 func (h *handler) activity(w http.ResponseWriter, r *http.Request) {
@@ -112,5 +92,5 @@ func (h *handler) activity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	htmx.Respond(w, r, ActivityList(ev),
-		htmx.FullPage(func(b templ.Component) templ.Component { return h.o.Frame("Activity of "+c.Name, b) }))
+		h.o.Frame.Page("Activity of "+c.Name))
 }

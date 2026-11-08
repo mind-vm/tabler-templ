@@ -7,24 +7,16 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/assistant"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
-	"github.com/mind-vm/tabler-templ/cdn"
-	"github.com/mind-vm/tabler-templ/internal/plugin"
+	"github.com/mind-vm/tabler-templ/htmx"
 )
 
 // The parts gallery shows every piece of blocks/assistant on its own, the interactive ones live: the
 // handlers below are the whole server side — parse the form, call the block's method, render the
-// block. htmx is loaded by this page only, until the kit has an htmx package of its own.
-
-const htmxVersion = "2.0.4"
-
-func htmxLibrary() templ.Component {
-	return templ.Join(templ.Raw(`<meta name="htmx-config" content='{"includeIndicatorStyles":false}'/>`),
-		plugin.Script(cdn.URL("htmx.org", htmxVersion, "dist/htmx.min.js")))
-}
+// block. The page loads htmx with package htmx (Library in the head, Setup at the end of the body).
 
 func partsRecommendation() assistant.Recommendation {
 	return assistant.Recommendation{ID: "rec", Post: "/assistant/parts/recommend", Question: "Want me to place this restock order?",
-		Text: "Order **5 cases of Pistachio** and **3 of Mint Chip** from Dairy Co for Friday. Sales of both rose 12% over the last two weeks and stock lasts until Thursday.",
+		Text:       "Order **5 cases of Pistachio** and **3 of Mint Chip** from Dairy Co for Friday. Sales of both rose 12% over the last two weeks and stock lasts until Thursday.",
 		Confidence: 0.86, Accept: "Place order", Options: []string{"Order only Pistachio", "Wait until Monday", "Ask another supplier"}}
 }
 
@@ -152,7 +144,8 @@ templ partsSection(title, text string) {
 templ assistantPartsPage() {
 	{{ p := frameProps("", "Assistant parts") }}
 	{{
-		p.Head = templ.Join(p.Head, htmxLibrary())
+		p.Head = templ.Join(p.Head, htmx.Library())
+		p.Scripts = templ.Join(p.Scripts, htmx.Setup())
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Assistant parts", Pretitle: "blocks/assistant",
 			Description: "The parts of an assistant's turn one by one. The interactive ones post with htmx to handlers that call the block's Go method and render the next state."})
 	}}
@@ -220,7 +213,7 @@ templ assistantPartsPage() {
 						{"text": "Waffle cones run out on Saturdays; two of the last four sold out by 3 pm.", "values": []float64{5, 3, 6, 2, 1, 0}, "question": "Order more cones?"},
 					}})
 					@partsBlock("screen", "screen", map[string]any{"title": "Agent's screen", "url": "https://supplier.example/orders/new", "status": "working",
-						"image": photo("photos/home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg"),
+						"image":   photo("photos/home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg"),
 						"caption": "Filling in the order form for Dairy Co"})
 				</div>
 			</div>

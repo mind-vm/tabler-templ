@@ -8,8 +8,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/a-h/templ"
-
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
@@ -27,9 +25,6 @@ var (
 // FormID is the form's id; a 422 response replaces the form under it.
 const FormID = "contactform"
 
-// EventSaved fires after a contact was created or saved; its detail is the contact id.
-const EventSaved = "contact:saved"
-
 // Service is what the component needs from the domain.
 type Service interface {
 	Get(ctx context.Context, id string) (contacts.Contact, error)
@@ -39,7 +34,7 @@ type Service interface {
 
 type Options struct {
 	// Frame puts the form into a page for requests without htmx.
-	Frame func(title string, body templ.Component) templ.Component
+	Frame htmx.Frame
 	// Done is where the browser goes after saving without htmx, e.g. the list.
 	Done string
 }

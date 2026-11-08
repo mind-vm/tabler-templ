@@ -6,6 +6,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/badge"
 	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/htmx"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/markdown"
@@ -210,7 +211,7 @@ templ DiffCard(d Diff) {
 
 func diffAction(d Diff, row, decision string) templ.Attributes {
 	return templ.Attributes{"hx-post": d.Post, "hx-target": "#" + d.ID, "hx-swap": "outerHTML",
-		"hx-vals": `{"row":` + strconv.Quote(row) + `,"decision":"` + decision + `"}`}
+		"hx-vals": htmx.Vals("row", row, "decision", decision)}
 }
 
 // TaskListCard draws a TaskList. While a task is pending or running and Poll is set, it fetches itself

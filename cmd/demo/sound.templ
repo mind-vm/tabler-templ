@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/htmx"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/motion"
 	"github.com/mind-vm/tabler-templ/sound"
@@ -61,8 +62,8 @@ templ soundButton(s sound.Sound, ic, class string) {
 
 templ soundPage() {
 	{{ p := frameProps("", "Sound") }}
-	{{ p.Head = templ.Join(htmxLibrary(), motion.Library(), assets()) }}
-	{{ p.Scripts = templ.Join(scripts(), sound.Script(sound.Config{})) }}
+	{{ p.Head = templ.Join(htmx.Library(), motion.Library(), assets()) }}
+	{{ p.Scripts = templ.Join(scripts(), htmx.Setup(), sound.Script(sound.Config{})) }}
 	{{
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Sound",
 			Description: "Short interface sounds, made by the browser (Web Audio): on click, when htmx swaps a message in, or on a server event. Click anywhere once first: browsers only play sound after that.",
@@ -88,7 +89,7 @@ templ soundPage() {
 				<div class="card mt-3">
 					<div class="card-header"><h3 class="card-title">From the server</h3></div>
 					<div class="card-body">
-						<p class="text-secondary">The handler answers with <code>HX-Trigger: {"{"}"sound":"success"{"}"}</code>, the page plays it.</p>
+						<p class="text-secondary">The handler answers with <code>HX-Trigger: { "{" }"sound":"success"{ "}" }</code>, the page plays it.</p>
 						<div class="btn-list">
 							<button type="button" class="btn btn-primary" hx-post="/sound/save" hx-vals={ `{"result":"success"}` } hx-swap="none">Save</button>
 							<button type="button" class="btn" hx-post="/sound/save" hx-vals={ `{"result":"error"}` } hx-swap="none">Save with an error</button>

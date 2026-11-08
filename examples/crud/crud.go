@@ -52,7 +52,7 @@ func RegisterWith(mux *http.ServeMux, store *contacts.Store) {
 		}
 		page := layout.Page{Title: "Contacts", List: true, Status: p.List.Value("status"), Actions: contactform.NewButton(),
 			Crumbs: []shell.Crumb{{Text: "Contacts"}}}
-		w.Header().Add("Vary", "HX-Request")
+		htmx.Vary(w)
 		_ = lay.Page(page).Render(templ.WithChildren(r.Context(), contacttable.View(p)), w)
 	})
 }

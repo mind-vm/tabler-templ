@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -99,6 +100,15 @@ func ToastWith(p toast.Props, body templ.Component) Option {
 // CloseDialog closes the dialog of Setup, e.g. after a form in it was saved.
 func CloseDialog() Option { return Trigger(EventCloseDialog) }
 
+// Frame puts a component into a page, e.g. the app's layout with the title as heading. Components take
+// one in their options for requests without htmx.
+type Frame func(title string, body templ.Component) templ.Component
+
+// Page is FullPage with this frame and title.
+func (f Frame) Page(title string) Option {
+	return FullPage(func(body templ.Component) templ.Component { return f(title, body) })
+}
+
 // FullPage is what a request without htmx gets: the component inside the page that frame makes, e.g.
 // the layout. A fragment route opened directly (bookmark, new tab, history) then shows a whole page.
 // Without FullPage such a request gets the bare fragment.
@@ -106,16 +116,39 @@ func FullPage(frame func(body templ.Component) templ.Component) Option {
 	return func(r *response) { r.full = frame }
 }
 
+// Vary marks the response as depending on HX-Request, so caches keep the fragment and the page apart.
+// Respond, Error and Redirect call it; a handler that writes a page itself calls it first.
+func Vary(w http.ResponseWriter) {
+	h := w.Header()
+	for _, v := range h.Values("Vary") {
+		if strings.Contains(v, "HX-Request") {
+			return
+		}
+	}
+	h.Add("Vary", "HX-Request")
+}
+
 // Respond writes c as the response. It sets all headers first (Vary: HX-Request, the htmx headers of
 // the options, the status) and renders afterwards, so no header comes too late. A request without htmx
 // gets the full page (FullPage) and no htmx headers; the extra fragments (OOB, Toast) go only to htmx.
-func Respond(w http.ResponseWriter, r *http.Request, c templ.Component, opts ...Option) error {
+// Without htmx there is no Toast or Trigger either: a page after Post/Redirect/Get shows its own message.
+// A render error is logged (the status is out by then); Respond returns nothing to check.
+//
+// Combinations that do not add up: PushURL and ReplaceURL (htmx applies both), Status(204) with OOB or
+// Toast (htmx swaps nothing on 204, Setup's responseHandling).
+func Respond(w http.ResponseWriter, r *http.Request, c templ.Component, opts ...Option) {
+	if err := respond(w, r, c, opts...); err != nil {
+		slog.ErrorContext(r.Context(), "htmx: render failed", "method", r.Method, "path", r.URL.Path, "err", err)
+	}
+}
+
+func respond(w http.ResponseWriter, r *http.Request, c templ.Component, opts ...Option) error {
 	var res response
 	for _, o := range opts {
 		o(&res)
 	}
 	h := w.Header()
-	h.Add("Vary", "HX-Request")
+	Vary(w)
 	if h.Get("Content-Type") == "" {
 		h.Set("Content-Type", "text/html; charset=utf-8")
 	}
@@ -187,37 +220,82 @@ func (e *HTTPError) Unwrap() error { return e.Err }
 // Fail is an HTTPError with a code and a message for the user.
 func Fail(code int, message string) error { return &HTTPError{Code: code, Message: message} }
 
-// Error answers a failed request. To htmx it sends a danger toast into Setup's container (HX-Retarget,
-// HX-Reswap) and leaves the page as it is; without htmx it sends a plain error page with the status.
-// An *HTTPError gives the status and the user's message; any other error counts as 500, is logged and
-// shown with kit.T(ctx).ErrorGeneric, so details never reach the HTML.
-func Error(w http.ResponseWriter, r *http.Request, err error) {
+// A Rule maps a domain error to a status and the message the user sees, for Error. Domain packages stay
+// free of HTTP; the UI says once how their errors read.
+type Rule struct {
+	target  error
+	code    int
+	message string
+}
+
+// Is is the Rule for errors that match target (errors.Is).
+func Is(target error, code int, message string) Rule { return Rule{target, code, message} }
+
+// Error answers a failed request with its real status. To htmx it sends a danger toast into Setup's
+// container (HX-Retarget, HX-Reswap; Setup swaps these error responses in) and leaves the page as it is;
+// without htmx a plain error page. The status and message come from an *HTTPError or the first rule that
+// matches; any other error counts as 500, is logged and shown with kit.T(ctx).ErrorGeneric, so details
+// never reach the HTML.
+func Error(w http.ResponseWriter, r *http.Request, err error, rules ...Rule) {
 	code, msg := http.StatusInternalServerError, ""
 	var he *HTTPError
 	if errors.As(err, &he) {
 		code, msg = he.Code, he.Message
+	} else {
+		for _, rule := range rules {
+			if errors.Is(err, rule.target) {
+				code, msg = rule.code, rule.message
+				break
+			}
+		}
 	}
 	if code >= 500 || msg == "" {
 		slog.ErrorContext(r.Context(), "request failed", "method", r.Method, "path", r.URL.Path, "status", code, "err", err)
 		msg = kit.T(r.Context()).ErrorGeneric
 	}
+	Vary(w)
 	if !IsHTMX(r) {
 		http.Error(w, msg, code)
 		return
 	}
 	h := w.Header()
-	h.Add("Vary", "HX-Request")
 	h.Set("Content-Type", "text/html; charset=utf-8")
 	h.Set("HX-Retarget", Target(ToastsID))
 	h.Set("HX-Reswap", "beforeend")
-	// 200, so htmx swaps the toast in; the status the request deserved goes along for scripts and logs.
-	h.Set("X-Status", http.StatusText(code))
+	w.WriteHeader(code)
 	_ = toastHTML(toast.Props{Color: "danger", Urgent: true}, msg).Render(r.Context(), w)
 }
 
-// Redirect sends the browser to url: with HX-Redirect to htmx (a full page load), with 303 See Other
-// otherwise (Post/Redirect/Get).
+// LocalPath reports whether s is a path on this site ("/contacts?q=a"), safe to redirect to: no scheme,
+// no host, no "//" or "\" that browsers would read as one, no control characters.
+func LocalPath(s string) bool {
+	if !strings.HasPrefix(s, "/") || strings.HasPrefix(s, "//") || strings.ContainsAny(s, "\\") {
+		return false
+	}
+	for _, c := range s {
+		if c < 0x20 || c == 0x7f {
+			return false
+		}
+	}
+	u, err := url.Parse(s)
+	return err == nil && u.Scheme == "" && u.Host == ""
+}
+
+// Redirect sends the browser to a local path: with HX-Redirect to htmx (a full page load), with 303 See
+// Other otherwise (Post/Redirect/Get). A url that is not a LocalPath is refused with 500 and logged, so a
+// value taken from the request cannot send the user to another site; use RedirectExternal for those.
 func Redirect(w http.ResponseWriter, r *http.Request, url string) {
+	if !LocalPath(url) {
+		slog.ErrorContext(r.Context(), "htmx: redirect to a non-local URL refused", "url", url)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	RedirectExternal(w, r, url)
+}
+
+// RedirectExternal is Redirect without the check, for URLs the app chose itself.
+func RedirectExternal(w http.ResponseWriter, r *http.Request, url string) {
+	Vary(w)
 	if IsHTMX(r) {
 		w.Header().Set("HX-Redirect", url)
 		w.WriteHeader(http.StatusNoContent)

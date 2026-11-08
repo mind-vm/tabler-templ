@@ -98,6 +98,9 @@ func (e Endpoint) URL(values ...string) string {
 //
 //	List.URL() + htmx.Query("q", query, "page", "2")
 func Query(kv ...string) string {
+	if len(kv)%2 != 0 {
+		panic("htmx: Query takes key-value pairs")
+	}
 	v := url.Values{}
 	for i := 0; i+1 < len(kv); i += 2 {
 		if kv[i+1] != "" {
@@ -131,8 +134,22 @@ func ID(base, inst string) string {
 // Target is the CSS selector of an id, for hx-target: "#" + id.
 func Target(id string) string { return "#" + id }
 
-// Vals is the JSON for hx-vals from key-value pairs: Vals("instance", "b") is {"instance":"b"}.
+// On is the hx-trigger for events fired anywhere on the page (HX-Trigger bubbles to the body):
+// On("contact:saved", "contact:deleted") is "contact:saved from:body, contact:deleted from:body".
+func On(events ...string) string {
+	parts := make([]string, len(events))
+	for i, e := range events {
+		parts[i] = e + " from:body"
+	}
+	return strings.Join(parts, ", ")
+}
+
+// Vals is the JSON for hx-vals from key-value pairs: Vals("instance", "b") is {"instance":"b"}. It
+// panics on an odd number of arguments.
 func Vals(kv ...string) string {
+	if len(kv)%2 != 0 {
+		panic("htmx: Vals takes key-value pairs")
+	}
 	m := map[string]string{}
 	for i := 0; i+1 < len(kv); i += 2 {
 		m[kv[i]] = kv[i+1]

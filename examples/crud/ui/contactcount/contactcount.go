@@ -7,14 +7,11 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactdelete"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactrow"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -24,16 +21,8 @@ var Count = htmx.Route("GET", "/crud/ui/contactcount")
 // RootID is the badge's id for an instance.
 func RootID(inst string) string { return htmx.ID("contactcount", inst) }
 
-// refreshOn are the events after which the count may have changed.
-var refreshOn = []string{contactform.EventSaved, contactdelete.EventDeleted, contactdelete.EventRestored, contactrow.EventStatusChanged}
-
-func trigger() string {
-	parts := make([]string, len(refreshOn))
-	for i, e := range refreshOn {
-		parts[i] = e + " from:body"
-	}
-	return strings.Join(parts, ", ")
-}
+// trigger: the count may change with any change of a contact.
+func trigger() string { return htmx.On(events.Any...) }
 
 // Service is what the component needs from the domain.
 type Service interface {

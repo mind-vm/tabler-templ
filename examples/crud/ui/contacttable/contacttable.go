@@ -11,8 +11,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactdelete"
-	"github.com/mind-vm/tabler-templ/examples/crud/ui/contactform"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -22,15 +21,8 @@ var List = htmx.Route("GET", "/crud/ui/contacttable")
 // RootID is the table's id.
 const RootID = "contacttable"
 
-var refreshOn = []string{contactform.EventSaved, contactdelete.EventDeleted, contactdelete.EventRestored}
-
-func trigger() string {
-	parts := make([]string, len(refreshOn))
-	for i, e := range refreshOn {
-		parts[i] = e + " from:body"
-	}
-	return strings.Join(parts, ", ")
-}
+// trigger: the rows may change after these events (a status change only touches its own cell).
+func trigger() string { return htmx.On(events.ListChanged...) }
 
 // Service is what the component needs from the domain.
 type Service interface {
@@ -108,7 +100,7 @@ func (t *Table) pageURL(r *http.Request, l *listpage.List) string {
 func (t *Table) serve(w http.ResponseWriter, r *http.Request) {
 	if !htmx.IsHTMX(r) {
 		// Opened directly (bookmark, new tab): the page shows the table with the same query.
-		http.Redirect(w, r, t.pageURL(r, nil), http.StatusSeeOther)
+		htmx.Redirect(w, r, t.pageURL(r, nil))
 		return
 	}
 	p, err := t.Props(r)

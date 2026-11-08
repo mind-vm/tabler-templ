@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/htmx"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/motion"
@@ -51,8 +52,14 @@ templ motionItem(id int) {
 	<li class="list-group-item d-flex align-items-center" { motion.Attrs(motion.Props{Preset: motion.Pop, Exit: motion.SlideLeft})... }>
 		<span class="avatar avatar-sm me-3">{ strconv.Itoa(id) }</span>
 		<span class="flex-fill">Task { strconv.Itoa(id) }</span>
-		<button type="button" class="btn btn-ghost-danger btn-icon btn-sm" aria-label="Remove"
-			hx-delete={ "/motion/items/" + strconv.Itoa(id) } hx-target="closest li" hx-swap="outerHTML swap:200ms">
+		<button
+			type="button"
+			class="btn btn-ghost-danger btn-icon btn-sm"
+			aria-label="Remove"
+			hx-delete={ "/motion/items/" + strconv.Itoa(id) }
+			hx-target="closest li"
+			hx-swap="outerHTML swap:200ms"
+		>
 			@icon.Icon("ti-x")
 		</button>
 	</li>
@@ -74,7 +81,8 @@ templ motionStat(title string, c motion.CounterProps, note string) {
 
 templ motionPage() {
 	{{ p := frameProps("", "Motion") }}
-	{{ p.Head = templ.Join(htmxLibrary(), motion.Library(), assets()) }}
+	{{ p.Head = templ.Join(htmx.Library(), motion.Library(), assets()) }}
+	{{ p.Scripts = templ.Join(p.Scripts, htmx.Setup()) }}
 	{{
 		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Motion",
 			Description: "Enter and leave animations with Motion (formerly Framer Motion), without React: on load, on htmx swaps and on scroll."})

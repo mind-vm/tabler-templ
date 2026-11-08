@@ -23,9 +23,6 @@ var (
 // CellID is the id of a contact's status cell; the contact id is the instance.
 func CellID(contactID string) string { return htmx.ID("contactrow-status", contactID) }
 
-// EventStatusChanged fires after a status was saved; its detail is the contact id.
-const EventStatusChanged = "contact:status"
-
 // Service is what the component needs from the domain.
 type Service interface {
 	Get(ctx context.Context, id string) (contacts.Contact, error)

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/examples/crud/ui/events"
 	"github.com/mind-vm/tabler-templ/htmx"
 )
 
@@ -34,7 +35,7 @@ func TestStatusCell(t *testing.T) {
 		t.Fatalf("edit cell:\n%s", w.Body.String())
 	}
 	w = do(t, mux, "POST", SaveStatus.URL("1"), "status=inactive", true)
-	if w.Code != 200 || w.Header().Get("HX-Trigger") != `{"`+EventStatusChanged+`":"1"}` || !strings.Contains(w.Body.String(), "Inactive") {
+	if w.Code != 200 || w.Header().Get("HX-Trigger") != `{"`+events.StatusChanged+`":"1"}` || !strings.Contains(w.Body.String(), "Inactive") {
 		t.Fatalf("save: %d %v\n%s", w.Code, w.Header(), w.Body.String())
 	}
 	w = do(t, mux, "POST", SaveStatus.URL("1"), "status=bogus", true)
