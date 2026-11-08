@@ -24,6 +24,7 @@ type FormProps struct {
 
 // Form is the page's form (method post).
 templ Form(p FormProps) {
+	@Styles()
 	<form method="post" action={ templ.URL(p.Action) } class={ kit.Classes("kit-create", p.Class) } { p.Attributes... }>
 		{ children... }
 	</form>
@@ -39,6 +40,7 @@ type FooterProps struct {
 
 // Footer is the bar at the end of the form: hint, Cancel and the primary submit button.
 templ Footer(p FooterProps) {
+	@Styles()
 	{{ m := kit.T(ctx) }}
 	<div class="kit-create-footer">
 		if p.Hint != "" {
@@ -55,9 +57,12 @@ templ Footer(p FooterProps) {
 	</div>
 }
 
-// Styles renders the block's CSS; the shell block includes it.
+var styles = csp.Sheet("blocks/create", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
+// it themselves; calling it is only needed to put it in <head>.
 templ Styles() {
-	@csp.Style(css)
+	@styles
 }
 
 const css = `.kit-create-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.5rem;padding:1rem 1.25rem;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}

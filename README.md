@@ -396,7 +396,8 @@ next.ServeHTTP(w, r.WithContext(templ.WithNonce(r.Context(), nonce)))
 Styles still need `'unsafe-inline'`: some components and blocks set `style=` attributes (widths, colors,
 images), and Tabler's and ApexCharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
 ignore `'unsafe-inline'`, so leave the nonce out of `style-src` for now.) `csp_test.go` checks that every
-script and style of the packages goes through `internal/csp`.
+script and style of the packages goes through `internal/csp`. With `static.WithKitCSS()` the kit's own CSS
+comes from a file instead (see "Serve Tabler yourself").
 
 ## Theming
 
@@ -508,6 +509,17 @@ mux.Handle("/static/", files)
 Measured in an app with Tabler, the icon subset and one font (phone at 4 Mbit/s, 100 ms RTT): the first
 visit went from 1.9 MB in 4.3 s (served without compression or cache headers, the whole webfont) to 185 KB
 in 0.7 s, a repeat visit to 12–17 KB (the page) in 0.2 s.
+
+**The kit's own CSS.** The sidebar, the shell, the blocks and the icon sizing bring a little CSS of their
+own. By default each part renders it inline, once per page and only where it is used (an empty shell page
+carries about 8.6 KB, 2 KB gzipped). `static.WithKitCSS()` puts all of it into the bundle as one file
+(`kit/kit.css`), which the browser caches like Tabler's CSS, and switches the inline CSS off.
+`static.Head` links the file; a page without `Head` links it with `static.Kit(files)`. The file holds the
+CSS of the packages linked into the program, and only those.
+
+```go
+var files = static.New("/static/", must(fs.Sub(embedded, "static")), static.WithKitCSS())
+```
 
 **Plugins, charts and theme fonts.** Everything else the packages load in the browser comes from
 `cdn.Base` (default jsDelivr):

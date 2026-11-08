@@ -248,8 +248,10 @@ templ Footer(p FooterProps) {
 // Styles renders the block's CSS; Page includes it.
 templ Styles() {
 	@icon.Styles()
-	@csp.Style(css)
+	@styles
 }
+
+var styles = csp.Sheet("blocks/landing", css)
 
 const css = `.kit-landing{min-height:100vh;display:flex;flex-direction:column;background:var(--tblr-bg-surface)}
 .kit-landing main{flex:1}

@@ -173,13 +173,11 @@ templ ListItem(p ListItemProps) {
 	</a>
 }
 
-var styles = templ.NewOnceHandle()
+var styles = csp.Sheet("blocks/split", css)
 
 // Styles renders the panes' CSS once per page; Split includes it.
 templ Styles() {
-	@styles.Once() {
-		@csp.Style(css)
-	}
+	@styles
 }
 
 var script = templ.NewOnceHandle()

@@ -49,6 +49,8 @@ import (
 	"time"
 
 	"github.com/andybalholm/brotli"
+
+	"github.com/mind-vm/tabler-templ/internal/csp"
 )
 
 // Cache-Control for the three kinds of address.
@@ -74,6 +76,7 @@ var types = map[string]string{
 type Files struct {
 	prefix string
 	fsys   fs.FS
+	kit    bool // the kit's own CSS is in the bundle as KitCSS
 
 	once    sync.Once
 	version string
@@ -90,11 +93,34 @@ type file struct {
 
 // New serves the files of fsys under prefix, which starts and ends with "/". The files are read and
 // compressed on first use and kept in memory; fsys is meant to be an embed.FS (or a part of one).
-func New(prefix string, fsys fs.FS) *Files {
+func New(prefix string, fsys fs.FS, opts ...Option) *Files {
 	if !strings.HasPrefix(prefix, "/") || !strings.HasSuffix(prefix, "/") {
 		panic("static: the prefix needs / at start and end: " + prefix)
 	}
-	return &Files{prefix: prefix, fsys: fsys}
+	d := &Files{prefix: prefix, fsys: fsys}
+	for _, o := range opts {
+		o(d)
+	}
+	return d
+}
+
+// An Option configures New.
+type Option func(*Files)
+
+// KitCSS is the bundle's name of the kit's own CSS with WithKitCSS.
+const KitCSS = "kit/kit.css"
+
+// WithKitCSS puts the kit's own CSS (sidebar, shell, blocks, icon sizing …) into the bundle as one file,
+// KitCSS, instead of inline in every page: the browser caches it like Tabler's CSS, and a
+// Content-Security-Policy needs no nonce for it. The file holds the CSS of the packages linked into the
+// program, and only those. Head links it; a page that does not use Head links Kit.
+//
+// It switches the inline CSS off for the whole program: pages without the link then lack the kit's CSS.
+func WithKitCSS() Option {
+	return func(d *Files) {
+		d.kit = true
+		csp.SetExternal(true)
+	}
 }
 
 func (d *Files) load() {
@@ -122,6 +148,14 @@ func (d *Files) load() {
 		})
 		if err != nil {
 			panic("static: " + err.Error())
+		}
+		if d.kit {
+			b := []byte(csp.All())
+			h := sha256.Sum256(b)
+			if d.files[KitCSS] == nil {
+				names = append(names, KitCSS)
+			}
+			d.files[KitCSS] = &file{raw: b, gz: gzipped(b), typ: contentType(KitCSS), etag: hex.EncodeToString(h[:8])}
 		}
 		sort.Strings(names)
 		h := sha256.New()

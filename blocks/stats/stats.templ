@@ -29,6 +29,7 @@ type Props struct {
 
 // Row is a strip of tiles in one card; it wraps on narrow screens.
 templ Row(items []Stat, props ...Props) {
+	@Styles()
 	{{ p := kit.First(props) }}
 	<div class={ kit.Classes("kit-stats", p.Class) }>
 		for _, s := range items {
@@ -38,6 +39,7 @@ templ Row(items []Stat, props ...Props) {
 }
 
 templ Tile(s Stat) {
+	@Styles()
 	<div class="kit-stat">
 		<div class="kit-stat-label">
 			if s.Marker != nil {
@@ -60,9 +62,12 @@ templ Tile(s Stat) {
 	</div>
 }
 
-// Styles renders the block's CSS; the shell block includes it.
+var styles = csp.Sheet("blocks/stats", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
+// it themselves; calling it is only needed to put it in <head>.
 templ Styles() {
-	@csp.Style(css)
+	@styles
 }
 
 const css = `.kit-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));margin-bottom:1rem;overflow:hidden;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}

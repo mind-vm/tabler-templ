@@ -1030,13 +1030,15 @@ func Styles() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = csp.Style(css).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = styles.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
 }
+
+var styles = csp.Sheet("blocks/landing", css)
 
 const css = `.kit-landing{min-height:100vh;display:flex;flex-direction:column;background:var(--tblr-bg-surface)}
 .kit-landing main{flex:1}

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Less CSS per page:**
+  - The blocks `listpage`, `detail`, `create`, `history` and `stats` render their CSS themselves, where
+    they are used and once per page.
+  - `shell.Styles` no longer carries their CSS. An empty shell page goes from 13.9 KB to 8.6 KB of inline
+    CSS.
+  - Their `Styles()` still work, e.g. to put the CSS in `<head>`.
+  - `sidebar.Sidebar` renders the sidebar's CSS itself as well.
+- **`static.WithKitCSS()`:**
+  - Puts the kit's own CSS (sidebar, shell, blocks, icon sizing) into the bundle as `kit/kit.css`,
+    cached and compressed like Tabler's CSS, and switches the inline CSS off.
+  - `static.Head` links the file; `static.Kit(files)` links it on its own.
+  - The file holds only the CSS of the packages the program links.
+
+## Unreleased
+
 - **Sidebar:**
   - `sidebar.Switcher` puts a workspace (team, organisation) with a dropdown to switch in place of the
     brand.
