@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.14.0
+
+The assistant fills in the right form: among several forms of one name it takes the row with the action's
+key or the section that shows the fields, focuses the first field once a dialog is open, lets the app
+reveal a panel first, and takes another form attribute. Catalogs can require a role for every action.
 
 - **`blocks/assistant`, filling in forms** (lessons from the assistant of auftragsbutler):
   - Several forms of one name: the row `kitDialog.matchForm` picks wins only when it carries the action's
