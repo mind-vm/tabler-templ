@@ -1,0 +1,106 @@
+// Package actionbar is the bar of a long form's buttons that sticks to the bottom of the window, so
+// "Save" stays in reach while the reader scrolls. Once a field changes it says so ("Unsaved changes"),
+// and with Guard the browser asks before the reader leaves the page with the changes unsaved.
+//
+//	<form id="settings" method="post"> … fields … </form>
+//	@actionbar.Bar(actionbar.Props{Form: "settings", Guard: true}) {
+//		<button type="reset" form="settings" class="btn">Discard</button>
+//		<button type="submit" form="settings" class="btn btn-primary">Save</button>
+//	}
+//
+// The bar can also sit inside the form; Form is then not needed. Buttons outside the form reach it
+// with the form attribute, as above. Resetting the form clears the state, submitting it ends the guard.
+package actionbar
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type Props struct {
+	Form  string // id of the form it watches; empty = the form the bar sits in
+	Guard bool   // ask before leaving the page with unsaved changes
+	// Message is shown once a field changed, default kit.T(ctx).UnsavedChanges.
+	Message string
+	// Info is shown while nothing changed, e.g. "Last saved 3 minutes ago".
+	Info  string
+	Class string
+	// Dirty starts the bar as changed, e.g. a form shown again after a failed validation.
+	Dirty bool
+}
+
+// Bar renders the bar; the children are its buttons. It renders its CSS and script once per page.
+templ Bar(p Props) {
+	@styles.Once() {
+		@csp.Style(css)
+	}
+	<div
+		class={ kit.Classes("kit-actionbar d-print-none", p.Class) }
+		data-kit-actionbar
+		if p.Form != "" {
+			data-form={ p.Form }
+		}
+		if p.Guard {
+			data-guard
+		}
+		if p.Dirty {
+			data-dirty
+		}
+	>
+		<div class="kit-actionbar-state">
+			<span class="kit-actionbar-dirty" role="status">
+				<span class="status-dot status-dot-animated bg-orange"></span>
+				{ kit.Or(p.Message, kit.T(ctx).UnsavedChanges) }
+			</span>
+			if p.Info != "" {
+				<span class="kit-actionbar-info">{ p.Info }</span>
+			}
+		</div>
+		<div class="btn-list kit-actionbar-buttons">
+			{ children... }
+		</div>
+	</div>
+	@script.Once() {
+		<script { csp.Nonce(ctx)... }>
+			(function () {
+				var formOf = function (bar) {
+					return bar.dataset.form ? document.getElementById(bar.dataset.form) : bar.closest('form');
+				};
+				var barOf = function (form) {
+					var all = document.querySelectorAll('[data-kit-actionbar]');
+					for (var i = 0; i < all.length; i++) if (formOf(all[i]) === form) return all[i];
+					return null;
+				};
+				var mark = function (e) {
+					var form = e.target.form || (e.target.closest && e.target.closest('form'));
+					var bar = form && barOf(form);
+					if (bar) bar.setAttribute('data-dirty', '');
+				};
+				document.addEventListener('input', mark);
+				document.addEventListener('change', mark);
+				document.addEventListener('reset', function (e) {
+					var bar = barOf(e.target);
+					if (bar) bar.removeAttribute('data-dirty');
+				});
+				document.addEventListener('submit', function (e) {
+					var bar = barOf(e.target);
+					if (bar) bar.setAttribute('data-submitting', '');
+				});
+				window.addEventListener('beforeunload', function (e) {
+					var bars = document.querySelectorAll('[data-kit-actionbar][data-guard][data-dirty]:not([data-submitting])');
+					if (bars.length) { e.preventDefault(); e.returnValue = ''; }
+				});
+			})();
+		</script>
+	}
+}
+
+var styles = templ.NewOnceHandle()
+var script = templ.NewOnceHandle()
+
+const css = `.kit-actionbar{position:sticky;bottom:0;z-index:1010;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-top:1.5rem;padding:.75rem 1rem;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg);box-shadow:0 -.25rem 1rem rgba(var(--tblr-body-color-rgb),.06)}
+.kit-actionbar-state{display:flex;align-items:center;gap:.5rem;min-width:0;color:var(--tblr-secondary)}
+.kit-actionbar-dirty{display:none;align-items:center;gap:.5rem;font-weight:500;color:var(--tblr-body-color)}
+.kit-actionbar[data-dirty] .kit-actionbar-dirty{display:inline-flex}
+.kit-actionbar[data-dirty] .kit-actionbar-info{display:none}
+.kit-actionbar-buttons{margin-left:auto}`

@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Sidebar:**
+  - `sidebar.Switcher` puts a workspace (team, organisation) with a dropdown to switch in place of the
+    brand.
+  - `GroupProps.Collapsible` and `Open` make a group's label a button that folds its items away. With
+    the sidebar collapsed to icons every group shows its items.
+- **`blocks/split`:**
+  - `Split` lays out a list beside its detail and an inspector on the right (mail, tickets, customers).
+  - The panes scroll on their own and fill the window.
+  - On small screens the page shows the list or, once an item is open, the detail with a back link.
+  - `ListItem` is a row of the list; `AsideToggle` shows and hides the inspector.
+- **`blocks/actionbar`:**
+  - `Bar` keeps a long form's buttons at the bottom of the window.
+  - It says "Unsaved changes" once a field changed and, with `Guard`, asks before the reader leaves the
+    page.
+- **Shell:** `Props.Tabs` puts tabs below the page heading; `Props.Compact` tightens cards, tables,
+  forms, buttons and the sidebar for pages dense with data.
+- **kit:** new texts `Back`, `ToggleDetails` and `UnsavedChanges` (English and German).
+- **Demo:** `/enterprise`, a small help-desk app with all of the above (`?compact=1` for the compact mode).
+
+## Unreleased
+
 - **`markdown`:** renders GitHub-flavoured Markdown in Tabler's prose container. Raw HTML and
   `javascript:` links are dropped, so user input and a language model's answers can be shown as they are.
 - **`blocks/assistant`:** the blocks of an AI assistant, moved here from thinking-core's

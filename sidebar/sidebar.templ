@@ -22,6 +22,7 @@ import (
 	"context"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/internal/csp"
@@ -120,6 +121,52 @@ templ Brand(p BrandProps) {
 	</a>
 }
 
+type SwitcherProps struct {
+	Logo     templ.Component // e.g. an <img> or an avatar; without it, Initials in a square
+	Initials string
+	Title    string // the current workspace, team or organisation
+	Subtitle string // e.g. the plan or the role
+	Label    string // aria-label of the button, e.g. "Switch workspace"
+}
+
+// Switcher stands in for the Brand when the app has several workspaces (teams, organisations, tenants):
+// the current one with a dropdown to switch. The children are the dropdown's items, e.g. one
+// .dropdown-item per workspace (the current one .active), a divider and "New workspace".
+templ Switcher(p SwitcherProps) {
+	<div class="dropdown kit-sidebar-switcher">
+		<button
+			type="button"
+			class="kit-sidebar-brand kit-sidebar-switcher-button"
+			data-bs-toggle="dropdown"
+			data-bs-popper-config='{"strategy":"fixed"}'
+			aria-expanded="false"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			data-kit-tooltip={ p.Title }
+			if t := tooltip(ctx, p.Title); t != "" {
+				title={ t }
+			}
+		>
+			if p.Logo != nil {
+				@p.Logo
+			} else {
+				<span class="kit-sidebar-avatar kit-sidebar-switcher-logo">{ p.Initials }</span>
+			}
+			<span class="kit-sidebar-brand-text">
+				<span class="kit-sidebar-brand-title">{ p.Title }</span>
+				if p.Subtitle != "" {
+					<span class="kit-sidebar-brand-subtitle">{ p.Subtitle }</span>
+				}
+			</span>
+			@icon.Icon("ti-selector", icon.Props{Class: "kit-sidebar-hide-collapsed text-secondary ms-auto"})
+		</button>
+		<div class="dropdown-menu">
+			{ children... }
+		</div>
+	</div>
+}
+
 // tooltip: the title an element shows only while the sidebar is collapsed (the script swaps it on toggle).
 func tooltip(ctx context.Context, s string) string {
 	if collapsed(ctx) {
@@ -137,21 +184,50 @@ templ Content(props ...SectionProps) {
 }
 
 type GroupProps struct {
-	Label      string // small heading; hidden when collapsed
-	End        bool   // push the group to the bottom of the content
-	Class      string
-	Attributes templ.Attributes
+	Label string // small heading; hidden when collapsed
+	End   bool   // push the group to the bottom of the content
+	// Collapsible makes the label a button that folds the group's items away; Open is the state the
+	// page starts in (e.g. open when the group holds the current page). With the sidebar collapsed to
+	// icons every group shows its items.
+	Collapsible bool
+	Open        bool
+	ID          string // id of the item list, for aria-controls; default derived from Label
+	Class       string
+	Attributes  templ.Attributes
 }
 
 templ Group(p GroupProps) {
-	<div class={ kit.Classes("kit-sidebar-group", kit.If(p.End, "kit-sidebar-group-end"), p.Class) } { p.Attributes... }>
-		if p.Label != "" {
+	{{ id := kit.Or(p.ID, "kit-sidebar-group-"+slug(p.Label)) }}
+	<div
+		class={ kit.Classes("kit-sidebar-group", kit.If(p.End, "kit-sidebar-group-end"), p.Class) }
+		if p.Collapsible && !p.Open {
+			data-closed
+		}
+		{ p.Attributes... }
+	>
+		if p.Label != "" && p.Collapsible {
+			<button type="button" class="kit-sidebar-label kit-sidebar-group-toggle" data-kit-sidebar-group aria-expanded={ strconv.FormatBool(p.Open) } aria-controls={ id }>
+				<span>{ p.Label }</span>
+				@icon.Icon("ti-chevron-down", icon.Props{Class: "kit-sidebar-group-chevron"})
+			</button>
+		} else if p.Label != "" {
 			<div class="kit-sidebar-label">{ p.Label }</div>
 		}
-		<ul class="kit-sidebar-menu">
+		<ul class="kit-sidebar-menu" id={ id }>
 			{ children... }
 		</ul>
 	</div>
+}
+
+// slug turns a label into an id part: lower-case letters and digits, the rest as "-".
+func slug(s string) string {
+	b := []byte(strings.ToLower(s))
+	for i, c := range b {
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') {
+			b[i] = '-'
+		}
+	}
+	return string(b)
 }
 
 type ItemProps struct {
