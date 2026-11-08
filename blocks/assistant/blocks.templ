@@ -1,0 +1,163 @@
+package assistant
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/table"
+	"github.com/mind-vm/tabler-templ/trending"
+)
+
+// BlockView draws one result block in its wrapper. The wrapper carries DOMID, by which the page replaces
+// it, so every block type is replaceable the same way.
+//
+// The payloads, by Type:
+//   - markdown: markdown (the text)
+//   - table: title, columns ([]string), rows ([]map), truncated and totalRows when the rows are cut
+//   - chart: see ChartProps
+//   - stats: title, cols (1–4), items ([]{label, value, unit, delta (a fraction), hint})
+//
+// A block of another type is shown as its JSON rather than dropped: a dropped block is a result the
+// reader never saw.
+templ BlockView(b Block) {
+	<div class="assistant-block" id={ b.DOMID } data-block={ b.Type }>
+		if b.Revised {
+			@badge.Badge(badge.Props{Color: "purple", Light: true, Class: "mb-1", Icon: "ti-refresh"}) {
+				{ T(ctx).Revised }
+			}
+		}
+		switch b.Type {
+			case "markdown":
+				@markdown.Markdown(str(b.Payload, "markdown"))
+			case "table":
+				@tableBlock(b.Payload)
+			case "chart":
+				@chartBlock(b)
+			case "stats":
+				@statsBlock(b.Payload)
+			default:
+				@unknownBlock(b)
+		}
+	</div>
+}
+
+templ framed(title string) {
+	@card.Card() {
+		if title != "" {
+			@card.Header() {
+				@card.Title() {
+					{ title }
+				}
+			}
+		}
+		{ children... }
+	}
+}
+
+templ tableBlock(p map[string]any) {
+	{{
+		cols := strs(p, "columns")
+		rs := rows(p, "rows")
+		num := map[string]bool{}
+		for _, c := range cols {
+			num[c] = numeric(rs, c)
+		}
+	}}
+	@framed(str(p, "title")) {
+		@table.Table(table.Props{Card: true, VCenter: true, Striped: true, Hover: true, Responsive: true}) {
+			<thead>
+				<tr>
+					for _, c := range cols {
+						<th class={ templ.KV("text-end", num[c]) }>{ c }</th>
+					}
+				</tr>
+			</thead>
+			<tbody>
+				if len(rs) == 0 {
+					@table.Empty(max(1, len(cols)), T(ctx).NoRows)
+				}
+				for _, r := range rs {
+					<tr>
+						for _, c := range cols {
+							// Numbers right-aligned, as in every ledger: a column of amounts is read by
+							// comparing digits that line up.
+							<td class={ templ.KV("text-end font-monospace", num[c]) }>{ cellText(r[c]) }</td>
+						}
+					</tr>
+				}
+			</tbody>
+		}
+		if p["truncated"] == true {
+			@card.Footer() {
+				<span class="text-secondary small">{ fmt.Sprintf(T(ctx).RowsShown, len(rs), cell(p["totalRows"])) }</span>
+			}
+		}
+	}
+}
+
+templ chartBlock(b Block) {
+	@framed(str(b.Payload, "title")) {
+		@card.Body() {
+			@chart.Chart(ChartProps(b.ChartID, b.Payload))
+		}
+	}
+}
+
+templ statsBlock(p map[string]any) {
+	{{
+		items := rows(p, "items")
+		cols := len(items)
+		if n, ok := p["cols"].(float64); ok && n >= 1 {
+			cols = int(n)
+		}
+		cols = min(max(cols, 1), 4)
+	}}
+	<div>
+		if t := str(p, "title"); t != "" {
+			<h3 class="mb-2">{ t }</h3>
+		}
+		<div class="row row-cards">
+			for _, it := range items {
+				<div class={ "col-sm-6", "col-lg-" + strconv.Itoa(12/cols) }>
+					@metric.Card(metric.Props{
+						Label: str(it, "label"),
+						Value: valueWithUnit(it),
+						Trend: trend(it),
+						Note:  str(it, "hint"),
+					})
+				</div>
+			}
+		</div>
+	</div>
+}
+
+func valueWithUnit(it map[string]any) string {
+	v := cell(it["value"])
+	if u := str(it, "unit"); u != "" {
+		return v + " " + u
+	}
+	return v
+}
+
+// trend turns the payload's delta, a fraction, into a percent.
+func trend(it map[string]any) *trending.Props {
+	d, ok := it["delta"].(float64)
+	if !ok {
+		return nil
+	}
+	pct := d * 100
+	return &trending.Props{Value: pct, Text: strconv.FormatFloat(pct, 'f', 0, 64)}
+}
+
+templ unknownBlock(b Block) {
+	@framed(T(ctx).Unknown + b.Type) {
+		@card.Body() {
+			<pre class="mb-0">{ pretty(b.Payload) }</pre>
+		}
+	}
+}

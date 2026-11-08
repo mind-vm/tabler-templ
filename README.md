@@ -189,6 +189,7 @@ in front compresses already.
 | `pattern` | `Pattern`: Tabler's background patterns (type, color, size, opacity) |
 | `payment` | `Payment(code)`: the 169 payment provider logos (needs `tabler-payments.css`) |
 | `prose` | `Prose` (rich text), `HTML` (checked HTML, e.g. rendered Markdown), `Callout` |
+| `markdown` | `Markdown(src)`: GitHub-flavoured Markdown (tables, task lists, autolinks) in a `Prose`, `HTML(src)`; raw HTML and `javascript:` links are dropped, so it is safe for user or model text (goldmark) |
 | `social` | `Social`: brand icons of the socials stylesheet (sizes, grey) |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Content`, `Group`, `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |
 | `icon` | `Icon("ti-…")` with Tabler's `.icon` sizing, sizes, color, inline, filled icons (`Filled` or a `-filled` name, from the filled webfont) – full class name, so icon-font subsetters can find it in the source; `Styles()` sizes webfont icons where Tabler's CSS only sizes SVG (avatars, stamps, empty states) |
@@ -250,6 +251,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 | `blocks/dashboard` | Cards of Tabler's dashboard: `Welcome`, `Usage` (storage), `ChartTable` with `Goal` and `Commits`, `Banner`, `Visits` (pages with sparklines), `Bars` (traffic by source), `Tasks`, `Checklist`, `Leaderboard`, `Sponsor` |
 | `blocks/crm` | `Deals`, `Funnel` (pipeline), `Activity`, `Risks` (churn) |
 | `blocks/crypto` | `Markets` (coin table), `Orders` (order book), `OrderForm` (buy/sell), `ChartCard` with a time-frame `Switch` |
+| `blocks/assistant` | An AI assistant's conversation, rendered on the server and streamed as fragments: `Conversation` (intro with example prompts, composer, the client script), `Turn` (slots for steps, questions, blocks, answer, status), `Step` (a folded script or tool call with its result), `Ask`/`Answered` (text, confirm, choice or a form of questions), `BlockView` (markdown, table, chart, stats; a block sent again under its id replaces the earlier one), `Answer` (Markdown), `Failure`, `Usage`; `Open` starts the event stream, `Fragment` renders without page-wide scripts. The payloads follow thinking-core's `ext.BlocksPack`; demo at `/assistant` |
 | `blocks/activity` | `Feed` (avatar, text, time, unread), `Card` (scrolling activity card) |
 | `blocks/uptime` | Monitor page: `Header`, `SystemStatus` (services with history), `Incidents`, `Availability` |
 | `blocks/tasks` | `Board` (kanban columns of task `Card`s: status, image, people, due date, subtasks, comments), `Table` (tasks with priority) |

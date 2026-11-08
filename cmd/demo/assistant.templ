@@ -1,0 +1,240 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"sync"
+	"time"
+
+	"github.com/mind-vm/tabler-templ/blocks/assistant"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/listgroup"
+)
+
+// The assistant demo answers every message with the same scripted run, the way an agent would: two
+// steps, a question, figures, a chart, a table and an answer. A second message revises the chart, which
+// moves down to the new turn with a "revised" badge.
+
+func assistantRoutes(mux *http.ServeMux) {
+	d := &assistantDemo{asks: map[string]chan any{}, seen: map[string]map[string]int{}}
+	mux.Handle("GET /assistant", templ.Handler(assistantPage()))
+	mux.HandleFunc("POST /assistant/run", d.run)
+	mux.HandleFunc("POST /assistant/reply", d.reply)
+}
+
+templ assistantLink() {
+	<a href="/assistant" class="btn">
+		@icon.Icon("ti-sparkles")
+		Assistant
+	</a>
+}
+
+var assistantExamples = []string{
+	"How did revenue develop in the first half of 2026?",
+	"Which region grew fastest?",
+}
+
+templ assistantPage() {
+	{{ p := frameProps("", "Assistant") }}
+	{{
+		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Assistant", Pretitle: "blocks/assistant",
+			Description: "An agent's run streamed as server-rendered fragments: steps, a question, result blocks and a Markdown answer."})
+	}}
+	@layout.Page(p) {
+		<div class="row g-4">
+			<div class="col-lg-3 d-none d-lg-block">
+				@card.Card() {
+					@card.Header() {
+						@card.Title() {
+							Conversations
+						}
+					}
+					@listgroup.List(listgroup.Props{Flush: true}) {
+						@listgroup.Item(listgroup.ItemProps{Href: "/assistant", Active: true}) {
+							Sales H1 2026
+						}
+						@listgroup.Item(listgroup.ItemProps{Href: "/assistant"}) {
+							Churn by plan
+						}
+						@listgroup.Item(listgroup.ItemProps{Href: "/assistant"}) {
+							Support tickets in May
+						}
+					}
+				}
+			</div>
+			<div class="col-lg-9">
+				@assistant.Conversation(assistant.ConversationProps{Run: "/assistant/run", Reply: "/assistant/reply",
+					Title: "Ask about the sales data", Text: "The agent reads orders.csv (January to June 2026). This demo plays back a scripted run.",
+					Examples: assistantExamples, Placeholder: "Ask something about orders.csv…"})
+			</div>
+		</div>
+	}
+}
+
+type assistantDemo struct {
+	mu   sync.Mutex
+	asks map[string]chan any       // pending questions by request id
+	seen map[string]map[string]int // per session: block id → turn that showed it
+	turn map[string]int
+	seq  int
+}
+
+func (d *assistantDemo) begin(session string) (turn int) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.turn == nil {
+		d.turn = map[string]int{}
+	}
+	d.turn[session]++
+	if d.seen[session] == nil {
+		d.seen[session] = map[string]int{}
+	}
+	return d.turn[session]
+}
+
+// place records that turn shows block id and reports whether an earlier turn showed it first.
+func (d *assistantDemo) place(session, id string, turn int) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	prev, ok := d.seen[session][id]
+	d.seen[session][id] = turn
+	return ok && prev < turn
+}
+
+func (d *assistantDemo) chartID() string {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.seq++
+	return fmt.Sprintf("ac%d", d.seq)
+}
+
+func (d *assistantDemo) run(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Message   string `json:"message"`
+		SessionID string `json:"sessionId"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Message == "" || req.SessionID == "" {
+		http.Error(w, "want {message, sessionId}", http.StatusBadRequest)
+		return
+	}
+	s := assistant.Open(w)
+	if s == nil {
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+	ctx := r.Context()
+	turn := d.begin(req.SessionID)
+	pause := func(ms int) bool {
+		select {
+		case <-ctx.Done():
+			return false
+		case <-time.After(time.Duration(ms) * time.Millisecond):
+			return true
+		}
+	}
+	step := func(n int, code, result string) bool {
+		id := fmt.Sprintf("step-%d-%d", turn, n)
+		s.Send(ctx, assistant.SlotSteps, id, "", assistant.Step(assistant.StepProps{ID: id, N: n, Code: code}))
+		if !pause(700) {
+			return false
+		}
+		s.Send(ctx, assistant.SlotSteps, id, "", assistant.Step(assistant.StepProps{ID: id, N: n, Code: code, Result: &result}))
+		return pause(300)
+	}
+	block := func(typ, id string, payload any) {
+		b := assistant.Block{Type: typ, Payload: assistant.Normalize(payload), DOMID: "block-" + id, ChartID: d.chartID(),
+			Revised: d.place(req.SessionID, id, turn)}
+		s.Send(ctx, assistant.SlotBlocks, b.DOMID, "", assistant.BlockView(b))
+	}
+
+	s.Send(ctx, assistant.SlotTurn, "", "", assistant.Turn(req.Message))
+	if !pause(400) || !step(1, "const rows = csv(read('orders.csv'))\nlog(rows.length, Object.keys(rows[0]))",
+		"24 [ 'order', 'date', 'region', 'amount' ]") {
+		return
+	}
+
+	// The question: the run waits for the reply.
+	reqID := fmt.Sprintf("ask-%d-%s", turn, req.SessionID[:min(8, len(req.SessionID))])
+	ch := make(chan any, 1)
+	d.mu.Lock()
+	d.asks[reqID] = ch
+	d.mu.Unlock()
+	s.Send(ctx, assistant.SlotAsks, "ask-"+reqID, "", assistant.Ask(assistant.AskRequest{RequestID: reqID, InputType: "choice",
+		Message: "Which revenue should I use?", Options: []string{"Net", "Gross"}}))
+	var basis any
+	select {
+	case basis = <-ch:
+	case <-ctx.Done():
+		return
+	case <-time.After(5 * time.Minute):
+		s.Send(ctx, assistant.SlotStatus, "", assistant.ModeSet, assistant.Failure("No answer in five minutes."))
+		return
+	}
+	kind := fmt.Sprint(basis)
+	factor := 1.0
+	if kind == "Gross" {
+		factor = 1.19
+	}
+
+	if !step(2, fmt.Sprintf("const byMonth = sum(rows, 'month', 'amount') // %s\nemitChart({id: 'revenue', variant: 'bar', …})", kind),
+		"6 months") {
+		return
+	}
+	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun"}
+	net := []float64{6120, 5480, 7930, 8210, 9650, 10810}
+	data := make([]map[string]any, len(months))
+	total := 0.0
+	for i, m := range months {
+		v := net[i] * factor
+		total += v
+		data[i] = map[string]any{"month": m, "revenue": int(v), "orders": []int{3, 3, 4, 4, 5, 5}[i]}
+	}
+	block("stats", fmt.Sprintf("figures-%d", turn), map[string]any{"items": []map[string]any{
+		{"label": kind + " revenue", "value": fmt.Sprintf("%.0f", total), "unit": "EUR", "delta": 0.18, "hint": "vs. H2 2025"},
+		{"label": "Orders", "value": "24", "delta": 0.09},
+		{"label": "Average order", "value": fmt.Sprintf("%.0f", total/24), "unit": "EUR", "delta": 0.08},
+	}})
+	pause(300)
+	block("chart", "revenue", map[string]any{"title": kind + " revenue by month", "variant": "composite", "x": "month",
+		"series": []string{"revenue", "orders"}, "types": map[string]string{"orders": "line"}, "data": data})
+	pause(300)
+	block("table", fmt.Sprintf("regions-%d", turn), map[string]any{"title": "Regions", "columns": []string{"region", "orders", "revenue"},
+		"rows": []map[string]any{
+			{"region": "North", "orders": 9, "revenue": fmt.Sprintf("%.2f", 18240*factor)},
+			{"region": "West", "orders": 8, "revenue": fmt.Sprintf("%.2f", 16110*factor)},
+			{"region": "South", "orders": 7, "revenue": fmt.Sprintf("%.2f", 13850*factor)},
+		}})
+	pause(300)
+	s.Send(ctx, assistant.SlotAnswer, "", assistant.ModeSet, assistant.Answer(fmt.Sprintf(
+		"%s revenue grew in **five of six months** and reached **%.0f EUR** in the first half of 2026.\n\n"+
+			"- The dip in February follows the short month and two cancelled orders.\n"+
+			"- **North** leads; **South** grew fastest from April on.\n\n"+
+			"Ask again and the chart is revised in place.", kind, total)))
+	s.Send(ctx, assistant.SlotStatus, "", assistant.ModeSet, assistant.Usage(assistant.UsageProps{Steps: 2, Prompt: 3120, Completion: 412, Blocks: 3}))
+}
+
+func (d *assistantDemo) reply(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		RequestID string `json:"requestId"`
+		Value     any    `json:"value"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.RequestID == "" {
+		http.Error(w, "want {sessionId, requestId, value}", http.StatusBadRequest)
+		return
+	}
+	d.mu.Lock()
+	ch, ok := d.asks[req.RequestID]
+	delete(d.asks, req.RequestID)
+	d.mu.Unlock()
+	if !ok {
+		http.Error(w, "this question is no longer open", http.StatusConflict)
+		return
+	}
+	ch <- req.Value
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_ = assistant.Answered(assistant.AskRequest{RequestID: req.RequestID, InputType: "choice"}, req.Value).Render(context.Background(), w)
+}

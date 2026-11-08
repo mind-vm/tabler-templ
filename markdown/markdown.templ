@@ -1,0 +1,35 @@
+// Package markdown renders Markdown (GitHub flavour: tables, task lists, strikethrough, autolinks) as
+// HTML in Tabler's prose container.
+//
+// It is safe for text you did not write, such as user input or a language model's answer: raw HTML in
+// the source is dropped and javascript: links are neutralised (goldmark without WithUnsafe), so the
+// output can go into the page unescaped.
+//
+//	@markdown.Markdown(answer)
+package markdown
+
+import (
+	"bytes"
+
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+
+	"github.com/mind-vm/tabler-templ/prose"
+)
+
+var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
+
+// HTML converts Markdown to HTML. Raw HTML in src is left out. If conversion fails, it returns src
+// escaped, so the text still shows.
+func HTML(src string) string {
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(src), &buf); err != nil {
+		return templ.EscapeString(src)
+	}
+	return buf.String()
+}
+
+// Markdown renders src inside a prose.Prose.
+templ Markdown(src string, props ...prose.Props) {
+	@prose.HTML(HTML(src), props...)
+}

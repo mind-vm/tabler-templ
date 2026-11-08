@@ -1,0 +1,290 @@
+package assistant
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/spinner"
+)
+
+type ConversationProps struct {
+	ID    string // default "assistant"
+	Class string
+	// Run is the URL a message is posted to as JSON {message, sessionId}; it answers with a Stream.
+	Run string
+	// Reply is the URL an answer to an Ask is posted to as JSON {sessionId, requestId, value}; it
+	// answers with the HTML that replaces the form, usually Answered.
+	Reply string
+	// Session names the conversation in both requests; default a random id chosen by the page.
+	Session string
+	// Intro: a card shown until the first message, with Title, Text and Examples (prompts the reader
+	// can send with one click). Without Title, Text and Examples there is none.
+	Title    string
+	Text     string
+	Examples []string
+	// Placeholder of the composer, default Texts.Placeholder.
+	Placeholder string
+}
+
+// Conversation is the assistant's page content: the turns (children: earlier turns rendered on the
+// server, e.g. Turn with its parts), the intro and the composer, which sticks to the bottom of the
+// window. It renders Styles and Script; the head needs chart.Library() when blocks may hold charts.
+templ Conversation(p ConversationProps) {
+	@Styles()
+	<div
+		id={ kit.Or(p.ID, "assistant") }
+		class={ kit.Classes("assistant", p.Class) }
+		data-assistant
+		data-run={ p.Run }
+		data-reply={ p.Reply }
+		if p.Session != "" {
+			data-session={ p.Session }
+		}
+		data-missing={ T(ctx).MissingAnswer }
+	>
+		<div class="assistant-turns d-flex flex-column gap-4">
+			if p.Title != "" || p.Text != "" || len(p.Examples) > 0 {
+				@card.Card(card.Props{Class: "assistant-intro"}) {
+					@card.Body() {
+						if p.Title != "" {
+							<h3 class="card-title mb-1">{ p.Title }</h3>
+						}
+						if p.Text != "" {
+							<p class="text-secondary">{ p.Text }</p>
+						}
+						if len(p.Examples) > 0 {
+							<div class="d-flex flex-column gap-2">
+								for _, ex := range p.Examples {
+									@button.Button(button.Props{Type: "button", Outline: true, Variant: button.VariantPrimary,
+										Class: "text-start justify-content-start", Attributes: templ.Attributes{"data-example": ex}}) {
+										{ ex }
+									}
+								}
+							</div>
+						}
+					}
+				}
+			}
+			{ children... }
+		</div>
+		<form class="assistant-composer d-flex gap-2 align-items-end">
+			<textarea name="message" class="form-control" rows="2" placeholder={ kit.Or(p.Placeholder, T(ctx).Placeholder) } aria-label={ kit.Or(p.Placeholder, T(ctx).Placeholder) }></textarea>
+			@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-send"}) {
+				{ T(ctx).Send }
+			}
+		</form>
+	</div>
+	// The page may draw no chart itself; this starts the ones streamed in later.
+	@chart.Script()
+	@Script()
+}
+
+// Turn is the frame one message's run fills in, slot by slot (Slot*). Working shows until the status
+// slot is set.
+templ Turn(message string) {
+	<div class="assistant-turn d-flex flex-column gap-3">
+		<div class="assistant-message align-self-end bg-primary-lt rounded-3 px-3 py-2">{ message }</div>
+		<div data-slot="steps" class="d-flex flex-column gap-1"></div>
+		<div data-slot="asks" class="d-flex flex-column gap-3"></div>
+		<div data-slot="blocks" class="d-flex flex-column gap-3"></div>
+		<div data-slot="answer"></div>
+		<div data-slot="status">
+			@Working()
+		</div>
+	</div>
+}
+
+// Working is the spinner of a running turn.
+templ Working() {
+	<div class="assistant-working text-secondary d-flex align-items-center gap-2">
+		@spinner.Spinner(spinner.Props{Small: true})
+		<span>{ T(ctx).Working }</span>
+	</div>
+}
+
+type StepProps struct {
+	ID    string // the element id; send the step again under it with the result
+	N     int    // the step's number, shown after Texts.Script
+	Title string // instead of "Script N", e.g. a tool's name
+	Code  string // what the agent ran
+	// Result is nil while the step runs (a spinner), then its output.
+	Result *string
+	// Failed marks the result as an error; without it, a result starting with "Error" counts as one.
+	Failed bool
+}
+
+func (p StepProps) failed() bool {
+	return p.Result != nil && (p.Failed || strings.HasPrefix(*p.Result, "Error"))
+}
+
+// Step is one step the agent ran (a script, a tool call), folded: the title and its state, the code
+// and the result inside. It is sent twice under the same ID — when it starts, and with the result — so
+// the page swaps it; a step the reader opened stays open.
+templ Step(p StepProps) {
+	<details class="card card-sm assistant-step" id={ p.ID }>
+		<summary class="card-body d-flex align-items-center gap-2 py-2">
+			<span>{ kit.Or(p.Title, T(ctx).Script+" "+strconv.Itoa(p.N)) }</span>
+			if p.Result == nil {
+				@spinner.Spinner(spinner.Props{Small: true})
+			} else if p.failed() {
+				@badge.Badge(badge.Props{Color: "orange", Light: true}) {
+					{ T(ctx).Retried }
+				}
+			} else {
+				@badge.Badge(badge.Props{Color: "green", Light: true}) {
+					{ T(ctx).Ran }
+				}
+			}
+		</summary>
+		<div class="card-body pt-0">
+			if p.Code != "" {
+				<pre class="mb-2"><code>{ p.Code }</code></pre>
+			}
+			if p.Result != nil && *p.Result != "" {
+				<pre class={ "mb-0", templ.KV("bg-orange-lt", p.failed()) }>{ *p.Result }</pre>
+			}
+		</div>
+	</details>
+}
+
+// Answer is the agent's closing text, as Markdown.
+templ Answer(text string) {
+	@markdown.Markdown(text)
+}
+
+// Failure ends a turn that failed.
+templ Failure(msg string) {
+	@alert.Alert(alert.Props{Variant: alert.VariantDanger, Title: T(ctx).Failed}) {
+		{ msg }
+	}
+}
+
+type UsageProps struct {
+	Steps, Blocks      int
+	Prompt, Completion int    // tokens
+	Text               string // instead of Texts.Usage
+}
+
+// Usage ends a turn that finished: steps, tokens and blocks in a muted line.
+templ Usage(p UsageProps) {
+	<div class="text-secondary small">
+		if p.Text != "" {
+			{ p.Text }
+		} else {
+			{ fmt.Sprintf(T(ctx).Usage, p.Steps, p.Prompt, p.Completion, p.Blocks) }
+		}
+	</div>
+}
+
+// Ask is a question the agent waits on, as a form; send it into SlotAsks under "ask-"+RequestID. The
+// page posts the answer to the conversation's Reply URL and puts the response in its place: the value
+// is a string (text, choice), a bool (confirm) or, for questions, a map from question id to the label
+// (or a list of labels for MultiSelect). The server should check it again: the form only has to be
+// convenient, not right.
+templ Ask(r AskRequest) {
+	@card.Card(card.Props{ID: "ask-" + r.RequestID, Status: "primary", Class: "assistant-ask"}) {
+		<form class="card-body" data-ask={ r.RequestID } data-input-type={ r.InputType }>
+			<div class="mb-2">
+				@badge.Badge(badge.Props{Color: "blue", Light: true, Icon: "ti-message-question"}) {
+					{ T(ctx).Asking }
+				}
+			</div>
+			if r.Message != "" {
+				<p class="fw-bold">{ r.Message }</p>
+			}
+			switch r.InputType {
+				case "questions":
+					for _, q := range r.Questions {
+						@question(q)
+					}
+					<div class="assistant-ask-error text-danger small mb-2"></div>
+					<div class="d-flex justify-content-end">
+						@button.Button(button.Props{Variant: button.VariantPrimary}) {
+							{ T(ctx).SendAnswers }
+						}
+					</div>
+				case "confirm":
+					<div class="d-flex gap-2">
+						@button.Button(button.Props{Variant: button.VariantPrimary, Attributes: templ.Attributes{"name": "value", "value": "true"}}) {
+							{ T(ctx).Yes }
+						}
+						@button.Button(button.Props{Attributes: templ.Attributes{"name": "value", "value": "false"}}) {
+							{ T(ctx).No }
+						}
+					</div>
+				case "choice":
+					<div class="d-flex flex-wrap gap-2">
+						for _, o := range r.Options {
+							@button.Button(button.Props{Outline: true, Variant: button.VariantPrimary, Attributes: templ.Attributes{"name": "value", "value": o}}) {
+								{ o }
+							}
+						}
+					</div>
+				default:
+					<div class="d-flex gap-2">
+						<input type="text" name="text" class="form-control" placeholder={ r.Placeholder } aria-label={ kit.Or(r.Placeholder, T(ctx).YourAnswer) } required/>
+						@button.Button(button.Props{Variant: button.VariantPrimary}) {
+							{ T(ctx).Send }
+						}
+					</div>
+			}
+		</form>
+	}
+}
+
+templ question(q AskQuestion) {
+	<fieldset class="mb-3" data-question={ q.ID } data-label={ q.Question } data-multi={ strconv.FormatBool(q.MultiSelect) }>
+		<legend class="form-label">
+			if q.Header != "" {
+				<span class="badge bg-secondary-lt me-1">{ q.Header }</span>
+			}
+			{ q.Question }
+			if q.MultiSelect {
+				<span class="text-secondary small">{ T(ctx).ChooseSeveral }</span>
+			}
+		</legend>
+		@form.SelectGroup(form.SelectGroupProps{Boxes: true, Class: "d-flex flex-column"}) {
+			for _, o := range q.Options {
+				@form.SelectItem(form.SelectItemProps{Name: "q-" + q.ID, Value: o.Label, Radio: !q.MultiSelect, Box: true, Title: o.Label, Description: o.Description})
+			}
+			if q.AllowOther {
+				// "Other…" is marked by an attribute, not a sentinel value: any string could also be a
+				// label the model wrote.
+				@form.SelectItem(form.SelectItemProps{Name: "q-" + q.ID, Radio: !q.MultiSelect, Box: true, Title: T(ctx).Other, Description: T(ctx).OtherHint, Attributes: templ.Attributes{"data-other": "true"}})
+			}
+		}
+		if q.AllowOther {
+			<input type="text" class="form-control mt-2 assistant-other" name={ "other-" + q.ID } placeholder={ T(ctx).YourAnswer } aria-label={ T(ctx).YourAnswer }/>
+		}
+	</fieldset>
+}
+
+// Answered replaces an Ask once the reply is through: the answer as the reader gave it.
+templ Answered(r AskRequest, value any) {
+	<div class="card card-sm bg-secondary-lt" id={ "ask-" + r.RequestID }>
+		<div class="card-body">
+			<div class="text-secondary small">{ T(ctx).YouAnswered }</div>
+			if r.InputType == "questions" {
+				{{ answers, _ := value.(map[string]any) }}
+				for i, q := range r.Questions {
+					if i > 0 {
+						<span class="text-secondary">{ " · " }</span>
+					}
+					<span class="text-secondary">{ kit.Or(q.Header, q.ID) }:</span>
+					<span class="fw-medium">{ joinAnswer(answers[q.ID], T(ctx)) }</span>
+				}
+			} else {
+				<span class="fw-medium">{ joinAnswer(value, T(ctx)) }</span>
+			}
+		</div>
+	</div>
+}

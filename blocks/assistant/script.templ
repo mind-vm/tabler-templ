@@ -1,0 +1,205 @@
+package assistant
+
+import "github.com/mind-vm/tabler-templ/internal/csp"
+
+var styles = templ.NewOnceHandle()
+
+const css = `.assistant-message{max-width:80%;white-space:pre-wrap}
+.assistant-composer{position:sticky;bottom:0;z-index:2;margin-top:1.5rem;padding:.75rem 0;background:var(--tblr-body-bg)}
+.assistant-turn:has(form[data-ask]) .assistant-working{display:none!important}
+fieldset:not(:has([data-other]:checked)) .assistant-other{display:none}
+.assistant-step>summary{cursor:pointer;list-style:none}
+.assistant-step>summary::-webkit-details-marker{display:none}
+.assistant-step pre{white-space:pre-wrap;font-size:12px;max-height:24rem;overflow:auto}
+.assistant .prose>:last-child{margin-bottom:0}`
+
+// Styles are the conversation's few rules (once per page; Conversation renders them).
+templ Styles() {
+	@styles.Once() {
+		@csp.Style(css)
+	}
+}
+
+var script = templ.NewOnceHandle()
+
+// Script is the conversation's client (once per page; Conversation renders it): it posts a message to
+// the Run URL, reads the event stream and puts each fragment in its slot, and posts the answers to an
+// Ask to the Reply URL. A fragment whose id the page already shows replaces it: in place within the
+// current turn, moved here from an earlier turn. Charts in replaced content are torn down first.
+templ Script() {
+	@script.Once() {
+		<script { csp.Nonce(ctx)... }>
+			(function () {
+				'use strict';
+				var root = document.querySelector('[data-assistant]');
+				if (!root) return;
+				var uuid = function () {
+					if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+					return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+						var r = Math.random() * 16 | 0;
+						return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+					});
+				};
+				var sessionId = root.dataset.session || uuid();
+				var turns = root.querySelector('.assistant-turns');
+				var composer = root.querySelector('.assistant-composer');
+				var input = composer.querySelector('textarea');
+				var sendButton = composer.querySelector('button');
+				var running = false;
+
+				var nodes = function (html) {
+					var t = document.createElement('template');
+					t.innerHTML = html;
+					return t.content;
+				};
+				var dropCharts = function (el) {
+					if (window.tablerCharts && window.tablerCharts.destroy) window.tablerCharts.destroy(el);
+				};
+				var currentTurn = function () {
+					var all = turns.querySelectorAll('.assistant-turn');
+					return all[all.length - 1];
+				};
+
+				function apply(f) {
+					if (f.slot === 'turn') {
+						var intro = root.querySelector('.assistant-intro');
+						if (intro) intro.remove();
+						turns.append(nodes(f.html));
+						currentTurn().scrollIntoView({ block: 'start', behavior: 'smooth' });
+						return;
+					}
+					var turn = currentTurn();
+					var slot = turn && turn.querySelector('[data-slot="' + f.slot + '"]');
+					if (!slot) return;
+					var frag = nodes(f.html);
+					var added = Array.prototype.slice.call(frag.children);
+					var old = f.id ? document.getElementById(f.id) : null;
+					if (f.mode === 'set') {
+						dropCharts(slot);
+						slot.replaceChildren(frag);
+					} else if (old && turn.contains(old)) {
+						if (old.open && added[0]) added[0].open = true;
+						dropCharts(old);
+						old.replaceWith(frag);
+					} else {
+						if (old) { dropCharts(old); old.remove(); }
+						slot.append(frag);
+					}
+					if (window.tablerCharts) added.forEach(function (el) { window.tablerCharts.init(el); });
+				}
+
+				// EventSource cannot POST, and a message does not belong in a URL, so the stream is read
+				// from fetch. Only data lines count; an event other than "html" is ignored.
+				async function run(message) {
+					var res = await fetch(root.dataset.run, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ message: message, sessionId: sessionId }),
+					});
+					if (!res.ok || !res.body) throw new Error(res.status + ' ' + (await res.text()));
+					var reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+					var buf = '';
+					for (;;) {
+						var r = await reader.read();
+						if (r.done) break;
+						buf += r.value;
+						var i;
+						while ((i = buf.indexOf('\n\n')) >= 0) {
+							var frame = buf.slice(0, i);
+							buf = buf.slice(i + 2);
+							var data = frame.split('\n').filter(function (l) { return l.indexOf('data: ') === 0; })
+								.map(function (l) { return l.slice(6); }).join('\n');
+							if (!data) continue;
+							var e = JSON.parse(data);
+							if (e.type === 'html') apply(e.args);
+						}
+					}
+				}
+
+				async function send(message) {
+					message = message.trim();
+					if (!message || running) return;
+					running = true;
+					input.value = '';
+					input.disabled = sendButton.disabled = true;
+					try {
+						await run(message);
+					} catch (err) {
+						var turn = currentTurn();
+						var status = turn && turn.querySelector('[data-slot="status"]');
+						if (status) status.textContent = String(err);
+					} finally {
+						running = false;
+						input.disabled = sendButton.disabled = false;
+						input.focus();
+					}
+				}
+
+				composer.addEventListener('submit', function (e) { e.preventDefault(); send(input.value); });
+				input.addEventListener('keydown', function (e) {
+					if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(input.value); }
+				});
+				root.addEventListener('click', function (e) {
+					var ex = e.target.closest('[data-example]');
+					if (ex) send(ex.dataset.example);
+				});
+
+				function answerOf(form, submitter) {
+					switch (form.dataset.inputType) {
+						case 'confirm':
+							return { value: !!submitter && submitter.value === 'true' };
+						case 'choice':
+							return { value: submitter ? submitter.value : '' };
+						case 'questions': {
+							var value = {};
+							var sets = form.querySelectorAll('fieldset[data-question]');
+							for (var s = 0; s < sets.length; s++) {
+								var fs = sets[s];
+								var other = fs.querySelector('.assistant-other');
+								other = other ? other.value.trim() : '';
+								var picked = [];
+								fs.querySelectorAll('input.form-selectgroup-input:checked').forEach(function (box) {
+									if (box.dataset.other) { if (other) picked.push(other); } else picked.push(box.value);
+								});
+								if (!picked.length) {
+									return { missing: (root.dataset.missing || '%s').replace('%s', fs.dataset.label || fs.dataset.question) };
+								}
+								value[fs.dataset.question] = fs.dataset.multi === 'true' ? picked : picked[0];
+							}
+							return { value: value };
+						}
+						default:
+							return { value: form.elements.text.value };
+					}
+				}
+
+				root.addEventListener('submit', async function (e) {
+					var form = e.target.closest('form[data-ask]');
+					if (!form) return;
+					e.preventDefault();
+					var a = answerOf(form, e.submitter);
+					var error = form.querySelector('.assistant-ask-error');
+					if (a.missing) {
+						if (error) error.textContent = a.missing;
+						return;
+					}
+					var buttons = form.querySelectorAll('button');
+					buttons.forEach(function (b) { b.disabled = true; });
+					var requestId = form.dataset.ask;
+					var res = await fetch(root.dataset.reply, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ sessionId: sessionId, requestId: requestId, value: a.value }),
+					});
+					if (!res.ok) {
+						buttons.forEach(function (b) { b.disabled = false; });
+						if (error) error.textContent = await res.text();
+						return;
+					}
+					var card = document.getElementById('ask-' + requestId);
+					if (card) card.replaceWith(nodes(await res.text()));
+				});
+			})();
+		</script>
+	}
+}

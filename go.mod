@@ -9,6 +9,7 @@ require (
 	github.com/andybalholm/brotli v1.2.7
 	github.com/stretchr/testify v1.12.1
 	github.com/tdewolff/font v0.0.0-20261010204837-88a7f6b56918
+	github.com/yuin/goldmark v1.8.7
 )
 
 require (

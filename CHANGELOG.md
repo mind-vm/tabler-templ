@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **`markdown`:** renders GitHub-flavoured Markdown in Tabler's prose container. Raw HTML and
+  `javascript:` links are dropped, so user input and a language model's answers can be shown as they are.
+- **`blocks/assistant`:** the blocks of an AI assistant, moved here from thinking-core's
+  `examples/blocks-tabler`:
+  - the conversation with composer and example prompts;
+  - one turn per message, with steps, questions to the user (`Ask`) and result blocks (markdown, table,
+    chart, stats);
+  - a Markdown answer and the usage line.
+  Everything is rendered on the server and streamed as server-sent events (`Open`, `Stream.Send`). A small
+  client script puts each fragment in its slot and replaces a block sent again under its id. Texts can be
+  changed per request (`WithTexts`). The demo plays back a scripted run at `/assistant`.
+
 ## v0.11.0
 
 Landing pages: ten new sections in `blocks/marketing` and a demo with two complete landing pages, plus a
