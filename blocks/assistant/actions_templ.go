@@ -326,10 +326,12 @@ var actionOnce = templ.NewOnceHandle()
 //
 // It runs the actions of a finished stream in order, and an action card's button. Before running an
 // action it dispatches "assistant:action" on document with the action as detail; preventDefault
-// takes the action over. Open goes to the page. Fill finds form[data-form] (several: the one
-// kitDialog.matchForm picks), opens its dialog, collapse or details, fills in the fields, marks them
-// and puts a banner over the form; it never submits. Show scrolls to [data-tour] and highlights it.
-// An action for another page is kept in sessionStorage and run when that page has loaded.
+// takes the action over. Open goes to the page. Fill finds form[data-form] (several: see pick in the
+// script) and dispatches "assistant:reveal" on it, so the app can show a panel or tab the form sits
+// in. It opens the form's dialog, collapse or details, fills in the fields, marks them, puts a banner
+// over the form and focuses the first field it changed, in a dialog once the dialog is shown; it
+// never submits. Show scrolls to [data-tour] and highlights it. An action for another page is kept in
+// sessionStorage and run when that page has loaded. WithActionOptions sets another form attribute.
 func ActionScript() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -376,7 +378,8 @@ func ActionScript() templ.Component {
 func actionScript() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		t := T(ctx)
-		cfg, err := json.Marshal(map[string]string{"filled": t.Filled, "notOnPage": t.NotOnPage, "notFilled": t.NotFilled, "unchanged": t.Unchanged})
+		cfg, err := json.Marshal(map[string]string{"filled": t.Filled, "notOnPage": t.NotOnPage, "notFilled": t.NotFilled, "unchanged": t.Unchanged,
+			"formAttribute": ActionOptionsFrom(ctx).formAttribute()})
 		if err != nil {
 			return err
 		}
@@ -401,30 +404,56 @@ function note(a, text) {
 	if (line) line.textContent = text;
 }
 
-function pick(forms, fields, kind) {
-	if (forms.length <= 1) return forms[0] || null;
-	if (window.kitDialog) return window.kitDialog.matchForm(forms, fields, kind);
-	return forms[0];
+// visible counts the action's fields a form shows (not hidden). keyed: the form carries hidden or
+// read-only fields the action names, e.g. the row's positionId, and all hold the action's values.
+function visible(f, fields) {
+	return Object.keys(fields).filter(function (n) { var e = f.elements.namedItem(n); return e && e.type !== 'hidden'; }).length;
 }
 
+function keyed(f, fields) {
+	var keys = Array.prototype.filter.call(f.querySelectorAll('input[type=hidden], input[readonly]'), function (e) {
+		return e.name && e.name.charAt(0) !== '_' && fields[e.name] !== undefined;
+	});
+	return keys.length > 0 && keys.every(function (e) { return e.value === String(fields[e.name]); });
+}
+
+// pick chooses among several forms of one name: one per row of a list, or one per section of a record.
+// The row (kitDialog.matchForm, else the first keyed form) wins when it is keyed and shows as many of
+// the fields as the best form; otherwise the form that shows most of them. Sections of one record
+// carry the other sections' fields hidden, so a key alone would pick the wrong section.
+function pick(forms, fields, kind) {
+	if (forms.length <= 1) return forms[0] || null;
+	var best = Array.prototype.reduce.call(forms, function (b, f) { return visible(f, fields) > visible(b, fields) ? f : b; });
+	var row = window.kitDialog ? window.kitDialog.matchForm(forms, fields, kind) :
+		Array.prototype.find.call(forms, function (f) { return keyed(f, fields); });
+	if (row && keyed(row, fields) && visible(row, fields) >= visible(best, fields)) return row;
+	return best;
+}
+
+// reveal shows the form: "assistant:reveal" for a panel or tab of the app, then its dialog, collapse or
+// details. It returns the dialog when the form is in one, with opening set when it had to open it.
 function reveal(f) {
+	f.dispatchEvent(new CustomEvent('assistant:reveal', { bubbles: true }));
 	var modal = f.closest('.modal');
-	var bs = boot();
-	if (modal && bs) { bs.Modal.getOrCreateInstance(modal).show(); return true; }
+	if (modal) {
+		if (modal.classList.contains('show')) return { modal: modal };
+		var bs = boot();
+		if (bs) { bs.Modal.getOrCreateInstance(modal).show(); return { modal: modal, opening: true }; }
+	}
 	for (var p = f.parentElement; p; p = p.parentElement) {
 		if (p.classList.contains('collapse')) p.classList.add('show');
 		if (p.tagName === 'DETAILS') p.open = true;
 	}
-	return false;
+	return null;
 }
 
 function mark(el) { el.classList.add('assistant-filled'); }
 
 function fill(a) {
 	var fields = a.fields || {};
-	var f = pick(document.querySelectorAll('form[data-form="' + esc(a.form) + '"]'), fields, a.form);
+	var f = pick(document.querySelectorAll('form[' + cfg.formAttribute + '="' + esc(a.form) + '"]'), fields, a.form);
 	if (!f) { note(a, cfg.notOnPage.replace('%s', a.title)); return; }
-	var inModal = reveal(f);
+	var dialog = reveal(f);
 	var missing = [], changed = 0;
 	Object.keys(fields).forEach(function (name) {
 		var el = f.elements.namedItem(name), v = String(fields[name]);
@@ -443,7 +472,7 @@ function fill(a) {
 			if (!opt) { missing.push(name); return; }
 			el.value = opt.value;
 		} else if (el.type === 'checkbox') {
-			el.checked = /^(true|1|yes|ja|on)$/i.test(v);
+			el.checked = /^(true|1|yes|ja|an|on)$/i.test(v) || (v !== '' && v === el.value);
 		} else {
 			el.value = v;
 		}
@@ -461,9 +490,16 @@ function fill(a) {
 		var body = f.querySelector('.modal-body, .card-body');
 		if (body) body.prepend(banner); else f.prepend(banner);
 	}
-	if (!inModal) f.scrollIntoView({ behavior: 'smooth', block: 'center' });
-	var first = f.querySelector('.assistant-filled');
-	if (first && first.focus) setTimeout(function () { first.focus({ preventScroll: !inModal }); }, inModal ? 350 : 0);
+	if (!dialog) f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	// A dialog focuses its first field once shown; the focus belongs in the first field filled in. Of a
+	// radio button the label is marked: focus the button.
+	var focus = function () {
+		var first = f.querySelector('.assistant-filled');
+		if (first && first.tagName === 'LABEL') first = first.control || first.querySelector('input') || first;
+		if (first && first.focus) first.focus({ preventScroll: true });
+	};
+	if (dialog && dialog.opening) dialog.modal.addEventListener('shown.bs.modal', focus, { once: true });
+	else focus();
 	if (missing.length) note(a, cfg.notFilled.replace('%s', missing.join(', ')));
 	else if (!changed) note(a, cfg.unchanged);
 	else note(a, '');
@@ -631,7 +667,7 @@ func CopilotButton(id, label string) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/assistant/actions.templ`, Line: 282, Col: 9}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/assistant/actions.templ`, Line: 318, Col: 9}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
