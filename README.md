@@ -74,6 +74,22 @@ go run ./cmd/demo -addr localhost:8080
 | **Dashboard (vertical layout)** | **Tables** |
 | ![Dashboard in the vertical layout](docs/screenshots/layout-vertical.png) | ![Tables](docs/screenshots/tables.png) |
 
+**CRUD demo (`/crud`).** `examples/crud` is a small contacts app built from co-located HTMX components, the
+pattern package `htmx` is made for. Each component is one package with its contract (routes, ids, events),
+handlers, markup and tests; `crud.go` only composes them:
+
+| Package | Shows |
+|---|---|
+| `contacttable` | search, filter, order and pages in the URL (`blocks/listpage`), boosted with htmx, the address follows |
+| `contactform` | create and edit in a dialog; 422 with errors at the fields; 409 when someone else saved first; a page and Post/Redirect/Get without JavaScript |
+| `contactrow` | the status cell edited in place (only the cell is swapped) |
+| `contactdelete` | deleting after a question, with Undo in the toast |
+| `contactcount` | a count shown twice on the page, refreshed by the other components' events |
+| `contactdetail` | the contact's page in `blocks/split`, the activity loaded lazily |
+
+The tests check every component's handlers and contract (`htmx.CheckRoutes`) and that no template holds a
+URL as a string literal.
+
 `scripts/screenshots.sh` takes the screenshots listed in `docs/screenshots/pages.txt` (`--all`: every rebuilt
 page) with Playwright (the only place that
 uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
@@ -189,6 +205,7 @@ in front compresses already.
 | `pattern` | `Pattern`: Tabler's background patterns (type, color, size, opacity) |
 | `payment` | `Payment(code)`: the 169 payment provider logos (needs `tabler-payments.css`) |
 | `prose` | `Prose` (rich text), `HTML` (checked HTML, e.g. rendered Markdown), `Callout` |
+| `htmx` | htmx for interactive components with their own endpoints: `Library` (head), `Setup` (toast container, a dialog, 422 swapped in, eval off, offline toast, Tabler after swaps); `Route` (an endpoint defined once: `Pattern` for the mux, `URL` for the markup), `ID`, `Target`, `Vals`, `Query`; `Respond` (headers before the body, `Vary: HX-Request`, `Status`, `Trigger`, `Retarget`, `Reswap`, `PushURL`, `OOB`, `Toast`, `CloseDialog`, `FullPage` for requests without htmx), `Error`/`Fail`, `Redirect`; `CheckRoutes` (contract test) |
 | `markdown` | `Markdown(src)`: GitHub-flavoured Markdown (tables, task lists, autolinks) in a `Prose`, `HTML(src)`; raw HTML and `javascript:` links are dropped, so it is safe for user or model text (goldmark) |
 | `social` | `Social`: brand icons of the socials stylesheet (sizes, grey) |
 | `sidebar` | `Sidebar` (fixed left, collapsible to icons, a sheet on small screens), `Header`, `Brand`, `Switcher` (workspace or team with a dropdown, in place of the brand), `Content`, `Group` (optionally `Collapsible`), `Item` (icon, active, count badge), `Separator`, `Footer`, `User` (dropdown), `Trigger` (menu and collapse buttons for the page header), `Styles`, `Script`, `Collapsed(r)` |

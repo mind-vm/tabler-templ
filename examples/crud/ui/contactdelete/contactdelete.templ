@@ -1,0 +1,83 @@
+package contactdelete
+
+import (
+	"github.com/mind-vm/tabler-templ/examples/crud/contacts"
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+// Question asks before deleting: in the dialog (Tabler's danger modal) or as a card on a page. next is
+// where to go after deleting (when the page shows the contact itself), cancel where Cancel leads on a
+// page.
+templ Question(c contacts.Contact, inDialog bool, next, cancel string) {
+	<form
+		method="post"
+		action={ templ.SafeURL(Delete.URL(c.ID)) }
+		class={ templ.KV("card", !inDialog) }
+		if inDialog {
+			hx-post={ Delete.URL(c.ID) }
+			hx-swap="none"
+		}
+	>
+		if next != "" {
+			<input type="hidden" name="next" value={ next }/>
+		}
+		if inDialog {
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			<div class="modal-status bg-danger"></div>
+		} else {
+			<div class="card-status-top bg-danger"></div>
+		}
+		<div class={ "text-center py-4", templ.KV("modal-body", inDialog), templ.KV("card-body", !inDialog) }>
+			@icon.Icon("ti-alert-triangle", icon.Props{Class: "mb-2 text-danger icon-lg"})
+			<h3>Delete { c.Name }?</h3>
+			<div class="text-secondary">The contact leaves the list. You can undo it right after.</div>
+		</div>
+		<div class={ templ.KV("modal-footer", inDialog), templ.KV("card-footer", !inDialog) }>
+			<div class="w-100">
+				<div class="row">
+					<div class="col">
+						if inDialog {
+							<button type="button" class="btn w-100" data-bs-dismiss="modal">Cancel</button>
+						} else {
+							<a href={ templ.SafeURL(cancel) } class="btn w-100">Cancel</a>
+						}
+					</div>
+					<div class="col">
+						<button type="submit" class="btn btn-danger w-100">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+}
+
+// Button opens the question in the dialog; next is where to go after deleting ("" stays on the page).
+// Without JavaScript it is a link to the question's page.
+templ Button(c contacts.Contact, next string, label bool) {
+	<a
+		href={ templ.SafeURL(Confirm.URL(c.ID) + htmx.Query("next", next)) }
+		class={ templ.KV("btn btn-ghost-danger btn-icon btn-sm", !label), templ.KV("btn btn-outline-danger", label) }
+		hx-get={ Confirm.URL(c.ID) + htmx.Query("next", next) }
+		hx-target={ htmx.Target(htmx.DialogContentID) }
+		hx-swap="innerHTML"
+		aria-label={ "Delete " + c.Name }
+		title="Delete"
+	>
+		@icon.Icon("ti-trash")
+		if label {
+			Delete
+		}
+	</a>
+}
+
+// Undo is the toast's body after deleting.
+templ Undo(c contacts.Contact) {
+	<div class="d-flex align-items-center gap-3">
+		<span class="me-auto">{ c.Name } deleted.</span>
+		<button type="button" class="btn btn-sm" hx-post={ Restore.URL(c.ID) } hx-swap="none">
+			@icon.Icon("ti-arrow-back-up")
+			Undo
+		</button>
+	</div>
+}

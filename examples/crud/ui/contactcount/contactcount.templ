@@ -1,0 +1,25 @@
+package contactcount
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/htmx"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// View is the badge; it fetches itself again after the events in refreshOn.
+templ View(p Props) {
+	<span
+		id={ RootID(p.Instance) }
+		class={ "badge bg-" + kit.Or(p.Color, "blue") + "-lt" }
+		hx-get={ Count.URL() + htmx.Query("instance", p.Instance, "status", string(p.Status), "label", p.Label, "color", p.Color) }
+		hx-trigger={ trigger() }
+		hx-swap="outerHTML"
+		aria-live="polite"
+	>
+		{ strconv.Itoa(p.N) }
+		if p.Label != "" {
+			{ " " + p.Label }
+		}
+	</span>
+}

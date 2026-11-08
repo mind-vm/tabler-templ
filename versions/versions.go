@@ -30,9 +30,10 @@ const (
 	Fslightbox      = "3.8.0"  // npm: fslightbox
 	Plyr            = "3.8.5"  // npm: plyr
 	Typed           = "3.0.0"  // npm: typed.js
+	HTMX            = "2.0.4"  // npm: htmx.org (not a Tabler plugin: the interactive blocks use it)
 )
 
 // Libraries the kit adds itself, not from Tabler's lockfile (the versions tool leaves them alone).
 const (
-	Motion = "14.6.0" // motion (motion.dev, formerly Framer Motion), its vanilla build
+	Motion = "14.6.0" // npm: motion (motion.dev, formerly Framer Motion), its vanilla build
 )

@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **`htmx` for components with their own endpoints:**
+  - `Route` defines an endpoint once: `Pattern` goes to the mux, `URL` to the markup. `CheckRoutes` is the
+    contract test.
+  - `ID`, `Target`, `Vals` and `Query` name a component instance's elements and requests.
+  - `Respond` writes a fragment with its headers first (`Vary: HX-Request`, status, `HX-Trigger` …).
+    Requests without htmx get the whole page (`FullPage`). Toasts and other fragments go out of band.
+  - `Error` and `Fail` answer failures as a danger toast, without details for 5xx. `Redirect` does
+    Post/Redirect/Get, or `HX-Redirect` for htmx.
+  - `Setup` is the page's client:
+    - toast container and dialog;
+    - 422 responses swapped in, `allowEval` off;
+    - toasts when offline or on an error;
+    - a toast closes once its action succeeded;
+    - tooltips and popovers start, and charts are torn down, around swaps.
+  - kit texts `ErrorGeneric` and `Offline`.
+- **CRUD demo (`examples/crud`, `/crud` in the demo):** contacts built from six co-located components
+  (table, form, inline status, delete with undo, live count, detail page). Each has its own contract,
+  handlers and tests, and it works without JavaScript too.
+- **Tests:** `TestNonceRendered` renders each package in a fresh context. Before, the once-per-page CSS
+  made it fail now and then, depending on the map order.
+
 - **`motion`, enter and leave animations** with Motion (motion.dev, formerly Framer Motion), its build
   without React:
   - `Attrs` make an element fade, slide, zoom or pop in when the page loads, when htmx swaps it in, or
@@ -18,8 +39,6 @@
     `HX-Trigger: {"sound":"message"}`.
   - `Toggle` switches the sounds on and off and keeps the choice in the browser.
 - Demo: `/motion` and `/sound`.
-
-## Unreleased
 
 - **`blocks/assistant`, more parts** (after the examples on beautifului.dev):
   - `Thinking` folds the agent's trace (reasoning, searches, reads, code) under "Thinking…" or "Thought
@@ -41,8 +60,6 @@
   - Demo: `/assistant/parts` shows every part and runs the interactive ones; `/assistant` uses thinking,
     sources, follow-ups, the model picker, selection actions and a recommendation.
 
-## Unreleased
-
 - **Less CSS per page:**
   - The blocks `listpage`, `detail`, `create`, `history` and `stats` render their CSS themselves, where
     they are used and once per page.
@@ -55,8 +72,6 @@
     cached and compressed like Tabler's CSS, and switches the inline CSS off.
   - `static.Head` links the file; `static.Kit(files)` links it on its own.
   - The file holds only the CSS of the packages the program links.
-
-## Unreleased
 
 - **Sidebar:**
   - `sidebar.Switcher` puts a workspace (team, organisation) with a dropdown to switch in place of the
@@ -76,8 +91,6 @@
   forms, buttons and the sidebar for pages dense with data.
 - **kit:** new texts `Back`, `ToggleDetails` and `UnsavedChanges` (English and German).
 - **Demo:** `/enterprise`, a small help-desk app with all of the above (`?compact=1` for the compact mode).
-
-## Unreleased
 
 - **`markdown`:** renders GitHub-flavoured Markdown in Tabler's prose container. Raw HTML and
   `javascript:` links are dropped, so user input and a language model's answers can be shown as they are.
