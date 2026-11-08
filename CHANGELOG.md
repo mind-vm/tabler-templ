@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.14.1
+
+- **`blocks/assistant`:** among several forms of one name, the first form with the action's key is the row
+  also when `kitDialog.matchForm` finds none, e.g. because `detail.Script` marks forms with another
+  attribute (`data-form`) than `ActionScript` (`WithActionOptions`).
+
 ## v0.14.0
 
 The assistant fills in the right form: among several forms of one name it takes the row with the action's
