@@ -11,8 +11,10 @@ import (
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/markdown"
+	"github.com/mind-vm/tabler-templ/shimmer"
 	"github.com/mind-vm/tabler-templ/spinner"
 )
 
@@ -33,6 +35,20 @@ type ConversationProps struct {
 	Examples []string
 	// Placeholder of the composer, default Texts.Placeholder.
 	Placeholder string
+	// Models puts a model picker in the composer; the choice (default Model, else the first) is posted
+	// with the message as "model".
+	Models []string
+	Model  string
+	// SelectionActions show a toolbar when the reader selects text in an answer or a block; an action
+	// sends its Prompt with the selection in place of %s.
+	SelectionActions []SelectionAction
+}
+
+// SelectionAction is a button of the selection toolbar: "Explain", "Shorten" …
+type SelectionAction struct {
+	Label  string
+	Icon   string
+	Prompt string // "Explain this passage: %s"
 }
 
 // Conversation is the assistant's page content: the turns (children: earlier turns rendered on the
@@ -76,12 +92,35 @@ templ Conversation(p ConversationProps) {
 			}
 			{ children... }
 		</div>
-		<form class="assistant-composer d-flex gap-2 align-items-end">
-			<textarea name="message" class="form-control" rows="2" placeholder={ kit.Or(p.Placeholder, T(ctx).Placeholder) } aria-label={ kit.Or(p.Placeholder, T(ctx).Placeholder) }></textarea>
-			@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-send"}) {
-				{ T(ctx).Send }
-			}
+		<form class="assistant-composer">
+			<div class="assistant-prompt">
+				<textarea name="message" class="form-control" rows="2" placeholder={ kit.Or(p.Placeholder, T(ctx).Placeholder) } aria-label={ kit.Or(p.Placeholder, T(ctx).Placeholder) }></textarea>
+				<div class="d-flex align-items-center gap-2">
+					if len(p.Models) > 0 {
+						<select name="model" class="form-select form-select-sm w-auto" aria-label={ T(ctx).Model }>
+							for i, m := range p.Models {
+								<option value={ m } selected?={ m == p.Model || (p.Model == "" && i == 0) }>{ m }</option>
+							}
+						</select>
+					}
+					@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-send", Class: "ms-auto"}) {
+						{ T(ctx).Send }
+					}
+				</div>
+			</div>
 		</form>
+		if len(p.SelectionActions) > 0 {
+			<div class="assistant-selection btn-group shadow" role="toolbar" aria-label={ T(ctx).Selection } hidden>
+				for _, a := range p.SelectionActions {
+					<button type="button" class="btn btn-sm" data-selection-prompt={ a.Prompt }>
+						if a.Icon != "" {
+							@icon.Icon(a.Icon)
+						}
+						{ a.Label }
+					</button>
+				}
+			</div>
+		}
 	</div>
 	// The page may draw no chart itself; this starts the ones streamed in later.
 	@chart.Script()
@@ -107,7 +146,10 @@ templ Turn(message string) {
 templ Working() {
 	<div class="assistant-working text-secondary d-flex align-items-center gap-2">
 		@spinner.Spinner(spinner.Props{Small: true})
-		<span>{ T(ctx).Working }</span>
+		@shimmer.Shimmer() {
+			{ T(ctx).Working }
+		}
+		<span class="assistant-elapsed font-monospace small">0.0s</span>
 	</div>
 }
 

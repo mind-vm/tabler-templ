@@ -11,7 +11,51 @@ fieldset:not(:has([data-other]:checked)) .assistant-other{display:none}
 .assistant-step>summary{cursor:pointer;list-style:none}
 .assistant-step>summary::-webkit-details-marker{display:none}
 .assistant-step pre{white-space:pre-wrap;font-size:12px;max-height:24rem;overflow:auto}
-.assistant .prose>:last-child{margin-bottom:0}`
+.assistant .prose>:last-child{margin-bottom:0}
+.assistant-prompt{display:flex;flex-direction:column;gap:.5rem;padding:.5rem;border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg);background:var(--tblr-bg-surface);box-shadow:var(--tblr-shadow-card)}
+.assistant-prompt:focus-within{border-color:var(--tblr-primary)}
+.assistant-prompt textarea{border:0;box-shadow:none!important;resize:none;padding:.25rem .5rem;background:transparent}
+.assistant-selection{position:absolute;z-index:1060;background:var(--tblr-bg-surface)}
+.assistant-thinking>summary,.assistant-sources>summary,.assistant-tools>summary,.assistant-alternatives>summary{cursor:pointer;list-style:none}
+.assistant-thinking>summary::-webkit-details-marker,.assistant-sources>summary::-webkit-details-marker,.assistant-tools>summary::-webkit-details-marker,.assistant-alternatives>summary::-webkit-details-marker{display:none}
+.assistant-chevron{transition:transform .2s}
+details[open]>summary .assistant-chevron{transform:rotate(180deg)}
+.assistant-trace{position:relative;display:flex;flex-direction:column;gap:.75rem;padding-left:.25rem}
+.assistant-trace>li{position:relative}
+.assistant-trace>li:not(:last-child)::before{content:"";position:absolute;left:.5rem;top:1.5rem;bottom:-.75rem;border-left:1px dashed var(--tblr-border-color)}
+.assistant-trace pre{font-size:12px;white-space:pre-wrap;max-height:16rem;overflow:auto}
+.assistant-cite{display:inline-flex;align-items:center;gap:.25rem;padding:0 .4rem 0 .15rem;border-radius:1rem;background:var(--tblr-bg-surface-secondary);color:var(--tblr-secondary);font-size:.75rem;line-height:1.25rem;text-decoration:none;vertical-align:baseline}
+.assistant-cite:hover{color:var(--tblr-body-color);text-decoration:none}
+.assistant-cite-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.25rem;height:1.25rem;overflow:hidden;border-radius:50%;background:var(--tblr-bg-surface);border:1px solid var(--tblr-border-color);font-size:.625rem;font-weight:600;color:var(--tblr-secondary)}
+.assistant-cite-mark .icon{width:auto;height:auto;font-size:.75rem;line-height:1;margin:0}
+.assistant-stack{display:inline-flex}
+.assistant-stack>*+*{margin-left:-.35rem}
+.assistant-chip{display:inline-flex;align-items:center;gap:.375rem;max-width:100%;padding:.25rem .625rem;border:1px solid var(--tblr-border-color);border-radius:var(--tblr-border-radius);background:var(--tblr-bg-surface);font-size:.8125rem}
+.assistant-chip-failed{border-color:var(--tblr-orange);background:var(--tblr-orange-lt)}
+.assistant-task-state{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.5rem;height:1.5rem;border-radius:50%;font-size:.75rem;background:var(--tblr-bg-surface-secondary);color:var(--tblr-secondary)}
+.assistant-task-done{background:var(--tblr-green-lt);color:var(--tblr-green)}
+.assistant-task-failed{background:var(--tblr-red-lt);color:var(--tblr-red)}
+.assistant-task-running{background:var(--tblr-blue-lt);color:var(--tblr-blue)}
+.assistant-substeps{padding-left:2.75rem}
+.assistant-lines{counter-reset:line;font-size:12px;line-height:1.6;padding:.5rem 0;overflow:auto;max-height:28rem;background:transparent;color:var(--tblr-body-color);border-radius:0}
+.assistant-line{display:block;padding-right:1rem;white-space:pre}
+.assistant-line::before{counter-increment:line;content:counter(line);display:inline-block;width:3rem;padding-right:1rem;text-align:right;color:var(--tblr-secondary);opacity:.6;user-select:none}
+.assistant-line-add{background:var(--tblr-green-lt)}
+.assistant-line-del{background:var(--tblr-red-lt)}
+.assistant-line-hunk{color:var(--tblr-blue)}
+.assistant-clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.assistant-insight-radio{position:absolute;opacity:0;pointer-events:none}
+.assistant-insight{display:none}
+.assistant-insight-radio:checked+.assistant-insight{display:block}
+.assistant-insight label.disabled{opacity:.35;pointer-events:none}
+.assistant-option{display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border:1px solid var(--tblr-border-color);border-radius:var(--tblr-border-radius);cursor:pointer}
+.assistant-option:has(input:checked){border-color:var(--tblr-primary);background:var(--tblr-primary-lt)}
+.assistant-old{color:var(--tblr-red);text-decoration:line-through;margin-right:.375rem}
+ins.assistant-new{text-decoration:none;background:var(--tblr-green-lt);color:var(--tblr-green);padding:0 .25rem;border-radius:var(--tblr-border-radius-sm)}
+.assistant-diff-rejected td{color:var(--tblr-secondary)}
+.assistant-diff-pending{animation:assistant-sweep 1.2s ease-out both}
+@keyframes assistant-sweep{from{background:var(--tblr-yellow-lt)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.assistant-diff-pending{animation:none}}`
 
 // Styles are the conversation's few rules (once per page; Conversation renders them).
 templ Styles() {
@@ -43,6 +87,7 @@ templ Script() {
 				var composer = root.querySelector('.assistant-composer');
 				var input = composer.querySelector('textarea');
 				var sendButton = composer.querySelector('button');
+				var model = composer.querySelector('select[name="model"]');
 				var running = false;
 
 				var nodes = function (html) {
@@ -84,7 +129,18 @@ templ Script() {
 						slot.append(frag);
 					}
 					if (window.tablerCharts) added.forEach(function (el) { window.tablerCharts.init(el); });
+					// Interactive blocks carry hx-* attributes; htmx only knows content it swapped itself.
+					if (window.htmx) added.forEach(function (el) { window.htmx.process(el); });
 				}
+
+				// The working line counts the seconds since it appeared.
+				setInterval(function () {
+					var now = Date.now();
+					root.querySelectorAll('.assistant-elapsed').forEach(function (el) {
+						if (!el.dataset.t0) el.dataset.t0 = now;
+						el.textContent = ((now - el.dataset.t0) / 1000).toFixed(1) + 's';
+					});
+				}, 100);
 
 				// EventSource cannot POST, and a message does not belong in a URL, so the stream is read
 				// from fetch. Only data lines count; an event other than "html" is ignored.
@@ -92,7 +148,7 @@ templ Script() {
 					var res = await fetch(root.dataset.run, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ message: message, sessionId: sessionId }),
+						body: JSON.stringify({ message: message, sessionId: sessionId, model: model ? model.value : undefined }),
 					});
 					if (!res.ok || !res.body) throw new Error(res.status + ' ' + (await res.text()));
 					var reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -141,6 +197,39 @@ templ Script() {
 					var ex = e.target.closest('[data-example]');
 					if (ex) send(ex.dataset.example);
 				});
+
+				// The selection toolbar: shown over text selected inside a turn's answer or blocks.
+				var toolbar = root.querySelector('.assistant-selection');
+				var picked = '';
+				if (toolbar) {
+					document.body.append(toolbar);
+					var hide = function () { toolbar.hidden = true; };
+					document.addEventListener('mouseup', function (e) {
+						if (toolbar.contains(e.target)) return;
+						setTimeout(function () {
+							var sel = window.getSelection();
+							var text = sel && !sel.isCollapsed ? sel.toString().trim() : '';
+							var node = text && sel.anchorNode;
+							var el = node && (node.nodeType === 1 ? node : node.parentElement);
+							if (!text || !el || !turns.contains(el) || el.closest('.assistant-message, form')) return hide();
+							picked = text;
+							var r = sel.getRangeAt(0).getBoundingClientRect();
+							toolbar.hidden = false;
+							// Relative to the toolbar's offset parent, which need not start at the page's top.
+							var o = (toolbar.offsetParent || document.body).getBoundingClientRect();
+							toolbar.style.top = (r.top - o.top - toolbar.offsetHeight - 8) + 'px';
+							toolbar.style.left = Math.max(8, r.left - o.left + r.width / 2 - toolbar.offsetWidth / 2) + 'px';
+						});
+					});
+					document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+					toolbar.addEventListener('click', function (e) {
+						var b = e.target.closest('[data-selection-prompt]');
+						if (!b) return;
+						hide();
+						window.getSelection().removeAllRanges();
+						send(b.dataset.selectionPrompt.replace('%s', '“' + picked + '”'));
+					});
+				}
 
 				function answerOf(form, submitter) {
 					switch (form.dataset.inputType) {

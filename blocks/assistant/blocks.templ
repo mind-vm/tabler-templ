@@ -21,6 +21,7 @@ import (
 //   - table: title, columns ([]string), rows ([]map), truncated and totalRows when the rows are cut
 //   - chart: see ChartProps
 //   - stats: title, cols (1–4), items ([]{label, value, unit, delta (a fraction), hint})
+//   - code, context, screen, tasks, insights: see parts.templ
 //
 // A block of another type is shown as its JSON rather than dropped: a dropped block is a result the
 // reader never saw.
@@ -40,6 +41,16 @@ templ BlockView(b Block) {
 				@chartBlock(b)
 			case "stats":
 				@statsBlock(b.Payload)
+			case "code":
+				@codeBlock(b)
+			case "context":
+				@contextBlock(b.Payload)
+			case "screen":
+				@screenBlock(b.Payload)
+			case "tasks":
+				@tasksBlock(b.Payload)
+			case "insights":
+				@insightsBlock(b)
 			default:
 				@unknownBlock(b)
 		}

@@ -1,0 +1,229 @@
+package main
+
+import (
+	"net/http"
+	"sync"
+	"time"
+
+	"github.com/mind-vm/tabler-templ/blocks/assistant"
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/cdn"
+	"github.com/mind-vm/tabler-templ/internal/plugin"
+)
+
+// The parts gallery shows every piece of blocks/assistant on its own, the interactive ones live: the
+// handlers below are the whole server side — parse the form, call the block's method, render the
+// block. htmx is loaded by this page only, until the kit has an htmx package of its own.
+
+const htmxVersion = "2.0.4"
+
+func htmxLibrary() templ.Component {
+	return templ.Join(templ.Raw(`<meta name="htmx-config" content='{"includeIndicatorStyles":false}'/>`),
+		plugin.Script(cdn.URL("htmx.org", htmxVersion, "dist/htmx.min.js")))
+}
+
+func partsRecommendation() assistant.Recommendation {
+	return assistant.Recommendation{ID: "rec", Post: "/assistant/parts/recommend", Question: "Want me to place this restock order?",
+		Text: "Order **5 cases of Pistachio** and **3 of Mint Chip** from Dairy Co for Friday. Sales of both rose 12% over the last two weeks and stock lasts until Thursday.",
+		Confidence: 0.86, Accept: "Place order", Options: []string{"Order only Pistachio", "Wait until Monday", "Ask another supplier"}}
+}
+
+func partsApproval() assistant.Approval {
+	return assistant.Approval{ID: "approval", Post: "/assistant/parts/approve", Title: "Before I draft the emails", Questions: []assistant.AskQuestion{
+		{ID: "flavors", Header: "Flavors", Question: "How many flavors should the summer menu have?", Options: []assistant.AskOption{
+			{Label: "Three", Description: "The core line"}, {Label: "Five", Description: "A full case"}, {Label: "Just one hero"}}},
+		{ID: "supplier", Header: "Supplier", Question: "Which supplier should I contact first?", AllowOther: true,
+			Options: []assistant.AskOption{{Label: "Dairy Co"}, {Label: "Cone & Co"}}},
+		{ID: "tone", Header: "Tone", Question: "How should the emails sound?", Options: []assistant.AskOption{{Label: "Friendly"}, {Label: "Formal"}}},
+	}}
+}
+
+func partsDiff() assistant.Diff {
+	return assistant.Diff{ID: "diff", Post: "/assistant/parts/diff", Title: "Proposed menu cleanup", Columns: []string{"Flavor", "Category", "Supplier"},
+		Rows: []assistant.DiffRow{
+			{ID: "1", Cells: []assistant.DiffCell{{Old: "Rocky Road"}, {Old: "Chocolate"}, {Old: "Acme", New: "Dairy Co"}}},
+			{ID: "2", Cells: []assistant.DiffCell{{Old: "Mint Chip"}, {Old: "Classic", New: "Fresh"}, {Old: "Dairy Co"}}},
+			{ID: "3", Cells: []assistant.DiffCell{{Old: "Lemon", New: "Lemon Sorbet"}, {Old: "Fruit", New: "Sorbet"}, {Old: "Acme"}}},
+			{ID: "4", Cells: []assistant.DiffCell{{Old: "Vanilla"}, {Old: "Classic"}, {Old: "Acme", New: "Dairy Co"}}},
+		}}
+}
+
+// partsTasks advances with the time since the reader started them.
+func partsTasks(since time.Time) assistant.TaskList {
+	s := time.Since(since).Seconds()
+	state := func(start, end float64) (string, float64) {
+		switch {
+		case since.IsZero() || s < start:
+			return "pending", 0
+		case s < end:
+			return "running", (s - start) / (end - start)
+		}
+		return "done", 0
+	}
+	l := assistant.TaskList{ID: "tasks", Title: "Restock run", Poll: "/assistant/parts/tasks", Every: 500}
+	for _, t := range []struct {
+		title, detail string
+		start, end    float64
+		steps         []string
+	}{
+		{"Verify vendor records", "12/12", 0, 2, nil},
+		{"Build reorder task list", "7 SKUs", 2, 5, []string{"Read Sales Velocity Export.csv", "Compare with stock levels"}},
+		{"Draft supplier emails", "3 files", 5, 8, nil},
+	} {
+		st, pr := state(t.start, t.end)
+		l.Tasks = append(l.Tasks, assistant.Task{Title: t.title, Status: st, Detail: t.detail, Progress: pr, Steps: t.steps})
+	}
+	if since.IsZero() {
+		l.Poll = ""
+	}
+	return l
+}
+
+type partsDemo struct {
+	mu    sync.Mutex
+	diff  assistant.Diff // one table for every reader: it is a demo
+	start time.Time
+}
+
+func assistantPartsRoutes(mux *http.ServeMux) {
+	d := &partsDemo{diff: partsDiff()}
+	mux.Handle("GET /assistant/parts", templ.Handler(assistantPartsPage()))
+	mux.HandleFunc("POST /assistant/parts/recommend", func(w http.ResponseWriter, r *http.Request) {
+		_ = r.ParseForm()
+		next, err := partsRecommendation().Decide(r.PostForm)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_ = assistant.RecommendationCard(next).Render(r.Context(), w)
+	})
+	mux.HandleFunc("POST /assistant/parts/approve", func(w http.ResponseWriter, r *http.Request) {
+		_ = r.ParseForm()
+		next, err := partsApproval().Advance(r.PostForm)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_ = assistant.ApprovalCard(next).Render(r.Context(), w)
+	})
+	mux.HandleFunc("POST /assistant/parts/diff", func(w http.ResponseWriter, r *http.Request) {
+		_ = r.ParseForm()
+		d.mu.Lock()
+		if r.PostForm.Get("row") == "reset" {
+			d.diff = partsDiff()
+		} else if next, err := d.diff.Resolve(r.PostForm); err == nil {
+			d.diff = next
+		}
+		diff := d.diff
+		d.mu.Unlock()
+		_ = assistant.DiffCard(diff).Render(r.Context(), w)
+	})
+	mux.HandleFunc("POST /assistant/parts/tasks", func(w http.ResponseWriter, r *http.Request) {
+		d.mu.Lock()
+		d.start = time.Now()
+		d.mu.Unlock()
+		_ = assistant.TaskListCard(partsTasks(d.start)).Render(r.Context(), w)
+	})
+	mux.HandleFunc("GET /assistant/parts/tasks", func(w http.ResponseWriter, r *http.Request) {
+		d.mu.Lock()
+		start := d.start
+		d.mu.Unlock()
+		_ = assistant.TaskListCard(partsTasks(start)).Render(r.Context(), w)
+	})
+}
+
+func partsBlock(typ, id string, payload any) templ.Component {
+	return assistant.BlockView(assistant.Block{Type: typ, DOMID: id, ChartID: id, Payload: assistant.Normalize(payload)})
+}
+
+var partsSources = []assistant.Source{
+	{Title: "Ice cream sales by season", URL: "https://scoopdata.io/seasons"},
+	{Title: "Search interest: pistachio ice cream", URL: "https://trends.google.com/trends/explore?q=pistachio"},
+	{Title: "Basket analysis Q2", URL: "https://marketbasket.io/q2"},
+}
+
+templ partsSection(title, text string) {
+	<div class="mt-5 mb-3">
+		<h2 class="mb-1">{ title }</h2>
+		<p class="text-secondary mb-0">{ text }</p>
+	</div>
+}
+
+templ assistantPartsPage() {
+	{{ p := frameProps("", "Assistant parts") }}
+	{{
+		p.Head = templ.Join(p.Head, htmxLibrary())
+		p.Header = layout.PageHeader(layout.PageHeaderProps{Title: "Assistant parts", Pretitle: "blocks/assistant",
+			Description: "The parts of an assistant's turn one by one. The interactive ones post with htmx to handlers that call the block's Go method and render the next state."})
+	}}
+	@layout.Page(p) {
+		<div class="row justify-content-center">
+			<div class="col-lg-9 assistant">
+				@assistant.Styles()
+				@partsSection("Working and thinking", "The working line counts seconds; the trace folds reasoning, searches, code and reads.")
+				<div class="d-flex flex-column gap-3">
+					@assistant.Working()
+					@assistant.Thinking(assistant.ThinkingProps{ID: "th-running", Running: true, Thoughts: []assistant.Thought{
+						{Kind: "reasoning", Text: "Winter sales are what the question is about, so I need the monthly data, not the totals."}}})
+					@assistant.Thinking(assistant.ThinkingProps{ID: "th-done", Duration: "6s", Open: true, Thoughts: []assistant.Thought{
+						{Kind: "reasoning", Title: "Plan", Text: "Compare flavor sales in December–February with the yearly average."},
+						{Kind: "search", Title: "Searched the web", Text: "pistachio ice cream demand winter"},
+						{Kind: "read", Title: "Read Sales Velocity Export.csv", Text: "1,240 rows, 18 flavors"},
+						{Kind: "code", Title: "Ran a script", Text: "const winter = rows.filter(r => [12, 1, 2].includes(r.month))\nsum(winter, 'flavor', 'units')"},
+						{Kind: "step", Title: "Ranked 18 flavors"},
+					}})
+					@assistant.ToolChips("tools", []assistant.ToolCall{
+						{Name: "search_web", Detail: "pistachio demand winter", Icon: "ti-world-search"},
+						{Name: "read_file", Detail: "Sales Velocity Export.csv", Icon: "ti-file-spreadsheet"},
+						{Name: "run_script", Detail: "sum(winter, 'flavor')", Icon: "ti-code"},
+						{Name: "send_email", Detail: "Dairy Co", Icon: "ti-mail", Failed: true},
+					})
+				</div>
+				@partsSection("Answer with sources and follow-ups", "Cite marks a sentence's source; Sources and FollowUps go below the answer.")
+				@assistant.Answer("**Pistachio** and **Mint Chip** sell best in winter: together 41% of units from December to February, against 28% over the year.")
+				<p class="mt-2">
+					Search interest peaks in January
+					@assistant.Cite(partsSources[1])
+					and winter baskets pair them with hot drinks
+					@assistant.Cite(partsSources[2])
+				</p>
+				@assistant.Sources(partsSources)
+				@assistant.FollowUps([]string{"Which flavors sell best in summer?", "How much Pistachio should I order for January?"})
+				@partsSection("Recommendation", "Accept or pick an alternative; the decided card comes back from Recommendation.Decide.")
+				@assistant.RecommendationCard(partsRecommendation())
+				@partsSection("Approval", "Questions one at a time; Approval.Advance reads the form, the answers travel in it.")
+				@assistant.ApprovalCard(partsApproval())
+				@partsSection("Proposed edits", "Diff.Resolve applies a row's or every pending row's decision.")
+				@assistant.DiffCard(partsDiff())
+				<button type="button" class="btn btn-sm btn-ghost-secondary mt-2" hx-post="/assistant/parts/diff" hx-vals={ `{"row":"reset","decision":"accept"}` } hx-target="#diff" hx-swap="outerHTML">Reset table</button>
+				@partsSection("Live tasks", "The list polls while a task runs and stops when all are finished.")
+				@assistant.TaskListCard(partsTasks(time.Time{}))
+				<button type="button" class="btn btn-sm btn-primary mt-2" hx-post="/assistant/parts/tasks" hx-target="#tasks" hx-swap="outerHTML">Start run</button>
+				@partsSection("Result blocks", "New block types for BlockView: code, context, screen, tasks and insights.")
+				<div class="d-flex flex-column gap-3">
+					@partsBlock("code", "code-file", map[string]any{"title": "churn.ts", "code": "export function churn(rows: Row[]): number {\n  const lost = rows.filter((r) => r.cancelled).length\n  return lost / rows.length\n}"})
+					@partsBlock("code", "code-diff", map[string]any{"title": "churn.ts", "diff": true, "code": "@@ -1,4 +1,5 @@\n export function churn(rows: Row[]): number {\n-  const lost = rows.filter((r) => r.cancelled).length\n+  const active = rows.filter((r) => !r.trial)\n+  const lost = active.filter((r) => r.cancelled).length\n-  return lost / rows.length\n+  return active.length ? lost / active.length : 0\n }"})
+					@partsBlock("context", "context", map[string]any{"title": "Context", "chunks": []map[string]any{
+						{"title": "Receiving dairy deliveries", "source": "Dairy Onboarding SOP.pdf", "kind": "pdf", "chars": 1250,
+							"text": "Every delivery is checked at the door: temperature below 4 °C, seals intact, dates at least ten days out. Anything else goes back with the driver and is noted on the delivery slip."},
+						{"title": "Weekly units by flavor", "source": "Sales Velocity Export.csv", "kind": "csv", "chars": 290,
+							"text": "flavor,week,units — Pistachio 2026-W01 412; Mint Chip 2026-W01 388; Vanilla 2026-W01 301"},
+					}})
+					@partsBlock("tasks", "tasks-static", map[string]any{"title": "Tasks", "tasks": []map[string]any{
+						{"title": "Verified vendor records", "status": "done", "detail": "12/12"},
+						{"title": "Build reorder task list", "status": "running", "progress": 0.68, "detail": "68%"},
+						{"title": "Draft supplier emails", "status": "failed", "detail": "SMTP refused"},
+					}})
+					@partsBlock("insights", "insights", map[string]any{"items": []map[string]any{
+						{"text": "**Mint Chip** fell for the third week in a row.", "metric": "388 units", "delta": -0.0441, "values": []float64{48, 46, 47, 44, 42, 40}, "question": "Should I rebalance flavors?"},
+						{"text": "**Pistachio** keeps growing since the January campaign.", "metric": "412 units", "delta": 0.0115, "values": []float64{30, 31, 33, 34, 36, 37}},
+						{"text": "Waffle cones run out on Saturdays; two of the last four sold out by 3 pm.", "values": []float64{5, 3, 6, 2, 1, 0}, "question": "Order more cones?"},
+					}})
+					@partsBlock("screen", "screen", map[string]any{"title": "Agent's screen", "url": "https://supplier.example/orders/new", "status": "working",
+						"image": photo("photos/home-office-desk-with-macbook-iphone-calendar-watch-and-organizer.jpg"),
+						"caption": "Filling in the order form for Dairy Co"})
+				</div>
+			</div>
+		</div>
+	}
+}
