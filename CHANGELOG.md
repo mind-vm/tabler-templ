@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **`markdown`:** `Strict(src)` and `StrictHTML(src)` render without links and images: a link becomes
+  its text, an autolink its address as text, an image its alt text. For a model's answer that must not
+  lead to another site or load a file from outside (prompt injection). `Markdown` and `HTML` are
+  unchanged.
+
 ## v0.12.0
 
 Interactive apps: package `htmx` for components with their own endpoints and a CRUD demo built from them,

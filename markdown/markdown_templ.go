@@ -18,6 +18,18 @@
 
 //	@markdown.Markdown(answer)
 
+//
+
+// Links and images still come through: a link leads to any site, and an image loads a file from any
+
+// host when the page shows it. For text that must not do either, such as a model's answer that a prompt
+
+// injection may have written, use Strict: links become their text, images their alt text.
+
+//
+
+//	@markdown.Strict(answer)
+
 package markdown
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
@@ -29,18 +41,54 @@ import (
 	"bytes"
 
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/util"
 
 	"github.com/mind-vm/tabler-templ/prose"
 )
 
-var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
+var (
+	md     = goldmark.New(goldmark.WithExtensions(extension.GFM))
+	strict = goldmark.New(goldmark.WithExtensions(extension.GFM),
+		goldmark.WithRendererOptions(renderer.WithNodeRenderers(util.Prioritized(textOnly{}, 100))))
+)
+
+// textOnly renders links, autolinks and images as plain text. It runs before goldmark's HTML renderer
+// (priority 100 < 1000), so these nodes never become <a> or <img>.
+type textOnly struct{}
+
+func (textOnly) RegisterFuncs(r renderer.NodeRendererFuncRegisterer) {
+	r.Register(ast.KindLink, children)  // [text](url): the text
+	r.Register(ast.KindImage, children) // ![alt](url): the alt text
+	r.Register(ast.KindAutoLink, autoLink)
+}
+
+// children writes nothing itself; the walker renders the node's children, i.e. the label as text.
+func children(util.BufWriter, []byte, ast.Node, bool) (ast.WalkStatus, error) {
+	return ast.WalkContinue, nil
+}
+
+// autoLink writes <https://…>, www.… and e-mail addresses as escaped text.
+func autoLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		_, _ = w.Write(util.EscapeHTML(node.(*ast.AutoLink).Label(source)))
+	}
+	return ast.WalkContinue, nil
+}
 
 // HTML converts Markdown to HTML. Raw HTML in src is left out. If conversion fails, it returns src
 // escaped, so the text still shows.
-func HTML(src string) string {
+func HTML(src string) string { return convert(md, src) }
+
+// StrictHTML is HTML without links and images: a link becomes its text, an autolink its address as
+// text, an image its alt text. Nothing in the output points to another page or loads a file.
+func StrictHTML(src string) string { return convert(strict, src) }
+
+func convert(m goldmark.Markdown, src string) string {
 	var buf bytes.Buffer
-	if err := md.Convert([]byte(src), &buf); err != nil {
+	if err := m.Convert([]byte(src), &buf); err != nil {
 		return templ.EscapeString(src)
 	}
 	return buf.String()
@@ -65,6 +113,32 @@ func Markdown(src string, props ...prose.Props) templ.Component {
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = prose.HTML(HTML(src), props...).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// Strict renders src like Markdown, without links and images (StrictHTML).
+func Strict(src string, props ...prose.Props) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = prose.HTML(StrictHTML(src), props...).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
