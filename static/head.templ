@@ -48,11 +48,20 @@ templ Head(files *Files, props ...assets.Props) {
 			p = props[0]
 		}
 	}}
+	@Kit(files)
 	for _, name := range Stylesheets(p) {
 		<link rel="stylesheet" href={ files.URL(name) }/>
 	}
 	if p.Charts {
 		@chart.Library()
+	}
+}
+
+// Kit links the kit's own CSS when the bundle has it (WithKitCSS), and renders nothing otherwise. Head
+// includes it, before Tabler's stylesheets, where the kit's inline CSS would stand.
+templ Kit(files *Files) {
+	if files.kit {
+		<link rel="stylesheet" href={ files.URL(KitCSS) }/>
 	}
 }
 

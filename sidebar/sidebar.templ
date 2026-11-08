@@ -39,9 +39,12 @@ func collapsed(ctx context.Context) bool {
 	return s.collapsed
 }
 
-// Styles renders the sidebar's CSS; put it in <head>.
+var styles = csp.Sheet("sidebar", css)
+
+// Styles renders the sidebar's CSS once per page; Sidebar renders it, so calling it is only needed to
+// put it in <head>.
 templ Styles() {
-	@csp.Style(css)
+	@styles
 }
 
 // Script renders the toggle script; put it at the end of <body>. It carries templ's nonce, if set.
@@ -63,6 +66,7 @@ type Props struct {
 
 templ Sidebar(p Props) {
 	{{ ctx = context.WithValue(ctx, stateKey{}, sidebarState{collapsed: p.Collapsed}) }}
+	@Styles()
 	<aside
 		id={ p.ID }
 		class={ kit.Classes("kit-sidebar offcanvas-lg offcanvas-start d-print-none", p.Class) }

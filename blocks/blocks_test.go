@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -29,6 +30,14 @@ func render(t *testing.T, ctx context.Context, c templ.Component) string {
 	require.NoError(t, c.Render(ctx, &b))
 	return b.String()
 }
+
+// markup is render without the blocks' inline <style> elements, for assertions on the markup alone.
+func markup(t *testing.T, ctx context.Context, c templ.Component) string {
+	t.Helper()
+	return styleRE.ReplaceAllString(render(t, ctx, c), "")
+}
+
+var styleRE = regexp.MustCompile(`(?s)<style[^>]*>.*?</style>`)
 
 func mit(c templ.Component, kinder string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
@@ -98,7 +107,7 @@ func TestListCard(t *testing.T) {
 	assert.Contains(t, h, "1–3 von 3")
 	assert.NotContains(t, h, "pagination")
 	listpage.Paginate(l, []int{}, nil)
-	assert.Empty(t, render(t, ctx, listpage.Footer(l)))
+	assert.Empty(t, markup(t, ctx, listpage.Footer(l)))
 }
 
 func TestShellPage(t *testing.T) {
@@ -143,7 +152,7 @@ func TestDetailSection(t *testing.T) {
 	assert.Contains(t, h, `title="Bearbeiten"`)
 	assert.Contains(t, h, `<span class="kit-section-action-text">Bearbeiten</span>`)
 	assert.Contains(t, h, "<p>x</p>")
-	assert.NotContains(t, render(t, ctx, detail.Section(detail.SectionProps{})), "kit-section-head", "no head without title and action")
+	assert.NotContains(t, markup(t, ctx, detail.Section(detail.SectionProps{})), "kit-section-head", "no head without title and action")
 
 	h = render(t, ctx, mit(detail.Fields(), render(t, ctx, detail.Field("Telefon", "", "–"))+render(t, ctx, detail.Field("Ort", "Bonn", "–"))))
 	assert.Equal(t, `<dl class="kit-fields"><dt>Telefon</dt><dd class="kit-field-empty">–</dd><dt>Ort</dt><dd>Bonn</dd></dl>`, h)
@@ -186,7 +195,7 @@ func TestDetailScript(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	ctx := kit.WithMessages(context.Background(), kit.German)
-	h := render(t, ctx, mit(create.Form(create.FormProps{Action: "/kunden", Attributes: templ.Attributes{"data-formular": "kunde-anlegen"}}), "<input name=x>"))
+	h := markup(t, ctx, mit(create.Form(create.FormProps{Action: "/kunden", Attributes: templ.Attributes{"data-formular": "kunde-anlegen"}}), "<input name=x>"))
 	assert.Equal(t, `<form method="post" action="/kunden" class="kit-create" data-formular="kunde-anlegen"><input name=x></form>`, h)
 
 	h = render(t, ctx, create.Footer(create.FooterProps{Cancel: "/kunden", Submit: "Kunde anlegen", Hint: "Danach öffnet sich die Akte."}))

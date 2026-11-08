@@ -50,7 +50,7 @@ templ Page(p Props) {
 				}
 			</title>
 			@icon.Styles()
-			@csp.Style(css)
+			@styles
 			if p.Head != nil {
 				@p.Head
 			}
@@ -190,3 +190,5 @@ const css = `.kit-signin-brand{display:flex;justify-content:center;align-items:c
 .kit-signin-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.75rem}
 .kit-signin-choice{height:100%;margin:0}
 .kit-signin-footer{margin-top:1rem;text-align:center;color:var(--tblr-secondary)}`
+
+var styles = csp.Sheet("blocks/signin", css)

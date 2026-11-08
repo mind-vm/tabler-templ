@@ -14,6 +14,7 @@ import (
 
 // Card is the whole block: search and filters, the children (usually a table) and the footer.
 templ Card(l *List) {
+	@Styles()
 	@card.Card(card.Props{Class: "kit-list"}) {
 		@Search(l)
 		{ children... }
@@ -24,6 +25,7 @@ templ Card(l *List) {
 // Search is the bar above the list: search field, one select per filter (submits on change),
 // Search and, while something narrows the list, Reset.
 templ Search(l *List) {
+	@Styles()
 	{{ m := kit.T(ctx) }}
 	<form method="get" action={ templ.URL(l.Path) } class="kit-list-search" role="search">
 		<div class="input-icon kit-list-query">
@@ -70,6 +72,7 @@ func options(os []Option) []form.Option {
 
 // Footer shows "1–25 of 80" and, with more than one page, the page numbers; nothing for an empty list.
 templ Footer(l *List) {
+	@Styles()
 	if l.Total > 0 {
 		<div class="kit-list-footer">
 			<span class="text-secondary">{ strconv.Itoa(l.From) }–{ strconv.Itoa(l.To) } { kit.T(ctx).Of } { strconv.Itoa(l.Total) }</span>
@@ -78,10 +81,12 @@ templ Footer(l *List) {
 	}
 }
 
-// Styles is the block's small layout CSS (Tabler variables only); put it in <head>. The shell block
-// includes it.
+var styles = csp.Sheet("blocks/listpage", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
+// it themselves; calling it is only needed to put it in <head>.
 templ Styles() {
-	@csp.Style(css)
+	@styles
 }
 
 const css = `.kit-list-search{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}

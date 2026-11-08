@@ -19,11 +19,6 @@ package shell
 
 import (
 	"github.com/mind-vm/tabler-templ/alert"
-	"github.com/mind-vm/tabler-templ/blocks/create"
-	"github.com/mind-vm/tabler-templ/blocks/detail"
-	"github.com/mind-vm/tabler-templ/blocks/history"
-	"github.com/mind-vm/tabler-templ/blocks/listpage"
-	"github.com/mind-vm/tabler-templ/blocks/stats"
 	"github.com/mind-vm/tabler-templ/breadcrumb"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/internal/csp"
@@ -188,18 +183,16 @@ templ PageHeader(p Props) {
 	</div>
 }
 
-// Styles is the CSS of the shell, of webfont icons (icon.Styles), of the sidebar and of the other blocks (list page, detail, create, history, stats).
+// Styles is the CSS of the shell, of webfont icons (icon.Styles) and of the sidebar; the other blocks
+// (list page, detail, create, history, stats) render their own where they are used.
 // Page includes it; render it yourself only when you build your own frame.
 templ Styles() {
 	@icon.Styles()
 	@sidebar.Styles()
-	@listpage.Styles()
-	@detail.Styles()
-	@create.Styles()
-	@history.Styles()
-	@stats.Styles()
-	@csp.Style(css)
+	@styles
 }
+
+var styles = csp.Sheet("blocks/shell", css)
 
 const css = `.kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
 .kit-shell-breadcrumbs{min-width:0}

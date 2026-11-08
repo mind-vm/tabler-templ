@@ -73,7 +73,9 @@ templ Icon(name string, props ...Props) {
 	}
 }
 
-// Styles renders CSS and FilledCSS in a <style> element.
+var styles = csp.SheetFunc("icon", func() string { return CSS + FilledCSS() })
+
+// Styles renders CSS and FilledCSS in a <style> element, once per page.
 templ Styles() {
-	@csp.Style(CSS + FilledCSS())
+	@styles
 }

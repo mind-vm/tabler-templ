@@ -12,14 +12,12 @@ import (
 // quote, an integration grid and a contact section. They use Tabler's classes and a few rules of their own
 // (LandingStyles), which each of them renders once per page.
 
-var stylesOnce = templ.NewOnceHandle()
+var landingStyles = csp.Sheet("blocks/marketing", landingCSS)
 
 // LandingStyles are the rules of the sections in this file; every section renders them once per page, so
 // calling it is only needed to put them in the head.
 templ LandingStyles() {
-	@stylesOnce.Once() {
-		@csp.Style(landingCSS)
-	}
+	@landingStyles
 }
 
 const landingCSS = `.mkt-announcement{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;padding:.25rem .75rem .25rem .25rem;font-size:.875rem;color:var(--tblr-body-color);background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:2rem;text-decoration:none;box-shadow:var(--tblr-shadow-card,none)}

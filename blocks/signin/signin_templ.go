@@ -129,7 +129,7 @@ func Page(p Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = csp.Style(css).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = styles.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -779,5 +779,7 @@ const css = `.kit-signin-brand{display:flex;justify-content:center;align-items:c
 .kit-signin-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.75rem}
 .kit-signin-choice{height:100%;margin:0}
 .kit-signin-footer{margin-top:1rem;text-align:center;color:var(--tblr-secondary)}`
+
+var styles = csp.Sheet("blocks/signin", css)
 
 var _ = templruntime.GeneratedTemplate

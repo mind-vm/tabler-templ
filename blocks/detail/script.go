@@ -56,9 +56,12 @@ func Script(c ScriptConfig) templ.Component {
 	})
 }
 
-// Styles renders the block's CSS (Tabler variables only); the shell block includes it.
+var styles = csp.Sheet("blocks/detail", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
+// it themselves; calling it is only needed to put it in <head>.
 func Styles() templ.Component {
-	return csp.Style(css)
+	return styles
 }
 
 const css = `.kit-section{container-type:inline-size}

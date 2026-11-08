@@ -37,6 +37,7 @@ type SectionProps struct {
 // Section is a card with a head (title, extra, action) and the children as content. Without title and
 // action there is no head (a section used as a frame).
 templ Section(p SectionProps) {
+	@Styles()
 	@card.Card(card.Props{Section: true, Class: kit.Classes("kit-section", p.Class), Attributes: p.Attributes}) {
 		if p.Title != "" || p.Action != nil {
 			<div class={ kit.Classes("kit-section-head", p.HeadClass) }>
@@ -122,6 +123,7 @@ type DialogProps struct {
 // Dialog is a section's edit dialog (a Tabler modal). The script turns the last row of buttons of its
 // only form into the footer with Cancel, and reopens it after a failed save.
 templ Dialog(p DialogProps) {
+	@Styles()
 	{{
 		mp := modal.Props{ID: p.ID, Fade: true, Class: kit.Classes("kit-dialog", kit.If(p.Large, "kit-dialog-large"), p.Class),
 			Header: dialogHeader(p), Centered: true, Scrollable: true,

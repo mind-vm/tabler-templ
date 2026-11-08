@@ -283,7 +283,9 @@ func Icon(name string, props ...Props) templ.Component {
 	})
 }
 
-// Styles renders CSS and FilledCSS in a <style> element.
+var styles = csp.SheetFunc("icon", func() string { return CSS + FilledCSS() })
+
+// Styles renders CSS and FilledCSS in a <style> element, once per page.
 func Styles() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -301,7 +303,7 @@ func Styles() templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = csp.Style(CSS+FilledCSS()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = styles.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

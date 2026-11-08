@@ -150,6 +150,8 @@ func TestSidebar(t *testing.T) {
 	item := sidebar.Item(sidebar.ItemProps{Href: "/kunden", Icon: "ti-building", Label: "Kunden", Active: true, Count: 3, CountTitle: "offen"})
 	nav := mit(sidebar.Sidebar(sidebar.Props{ID: "leiste", Label: "Navigation"}), render(t, ctx, item))
 	h := render(t, ctx, nav)
+	assert.Equal(t, 1, strings.Count(h, "<style"), "the sidebar renders its CSS once")
+	h = h[strings.Index(h, "</style>"):]
 	assert.Contains(t, h, `<aside id="leiste" class="kit-sidebar offcanvas-lg offcanvas-start d-print-none" tabindex="-1" aria-label="Navigation">`)
 	assert.Contains(t, h, `class="kit-sidebar-link active" aria-current="page" data-kit-tooltip="Kunden">`)
 	assert.Contains(t, h, `<span class="badge bg-red-lt kit-sidebar-badge" title="offen">3</span>`)
