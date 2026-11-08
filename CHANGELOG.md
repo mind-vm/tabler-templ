@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.12.0
+
+Interactive apps: package `htmx` for components with their own endpoints and a CRUD demo built from them,
+an AI assistant with Markdown, enterprise layouts (list beside detail, sticky action bar, workspace
+switcher), animations and sounds, less CSS per page, and htmx 2.0.11.
 
 - **`htmx`, after an architecture review:**
   - `Error` sends the real status (404, 409 …) instead of 200. `Setup` swaps these toasts in and does not
