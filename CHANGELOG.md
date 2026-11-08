@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.13.0
+
+An assistant that acts on the page: a catalog of allowed actions (open a page, fill in a form, point at
+an element), a copilot panel that stays open from page to page, the conversation kept on the server, and
+Markdown without links and images for a model's answers. With the demo app `/copilot`.
 
 - **`markdown`:** `Strict(src)` and `StrictHTML(src)` render without links and images: a link becomes
   its text, an autolink its address as text, an image its alt text. For a model's answer that must not
