@@ -52,7 +52,7 @@ a.mkt-card-feature:hover{transform:translateY(-2px);box-shadow:var(--tblr-shadow
 .mkt-plan .card-body{display:flex;flex-direction:column}
 .mkt-plan-price{font-size:2.5rem;font-weight:700;line-height:1}
 .mkt-plan-price small{font-size:.875rem;font-weight:400;color:var(--tblr-secondary)}
-.mkt-plan-featured{border-color:var(--tblr-primary);box-shadow:0 0 0 1px var(--tblr-primary)}
+.card.mkt-plan-featured{border-color:var(--tblr-primary);box-shadow:0 0 0 1px var(--tblr-primary)}
 .mkt-quote{max-width:48rem;margin:0 auto;text-align:center}
 .mkt-quote blockquote{margin:0 0 2rem;font-size:clamp(1.25rem,1rem + 1vw,1.75rem);line-height:1.5;font-weight:500;color:var(--tblr-emphasis-color,var(--tblr-body-color))}
 .mkt-integrations{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:1rem}
@@ -136,13 +136,13 @@ templ FeatureCards(p FeatureCardsProps, fs []FeatureCard) {
 		}
 		<div class="row row-cards g-4">
 			for _, f := range fs {
-				<div class={ cols(p.Columns) }>
+				<div class={ cols(p.Columns), "d-flex" }>
 					if f.Href != "" {
-						<a href={ templ.URL(f.Href) } class="card card-link mkt-card-feature">
+						<a href={ templ.URL(f.Href) } class="card card-link mkt-card-feature w-100">
 							@featureCardBody(f)
 						</a>
 					} else {
-						<div class="card mkt-card-feature">
+						<div class="card mkt-card-feature w-100">
 							@featureCardBody(f)
 						</div>
 					}
@@ -370,7 +370,7 @@ templ Plans(p PlansProps, plans []Plan) {
 		}
 		<div class="row row-cards g-4 justify-content-center">
 			for _, pl := range plans {
-				<div class={ cols(len(plans)) }>
+				<div class={ cols(len(plans)), "d-flex" }>
 					@plan(pl)
 				</div>
 			}
@@ -379,7 +379,7 @@ templ Plans(p PlansProps, plans []Plan) {
 }
 
 templ plan(p Plan) {
-	<div class={ kit.Classes("card mkt-plan", kit.If(p.Featured, "mkt-plan-featured")) }>
+	<div class={ kit.Classes("card mkt-plan w-100", kit.If(p.Featured, "mkt-plan-featured")) }>
 		{{ badge := kit.Or(p.Badge, kit.If(p.Featured, "Most popular")) }}
 		if p.Featured {
 			<div class="card-status-top bg-primary"></div>
@@ -466,8 +466,8 @@ templ Team(header HeaderProps, people []Member) {
 		}
 		<div class="row row-cards g-4">
 			for _, m := range people {
-				<div class="col-sm-6 col-lg-3">
-					<div class="card mkt-team-card">
+				<div class="col-sm-6 col-lg-3 d-flex">
+					<div class="card mkt-team-card w-100">
 						<div class="card-body p-4">
 							{{ a := m.Avatar }}
 							if a.Size == "" {

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **`marketing.FeatureCards`, `marketing.Plans`, `marketing.Team`:** the cards in one row are always equally
+  tall; the column is a flex box and the card fills it, so this no longer depends on the marketing sheet or
+  on loading it after Tabler. The featured plan's border also holds when the sheet comes before Tabler.
+
 ## v0.15.0
 
 A black-and-white landing page in the minimal look of today's component-library sites, built from the

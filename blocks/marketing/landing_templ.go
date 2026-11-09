@@ -82,7 +82,7 @@ a.mkt-card-feature:hover{transform:translateY(-2px);box-shadow:var(--tblr-shadow
 .mkt-plan .card-body{display:flex;flex-direction:column}
 .mkt-plan-price{font-size:2.5rem;font-weight:700;line-height:1}
 .mkt-plan-price small{font-size:.875rem;font-weight:400;color:var(--tblr-secondary)}
-.mkt-plan-featured{border-color:var(--tblr-primary);box-shadow:0 0 0 1px var(--tblr-primary)}
+.card.mkt-plan-featured{border-color:var(--tblr-primary);box-shadow:0 0 0 1px var(--tblr-primary)}
 .mkt-quote{max-width:48rem;margin:0 auto;text-align:center}
 .mkt-quote blockquote{margin:0 0 2rem;font-size:clamp(1.25rem,1rem + 1vw,1.75rem);line-height:1.5;font-weight:500;color:var(--tblr-emphasis-color,var(--tblr-body-color))}
 .mkt-integrations{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:1rem}
@@ -313,7 +313,7 @@ func FeatureCards(p FeatureCardsProps, fs []FeatureCard) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 = []any{cols(p.Columns)}
+				var templ_7745c5c3_Var9 = []any{cols(p.Columns), "d-flex"}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_ElementWriter, templ_7745c5c3_Var9...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -359,7 +359,7 @@ func FeatureCards(p FeatureCardsProps, fs []FeatureCard) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"card card-link mkt-card-feature\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"card card-link mkt-card-feature w-100\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -372,7 +372,7 @@ func FeatureCards(p FeatureCardsProps, fs []FeatureCard) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"card mkt-card-feature\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"card mkt-card-feature w-100\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1336,7 +1336,7 @@ func Plans(p PlansProps, plans []Plan) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var49 = []any{cols(len(plans))}
+				var templ_7745c5c3_Var49 = []any{cols(len(plans)), "d-flex"}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_ElementWriter, templ_7745c5c3_Var49...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1410,7 +1410,7 @@ func plan(p Plan) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var52 = []any{kit.Classes("card mkt-plan", kit.If(p.Featured, "mkt-plan-featured"))}
+			var templ_7745c5c3_Var52 = []any{kit.Classes("card mkt-plan w-100", kit.If(p.Featured, "mkt-plan-featured"))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_ElementWriter, templ_7745c5c3_Var52...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1826,7 +1826,7 @@ func Team(header HeaderProps, people []Member) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, m := range people {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "<div class=\"col-sm-6 col-lg-3\"><div class=\"card mkt-team-card\"><div class=\"card-body p-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "<div class=\"col-sm-6 col-lg-3 d-flex\"><div class=\"card mkt-team-card w-100\"><div class=\"card-body p-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
