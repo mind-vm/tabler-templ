@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+A black-and-white landing page in the minimal look of today's component-library sites, built from the
+marketing blocks and the Graphite theme.
+
+- **`marketing.Marquee`:** a row of logos, badges or quotes that scrolls endlessly in pure CSS; it pauses on
+  hover and focus, can run slow, fast or in reverse, and without motion (`prefers-reduced-motion`) it is a
+  centered row. The copy for the loop is `aria-hidden` and `inert`.
+- **`marketing.CTABox`:** `Inline` puts the text at the start and the actions at the end of one row;
+  `Color: "light"` draws a bordered box without the decorative circle.
+- **`marketing.PageProps`:** `Theme` (color mode), `Appearance` and `HTMLAttributes` like `layout.Page`, and
+  `themes.Theme.ApplyMarketing` gives a marketing page a ready-made theme.
+- **Demo:** `/landing/black-white` (Tasklane: a live issue table in the hero instead of a screenshot, logo
+  marquee, feature cards, bento, testimonials, plans with a monthly/yearly switch, inline call to action);
+  the landing gallery shows the marquee and the inline call to action.
+
 ## v0.14.1
 
 - **`blocks/assistant`:** among several forms of one name, the first form with the action's key is the row

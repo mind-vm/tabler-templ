@@ -65,3 +65,28 @@ func TestCTABoxAndQuote(t *testing.T) {
 	assert.Equal(t, 3, strings.Count(h, "ti-filled"))
 	assert.Contains(t, h, `aria-label="3 of 5 stars"`)
 }
+
+func TestMarquee(t *testing.T) {
+	items := []templ.Component{templ.Raw("<b>A</b>"), templ.Raw("<b>B</b>")}
+	h := render(t, context.Background(), marketing.Marquee(marketing.MarqueeProps{Label: "Customers", Speed: "slow", Reverse: true}, items))
+	assert.Contains(t, h, `class="mkt-marquee mkt-marquee-slow mkt-marquee-reverse"`)
+	assert.Equal(t, 2, strings.Count(h, "<b>A</b>"), "the items are rendered twice for the loop")
+	assert.Contains(t, h, `aria-label="Customers"`)
+	assert.Contains(t, h, `aria-hidden="true" inert`, "the copy is hidden from assistive technology")
+}
+
+func TestCTABoxInline(t *testing.T) {
+	h := render(t, context.Background(), marketing.CTABox(marketing.CTABoxProps{Title: "Go", Color: "light", Inline: true,
+		Actions: []templ.Component{templ.Raw(`<a class="btn">Buy</a>`)}}))
+	assert.Contains(t, h, `class="mkt-cta-inline"`)
+	assert.NotContains(t, h, "justify-content-center")
+	assert.Contains(t, h, "Buy")
+}
+
+func TestPageTheme(t *testing.T) {
+	h := render(t, context.Background(), marketing.Page(marketing.PageProps{Title: "T", Theme: "dark",
+		HTMLAttributes: templ.Attributes{"data-bs-theme-pack": "graphite"}}))
+	assert.Contains(t, h, `data-bs-theme="dark"`)
+	assert.Contains(t, h, `data-bs-theme-pack="graphite"`)
+	assert.Contains(t, h, `lang="en"`)
+}

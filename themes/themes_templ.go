@@ -15,6 +15,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/blocks/auth"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/marketing"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
@@ -56,7 +57,7 @@ func Head(ts ...Theme) templ.Component {
 					var templ_7745c5c3_Var2 string
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression(f.URL()).ResolveURL(ctx)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 29, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 30, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 					if templ_7745c5c3_Err != nil {
@@ -168,6 +169,16 @@ func (t Theme) Apply(p *layout.PageProps) {
 
 // ApplyAuth gives a sign-in page (blocks/auth) the theme, like Apply.
 func (t Theme) ApplyAuth(p *auth.PageProps) {
+	p.Appearance = merge(t.Settings, p.Appearance)
+	if p.Theme == "" {
+		p.Theme = t.Mode
+	}
+	p.HTMLAttributes = t.attrs(p.HTMLAttributes)
+	p.Head = t.head(p.Head)
+}
+
+// ApplyMarketing gives a marketing page (blocks/marketing) the theme, like Apply.
+func (t Theme) ApplyMarketing(p *marketing.PageProps) {
 	p.Appearance = merge(t.Settings, p.Appearance)
 	if p.Theme == "" {
 		p.Theme = t.Mode

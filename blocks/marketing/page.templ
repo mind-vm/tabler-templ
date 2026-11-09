@@ -15,6 +15,7 @@ import (
 	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/theme"
 )
 
 // MarketingCSS is Tabler's marketing stylesheet on jsDelivr for a Tabler version, e.g. "1.7.1".
@@ -32,12 +33,32 @@ type PageProps struct {
 	Navbar    templ.Component // usually a Navbar
 	Footer    templ.Component // usually a Footer and a Legal footer
 	SkipLabel string          // the skip link, default "Skip to main content"
+	// Theme is the color mode: "light", "dark" or "" for Tabler's default.
+	Theme string
+	// Appearance is the accent color, gray base, font and corner radius (needs tabler-themes.css).
+	Appearance theme.Settings
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.ApplyMarketing sets them).
+	HTMLAttributes templ.Attributes
+}
+
+func htmlAttrs(p PageProps) templ.Attributes {
+	a := templ.Attributes{"lang": kit.Or(p.Lang, "en")}
+	if p.Theme != "" {
+		a["data-bs-theme"] = p.Theme
+	}
+	for k, v := range p.Appearance.Attrs() {
+		a[k] = v
+	}
+	for k, v := range p.HTMLAttributes {
+		a[k] = v
+	}
+	return a
 }
 
 // Page is a marketing page: the navbar, the children in <main> and the footer.
 templ Page(p PageProps) {
 	<!DOCTYPE html>
-	<html lang={ kit.Or(p.Lang, "en") }>
+	<html { htmlAttrs(p)... }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>

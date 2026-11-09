@@ -1,0 +1,248 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/avatar"
+	"github.com/mind-vm/tabler-templ/blocks/marketing"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/theme"
+	"github.com/mind-vm/tabler-templ/themes"
+)
+
+// The black-and-white landing page: the minimal look of today's component-library sites (black buttons,
+// thin borders, tight headlines, a real product UI in the hero) built from the same marketing blocks with
+// the Graphite theme. Its sections: an announcement hero with a live issue table, a logo marquee, feature
+// cards, a bento, testimonials, plans with a monthly/yearly switch and an inline call to action.
+
+// bwCSS is the page's own polish on top of the theme: tighter headlines, flat cards, rings behind the hero.
+const bwCSS = `.bw .hero-title{font-weight:700;letter-spacing:-.04em;line-height:1.05}
+.bw h2,.bw .section-title{letter-spacing:-.025em}
+.bw .card,.bw .mkt-bento-tile,.bw .mkt-announcement{box-shadow:none}
+.bw .hero{position:relative;isolation:isolate}
+.bw .hero::before{content:"";position:absolute;inset:-4rem 0 auto;height:44rem;z-index:-1;pointer-events:none;
+background:repeating-radial-gradient(circle at 50% 0,transparent 0 119px,var(--tblr-border-color) 120px 121px);
+-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000 20%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 0,#000 20%,transparent 70%)}
+.bw-app{text-align:start;overflow:hidden}
+.bw-app .table{font-size:.8125rem}
+.bw-app .table td,.bw-app .table th{white-space:nowrap}
+.bw-logo{display:block;color:var(--tblr-secondary)}
+.bw-logo svg{height:24px;width:auto}
+.bw .mkt-plan-featured{box-shadow:none}`
+
+templ bwHead() {
+	@lpHead(false)
+	@csp.Style(bwCSS)
+}
+
+templ bwNavAction() {
+	<div class="btn-list flex-nowrap">
+		<a href="#" class="btn btn-ghost-secondary">Sign in</a>
+		<a href="#pricing" class="btn btn-primary">Get started</a>
+	</div>
+}
+
+func bwLinks() []marketing.Link {
+	return []marketing.Link{{Text: "Gallery", Href: "/landing"}, {Text: "Product", Href: "#features"}, {Text: "Customers", Href: "#customers"}, {Text: "Pricing", Href: "#pricing"}}
+}
+
+// bwPage is the frame: Graphite's colors and fonts (its attribute and the neutral base) with rounder
+// corners. An app without the demo's assets would call themes.Graphite.ApplyMarketing(&props) instead.
+templ bwPage() {
+	@marketing.Page(marketing.PageProps{
+		Title:          "Tasklane – black & white landing · tabler-templ",
+		BodyClass:      "body-marketing bw",
+		Head:           bwHead(),
+		Scripts:        scripts(),
+		Appearance:     theme.Settings{Base: theme.Neutral, Radius: theme.Radius15},
+		HTMLAttributes: templ.Attributes{themes.Attribute: themes.Graphite.Name},
+		Navbar:         marketing.Navbar(marketing.NavbarProps{Brand: lpBrand("Tasklane", "ti-layout-kanban"), Links: bwLinks(), Action: bwNavAction(), ID: "navbar-bw"}),
+		Footer:         lpFooter("Tasklane"),
+	}) {
+		{ children... }
+	}
+}
+
+// --- hero: a live issue table instead of a screenshot -----------------------------------------------------
+
+type bwIssue struct {
+	Key, Title, Status, StatusColor, Priority, PriorityIcon, Assignee, Avatar string
+	Labels                                                                    []string
+}
+
+var bwIssues = []bwIssue{
+	{"TSK-142", "Keyboard shortcuts for the board view", "In progress", "yellow", "High", "ti-antenna-bars-5", "Mia Chen", "avatars/002f.jpg", []string{"Feature"}},
+	{"TSK-141", "Export a cycle report as PDF", "In review", "purple", "Medium", "ti-antenna-bars-4", "Dunn Slane", "avatars/003m.jpg", []string{"Reports"}},
+	{"TSK-139", "Sync labels with the GitHub integration", "Todo", "blue", "Medium", "ti-antenna-bars-4", "", "", []string{"Integrations", "API"}},
+	{"TSK-137", "Empty state for archived projects", "Done", "green", "Low", "ti-antenna-bars-3", "Leesa Beaty", "avatars/004f.jpg", []string{"Design"}},
+	{"TSK-136", "Slow search in workspaces with 50k issues", "In progress", "yellow", "Urgent", "ti-alert-square-filled", "Perren Keemar", "", []string{"Bug", "Performance"}},
+	{"TSK-133", "Audit log for permission changes", "Backlog", "secondary", "Low", "ti-antenna-bars-3", "", "", []string{"Security"}},
+	{"TSK-131", "Drag issues between cycles", "Done", "green", "High", "ti-antenna-bars-5", "Mia Chen", "avatars/002f.jpg", []string{"Feature"}},
+}
+
+templ bwAssignee(i bwIssue) {
+	if i.Assignee == "" {
+		<span class="text-secondary">Unassigned</span>
+	} else {
+		<span class="d-inline-flex align-items-center gap-2">
+			if i.Avatar != "" {
+				@avatar.Avatar(avatar.Props{Src: photo(i.Avatar), Size: avatar.SizeXS})
+			} else {
+				@avatar.Avatar(avatar.Props{Initials: initials(i.Assignee), Size: avatar.SizeXS})
+			}
+			{ i.Assignee }
+		</span>
+	}
+}
+
+func initials(name string) string {
+	var out []rune
+	for i, r := range []rune(name) {
+		if i == 0 || (i > 0 && []rune(name)[i-1] == ' ') {
+			out = append(out, r)
+		}
+	}
+	return string(out)
+}
+
+templ bwIssueTable() {
+	<div class="card bw-app">
+		<div class="card-header gap-2">
+			<div class="d-flex align-items-center gap-2 fw-medium text-nowrap">
+				@icon.Icon("ti-layout-list")
+				Active issues
+			</div>
+			<div class="ms-auto btn-list flex-nowrap">
+				<span class="btn btn-sm d-none d-sm-inline-flex">
+					@icon.Icon("ti-filter")
+					Filter
+				</span>
+				<span class="btn btn-sm btn-primary">
+					@icon.Icon("ti-plus")
+					New issue
+				</span>
+			</div>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-vcenter card-table">
+				<thead>
+					<tr><th>Issue</th><th>Status</th><th>Priority</th><th>Assignee</th><th>Labels</th></tr>
+				</thead>
+				<tbody>
+					for _, i := range bwIssues {
+						<tr>
+							<td><span class="text-secondary font-monospace me-2">{ i.Key }</span>{ i.Title }</td>
+							<td>
+								<span class="badge badge-outline text-body d-inline-flex align-items-center gap-1">
+									<span class={ "status-dot status-" + i.StatusColor }></span>
+									{ i.Status }
+								</span>
+							</td>
+							<td>
+								<span class="d-inline-flex align-items-center gap-1">
+									@icon.Icon(i.PriorityIcon)
+									{ i.Priority }
+								</span>
+							</td>
+							<td>
+								@bwAssignee(i)
+							</td>
+							<td>
+								for _, l := range i.Labels {
+									<span class="badge badge-outline text-secondary me-1">{ l }</span>
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+// --- sections ---------------------------------------------------------------------------------------------
+
+var bwFeatures = []marketing.FeatureCard{
+	{Icon: "ti-bolt", Title: "Fast by default", Text: "Every view loads in under 100 ms and works offline; changes sync when you are back."},
+	{Icon: "ti-keyboard", Title: "Keyboard first", Text: "Create, assign and move issues without touching the mouse. Press ? for the full list."},
+	{Icon: "ti-git-branch", Title: "Linked to your code", Text: "Branches, pull requests and deploys update the issue they belong to."},
+	{Icon: "ti-refresh", Title: "Cycles that close", Text: "Two-week cycles roll unfinished work over and report what really shipped."},
+	{Icon: "ti-message-2", Title: "Discussions in place", Text: "Comment on an issue, a spec or a single line of a design, with threads that resolve."},
+	{Icon: "ti-shield-lock", Title: "Enterprise ready", Text: "SSO, SCIM, audit logs and data residency in the EU or the US."},
+}
+
+var bwBento = []marketing.Tile{
+	{Icon: "ti-layout-kanban", Title: "Boards, lists and timelines", Text: "The same issues in the view that fits the meeting: a board for stand-up, a timeline for planning.", Span: 4, Tall: true, Media: lpShot(photo("projects/dashboard-2.png"))},
+	{Icon: "ti-sparkles", Title: "Triage with AI", Text: "New reports arrive labeled, deduplicated and routed to the right team.", Span: 2, Color: "primary"},
+	{Icon: "ti-chart-line", Title: "Insights", Text: "Cycle time, scope creep and throughput, per team.", Span: 2},
+	{Icon: "ti-api", Title: "Open API & webhooks", Text: "Everything in the app is one GraphQL call away.", Span: 3},
+	{Icon: "ti-world", Title: "Built for remote teams", Text: "Time zones, async updates and a weekly digest.", Span: 3},
+}
+
+var bwPlans = []marketing.Plan{
+	{Name: "Free", Description: "For individuals and small side projects.", Monthly: marketing.PlanPrice{Amount: "$0", Period: "/month", Note: "free forever"},
+		Features: []string{"Up to 3 members", "Unlimited issues", "GitHub integration", "Community support"}, Button: "Start for free"},
+	{Name: "Team", Description: "For product teams that ship every week.", Featured: true,
+		Monthly: marketing.PlanPrice{Amount: "$12", Period: "/user/month", Note: "billed monthly"}, Yearly: marketing.PlanPrice{Amount: "$10", Period: "/user/month", Note: "billed yearly"},
+		Features: []string{"Unlimited members", "Cycles & roadmaps", "Insights", "AI triage", "Priority support"}, Button: "Start 14-day trial"},
+	{Name: "Enterprise", Description: "For organisations with security reviews.",
+		Monthly: marketing.PlanPrice{Amount: "Custom"}, Features: []string{"Everything in Team", "SSO & SCIM", "Audit log", "Data residency", "Dedicated manager"}, Button: "Contact sales"},
+}
+
+func bwLogos() []templ.Component {
+	var cs []templ.Component
+	for _, l := range mktLogos {
+		cs = append(cs, bwLogo(l))
+	}
+	return cs
+}
+
+templ bwLogo(l marketing.Logo) {
+	<span class="bw-logo" aria-label={ l.Name } role="img">
+		@l.Image
+	</span>
+}
+
+templ bwPageBody() {
+	@bwPage() {
+		@marketing.Hero(marketing.HeroProps{Header: true, Class: "pb-0",
+			Announcement:     marketing.Announcement(marketing.AnnouncementProps{Badge: "New", Text: "AI triage is in public beta", Href: "#features"}),
+			TitleHTML:        templ.Raw("The issue tracker for<br/>teams that ship"),
+			Description:      "Tasklane keeps issues, cycles and roadmaps in one fast, quiet place – so your team spends its time building, not updating tickets.",
+			DescriptionClass: "mt-4",
+			Actions:          []templ.Component{lpIconButton("Get started", "btn-lg btn-primary", "ti-arrow-right"), lpButton("Book a demo", "btn-lg", "#")}}) {
+			<p class="text-secondary small mt-n3 mb-6">Free for up to 3 members · No credit card</p>
+			<div class="container container-slim-lg">
+				@bwIssueTable()
+			</div>
+		}
+		<div id="customers">
+			@marketing.Section(marketing.SectionProps{}) {
+				<div class="container">
+					<p class="text-center text-secondary mb-5">Trusted by product teams at fast-moving companies</p>
+					@marketing.Marquee(marketing.MarqueeProps{Label: "Customers", Speed: "slow"}, bwLogos())
+				</div>
+			}
+		</div>
+		<div id="features">
+			@marketing.Section(marketing.SectionProps{}) {
+				@marketing.FeatureCards(marketing.FeatureCardsProps{Header: marketing.HeaderProps{Title: "Everything a product team needs", Description: "Opinionated where it saves you time, flexible where your process is different."}}, bwFeatures)
+			}
+		</div>
+		@marketing.Section(marketing.SectionProps{}) {
+			@marketing.Bento(marketing.HeaderProps{Title: "One tool, every view", Description: "From the first bug report to the release notes."}, bwBento)
+		}
+		@marketing.Section(marketing.SectionProps{}) {
+			@marketing.Testimonials(marketing.TestimonialsProps{Header: marketing.HeaderProps{Title: "Loved by 4,000 teams", Description: "What engineers and product managers say after their first quarter."}}, mktTestimonials[:6])
+		}
+		<div id="pricing">
+			@marketing.Section(marketing.SectionProps{}) {
+				@marketing.Plans(marketing.PlansProps{ID: "bw-plans", Save: "-15%", Header: marketing.HeaderProps{Title: "Pricing that grows with your team", Description: "Start free, upgrade when you need cycles, insights and AI."}}, bwPlans)
+			}
+		</div>
+		@marketing.Section(marketing.SectionProps{}) {
+			@marketing.CTABox(marketing.CTABoxProps{Color: "light", Inline: true, Title: "Ship your next release with Tasklane",
+				Text:    "Import from Jira or GitHub in minutes. Your team will thank you.",
+				Actions: []templ.Component{lpButton("Book a demo", "", "#"), lpButton("Get started", "btn-primary", "#pricing")}})
+		}
+	}
+}
