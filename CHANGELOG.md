@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.15.1
 
 - **`marketing.FeatureCards`, `marketing.Plans`, `marketing.Team`:** the cards in one row are always equally
   tall; the column is a flex box and the card fills it, so this no longer depends on the marketing sheet or
