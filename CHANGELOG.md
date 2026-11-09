@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.15.0
 
 A black-and-white landing page in the minimal look of today's component-library sites, built from the
 marketing blocks and the Graphite theme.
