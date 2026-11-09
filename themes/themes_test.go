@@ -9,6 +9,7 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/blocks/marketing"
 	"github.com/mind-vm/tabler-templ/theme"
 )
 
@@ -72,5 +73,13 @@ func TestApply(t *testing.T) {
 	}
 	if s := Section(); len(s.Settings[0].Options) != len(All) || s.Settings[0].Options[0].Value != "default" {
 		t.Errorf("section %+v", s.Settings[0].Options[0])
+	}
+}
+
+func TestApplyMarketing(t *testing.T) {
+	p := marketing.PageProps{Appearance: theme.Settings{Radius: theme.Radius2}}
+	Graphite.ApplyMarketing(&p)
+	if p.HTMLAttributes[Attribute] != "graphite" || p.Appearance.Base != theme.Neutral || p.Appearance.Radius != theme.Radius2 || p.Head == nil {
+		t.Errorf("%+v", p)
 	}
 }

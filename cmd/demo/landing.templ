@@ -13,11 +13,12 @@ import (
 
 // Landing pages are this module's own showcase of the marketing blocks; they have no page in the Tabler
 // preview, so they are served next to the catalog (like /themes): /landing is a gallery of the section
-// variants, /landing/saas and /landing/app are two complete landing pages.
+// variants, /landing/saas, /landing/app and /landing/black-white are complete landing pages.
 func landingRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /landing", templ.Handler(lpGalleryPage()))
 	mux.Handle("GET /landing/saas", templ.Handler(lpSaaSPage()))
 	mux.Handle("GET /landing/app", templ.Handler(lpAppPage()))
+	mux.Handle("GET /landing/black-white", templ.Handler(bwPageBody()))
 }
 
 templ landingLink() {
@@ -43,7 +44,7 @@ templ lpNavAction(text string) {
 
 func lpLinks(active string) []marketing.Link {
 	var ls []marketing.Link
-	for _, l := range [][2]string{{"Gallery", "/landing"}, {"SaaS", "/landing/saas"}, {"App", "/landing/app"}, {"Features", "#features"}, {"Pricing", "#pricing"}, {"FAQ", "#faq"}} {
+	for _, l := range [][2]string{{"Gallery", "/landing"}, {"SaaS", "/landing/saas"}, {"App", "/landing/app"}, {"B&W", "/landing/black-white"}, {"Features", "#features"}, {"Pricing", "#pricing"}, {"FAQ", "#faq"}} {
 		ls = append(ls, marketing.Link{Text: l[0], Href: l[1], Active: l[1] == active})
 	}
 	return ls
@@ -345,10 +346,10 @@ templ lpPlanButton(primary bool) {
 templ lpGalleryPage() {
 	@lpPage("Landing sections", "tabler-templ", "ti-layout-board", "/landing", true) {
 		@marketing.Hero(marketing.HeroProps{Header: true,
-			Announcement: marketing.Announcement(marketing.AnnouncementProps{Badge: "Demo", BadgeColor: "green", Text: "Two full landing pages built from these blocks", Href: "/landing/saas"}),
+			Announcement: marketing.Announcement(marketing.AnnouncementProps{Badge: "Demo", BadgeColor: "green", Text: "Three full landing pages built from these blocks", Href: "/landing/saas"}),
 			Title:        "Landing page sections",
 			Description:  "Every hero, feature, pricing, social-proof and call-to-action block of blocks/marketing, one after the other. Each is labeled with its component.",
-			Actions:      []templ.Component{lpButton("SaaS landing", "btn-lg btn-primary", "/landing/saas"), lpButton("App landing", "btn-lg", "/landing/app")}})
+			Actions:      []templ.Component{lpButton("SaaS landing", "btn-lg btn-primary", "/landing/saas"), lpButton("App landing", "btn-lg", "/landing/app"), lpButton("Black & white", "btn-lg", "/landing/black-white")}})
 		// Heroes
 		@lpLabel("marketing.SideHero", "text at the start, media at the end; Typed rotates words")
 		@marketing.SideHero(marketing.SideHeroProps{Class: "py-6", Subheader: "Side hero", TitleHTML: mktTypedTitle(),
@@ -367,6 +368,10 @@ templ lpGalleryPage() {
 		@lpLabel("marketing.Logos", "customer logos")
 		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
 			@marketing.Logos("", mktLogos)
+		}
+		@lpLabel("marketing.Marquee", "logos that scroll endlessly, pure CSS")
+		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
+			@marketing.Marquee(marketing.MarqueeProps{Label: "Customers"}, bwLogos())
 		}
 		@lpLabel("marketing.Counters", "big numbers")
 		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
@@ -463,6 +468,10 @@ templ lpGalleryPage() {
 		@lpLabel("marketing.CTABox", "colored, with media")
 		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
 			@marketing.CTABox(marketing.CTABoxProps{Color: "purple", Title: "Join the beta", Text: "Get early access to new blocks and shape what comes next.", Actions: []templ.Component{lpButton("Request access", "btn-lg btn-light", "#")}, Media: lpImg(photo("illustrations/light/boy-with-key.png"), "", 200)})
+		}
+		@lpLabel("marketing.CTABox", "light, inline: text at the start, actions at the end")
+		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
+			@marketing.CTABox(marketing.CTABoxProps{Color: "light", Inline: true, Title: "Questions before you start?", Text: "Our team walks you through it in 20 minutes.", Actions: []templ.Component{lpButton("Book a call", "btn-primary", "#")}})
 		}
 		@lpLabel("marketing.Subscribe", "newsletter")
 		@marketing.Section(marketing.SectionProps{Class: "py-5"}) {
