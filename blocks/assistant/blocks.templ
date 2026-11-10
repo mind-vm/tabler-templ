@@ -8,6 +8,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/metric"
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/markdown"
 	"github.com/mind-vm/tabler-templ/table"
 	"github.com/mind-vm/tabler-templ/trending"
@@ -112,9 +113,20 @@ templ tableBlock(p map[string]any) {
 }
 
 templ chartBlock(b Block) {
-	@framed(str(b.Payload, "title")) {
-		@card.Body() {
-			@chart.Chart(ChartProps(b.ChartID, b.Payload))
+	{{ o := ChartOptionsFrom(ctx) }}
+	{{ props := ChartProps(b.ChartID, b.Payload) }}
+	if o.SVG && !svg.Supported(props.Type) {
+		// The SVG charts have no radar, scatter, bubble or heatmap: the data as a table, the numbers intact.
+		@tableBlock(chartTable(b.Payload))
+	} else {
+		@framed(str(b.Payload, "title")) {
+			@card.Body() {
+				if o.SVG {
+					@svg.Chart(svgProps(props, o))
+				} else {
+					@chart.Chart(props)
+				}
+			}
 		}
 	}
 }

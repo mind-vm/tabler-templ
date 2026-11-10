@@ -14,6 +14,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/avatar"
 	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/trending"
 	"github.com/mind-vm/tabler-templ/typography"
@@ -102,7 +103,7 @@ func IconCard(p IconCardProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(p.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 30, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 31, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -126,7 +127,7 @@ func IconCard(p IconCardProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.NewAttributeExpression(p.Countup).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 35, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 36, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
@@ -144,7 +145,7 @@ func IconCard(p IconCardProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 37, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 38, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -177,6 +178,23 @@ type GaugeProps struct {
 	CountLabel   string // between count and total, default "of"
 	Remaining    string // after the remainder, default "remaining"
 	Color        string // a Tabler color; default the body color
+	// SVG draws the gauge on the server (package chart/svg) instead of with ApexCharts, so the page needs
+	// no chart library. Format writes its percentage then, e.g. svg.German.
+	SVG    bool
+	Format svg.Format
+}
+
+func gaugeSVG(p GaugeProps) svg.Props {
+	color := "var(--tblr-body-color)"
+	if p.Color != "" {
+		color = "var(--tblr-" + p.Color + ")"
+	}
+	return svg.Props{
+		ID: "gauge-" + p.ID, Label: p.Title + ": " + strconv.FormatFloat(p.Value, 'f', -1, 64) + "%", Class: "mx-auto",
+		Attributes: templ.Attributes{"style": "width: 10rem; max-width: 100%"},
+		Type:       chart.RadialBar, Height: 10, Hollow: 64, Format: p.Format,
+		Series: []chart.Serie{{Name: p.Label, Color: color, Data: []float64{p.Value}}},
+	}
 }
 
 func thousands(n int) string {
@@ -245,7 +263,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 105, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 123, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -255,9 +273,16 @@ func Gauge(p GaugeProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = chart.Chart(gaugeChart(p)).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if p.SVG {
+			templ_7745c5c3_Err = svg.Chart(gaugeSVG(p)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = chart.Chart(gaugeChart(p)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p class=\"text-secondary mt-3 mb-0\" style=\"min-height: 2lh\">")
 		if templ_7745c5c3_Err != nil {
@@ -266,7 +291,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 107, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 129, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -279,7 +304,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(thousands(p.Count))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 110, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 132, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -292,7 +317,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.CountLabel, "of"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 110, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 132, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -305,7 +330,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(thousands(p.Total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 110, Col: 123}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 132, Col: 123}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -318,7 +343,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(thousands(p.Total - p.Count))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 111, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 133, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -331,7 +356,7 @@ func Gauge(p GaugeProps) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Remaining, "remaining"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 111, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 133, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -418,7 +443,7 @@ func Ticker(p TickerProps) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 134, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 156, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -439,7 +464,7 @@ func Ticker(p TickerProps) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(p.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 141, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 163, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -452,7 +477,7 @@ func Ticker(p TickerProps) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(p.Extra)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 142, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 164, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -474,7 +499,7 @@ func Ticker(p TickerProps) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(" ")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 147, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 169, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -492,7 +517,7 @@ func Ticker(p TickerProps) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(p.Note)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 149, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/metric/widgets.templ`, Line: 171, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {

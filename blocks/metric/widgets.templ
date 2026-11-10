@@ -5,6 +5,7 @@ import (
 
 	"github.com/mind-vm/tabler-templ/avatar"
 	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/trending"
 	"github.com/mind-vm/tabler-templ/typography"
@@ -55,6 +56,23 @@ type GaugeProps struct {
 	CountLabel   string // between count and total, default "of"
 	Remaining    string // after the remainder, default "remaining"
 	Color        string // a Tabler color; default the body color
+	// SVG draws the gauge on the server (package chart/svg) instead of with ApexCharts, so the page needs
+	// no chart library. Format writes its percentage then, e.g. svg.German.
+	SVG    bool
+	Format svg.Format
+}
+
+func gaugeSVG(p GaugeProps) svg.Props {
+	color := "var(--tblr-body-color)"
+	if p.Color != "" {
+		color = "var(--tblr-" + p.Color + ")"
+	}
+	return svg.Props{
+		ID: "gauge-" + p.ID, Label: p.Title + ": " + strconv.FormatFloat(p.Value, 'f', -1, 64) + "%", Class: "mx-auto",
+		Attributes: templ.Attributes{"style": "width: 10rem; max-width: 100%"},
+		Type:       chart.RadialBar, Height: 10, Hollow: 64, Format: p.Format,
+		Series:     []chart.Serie{{Name: p.Label, Color: color, Data: []float64{p.Value}}},
+	}
 }
 
 func thousands(n int) string {
@@ -103,7 +121,11 @@ templ Gauge(p GaugeProps) {
 	<div class="card">
 		<div class="card-body">
 			<h3 class="card-title">{ p.Title }</h3>
-			@chart.Chart(gaugeChart(p))
+			if p.SVG {
+				@svg.Chart(gaugeSVG(p))
+			} else {
+				@chart.Chart(gaugeChart(p))
+			}
 			<p class="text-secondary mt-3 mb-0" style="min-height: 2lh">{ p.Description }</p>
 		</div>
 		<div class="card-footer d-flex text-secondary">

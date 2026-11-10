@@ -18,6 +18,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/maps"
 	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/confetti"
 	"github.com/mind-vm/tabler-templ/datepicker"
 	"github.com/mind-vm/tabler-templ/form"
@@ -42,6 +43,7 @@ func TestNonceRendered(t *testing.T) {
 	for name, c := range map[string]templ.Component{
 		"assets":     templ.Join(assets.Head(), assets.Theme(), assets.Scripts()),
 		"chart":      templ.Join(chart.Library(), chart.Script()),
+		"chart/svg":  svg.Styles(),
 		"confetti":   confetti.Burst(confetti.Props{}),
 		"datepicker": templ.Join(datepicker.Library(), datepicker.Script()),
 		"detail":     templ.Join(detail.Styles(), detail.Script(detail.ScriptConfig{})),

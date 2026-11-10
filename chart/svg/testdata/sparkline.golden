@@ -1,0 +1,7 @@
+<div class="chart-svg" style="--chart-svg-h: 2.5rem;--s0: var(--tblr-chart-1, var(--tblr-primary));"><div class="chart-svg-box" role="img" aria-label="Trend"><div class="chart-svg-plot" style="inset:0;"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 100H10V0H0Z" class="chart-svg-hit"><title>1
+Solved: 12</title></path><path d="M10 100H30V0H10Z" class="chart-svg-hit"><title>2
+Solved: 19</title></path><path d="M30 100H50V0H30Z" class="chart-svg-hit"><title>3
+Solved: 8</title></path><path d="M50 100H70V0H50Z" class="chart-svg-hit"><title>4
+Solved: 15</title></path><path d="M70 100H90V0H70Z" class="chart-svg-hit"><title>5
+Solved: 22</title></path><path d="M90 100H100V0H90Z" class="chart-svg-hit"><title>6
+Solved: 18</title></path><path d="M0 70L20 52.5L40 80L60 62.5L80 45L100 55L100 100L80 100L60 100L40 100L20 100L0 100Z" class="chart-svg-area" style="fill:color-mix(in srgb, transparent, var(--s0) 16%);"></path><path d="M0 70L20 52.5L40 80L60 62.5L80 45L100 55" class="chart-svg-line" style="stroke:var(--s0);"></path></svg> </div></div></div>

@@ -186,6 +186,7 @@ in front compresses already.
 | `theme`, `themes` | Tabler's theme settings as typed values (`theme.Settings`: accent color, base, font, radius); 13 ready-made themes (`themes.Rose` …) with `Apply`, `Head`, `Section` for the settings panel, and your own via `themes.Theme` |
 | `vectormap` | Tabler's vector map: `Map` (world and other maps, values, selected regions, markers, lines, legend, zoom), `Library` |
 | `chart` | ApexCharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ApexCharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
+| `chart/svg` | Simple charts drawn as SVG on the server, without ApexCharts or JavaScript: `Chart` (bar vertical, horizontal or stacked, line straight, smooth or stepped, area, mixed columns and lines, pie, donut, radial bar and gauge; axes, grid, legend, value labels, target lines, tooltips as `<title>`, a hidden data table), `FromChart` (from `chart.Props`), `Number`/`German`/`English` (number formats), `Supported`; see [SVG charts](#svg-charts-without-apexcharts) |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
 | `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
@@ -640,4 +641,42 @@ What this means for an app using these packages:
   further. There is no pin on an MIT version: 4.7.0 gets no fixes, and the Go options are built and checked
   against Tabler's version.
 
-Options for apps that must stay clear of it are listed in the CHANGELOG entry that added this section.
+Options for apps that must stay clear of it are listed in the CHANGELOG entry that added this section; for
+simple charts, `chart/svg` draws them without it (next section).
+
+### SVG charts without ApexCharts
+
+`chart/svg` draws bar, line, area, pie, donut and radial bar charts as inline SVG on the server: no library,
+no script, nothing to license. The props carry the names of `chart.Props` (`svg.FromChart` converts one):
+
+```go
+@svg.Chart(svg.Props{
+	Label: "Umsatz je Monat", Type: chart.Line, Categories: months, Format: svg.German,
+	Series: []chart.Serie{{Name: "Umsatz", Data: revenue}}, StrokeCurve: "smooth", Legend: true, Table: true,
+})
+```
+
+- **Types:** `chart.Bar` (default; `Horizontal`, `Stacked`, negative values, one color per bar with `Colors`),
+  `chart.Line` (`StrokeCurve` `"straight"`, `"smooth"` as a monotone curve, `"stepline"`; `StrokeDash`,
+  `ShowMarkers`), `chart.Area` (also stacked), mixed by `Serie.Type` (`"column"`, `"line"`, `"area"`),
+  `chart.Pie`, `chart.Donut` (`Hollow`) and `chart.RadialBar` (one ring with its value in the middle, or
+  several; `StartAngle`/`EndAngle` for a half gauge or Tabler's radial). `Sparkline` drops axes and grid.
+- **Look:** Tabler's chart palette and colors as CSS variables, so themes and dark mode apply; axis and value
+  labels are HTML over a stretched SVG, so the text keeps its size at any width (every other category label
+  goes on narrow charts); round charts keep their aspect ratio. The chart's CSS (about 2 kB) is rendered
+  once per page through `internal/csp` (nonce, or the kit's CSS file with `static`).
+- **Reading:** a tooltip per bar, slice and ring, and one per category with all its values (`<title>`, no
+  script). The chart is one image for screen readers (`role="img"`, `Label`); `Table` adds the data as a
+  visually hidden table.
+- **Numbers:** `Format` writes axes, labels, tooltips and table: `svg.English` (12,400.5, default),
+  `svg.German` (12.400,5) or `svg.Number(decimals, decimal, group)`; `YFormatter` appends `%` or `K`.
+- **Limits:** at most `svg.MaxSeries` (12) series and `svg.MaxCategories` (400) categories; more are left
+  out. No radar, polar area, scatter, bubble, heatmap, treemap, timeline, box plot or candlestick, no
+  `Serie.Points`, no zoom, brush, second y axis or x annotations (`svg.Supported` tells). A bar chart of 7
+  days with 2 series is about 4 kB of HTML (1 kB gzipped), a gauge 0.6 kB.
+- **Switches in the blocks** (default: ApexCharts as before): `metric.GaugeProps{SVG: true, Format: …}`;
+  `assistant.WithChartOptions(ctx, assistant.ChartOptions{SVG: true, Format: svg.German})` draws the chart
+  blocks of the request as SVG, with the data table, and shows radar, scatter, bubble and heatmap blocks
+  as a table of their data.
+
+Demo at `/charts-svg`.
