@@ -613,3 +613,31 @@ node scripts/screenshots/compare-all.mjs http://localhost:8080 http://localhost:
 ## License
 
 MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module. tabler-templ is not an official Tabler project.
+
+### License of ApexCharts
+
+The `chart` package (and everything built on it: `blocks/metric`'s gauge, the chart block of
+`blocks/assistant`, `assets.Props{Charts: true}`, `chart` in `cmd/vendor`, `cmd/new` with charts) loads
+**ApexCharts**, in the version Tabler is built against (`versions.ApexCharts`, now 7.0.0). ApexCharts is
+**not MIT** any more, and the MIT license of this module does not cover it:
+
+| ApexCharts | License |
+|---|---|
+| up to 4.7.0 (April 2025) | MIT |
+| 5.0.0 (9 July 2025) | contradictory: `package.json` and the banner say MIT, the `LICENSE` file is already the dual license |
+| from 5.1.0 (9 July 2025), incl. 7.0.0 | dual license: the free *Community License* only for organizations under 2 million USD annual revenue (and not in competing charting products); from 2 million USD a paid *Commercial License*; an *OEM License* when ApexCharts is embedded in a product where other people build or configure charts (dashboards, BI, SDKs) |
+
+What this means for an app using these packages:
+
+- Nothing changes as long as no page loads ApexCharts: only `chart.Library()`, `assets.Props{Charts: true}`
+  and a vendored `apexcharts` file do. The rest of the module (including `sparkline`, which Tabler's own
+  script draws) does not use it.
+- An app that loads it accepts ApexCharts' license for its operator: free under 2 million USD revenue,
+  otherwise a paid license (see [apexcharts.com/license](https://apexcharts.com/license)). Charts that users
+  or an assistant configure themselves may need the OEM license.
+- `cmd/vendor` and `-self-host` copy ApexCharts into the app; its license file must go with it.
+- `scripts/tabler-update.sh` keeps `versions.ApexCharts` on Tabler's version; a Tabler update can move it
+  further. There is no pin on an MIT version: 4.7.0 gets no fixes, and the Go options are built and checked
+  against Tabler's version.
+
+Options for apps that must stay clear of it are listed in the CHANGELOG entry that added this section.
