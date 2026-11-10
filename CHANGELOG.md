@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.15.2
+
+- **`layout.App`:** `Badge` puts a small count or label on the app's logo in `layout.Apps`, like Tabler's
+  notification badge on an avatar (e.g. the number of urgent tasks in that app); `BadgeColor` sets its
+  color (default `red`), `BadgeLabel` is read out instead of the badge. Apps without a badge render as
+  before.
+- **Demo:** the app menu of the navigation pages shows two apps with a badge.
+
 ## v0.15.1
 
 - **`marketing.FeatureCards`, `marketing.Plans`, `marketing.Team`:** the cards in one row are always equally

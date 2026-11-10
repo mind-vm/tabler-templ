@@ -72,6 +72,11 @@ type App struct {
 	Name string
 	Icon string // URL of the app's logo
 	Href string
+	// Badge is a small count or label at the top end of the logo, e.g. "3" for open tasks; empty = none.
+	Badge      string
+	BadgeColor string // background of the badge, default "red" (bg-red text-red-fg)
+	// BadgeLabel is read out instead of Badge, e.g. "3 urgent"; the badge itself is then aria-hidden.
+	BadgeLabel string
 }
 
 type AppsProps struct {
@@ -98,7 +103,14 @@ templ Apps(p AppsProps, apps []App) {
 				for _, a := range apps {
 					<div class="col-4">
 						<a href={ templ.URL(kit.Or(a.Href, "#")) } class="d-flex flex-column text-center text-secondary py-2 px-2 link-hoverable">
-							<img src={ a.Icon } class="w-6 h-6 mx-auto mb-2" width="24" height="24" alt=""/>
+							if a.Badge != "" {
+								<span class="position-relative d-inline-block mx-auto mb-2">
+									<img src={ a.Icon } class="w-6 h-6 d-block" width="24" height="24" alt=""/>
+									@appBadge(a)
+								</span>
+							} else {
+								<img src={ a.Icon } class="w-6 h-6 mx-auto mb-2" width="24" height="24" alt=""/>
+							}
 							<span class="h5">{ a.Name }</span>
 						</a>
 					</div>
@@ -106,4 +118,15 @@ templ Apps(p AppsProps, apps []App) {
 			</div>
 		</div>
 	</div>
+}
+
+// appBadge: the badge of an App on its logo, like Tabler's notification badge on an avatar.
+templ appBadge(a App) {
+	{{ c := kit.Or(a.BadgeColor, "red") }}
+	if a.BadgeLabel != "" {
+		<span class={ "badge badge-notification badge-pill bg-" + c + " text-" + c + "-fg" } aria-hidden="true">{ a.Badge }</span>
+		<span class="visually-hidden">{ a.BadgeLabel }</span>
+	} else {
+		<span class={ "badge badge-notification badge-pill bg-" + c + " text-" + c + "-fg" }>{ a.Badge }</span>
+	}
 }
