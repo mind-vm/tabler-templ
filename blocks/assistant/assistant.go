@@ -250,7 +250,7 @@ var English = Texts{
 
 // ChartOptions choose how chart blocks are drawn.
 type ChartOptions struct {
-	// SVG draws chart blocks on the server with package chart/svg instead of with ApexCharts, so the page
+	// SVG draws chart blocks on the server with package chart/svg instead of with ECharts, so the page
 	// needs no chart library. The variants the SVG charts do not have (radar, scatter, bubble, heatmap)
 	// are shown as a table of their data; composite, funnel and sparkline are drawn.
 	SVG bool
@@ -260,12 +260,12 @@ type ChartOptions struct {
 
 type chartOptionsKey struct{}
 
-// WithChartOptions sets how the request's chart blocks are drawn; without it they use ApexCharts.
+// WithChartOptions sets how the request's chart blocks are drawn; without it they use ECharts (package chart).
 func WithChartOptions(ctx context.Context, o ChartOptions) context.Context {
 	return context.WithValue(ctx, chartOptionsKey{}, o)
 }
 
-// ChartOptionsFrom returns the request's chart options, the zero value (ApexCharts) if none were set.
+// ChartOptionsFrom returns the request's chart options, the zero value (ECharts) if none were set.
 func ChartOptionsFrom(ctx context.Context) ChartOptions {
 	o, _ := ctx.Value(chartOptionsKey{}).(ChartOptions)
 	return o

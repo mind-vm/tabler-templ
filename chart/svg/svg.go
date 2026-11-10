@@ -1,6 +1,6 @@
 // Package svg draws simple charts on the server as inline SVG: bar (vertical, horizontal, stacked), line,
 // area, pie, donut and radial bar (gauge). It needs no chart library and no JavaScript, so a page with only
-// these charts does not load ApexCharts (see the README, "License of ApexCharts").
+// these charts loads no chart library (see the README, "SVG charts without JavaScript").
 //
 //	@svg.Chart(svg.Props{
 //		Label: "Revenue per month", Type: chart.Area, Legend: true, Format: svg.German,

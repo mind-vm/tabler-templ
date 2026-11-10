@@ -56,7 +56,7 @@ func TestHead(t *testing.T) {
 			t.Errorf("missing %s", n)
 		}
 	}
-	if got := render(t, Head(f, assets.Props{Charts: true})); !strings.Contains(got, "apexcharts") {
+	if got := render(t, Head(f, assets.Props{Charts: true})); !strings.Contains(got, "echarts") {
 		t.Errorf("Charts: %s", got)
 	}
 	// Every address Head links is served with a year of cache.

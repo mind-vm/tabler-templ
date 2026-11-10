@@ -306,7 +306,7 @@ func TestLanding(t *testing.T) {
 	assert.Contains(t, h, `<div class="kit-landing-buttons"><a class="btn">Los</a></div>`)
 }
 
-// metric.Gauge with SVG draws its ring on the server: no ApexCharts config, the percentage in the
+// metric.Gauge with SVG draws its ring on the server: no ECharts option, the percentage in the
 // given format.
 func TestGaugeSVG(t *testing.T) {
 	ctx := templ.InitializeContext(context.Background())

@@ -1,4 +1,4 @@
-// Command vendor downloads the files tabler-templ loads in the browser (Tabler, its icons, ApexCharts, the
+// Command vendor downloads the files tabler-templ loads in the browser (Tabler, its icons, ECharts, the
 // plugins, the theme fonts) into a folder, in the layout cdn.URL builds: <package>@<version>/<path>. Serve
 // the folder (or embed it) and point cdn.Base at it, and the app loads nothing from outside at runtime:
 //

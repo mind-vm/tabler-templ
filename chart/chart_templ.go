@@ -2,11 +2,13 @@
 
 // templ: version: v0.3.1100
 
-// Package chart renders Tabler's charts: ApexCharts set up the way the Tabler preview does it (series in
+// Package chart renders Tabler's charts with Apache ECharts (Apache-2.0), set up the way the Tabler
 
-// Tabler's colors, no chrome around a card's plot, sparklines, legends, annotations). The options are
+// preview draws them (series in Tabler's colors, no chrome around a card's plot, sparklines, legends,
 
-// built in Go; a small script, rendered once per page, starts every chart. Load ApexCharts with Library.
+// annotations). The options are built in Go; a small script, rendered once per page, starts every chart.
+
+// Load ECharts with Library.
 
 //
 
@@ -26,6 +28,8 @@
 
 // window.tablerCharts.init(element); window.tablerCharts.flush() draws all at once (it returns a promise).
 
+// The ECharts instance of a drawn chart is element.tablerChart.
+
 // Before removing or replacing content with charts in it, call window.tablerCharts.destroy(element): it
 
 // frees the drawn charts and drops the ones still waiting to be drawn.
@@ -39,6 +43,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/mind-vm/tabler-templ/cdn"
 	"github.com/mind-vm/tabler-templ/versions"
 	"strings"
@@ -47,13 +52,13 @@ import (
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
-// Version is the ApexCharts version Library loads; Tabler 1.7 is built against it.
-const Version = versions.ApexCharts
+// Version is the ECharts version Library loads.
+const Version = versions.ECharts
 
-// LibraryURL is ApexCharts (on cdn.Base).
-func LibraryURL() string { return cdn.URL("apexcharts", Version, "dist/apexcharts.min.js") }
+// LibraryURL is ECharts (on cdn.Base).
+func LibraryURL() string { return cdn.URL("echarts", Version, "dist/echarts.min.js") }
 
-// Type is the kind of chart, ApexCharts' chart.type.
+// Type is the kind of chart.
 type Type string
 
 const (
@@ -133,7 +138,7 @@ type YAxis struct {
 
 type Props struct {
 	// ID names the chart; the element is chart-<ID>, and other charts reach it by this name
-	// (BrushTarget, ApexCharts.exec).
+	// (BrushTarget).
 	ID         string
 	Label      string // what the chart shows, for screen readers
 	Class      string
@@ -150,7 +155,7 @@ type Props struct {
 	Sparkline  bool
 	Stacked    bool
 	Animations bool
-	Toolbar    bool // ApexCharts' zoom and download toolbar
+	Toolbar    bool // a zoom, reset and download toolbar
 	Horizontal bool // horizontal bars
 	Funnel     bool // a bar chart as a funnel; give each stage a color in Colors
 	Legend     bool
@@ -185,7 +190,8 @@ type Props struct {
 	// SelectionFrom to SelectionTo (Unix milliseconds) at first.
 	BrushTarget                string
 	SelectionFrom, SelectionTo float64
-	// Options are ApexCharts options merged over the built ones, e.g. a gradient fill.
+	// Options are ECharts options merged over the built ones (maps merge key by key; a list, such as
+	// series or yAxis, replaces the built one).
 	Options map[string]any
 
 	raw        map[string]any // a complete config instead of the built one
@@ -195,6 +201,28 @@ type Props struct {
 func (p Props) json() string {
 	b, _ := json.Marshal(p.build())
 	return string(b)
+}
+
+// style is the element's height (ECharts draws into the element's box) and the style of Attributes.
+func (p Props) style() string {
+	s := fmt.Sprintf("height:%.0fpx;", p.heightPx())
+	if v, ok := p.Attributes["style"].(string); ok {
+		s += v
+	}
+	return s
+}
+
+func (p Props) attributes() templ.Attributes {
+	if _, ok := p.Attributes["style"]; !ok {
+		return p.Attributes
+	}
+	a := templ.Attributes{}
+	for k, v := range p.Attributes {
+		if k != "style" {
+			a[k] = v
+		}
+	}
+	return a
 }
 
 // Chart is a chart.
@@ -226,7 +254,7 @@ func Chart(p Props) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression("chart-" + p.ID).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 180, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 206, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -262,7 +290,7 @@ func Chart(p Props) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.NewAttributeExpression(p.Label).Resolve(ctx)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 184, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 210, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 				if templ_7745c5c3_Err != nil {
@@ -273,43 +301,37 @@ func Chart(p Props) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			if s := p.style(); s != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " style=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(s))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 187, Col: 27}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " style=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " data-tabler-chart=\"")
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(p.style()))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 212, Col: 34}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-tabler-chart=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templruntime.NewAttributeExpression(p.json()).Resolve(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 189, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 213, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.RenderAttributes(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_ElementWriter, "div", p.Attributes)
+			templ_7745c5c3_Err = templruntime.RenderAttributes(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_ElementWriter, "div", p.attributes())
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -323,7 +345,7 @@ func Chart(p Props) templ.Component {
 			}
 			templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -375,22 +397,48 @@ func radial(p RadialProps) Props {
 	if h == 0 {
 		h = 350
 	}
-	return Props{ID: p.ID, Label: p.Title, Class: p.Class, formatters: map[string]string{"plotOptions.radialBar.dataLabels.value.formatter": string(Percent)},
-		raw: map[string]any{
-			"series": []float64{p.Value},
-			"chart":  map[string]any{"height": h, "type": "radialBar"},
-			"plotOptions": map[string]any{"radialBar": map[string]any{
-				"startAngle": -120, "endAngle": 120,
-				"hollow": map[string]any{"margin": 15, "size": "70%"},
-				"dataLabels": map[string]any{
-					"name":  map[string]any{"show": true, "offsetY": -20, "fontSize": "14px", "fontFamily": "inherit", "fontWeight": 400, "color": "var(--tblr-secondary)"},
-					"value": map[string]any{"show": true, "fontSize": "30px", "fontWeight": 700, "fontFamily": "inherit", "offsetY": 0, "color": "var(--tblr-body-color)"},
-				},
-			}},
-			"colors": []string{colorVar(kit.Or(p.Color, "primary"))},
-			"stroke": map[string]any{"lineCap": "round"},
-			"labels": []string{strings.ToUpper(p.Title)},
-		}}
+	color := colorVar(kit.Or(p.Color, "primary"))
+	return Props{ID: p.ID, Label: p.Title, Class: p.Class, Height: float64(h) / 16, raw: Gauge(GaugeOptions{
+		Value: p.Value, Label: strings.ToUpper(p.Title), Color: color, Width: 14, Radius: "90%",
+		LabelSize: 14, ValueSize: 30, ValueWeight: 700,
+	})}
+}
+
+// GaugeOptions describe a single percentage drawn as a ring from -120° to 120°.
+type GaugeOptions struct {
+	Value                float64
+	Label                string // under the value, muted; empty for none
+	Color                string // CSS color of the bar
+	Track                string // CSS color of the ring behind it, default var(--tblr-bg-surface-secondary)
+	Width                float64
+	Radius               string // e.g. "90%"
+	LabelSize            int
+	ValueSize            int
+	ValueWeight          int
+	StartAngle, EndAngle float64 // ECharts angles, default 210 and -30
+}
+
+// Gauge is the ECharts option of a single percentage as a ring, for RawProps (chart.Radial and the
+// Gauge card of blocks/metric use it).
+func Gauge(g GaugeOptions) map[string]any {
+	if g.StartAngle == 0 && g.EndAngle == 0 {
+		g.StartAngle, g.EndAngle = 210, -30
+	}
+	track := firstOf(g.Track, "var(--tblr-bg-surface-secondary)")
+	return map[string]any{
+		"animation": false,
+		"series": []map[string]any{{
+			"type": "gauge", "startAngle": g.StartAngle, "endAngle": g.EndAngle, "min": 0, "max": 100, "radius": firstOf(g.Radius, "90%"),
+			"progress": map[string]any{"show": true, "roundCap": true, "width": g.Width, "itemStyle": map[string]any{"color": g.Color}},
+			"axisLine": map[string]any{"roundCap": true, "lineStyle": map[string]any{"width": g.Width, "color": [][2]any{{1, track}}}},
+			"pointer":  map[string]any{"show": false}, "axisTick": map[string]any{"show": false}, "splitLine": map[string]any{"show": false},
+			"axisLabel": map[string]any{"show": false}, "anchor": map[string]any{"show": false},
+			"title": map[string]any{"show": g.Label != "", "offsetCenter": []any{0, "28%"}, "fontSize": g.LabelSize, "color": textColor},
+			"detail": map[string]any{"formatter": "{value}%", "fontSize": g.ValueSize, "fontWeight": g.ValueWeight, "color": bodyColor,
+				"offsetCenter": []any{0, map[bool]string{true: "-6%", false: "0%"}[g.Label != ""]}},
+			"data": []map[string]any{{"value": g.Value, "name": g.Label}},
+		}},
+	}
 }
 
 // Toggle makes an element, e.g. a legend.Legend with Button, show and hide a serie of the chart with
@@ -399,7 +447,7 @@ func Toggle(id, serie string) templ.Attributes {
 	return templ.Attributes{"data-chart-toggle": id, "data-series": serie}
 }
 
-// Library loads ApexCharts; put it in the page's head.
+// Library loads ECharts; put it in the page's head.
 func Library() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -421,7 +469,7 @@ func Library() templ.Component {
 			templ_7745c5c3_ElementWriter := templ_7745c5c3_Buffer
 			templ_7745c5c3_Buffer := templ.GetBuffer()
 			var templ_7745c5c3_ElementScripts []templ.ComponentScript
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<script")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<script")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -429,20 +477,20 @@ func Library() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.NewAttributeExpression(LibraryURL()).ResolveURL(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 240, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `chart/chart.templ`, Line: 290, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" defer")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" defer")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -456,7 +504,7 @@ func Library() templ.Component {
 			}
 			templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "></script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -501,7 +549,7 @@ func Script() templ.Component {
 				templ_7745c5c3_ElementWriter := templ_7745c5c3_Buffer
 				templ_7745c5c3_Buffer := templ.GetBuffer()
 				var templ_7745c5c3_ElementScripts []templ.ComponentScript
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<script")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<script")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -519,7 +567,7 @@ func Script() templ.Component {
 				}
 				templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">\n\t\t\t(function () {\n\t\t\t\tif (window.tablerCharts) return;\n\t\t\t\tvar formatters = {\n\t\t\t\t\tthousands: function (v) { return v.toLocaleString('en-US'); },\n\t\t\t\t\t'suffix-k': function (v) { return v + 'K'; },\n\t\t\t\t\tpercent: function (v) { return v + '%'; },\n\t\t\t\t};\n\t\t\t\t// ApexCharts resolves every var() color itself, with a helper element and getComputedStyle each\n\t\t\t\t// time: on a large page every call restyles the whole page. So the colors of a chart are resolved\n\t\t\t\t// here in one go (one style pass) and handed over as hex colors; heatmaps and treemaps need literal\n\t\t\t\t// colors anyway. resolveAll walks the config, finds the strings with var(), reads them on probes\n\t\t\t\t// inside the chart (its own --chart-* properties apply there) and converts them on a canvas.\n\t\t\t\tvar cx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });\n\t\t\t\tfunction literal(css, original) {\n\t\t\t\t\tcx.clearRect(0, 0, 1, 1);\n\t\t\t\t\tcx.fillStyle = '#000';\n\t\t\t\t\tcx.fillStyle = css;\n\t\t\t\t\tcx.fillRect(0, 0, 1, 1);\n\t\t\t\t\tvar d = cx.getImageData(0, 0, 1, 1).data;\n\t\t\t\t\tvar hex = '#' + [d[0], d[1], d[2]].map(function (c) { return c.toString(16).padStart(2, '0'); }).join('');\n\t\t\t\t\t// A translucent color stays var(): ApexCharts mixes a var() with the fill opacity, but replaces the\n\t\t\t\t\t// alpha of an rgba() with it. Translucent colors are few, so they cost little.\n\t\t\t\t\treturn d[3] === 255 ? hex : original;\n\t\t\t\t}\n\t\t\t\tfunction walk(v, fn) {\n\t\t\t\t\tif (typeof v === 'string') return fn(v);\n\t\t\t\t\tif (Array.isArray(v)) return v.map(function (x) { return walk(x, fn); });\n\t\t\t\t\tif (v && typeof v === 'object') {\n\t\t\t\t\t\tvar o = {};\n\t\t\t\t\t\tObject.keys(v).forEach(function (k) { o[k] = walk(v[k], fn); });\n\t\t\t\t\t\treturn o;\n\t\t\t\t\t}\n\t\t\t\t\treturn v;\n\t\t\t\t}\n\t\t\t\tfunction resolveAll(el, config) {\n\t\t\t\t\tvar found = [];\n\t\t\t\t\twalk(config, function (s) { if (s.indexOf('var(') >= 0 && found.indexOf(s) < 0) found.push(s); return s; });\n\t\t\t\t\tif (!found.length) return config;\n\t\t\t\t\tvar box = document.createElement('div');\n\t\t\t\t\tbox.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';\n\t\t\t\t\tvar probes = found.map(function (s) { var p = document.createElement('span'); p.style.color = s; box.appendChild(p); return p; });\n\t\t\t\t\tel.appendChild(box);\n\t\t\t\t\tvar map = {};\n\t\t\t\t\tfound.forEach(function (s, i) { var c = getComputedStyle(probes[i]).color; map[s] = c ? literal(c, s) : s; });\n\t\t\t\t\tbox.remove();\n\t\t\t\t\treturn walk(config, function (s) { return map[s] || s; });\n\t\t\t\t}\n\t\t\t\t// The colors that stay var() (translucent ones) ApexCharts still resolves itself, with a hidden\n\t\t\t\t// helper div in <body> per call. Its result only depends on the color and the theme, so it is kept\n\t\t\t\t// per color until the theme changes; every other getComputedStyle call goes through untouched.\n\t\t\t\tvar computed = window.getComputedStyle, cache = {};\n\t\t\t\twindow.getComputedStyle = function (el) {\n\t\t\t\t\tvar st = el && el.style;\n\t\t\t\t\tif (st && st.left === '-9999px' && st.visibility === 'hidden' && st.color && el.parentNode === document.body && !el.firstChild) {\n\t\t\t\t\t\tvar key = st.color;\n\t\t\t\t\t\tif (!(key in cache)) cache[key] = computed.apply(window, arguments).color;\n\t\t\t\t\t\treturn { color: cache[key], getPropertyValue: function (p) { return p === 'color' ? cache[key] : ''; } };\n\t\t\t\t\t}\n\t\t\t\t\treturn computed.apply(window, arguments);\n\t\t\t\t};\n\t\t\t\tfunction set(obj, path, value) {\n\t\t\t\t\tvar keys = path.split('.');\n\t\t\t\t\tfor (var i = 0; i < keys.length - 1; i++) {\n\t\t\t\t\t\tif (obj[keys[i]] == null || typeof obj[keys[i]] !== 'object') return;\n\t\t\t\t\t\tobj = obj[keys[i]];\n\t\t\t\t\t}\n\t\t\t\t\tobj[keys[keys.length - 1]] = value;\n\t\t\t\t}\n\t\t\t\t// options is a chart's ApexCharts config with formatters and resolved colors.\n\t\t\t\tfunction options(el) {\n\t\t\t\t\tvar data = JSON.parse(el.getAttribute('data-tabler-chart'));\n\t\t\t\t\tvar config = resolveAll(el, data.config);\n\t\t\t\t\tObject.keys(data.formatters || {}).forEach(function (path) {\n\t\t\t\t\t\tvar f = formatters[data.formatters[path]];\n\t\t\t\t\t\tif (f) set(config, path, f);\n\t\t\t\t\t});\n\t\t\t\t\tif (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {\n\t\t\t\t\t\tconfig.chart.animations = { enabled: false };\n\t\t\t\t\t}\n\t\t\t\t\treturn config;\n\t\t\t\t}\n\t\t\t\t// draw starts one chart; a brush draws its target first.\n\t\t\t\tfunction draw(el) {\n\t\t\t\t\tif (el.tablerChart) return Promise.resolve();\n\t\t\t\t\twindow.tabler_chart = window.tabler_chart || {};\n\t\t\t\t\tvar config = options(el);\n\t\t\t\t\tvar target = config.chart.brush && document.getElementById('chart-' + config.chart.brush.target);\n\t\t\t\t\tif (target) draw(target);\n\t\t\t\t\tel.tablerChart = window.tabler_chart[el.id] = new ApexCharts(el, config);\n\t\t\t\t\treturn Promise.resolve(el.tablerChart.render());\n\t\t\t\t}\n\t\t\t\t// Charts are drawn one at a time, with a frame for the browser in between: ApexCharts reads its\n\t\t\t\t// colors from the computed style, and drawing many charts in one task makes every chart restyle\n\t\t\t\t// the whole page (seconds on a phone).\n\t\t\t\tvar queue = [], busy = false;\n\t\t\t\tfunction pump() {\n\t\t\t\t\tif (busy || !queue.length) return;\n\t\t\t\t\tbusy = true;\n\t\t\t\t\tdraw(queue.shift()).catch(function (e) { console.error(e); }).then(function () {\n\t\t\t\t\t\trequestAnimationFrame(function () { setTimeout(function () { busy = false; pump(); }, 0); });\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction enqueue(el) {\n\t\t\t\t\tif (el.tablerChart || el.tablerQueued) return;\n\t\t\t\t\tel.tablerQueued = true;\n\t\t\t\t\tqueue.push(el);\n\t\t\t\t\tpump();\n\t\t\t\t}\n\t\t\t\t// A chart is drawn when it comes near the screen: charts further down wait, and charts in a\n\t\t\t\t// hidden tab or dialog are drawn when it opens, at their real width.\n\t\t\t\tvar io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {\n\t\t\t\t\tentries.forEach(function (e) {\n\t\t\t\t\t\tif (e.isIntersecting) { io.unobserve(e.target); enqueue(e.target); }\n\t\t\t\t\t});\n\t\t\t\t}, { rootMargin: '300px 0px' }) : null;\n\t\t\t\tfunction init(root) {\n\t\t\t\t\tif (!window.ApexCharts) return;\n\t\t\t\t\t(root || document).querySelectorAll('[data-tabler-chart]').forEach(function (el) {\n\t\t\t\t\t\tif (el.tablerChart || el.tablerWatched) return;\n\t\t\t\t\t\tel.tablerWatched = true;\n\t\t\t\t\t\tio ? io.observe(el) : enqueue(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t// flush draws every chart now, e.g. before a screenshot or printing.\n\t\t\t\tfunction flush() {\n\t\t\t\t\tvar all = [];\n\t\t\t\t\tdocument.querySelectorAll('[data-tabler-chart]').forEach(function (el) {\n\t\t\t\t\t\tif (io) io.unobserve(el);\n\t\t\t\t\t\tall.push(draw(el));\n\t\t\t\t\t});\n\t\t\t\t\treturn Promise.all(all);\n\t\t\t\t}\n\t\t\t\twindow.addEventListener('beforeprint', flush);\n\t\t\t\t// destroy tears down the charts in root (root itself included) before it leaves the page. ApexCharts\n\t\t\t\t// keeps its instance, its resize listener and the window.tabler_chart entry after the element is\n\t\t\t\t// gone; content that is replaced again and again (a stream, a polled panel) piles them up, and a\n\t\t\t\t// chart that waits in the queue would still be drawn into a detached element.\n\t\t\t\tfunction destroy(root) {\n\t\t\t\t\tif (!root || !root.querySelectorAll) return;\n\t\t\t\t\tvar els = [].slice.call(root.querySelectorAll('[data-tabler-chart]'));\n\t\t\t\t\tif (root.matches && root.matches('[data-tabler-chart]')) els.push(root);\n\t\t\t\t\tels.forEach(function (el) {\n\t\t\t\t\t\tif (io) io.unobserve(el);\n\t\t\t\t\t\tvar i = queue.indexOf(el);\n\t\t\t\t\t\tif (i >= 0) queue.splice(i, 1);\n\t\t\t\t\t\tel.tablerQueued = el.tablerWatched = false;\n\t\t\t\t\t\tif (!el.tablerChart) return;\n\t\t\t\t\t\ttry { el.tablerChart.destroy(); } catch (e) { console.error(e); }\n\t\t\t\t\t\tif (window.tabler_chart && window.tabler_chart[el.id] === el.tablerChart) delete window.tabler_chart[el.id];\n\t\t\t\t\t\tel.tablerChart = null;\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t// The colors are literal now, so a new color mode or theme (Tabler's theme switch, the settings\n\t\t\t\t// panel) redraws the drawn charts with their colors resolved again, one after another.\n\t\t\t\tvar restyling = false;\n\t\t\t\tnew MutationObserver(function () {\n\t\t\t\t\tcache = {};\n\t\t\t\t\tif (restyling) return;\n\t\t\t\t\trestyling = true;\n\t\t\t\t\trequestAnimationFrame(function () {\n\t\t\t\t\t\trestyling = false;\n\t\t\t\t\t\tvar drawn = [].filter.call(document.querySelectorAll('[data-tabler-chart]'), function (el) { return el.tablerChart; });\n\t\t\t\t\t\t(function next() {\n\t\t\t\t\t\t\tvar el = drawn.shift();\n\t\t\t\t\t\t\tif (!el) return;\n\t\t\t\t\t\t\tPromise.resolve(el.tablerChart.updateOptions(options(el), false, false)).then(function () { setTimeout(next, 0); });\n\t\t\t\t\t\t})();\n\t\t\t\t\t});\n\t\t\t\t}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-bs-theme-primary', 'data-bs-theme-base', 'data-bs-theme-pack', 'data-bs-navbar-theme'] });\n\t\t\t\twindow.tablerCharts = { init: init, flush: flush, destroy: destroy, formatters: formatters };\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t\tdocument.addEventListener('click', function (e) {\n\t\t\t\t\tvar t = e.target.closest && e.target.closest('[data-chart-toggle]');\n\t\t\t\t\tvar el = t && document.getElementById('chart-' + t.getAttribute('data-chart-toggle'));\n\t\t\t\t\tif (!el || !el.tablerChart) return;\n\t\t\t\t\tel.tablerChart.toggleSeries(t.getAttribute('data-series'));\n\t\t\t\t\tt.classList.toggle('legend-off');\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ">\n\t\t\t(function () {\n\t\t\t\tif (window.tablerCharts) return;\n\t\t\t\tvar formatters = {\n\t\t\t\t\tthousands: function (v) { return Number(v).toLocaleString('en-US'); },\n\t\t\t\t\t'suffix-k': function (v) { return v + 'K'; },\n\t\t\t\t\tpercent: function (v) { return v + '%'; },\n\t\t\t\t\t// timeline draws a range [start, end] on row value(0), for the timeline chart type.\n\t\t\t\t\ttimeline: function (params, api) {\n\t\t\t\t\t\tvar row = api.value(0), s = api.coord([api.value(1), row]), e = api.coord([api.value(2), row]);\n\t\t\t\t\t\tvar h = api.size([0, 1])[1] * 0.5;\n\t\t\t\t\t\tvar cs = params.coordSys;\n\t\t\t\t\t\tvar rect = echarts.graphic.clipRectByRect({ x: s[0], y: s[1] - h / 2, width: e[0] - s[0], height: h },\n\t\t\t\t\t\t\t{ x: cs.x, y: cs.y, width: cs.width, height: cs.height });\n\t\t\t\t\t\treturn rect && { type: 'rect', transition: ['shape'], shape: Object.assign(rect, { r: 3 }), style: api.style() };\n\t\t\t\t\t},\n\t\t\t\t};\n\t\t\t\t// ECharts draws on a canvas, which needs literal colors: every var() / color-mix() of a chart is\n\t\t\t\t// resolved on a probe inside the chart (one style pass per chart) and turned into rgba() on a 1×1\n\t\t\t\t// canvas. A new theme resolves them again.\n\t\t\t\tvar cx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });\n\t\t\t\tfunction literal(css) {\n\t\t\t\t\tcx.clearRect(0, 0, 1, 1);\n\t\t\t\t\tcx.fillStyle = 'rgba(0,0,0,0)';\n\t\t\t\t\tcx.fillStyle = css;\n\t\t\t\t\tcx.fillRect(0, 0, 1, 1);\n\t\t\t\t\tvar d = cx.getImageData(0, 0, 1, 1).data;\n\t\t\t\t\treturn 'rgba(' + d[0] + ',' + d[1] + ',' + d[2] + ',' + (d[3] / 255).toFixed(3) + ')';\n\t\t\t\t}\n\t\t\t\tfunction walk(v, fn) {\n\t\t\t\t\tif (typeof v === 'string') return fn(v);\n\t\t\t\t\tif (Array.isArray(v)) return v.map(function (x) { return walk(x, fn); });\n\t\t\t\t\tif (v && typeof v === 'object') {\n\t\t\t\t\t\tvar o = {};\n\t\t\t\t\t\tObject.keys(v).forEach(function (k) { o[k] = walk(v[k], fn); });\n\t\t\t\t\t\treturn o;\n\t\t\t\t\t}\n\t\t\t\t\treturn v;\n\t\t\t\t}\n\t\t\t\t// A color is a whole string with var() or color-mix(); CSS text (a tooltip's extraCssText) keeps its var().\n\t\t\t\tfunction isColor(s) { return s.indexOf(';') < 0 && (s.indexOf('var(') >= 0 || s.indexOf('color-mix(') === 0); }\n\t\t\t\tfunction resolveAll(el, option) {\n\t\t\t\t\tvar found = [];\n\t\t\t\t\twalk(option, function (s) { if (isColor(s) && found.indexOf(s) < 0) found.push(s); return s; });\n\t\t\t\t\tif (!found.length) return option;\n\t\t\t\t\tvar box = document.createElement('div');\n\t\t\t\t\tbox.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';\n\t\t\t\t\tvar probes = found.map(function (s) { var p = document.createElement('span'); p.style.color = s; box.appendChild(p); return p; });\n\t\t\t\t\tel.appendChild(box);\n\t\t\t\t\tvar map = {};\n\t\t\t\t\tfound.forEach(function (s, i) { var c = getComputedStyle(probes[i]).color; map[s] = c ? literal(c) : s; });\n\t\t\t\t\tbox.remove();\n\t\t\t\t\treturn walk(option, function (s) { return map[s] || s; });\n\t\t\t\t}\n\t\t\t\tfunction set(obj, path, value) {\n\t\t\t\t\tvar keys = path.split('.');\n\t\t\t\t\tfor (var i = 0; i < keys.length - 1; i++) {\n\t\t\t\t\t\tif (obj[keys[i]] == null || typeof obj[keys[i]] !== 'object') return;\n\t\t\t\t\t\tobj = obj[keys[i]];\n\t\t\t\t\t}\n\t\t\t\t\tobj[keys[keys.length - 1]] = value;\n\t\t\t\t}\n\t\t\t\tfunction data(el) { return JSON.parse(el.getAttribute('data-tabler-chart')); }\n\t\t\t\t// option is a chart's ECharts option with formatters, the page's font and resolved colors.\n\t\t\t\tfunction option(el) {\n\t\t\t\t\tvar d = data(el);\n\t\t\t\t\tvar o = resolveAll(el, d.option);\n\t\t\t\t\to.textStyle = Object.assign({ fontFamily: getComputedStyle(el).fontFamily }, o.textStyle);\n\t\t\t\t\tObject.keys(d.formatters || {}).forEach(function (path) {\n\t\t\t\t\t\tvar f = formatters[d.formatters[path]];\n\t\t\t\t\t\tif (f) set(o, path, f);\n\t\t\t\t\t});\n\t\t\t\t\tif (window.matchMedia('(prefers-reduced-motion: reduce)').matches) o.animation = false;\n\t\t\t\t\treturn o;\n\t\t\t\t}\n\t\t\t\t// draw starts one chart; a brush draws its target first.\n\t\t\t\tfunction draw(el) {\n\t\t\t\t\tif (el.tablerChart || !el.isConnected) return;\n\t\t\t\t\tvar d = data(el);\n\t\t\t\t\tvar c = el.tablerChart = echarts.init(el, null, { renderer: 'canvas' });\n\t\t\t\t\tc.setOption(option(el));\n\t\t\t\t\tel.tablerResize = new ResizeObserver(function () { c.resize(); });\n\t\t\t\t\tel.tablerResize.observe(el);\n\t\t\t\t\tif (d.group) { c.group = d.group; echarts.connect(d.group); }\n\t\t\t\t\tif (d.brush) {\n\t\t\t\t\t\t// The brush chart's slider zooms its target, which gets an inside zoom to follow it.\n\t\t\t\t\t\tvar target = document.getElementById('chart-' + d.brush.target);\n\t\t\t\t\t\tif (target) {\n\t\t\t\t\t\t\tdraw(target);\n\t\t\t\t\t\t\tvar tc = target.tablerChart;\n\t\t\t\t\t\t\tif (!tc) return;\n\t\t\t\t\t\t\ttc.setOption({ dataZoom: [{ id: 'brush', type: 'inside', xAxisIndex: 0, filterMode: 'none' }] });\n\t\t\t\t\t\t\tvar follow = function (from, to) { tc.dispatchAction({ type: 'dataZoom', dataZoomId: 'brush', startValue: from, endValue: to }); };\n\t\t\t\t\t\t\tfollow(d.brush.from, d.brush.to);\n\t\t\t\t\t\t\tc.on('datazoom', function () {\n\t\t\t\t\t\t\t\tvar z = c.getOption().dataZoom[0];\n\t\t\t\t\t\t\t\tfollow(z.startValue, z.endValue);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// A chart is drawn when it comes near the screen: charts further down wait, and charts in a\n\t\t\t\t// hidden tab or dialog are drawn when it opens, at their real width.\n\t\t\t\tvar io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {\n\t\t\t\t\tentries.forEach(function (e) {\n\t\t\t\t\t\tif (e.isIntersecting) { io.unobserve(e.target); draw(e.target); }\n\t\t\t\t\t});\n\t\t\t\t}, { rootMargin: '300px 0px' }) : null;\n\t\t\t\tfunction init(root) {\n\t\t\t\t\tif (!window.echarts) return;\n\t\t\t\t\tvar els = [].slice.call((root || document).querySelectorAll('[data-tabler-chart]'));\n\t\t\t\t\tif (root && root.matches && root.matches('[data-tabler-chart]')) els.push(root);\n\t\t\t\t\tels.forEach(function (el) {\n\t\t\t\t\t\tif (el.tablerChart || el.tablerWatched) return;\n\t\t\t\t\t\tel.tablerWatched = true;\n\t\t\t\t\t\tio ? io.observe(el) : draw(el);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t// flush draws every chart now, e.g. before a screenshot or printing.\n\t\t\t\tfunction flush() {\n\t\t\t\t\tdocument.querySelectorAll('[data-tabler-chart]').forEach(function (el) {\n\t\t\t\t\t\tif (io) io.unobserve(el);\n\t\t\t\t\t\tdraw(el);\n\t\t\t\t\t});\n\t\t\t\t\treturn Promise.resolve();\n\t\t\t\t}\n\t\t\t\twindow.addEventListener('beforeprint', function () {\n\t\t\t\t\tflush();\n\t\t\t\t\tdocument.querySelectorAll('[data-tabler-chart]').forEach(function (el) { if (el.tablerChart) el.tablerChart.resize(); });\n\t\t\t\t});\n\t\t\t\t// destroy tears down the charts in root (root itself included) before it leaves the page: ECharts\n\t\t\t\t// keeps its instance and listeners after the element is gone, so content that is replaced again\n\t\t\t\t// and again (a stream, a polled panel) would pile them up.\n\t\t\t\tfunction destroy(root) {\n\t\t\t\t\tif (!root || !root.querySelectorAll) return;\n\t\t\t\t\tvar els = [].slice.call(root.querySelectorAll('[data-tabler-chart]'));\n\t\t\t\t\tif (root.matches && root.matches('[data-tabler-chart]')) els.push(root);\n\t\t\t\t\tels.forEach(function (el) {\n\t\t\t\t\t\tif (io) io.unobserve(el);\n\t\t\t\t\t\tel.tablerWatched = false;\n\t\t\t\t\t\tif (el.tablerResize) { el.tablerResize.disconnect(); el.tablerResize = null; }\n\t\t\t\t\t\tif (!el.tablerChart) return;\n\t\t\t\t\t\ttry { el.tablerChart.dispose(); } catch (e) { console.error(e); }\n\t\t\t\t\t\tel.tablerChart = null;\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t// A new color mode or theme (Tabler's theme switch, the settings panel) redraws the drawn charts\n\t\t\t\t// with their colors resolved again.\n\t\t\t\tvar restyling = false;\n\t\t\t\tnew MutationObserver(function () {\n\t\t\t\t\tif (restyling) return;\n\t\t\t\t\trestyling = true;\n\t\t\t\t\trequestAnimationFrame(function () {\n\t\t\t\t\t\trestyling = false;\n\t\t\t\t\t\tdocument.querySelectorAll('[data-tabler-chart]').forEach(function (el) {\n\t\t\t\t\t\t\tif (el.tablerChart) el.tablerChart.setOption(option(el), { notMerge: true });\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'data-bs-theme-primary', 'data-bs-theme-base', 'data-bs-theme-pack', 'data-bs-navbar-theme'] });\n\t\t\t\twindow.tablerCharts = { init: init, flush: flush, destroy: destroy, formatters: formatters };\n\t\t\t\t// ECharts loads with defer, before DOMContentLoaded.\n\t\t\t\tdocument.readyState !== 'loading' ? init() : document.addEventListener('DOMContentLoaded', function () { init(); }, { once: true });\n\t\t\t\tdocument.addEventListener('htmx:afterSettle', function (e) { init(e.target); });\n\t\t\t\tdocument.addEventListener('click', function (e) {\n\t\t\t\t\tvar t = e.target.closest && e.target.closest('[data-chart-toggle]');\n\t\t\t\t\tvar el = t && document.getElementById('chart-' + t.getAttribute('data-chart-toggle'));\n\t\t\t\t\tif (!el || !el.tablerChart) return;\n\t\t\t\t\tel.tablerChart.dispatchAction({ type: 'legendToggleSelect', name: t.getAttribute('data-series') });\n\t\t\t\t\tt.classList.toggle('legend-off');\n\t\t\t\t});\n\t\t\t})();\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -534,7 +582,7 @@ func Script() templ.Component {
 }
 
 func init() {
-	cdn.Register("chart", "apexcharts", Version, "dist/apexcharts.min.js")
+	cdn.Register("chart", "echarts", Version, "dist/echarts.min.js")
 }
 
 var _ = templruntime.GeneratedTemplate

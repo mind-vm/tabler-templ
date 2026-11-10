@@ -143,7 +143,7 @@ templ Customer(c Customer) {
 
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
-the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself
+the module is built against (with flags, payments, vendors and ECharts as options); or serve them yourself
 ([Serve Tabler yourself](#serve-tabler-yourself)).
 jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
 wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
@@ -185,8 +185,8 @@ in front compresses already.
 | `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
 | `theme`, `themes` | Tabler's theme settings as typed values (`theme.Settings`: accent color, base, font, radius); 13 ready-made themes (`themes.Rose` …) with `Apply`, `Head`, `Section` for the settings panel, and your own via `themes.Theme` |
 | `vectormap` | Tabler's vector map: `Map` (world and other maps, values, selected regions, markers, lines, legend, zoom), `Library` |
-| `chart` | ApexCharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ApexCharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
-| `chart/svg` | Simple charts drawn as SVG on the server, without ApexCharts or JavaScript: `Chart` (bar vertical, horizontal or stacked, line straight, smooth or stepped, area, mixed columns and lines, pie, donut, radial bar and gauge; axes, grid, legend, value labels, target lines, tooltips as `<title>`, a hidden data table), `FromChart` (from `chart.Props`), `Number`/`German`/`English` (number formats), `Supported`; see [SVG charts](#svg-charts-without-apexcharts) |
+| `chart` | Apache ECharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ECharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
+| `chart/svg` | Simple charts drawn as SVG on the server, without a chart library or JavaScript: `Chart` (bar vertical, horizontal or stacked, line straight, smooth or stepped, area, mixed columns and lines, pie, donut, radial bar and gauge; axes, grid, legend, value labels, target lines, tooltips as `<title>`, a hidden data table), `FromChart` (from `chart.Props`), `Number`/`German`/`English` (number formats), `Supported`; see [SVG charts](#svg-charts-without-javascript) |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
 | `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
@@ -417,7 +417,7 @@ next.ServeHTTP(w, r.WithContext(templ.WithNonce(r.Context(), nonce)))
 ```
 
 Styles still need `'unsafe-inline'`: some components and blocks set `style=` attributes (widths, colors,
-images), and Tabler's and ApexCharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
+images), and Tabler's and ECharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
 ignore `'unsafe-inline'`, so leave the nonce out of `style-src` for now.) `csp_test.go` checks that every
 script and style of the packages goes through `internal/csp`. With `static.WithKitCSS()` the kit's own CSS
 comes from a file instead (see "Serve Tabler yourself").
@@ -546,7 +546,7 @@ var files = static.New("/static/", must(fs.Sub(embedded, "static")), static.With
 
 **Plugins, charts and theme fonts.** Everything else the packages load in the browser comes from
 `cdn.Base` (default jsDelivr):
-- ApexCharts;
+- ECharts;
 - the plugins (date picker, select, editor, maps …);
 - the theme fonts;
 - the filled icon font;
@@ -615,36 +615,19 @@ node scripts/screenshots/compare-all.mjs http://localhost:8080 http://localhost:
 
 MIT, see [LICENSE](LICENSE). Tabler and the Tabler icons (also MIT) are not part of this module. tabler-templ is not an official Tabler project.
 
-### License of ApexCharts
+### License of the chart library
 
 The `chart` package (and everything built on it: `blocks/metric`'s gauge, the chart block of
 `blocks/assistant`, `assets.Props{Charts: true}`, `chart` in `cmd/vendor`, `cmd/new` with charts) loads
-**ApexCharts**, in the version Tabler is built against (`versions.ApexCharts`, now 7.0.0). ApexCharts is
-**not MIT** any more, and the MIT license of this module does not cover it:
+**Apache ECharts** (`versions.ECharts`, now 6.0.0) under the **Apache License 2.0**: free for any use,
+commercial included, with no revenue limit. `cmd/vendor` and `-self-host` copy ECharts into the app; keep its
+`LICENSE` and `NOTICE` files with it.
 
-| ApexCharts | License |
-|---|---|
-| up to 4.7.0 (April 2025) | MIT |
-| 5.0.0 (9 July 2025) | contradictory: `package.json` and the banner say MIT, the `LICENSE` file is already the dual license |
-| from 5.1.0 (9 July 2025), incl. 7.0.0 | dual license: the free *Community License* only for organizations under 2 million USD annual revenue (and not in competing charting products); from 2 million USD a paid *Commercial License*; an *OEM License* when ApexCharts is embedded in a product where other people build or configure charts (dashboards, BI, SDKs) |
+Up to v0.16 the package loaded ApexCharts, which is no longer MIT from 5.1.0 (free only under 2 million USD
+annual revenue, an OEM license for charts that users configure); it was replaced by ECharts for that reason
+(see the CHANGELOG). For simple charts, `chart/svg` draws them without any library (next section).
 
-What this means for an app using these packages:
-
-- Nothing changes as long as no page loads ApexCharts: only `chart.Library()`, `assets.Props{Charts: true}`
-  and a vendored `apexcharts` file do. The rest of the module (including `sparkline`, which Tabler's own
-  script draws) does not use it.
-- An app that loads it accepts ApexCharts' license for its operator: free under 2 million USD revenue,
-  otherwise a paid license (see [apexcharts.com/license](https://apexcharts.com/license)). Charts that users
-  or an assistant configure themselves may need the OEM license.
-- `cmd/vendor` and `-self-host` copy ApexCharts into the app; its license file must go with it.
-- `scripts/tabler-update.sh` keeps `versions.ApexCharts` on Tabler's version; a Tabler update can move it
-  further. There is no pin on an MIT version: 4.7.0 gets no fixes, and the Go options are built and checked
-  against Tabler's version.
-
-Options for apps that must stay clear of it are listed in the CHANGELOG entry that added this section; for
-simple charts, `chart/svg` draws them without it (next section).
-
-### SVG charts without ApexCharts
+### SVG charts without JavaScript
 
 `chart/svg` draws bar, line, area, pie, donut and radial bar charts as inline SVG on the server: no library,
 no script, nothing to license. The props carry the names of `chart.Props` (`svg.FromChart` converts one):
@@ -674,7 +657,7 @@ no script, nothing to license. The props carry the names of `chart.Props` (`svg.
   out. No radar, polar area, scatter, bubble, heatmap, treemap, timeline, box plot or candlestick, no
   `Serie.Points`, no zoom, brush, second y axis or x annotations (`svg.Supported` tells). A bar chart of 7
   days with 2 series is about 4 kB of HTML (1 kB gzipped), a gauge 0.6 kB.
-- **Switches in the blocks** (default: ApexCharts as before): `metric.GaugeProps{SVG: true, Format: …}`;
+- **Switches in the blocks** (default: `chart` with ECharts): `metric.GaugeProps{SVG: true, Format: …}`;
   `assistant.WithChartOptions(ctx, assistant.ChartOptions{SVG: true, Format: svg.German})` draws the chart
   blocks of the request as SVG, with the data table, and shows radar, scatter, bubble and heatmap blocks
   as a table of their data.

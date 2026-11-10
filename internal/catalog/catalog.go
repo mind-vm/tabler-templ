@@ -60,7 +60,7 @@ var Own = []struct{ Package, Text string }{
 	{"blocks/create", "create page: post form with footer"},
 	{"blocks/detail", "detail page: sections with edit dialogs that reopen after a failed save"},
 	{"blocks/history", "change history as a timeline"},
-	{"chart/svg", "simple charts (bar, line, area, pie, donut, gauge) as server-rendered SVG, without ApexCharts"},
+	{"chart/svg", "simple charts (bar, line, area, pie, donut, gauge) as server-rendered SVG, without a chart library"},
 	{"blocks/signin", "sign-in page with its own look and an account picker (Tabler's own look: blocks/auth)"},
 }
 

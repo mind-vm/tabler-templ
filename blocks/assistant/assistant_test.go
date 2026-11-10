@@ -23,8 +23,8 @@ func render(t *testing.T, b Block) string {
 	return out
 }
 
-// chartConfig pulls the ApexCharts config out of a rendered chart block —
-// the thing ApexCharts will actually draw, which is what has to be right.
+// chartConfig pulls the ECharts option out of a rendered chart block —
+// the thing ECharts will actually draw, which is what has to be right.
 func chartConfig(t *testing.T, out string) map[string]any {
 	t.Helper()
 	m := regexp.MustCompile(`data-tabler-chart="([^"]*)"`).FindStringSubmatch(out)
@@ -32,12 +32,12 @@ func chartConfig(t *testing.T, out string) map[string]any {
 		t.Fatalf("no chart in %s", out)
 	}
 	var cfg struct {
-		Config map[string]any `json:"config"`
+		Option map[string]any `json:"option"`
 	}
 	if err := json.Unmarshal([]byte(html.UnescapeString(m[1])), &cfg); err != nil {
 		t.Fatal(err)
 	}
-	return cfg.Config
+	return cfg.Option
 }
 
 func payload(t *testing.T, js string) map[string]any {
@@ -64,7 +64,7 @@ func TestFragmentOmitsChartScript(t *testing.T) {
 func TestBarChartSeriesAndCategories(t *testing.T) {
 	cfg := chartConfig(t, render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"bar","x":"month","series":["revenue","cost"],"data":[{"month":"Jan","revenue":10,"cost":"4"},{"month":"Feb","revenue":12.5,"cost":5}]}`)}))
-	cats := cfg["xaxis"].(map[string]any)["categories"].([]any)
+	cats := cfg["xAxis"].([]any)[0].(map[string]any)["data"].([]any)
 	if len(cats) != 2 || cats[0] != "Jan" {
 		t.Fatalf("categories = %v", cats)
 	}
@@ -82,14 +82,13 @@ func TestBarChartSeriesAndCategories(t *testing.T) {
 func TestDonutIsOneSlicePerRow(t *testing.T) {
 	cfg := chartConfig(t, render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"donut","x":"product","series":["revenue"],"data":[{"product":"A","revenue":3},{"product":"B","revenue":7}]}`)}))
-	if cfg["chart"].(map[string]any)["type"] != "donut" {
-		t.Fatalf("type = %v", cfg["chart"])
+	pie := cfg["series"].([]any)[0].(map[string]any)
+	if pie["type"] != "pie" || pie["radius"].([]any)[0] != "55%" {
+		t.Fatalf("series = %v", pie)
 	}
-	if l := cfg["labels"].([]any); len(l) != 2 || l[1] != "B" {
-		t.Fatalf("labels = %v", l)
-	}
-	if s := cfg["series"].([]any); s[1] != 7.0 {
-		t.Fatalf("series = %v", s)
+	slices := pie["data"].([]any)
+	if len(slices) != 2 || slices[1].(map[string]any)["name"] != "B" || slices[1].(map[string]any)["value"] != 7.0 {
+		t.Fatalf("slices = %v", slices)
 	}
 }
 
@@ -97,7 +96,7 @@ func TestCompositeTypesEachSerie(t *testing.T) {
 	cfg := chartConfig(t, render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"composite","x":"m","series":["orders","revenue"],"types":{"revenue":"line"},"data":[{"m":"Jan","orders":3,"revenue":10}]}`)}))
 	series := cfg["series"].([]any)
-	if series[0].(map[string]any)["type"] != "column" || series[1].(map[string]any)["type"] != "line" {
+	if series[0].(map[string]any)["type"] != "bar" || series[1].(map[string]any)["type"] != "line" {
 		t.Fatalf("series = %v", series)
 	}
 }
@@ -115,21 +114,24 @@ func TestHeatmapIsWeeksByWeekday(t *testing.T) {
 	// 2026-01-05 is a Monday, 2026-01-14 a Wednesday of the next week.
 	cfg := chartConfig(t, render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"heatmap","x":"day","series":["n"],"data":[{"day":"2026-01-05","n":2},{"day":"2026-01-14","n":5}]}`)}))
-	series := cfg["series"].([]any)
-	if len(series) != 7 {
-		t.Fatalf("%d series, want one per weekday", len(series))
+	days := cfg["yAxis"].([]any)[0].(map[string]any)["data"].([]any)
+	if len(days) != 7 || days[6] != "Mon" {
+		t.Fatalf("rows = %v, want one per weekday, Monday on top", days)
 	}
-	byName := map[string][]any{}
-	for _, s := range series {
-		m := s.(map[string]any)
-		byName[m["name"].(string)] = m["data"].([]any)
+	weeks := cfg["xAxis"].([]any)[0].(map[string]any)["data"].([]any)
+	if len(weeks) != 2 || weeks[1] != "2026-01-12" {
+		t.Fatalf("weeks = %v", weeks)
 	}
-	mon, wed := byName["Mon"], byName["Wed"]
-	if len(mon) != 2 || mon[0].(map[string]any)["y"] != 2.0 || mon[1].(map[string]any)["y"] != nil {
-		t.Fatalf("Mon = %v", mon)
+	cells := map[[2]float64]any{}
+	for _, c := range cfg["series"].([]any)[0].(map[string]any)["data"].([]any) {
+		v := c.([]any)
+		cells[[2]float64{v[0].(float64), v[1].(float64)}] = v[2]
 	}
-	if wed[1].(map[string]any)["y"] != 5.0 || wed[1].(map[string]any)["x"] != "2026-01-12" {
-		t.Fatalf("Wed = %v", wed)
+	if cells[[2]float64{0, 6}] != 2.0 || cells[[2]float64{1, 6}] != "-" { // Monday
+		t.Fatalf("Mon = %v, %v", cells[[2]float64{0, 6}], cells[[2]float64{1, 6}])
+	}
+	if cells[[2]float64{1, 4}] != 5.0 { // Wednesday
+		t.Fatalf("Wed = %v", cells[[2]float64{1, 4}])
 	}
 }
 
@@ -137,8 +139,8 @@ func TestHeatmapIsWeeksByWeekday(t *testing.T) {
 func TestUnknownVariantDrawsBars(t *testing.T) {
 	cfg := chartConfig(t, render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"treemapish","x":"k","series":["v"],"data":[{"k":"a","v":1}]}`)}))
-	if cfg["chart"].(map[string]any)["type"] != "bar" {
-		t.Fatalf("type = %v", cfg["chart"])
+	if s := cfg["series"].([]any)[0].(map[string]any); s["type"] != "bar" {
+		t.Fatalf("series = %v", s)
 	}
 }
 
@@ -294,7 +296,7 @@ func TestStreamFrames(t *testing.T) {
 	}
 }
 
-// With ChartOptions.SVG a chart block is drawn as SVG on the server: no ApexCharts config, the numbers in
+// With ChartOptions.SVG a chart block is drawn as SVG on the server: no ECharts option, the numbers in
 // the request's format, and the variants without an SVG chart as a table of their data.
 func TestChartBlockSVG(t *testing.T) {
 	ctx := WithChartOptions(context.Background(), ChartOptions{SVG: true, Format: svg.German})
@@ -309,7 +311,7 @@ func TestChartBlockSVG(t *testing.T) {
 		}
 	}
 	if strings.Contains(out, "data-tabler-chart") {
-		t.Error("an SVG chart block carries an ApexCharts config")
+		t.Error("an SVG chart block carries an ECharts option")
 	}
 	out, err = Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t,
 		`{"variant":"scatter","title":"Pts","x":"a","series":["b"],"data":[{"a":1,"b":2}]}`)}))
