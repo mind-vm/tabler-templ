@@ -1,0 +1,87 @@
+package main
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/layout"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/echart"
+)
+
+// PROTOTYPE: every chart of the charts pages twice, ApexCharts (left) and ECharts (right), from the same
+// chart.Props.
+
+var echartsAdvanced = []demoChart{
+	{"revenue-vs-orders", "", "Two y-axes"},
+	{"uptime-sla", "", "Threshold line (y annotation)"},
+	{"sales-with-markers", "", "Marker lines (x annotations)"},
+	{"dashboard-crypto-candlestick", "", "Candlestick"},
+	{"traffic-zoom", "", "Brush: target"},
+	{"traffic-brush", "", "Brush: selector"},
+	{"synced-visits", "", "Synced group 1/3"},
+	{"synced-signups", "", "Synced group 2/3"},
+	{"synced-revenue", "", "Synced group 3/3"},
+}
+
+func echartProps(id string, height float64) chart.Props {
+	p := tc(id, chartName(id), height)
+	return p
+}
+
+func echartHeight(id string) float64 {
+	switch id {
+	case "traffic-brush":
+		return 5
+	case "synced-visits", "synced-signups", "synced-revenue":
+		return 8
+	case "dashboard-crypto-candlestick":
+		return 15
+	}
+	return 15
+}
+
+templ echartsPair(id, subtitle string) {
+	<div class="col-12">
+		<h3 class="mb-1">{ chartName(id) } <code class="ms-2 small">{ id }</code></h3>
+		<p class="text-secondary small mb-2">{ subtitle }</p>
+	</div>
+	<div class="col-md-6">
+		@card.Card(card.Props{Class: "h-100"}) {
+			@card.Body() {
+				<div class="subheader mb-2">ApexCharts 7</div>
+				@chart.Chart(echartProps(id, echartHeight(id)))
+			}
+		}
+	</div>
+	<div class="col-md-6">
+		@card.Card(card.Props{Class: "h-100"}) {
+			@card.Body() {
+				<div class="subheader mb-2">ECharts { echart.Version }</div>
+				@echart.Chart(echartProps(id, echartHeight(id)))
+			}
+		}
+	</div>
+}
+
+templ echartsPage() {
+	{{ fp := frameProps("charts-echarts", "ECharts prototype") }}
+	{{ fp.Head = templ.Join(echart.Library(), assets()) }}
+	{{ fp.Header = layout.PageHeader(layout.PageHeaderProps{Title: "ECharts prototype", Description: "The same chart.Props drawn by ApexCharts (left) and Apache ECharts (right)."}) }}
+	@layout.Page(fp) {
+		<div class="row row-cards">
+			for _, s := range chartSections {
+				<div class="col-12">
+					<h2 class="page-section-title">{ s.Title }</h2>
+				</div>
+				for _, c := range s.Charts {
+					@echartsPair(c.ID, c.Subtitle)
+				}
+			}
+			<div class="col-12">
+				<h2 class="page-section-title">Advanced</h2>
+			</div>
+			for _, c := range echartsAdvanced {
+				@echartsPair(c.ID, c.Subtitle)
+			}
+		</div>
+	}
+}
