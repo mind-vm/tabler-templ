@@ -1,0 +1,25 @@
+<div class="chart-svg" style="--chart-svg-h: 10rem;--s0: var(--tblr-chart-1, var(--tblr-primary));--s1: var(--tblr-chart-2, var(--tblr-green));"><div class="chart-svg-box" role="img" aria-label="Tickets"><div class="chart-svg-plot" style="left:calc(3ch + .5rem);right:1ch;top:1.5rem;bottom:1.5rem;"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 100L100 100" class="chart-svg-grid"></path><path d="M0 75L100 75" class="chart-svg-grid"></path><path d="M0 50L100 50" class="chart-svg-grid"></path><path d="M0 25L100 25" class="chart-svg-grid"></path><path d="M0 0L100 0" class="chart-svg-grid"></path><path d="M0 100H16.67V0H0Z" class="chart-svg-hit"><title>Jan
+Solved: 12
+Opened: 5</title></path><path d="M16.67 100H33.33V0H16.67Z" class="chart-svg-hit"><title>Feb
+Solved: 19
+Opened: 7</title></path><path d="M33.33 100H50V0H33.33Z" class="chart-svg-hit"><title>Mar
+Solved: 8
+Opened: 4</title></path><path d="M50 100H66.67V0H50Z" class="chart-svg-hit"><title>Apr
+Solved: 15
+Opened: 9</title></path><path d="M66.67 100H83.33V0H66.67Z" class="chart-svg-hit"><title>May
+Solved: 22
+Opened: 6</title></path><path d="M83.33 100H100V0H83.33Z" class="chart-svg-hit"><title>Jun
+Solved: 18
+Opened: -3</title></path><path d="M4.17 75H12.5V45H4.17Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Jan
+Solved: 12</title></path><path d="M20.83 75H29.17V27.5H20.83Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Feb
+Solved: 19</title></path><path d="M37.5 75H45.83V55H37.5Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Mar
+Solved: 8</title></path><path d="M54.17 75H62.5V37.5H54.17Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Apr
+Solved: 15</title></path><path d="M70.83 75H79.17V20H70.83Z" class="chart-svg-bar" style="fill:var(--s0);"><title>May
+Solved: 22</title></path><path d="M87.5 75H95.83V30H87.5Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Jun
+Solved: 18</title></path><path d="M4.17 45H12.5V32.5H4.17Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Jan
+Opened: 5</title></path><path d="M20.83 27.5H29.17V10H20.83Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Feb
+Opened: 7</title></path><path d="M37.5 55H45.83V45H37.5Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Mar
+Opened: 4</title></path><path d="M54.17 37.5H62.5V15H54.17Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Apr
+Opened: 9</title></path><path d="M70.83 20H79.17V5H70.83Z" class="chart-svg-bar" style="fill:var(--s1);"><title>May
+Opened: 6</title></path><path d="M87.5 75H95.83V82.5H87.5Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Jun
+Opened: -3</title></path></svg> <span class="chart-svg-y" style="top:100%;">-10</span> <span class="chart-svg-y" style="top:75%;">0</span> <span class="chart-svg-y" style="top:50%;">10</span> <span class="chart-svg-y" style="top:25%;">20</span> <span class="chart-svg-y" style="top:0%;">30</span> <span class="chart-svg-x" style="left:8.33%;">Jan</span> <span class="chart-svg-x" style="left:25%;">Feb</span> <span class="chart-svg-x" style="left:41.67%;">Mar</span> <span class="chart-svg-x" style="left:58.33%;">Apr</span> <span class="chart-svg-x" style="left:75%;">May</span> <span class="chart-svg-x" style="left:91.67%;">Jun</span> <span class="chart-svg-v chart-svg-in" style="left:8.33%;top:60%;">12</span><span class="chart-svg-v chart-svg-in" style="left:25%;top:51.25%;">19</span><span class="chart-svg-v chart-svg-in" style="left:41.67%;top:65%;">8</span><span class="chart-svg-v chart-svg-in" style="left:58.33%;top:56.25%;">15</span><span class="chart-svg-v chart-svg-in" style="left:75%;top:47.5%;">22</span><span class="chart-svg-v chart-svg-in" style="left:91.67%;top:52.5%;">18</span><span class="chart-svg-v chart-svg-in" style="left:8.33%;top:38.75%;">5</span><span class="chart-svg-v chart-svg-in" style="left:25%;top:18.75%;">7</span><span class="chart-svg-v chart-svg-in" style="left:41.67%;top:50%;">4</span><span class="chart-svg-v chart-svg-in" style="left:58.33%;top:26.25%;">9</span><span class="chart-svg-v chart-svg-in" style="left:75%;top:12.5%;">6</span></div></div></div>

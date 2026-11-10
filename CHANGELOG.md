@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## v0.16.0
+
+Simple charts without ApexCharts: `chart/svg` draws them as SVG on the server (nothing changes for
+existing charts).
+
+- **`chart/svg`:** `Chart` draws bar (vertical, horizontal, grouped, stacked, negative values), line
+  (straight, monotone smooth, stepped; dashes, markers), area (also stacked), mixed columns and lines, pie,
+  donut and radial bar or gauge charts as inline SVG: axes with labels, grid, legend, value labels, y
+  target lines, tooltips as `<title>` (per bar, slice, ring and per category), Tabler's color variables
+  (themes, dark mode), responsive (stretched plot with HTML labels, round charts by viewBox), `role="img"`
+  with `Label` and an optional hidden data table (`Table`). No library, no JavaScript; its CSS is a sheet
+  of `internal/csp`. `Props` uses the names of `chart.Props`, `FromChart` converts one, `Supported` names
+  the types it draws. `Format` writes the numbers (`English`, `German`, `Number(decimals, decimal,
+  group)`). Limits: `MaxSeries` 12, `MaxCategories` 400.
+- **`blocks/metric.Gauge`:** `SVG` draws the gauge with `chart/svg` (and `Format` its percentage); the
+  default stays ApexCharts.
+- **`blocks/assistant`:** `WithChartOptions(ctx, ChartOptions{SVG: true, Format: …})` draws chart blocks with
+  `chart/svg` (with the data table); radar, scatter, bubble and heatmap blocks become a table of their data.
+  Without it, ApexCharts as before.
+- **Demo:** `/charts-svg` shows every variant and the SVG gauge.
+- **README:** section "SVG charts without ApexCharts" (types, look, numbers, limits, switches).
 
 - **README, "License of ApexCharts":** `chart` loads ApexCharts 7.0.0 (Tabler's version), which is no
   longer MIT but dual-licensed (free only under 2 million USD annual revenue; OEM license for charts that

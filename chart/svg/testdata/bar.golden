@@ -1,0 +1,25 @@
+<div id="chart-bar" class="chart-svg" style="--chart-svg-h: 10rem;--s0: var(--tblr-chart-1, var(--tblr-primary));--s1: var(--tblr-chart-2, var(--tblr-green));"><div class="chart-svg-box" role="img" aria-label="Tickets"><div class="chart-svg-plot" style="left:calc(3ch + .5rem);right:1ch;top:0.5rem;bottom:1.5rem;"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 100L100 100" class="chart-svg-grid"></path><path d="M0 75L100 75" class="chart-svg-grid"></path><path d="M0 50L100 50" class="chart-svg-grid"></path><path d="M0 25L100 25" class="chart-svg-grid"></path><path d="M0 0L100 0" class="chart-svg-grid"></path><path d="M0 100H16.67V0H0Z" class="chart-svg-hit"><title>Jan
+Solved: 12
+Opened: 5</title></path><path d="M16.67 100H33.33V0H16.67Z" class="chart-svg-hit"><title>Feb
+Solved: 19
+Opened: 7</title></path><path d="M33.33 100H50V0H33.33Z" class="chart-svg-hit"><title>Mar
+Solved: 8
+Opened: 4</title></path><path d="M50 100H66.67V0H50Z" class="chart-svg-hit"><title>Apr
+Solved: 15
+Opened: 9</title></path><path d="M66.67 100H83.33V0H66.67Z" class="chart-svg-hit"><title>May
+Solved: 22
+Opened: 6</title></path><path d="M83.33 100H100V0H83.33Z" class="chart-svg-hit"><title>Jun
+Solved: 18
+Opened: -3</title></path><path d="M3.33 75H8.33V45H3.33Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Jan
+Solved: 12</title></path><path d="M20 75H25V27.5H20Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Feb
+Solved: 19</title></path><path d="M36.67 75H41.67V55H36.67Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Mar
+Solved: 8</title></path><path d="M53.33 75H58.33V37.5H53.33Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Apr
+Solved: 15</title></path><path d="M70 75H75V20H70Z" class="chart-svg-bar" style="fill:var(--s0);"><title>May
+Solved: 22</title></path><path d="M86.67 75H91.67V30H86.67Z" class="chart-svg-bar" style="fill:var(--s0);"><title>Jun
+Solved: 18</title></path><path d="M8.33 75H13.33V62.5H8.33Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Jan
+Opened: 5</title></path><path d="M25 75H30V57.5H25Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Feb
+Opened: 7</title></path><path d="M41.67 75H46.67V65H41.67Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Mar
+Opened: 4</title></path><path d="M58.33 75H63.33V52.5H58.33Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Apr
+Opened: 9</title></path><path d="M75 75H80V60H75Z" class="chart-svg-bar" style="fill:var(--s1);"><title>May
+Opened: 6</title></path><path d="M91.67 75H96.67V82.5H91.67Z" class="chart-svg-bar" style="fill:var(--s1);"><title>Jun
+Opened: -3</title></path></svg> <span class="chart-svg-y" style="top:100%;">-10</span> <span class="chart-svg-y" style="top:75%;">0</span> <span class="chart-svg-y" style="top:50%;">10</span> <span class="chart-svg-y" style="top:25%;">20</span> <span class="chart-svg-y" style="top:0%;">30</span> <span class="chart-svg-x" style="left:8.33%;">Jan</span> <span class="chart-svg-x" style="left:25%;">Feb</span> <span class="chart-svg-x" style="left:41.67%;">Mar</span> <span class="chart-svg-x" style="left:58.33%;">Apr</span> <span class="chart-svg-x" style="left:75%;">May</span> <span class="chart-svg-x" style="left:91.67%;">Jun</span> </div></div><div class="legend-list justify-content-center mt-3"><span class="legend" style="--tblr-legend-color: var(--s0);"><span class="legend-dot"></span> Solved</span><span class="legend" style="--tblr-legend-color: var(--s1);"><span class="legend-dot"></span> Opened</span></div><table class="visually-hidden"><caption>Tickets</caption> <thead><tr><th scope="col"></th><th scope="col">Solved</th><th scope="col">Opened</th></tr></thead> <tbody><tr><th scope="row">Jan</th><td>12</td><td>5</td></tr><tr><th scope="row">Feb</th><td>19</td><td>7</td></tr><tr><th scope="row">Mar</th><td>8</td><td>4</td></tr><tr><th scope="row">Apr</th><td>15</td><td>9</td></tr><tr><th scope="row">May</th><td>22</td><td>6</td></tr><tr><th scope="row">Jun</th><td>18</td><td>-3</td></tr></tbody></table></div>

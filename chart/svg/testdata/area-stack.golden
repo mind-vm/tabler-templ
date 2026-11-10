@@ -1,0 +1,11 @@
+<div class="chart-svg" style="--chart-svg-h: 10rem;--s0: var(--tblr-chart-1, var(--tblr-primary));--s1: var(--tblr-chart-2, var(--tblr-green));"><div class="chart-svg-box" role="img" aria-label="Storage"><div class="chart-svg-plot" style="left:calc(3ch + .5rem);right:1ch;top:0.5rem;bottom:1.5rem;"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 100L100 100" class="chart-svg-grid"></path><path d="M0 75L100 75" class="chart-svg-grid"></path><path d="M0 50L100 50" class="chart-svg-grid"></path><path d="M0 25L100 25" class="chart-svg-grid"></path><path d="M0 0L100 0" class="chart-svg-grid"></path><path d="M0 100H10V0H0Z" class="chart-svg-hit"><title>Jan
+Media: 12K
+Backups: 12K</title></path><path d="M10 100H30V0H10Z" class="chart-svg-hit"><title>Feb
+Media: 19K
+Backups: 19K</title></path><path d="M30 100H50V0H30Z" class="chart-svg-hit"><title>Mar
+Media: 8K
+Backups: 8K</title></path><path d="M50 100H70V0H50Z" class="chart-svg-hit"><title>Apr
+Media: 15K
+Backups: 15K</title></path><path d="M70 100H90V0H70Z" class="chart-svg-hit"><title>May
+Media: 22K</title></path><path d="M90 100H100V0H90Z" class="chart-svg-hit"><title>Jun
+Media: 18K</title></path><path d="M0 70L20 52.5L40 80L60 62.5L80 45L100 55L100 100L80 100L60 100L40 100L20 100L0 100Z" class="chart-svg-area" style="fill:color-mix(in srgb, transparent, var(--s0) 16%);"></path><path d="M0 40L20 5L40 60L60 25L60 62.5L40 80L20 52.5L0 70Z" class="chart-svg-area" style="fill:color-mix(in srgb, transparent, var(--s1) 16%);"></path><path d="M0 70L20 52.5L40 80L60 62.5L80 45L100 55" class="chart-svg-line" style="stroke:var(--s0);"></path><path d="M0 40L20 5L40 60L60 25" class="chart-svg-line" style="stroke:var(--s1);"></path></svg> <span class="chart-svg-y" style="top:100%;">0K</span> <span class="chart-svg-y" style="top:75%;">10K</span> <span class="chart-svg-y" style="top:50%;">20K</span> <span class="chart-svg-y" style="top:25%;">30K</span> <span class="chart-svg-y" style="top:0%;">40K</span> <span class="chart-svg-x" style="left:0%;">Jan</span> <span class="chart-svg-x" style="left:20%;">Feb</span> <span class="chart-svg-x" style="left:40%;">Mar</span> <span class="chart-svg-x" style="left:60%;">Apr</span> <span class="chart-svg-x" style="left:80%;">May</span> <span class="chart-svg-x" style="left:100%;">Jun</span> </div></div></div>

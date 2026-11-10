@@ -23,5 +23,5 @@ func TestUnique(t *testing.T) {
 		assert.False(t, seen[p.Name], p.Name)
 		seen[p.Name] = true
 	}
-	assert.Len(t, Pages, 146)
+	assert.Len(t, Pages, 147)
 }
