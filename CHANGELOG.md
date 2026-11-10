@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.17.0
 
 **Breaking:** the charts are drawn with Apache ECharts 6 (Apache-2.0) instead of ApexCharts. ApexCharts
 needs a paid license from USD 2M annual revenue (affiliates included), which reached every app built on
