@@ -79,6 +79,7 @@ var Pages = []Page{
 	{Name: "wizard", Title: "Wizard", Group: "App pages", Status: Done},
 	{Name: "charts-advanced", Title: "Charts advanced", Group: "Plugins", Status: Done, Description: "Charts that go past a single series: two scales in one plot, threshold and marker lines, a brush to zoom with, and a group of charts that move together."},
 	{Name: "charts", Title: "Charts", Group: "Plugins", Status: Done},
+	{Name: "charts-svg", Title: "SVG charts", Group: "Plugins", Status: Done, Description: "Simple charts drawn as SVG on the server: bars, lines, areas, pies, donuts and gauges without a chart library or JavaScript."},
 	{Name: "colorpicker", Title: "Color picker", Group: "Plugins", Status: Done},
 	{Name: "datatables", Title: "Datatables", Group: "Plugins", Status: Done},
 	{Name: "datepicker", Title: "Date picker", Group: "Plugins", Description: "A date picker opens a calendar under a field or a button and writes the picked date back into it.", Status: Done},

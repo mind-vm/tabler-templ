@@ -17,6 +17,50 @@ tabler-templ.
   is unchanged.
 - **Funnel** charts are drawn as a funnel of trapezoids instead of centered bars.
 - **`blocks/metric.Gauge`, `chart.Radial`** use `chart.Gauge`.
+- **`chart/svg`, `metric.GaugeProps.SVG`, `assistant.ChartOptions.SVG`** stay as they are; without `SVG`
+  the blocks draw with ECharts now.
+- **README:** "License of the chart library" replaces "License of ApexCharts"; "SVG charts without
+  JavaScript" is the new name of the SVG section.
+
+## v0.16.0
+
+Simple charts without ApexCharts: `chart/svg` draws them as SVG on the server (nothing changes for
+existing charts).
+
+- **`chart/svg`:** `Chart` draws bar (vertical, horizontal, grouped, stacked, negative values), line
+  (straight, monotone smooth, stepped; dashes, markers), area (also stacked), mixed columns and lines, pie,
+  donut and radial bar or gauge charts as inline SVG: axes with labels, grid, legend, value labels, y
+  target lines, tooltips as `<title>` (per bar, slice, ring and per category), Tabler's color variables
+  (themes, dark mode), responsive (stretched plot with HTML labels, round charts by viewBox), `role="img"`
+  with `Label` and an optional hidden data table (`Table`). No library, no JavaScript; its CSS is a sheet
+  of `internal/csp`. `Props` uses the names of `chart.Props`, `FromChart` converts one, `Supported` names
+  the types it draws. `Format` writes the numbers (`English`, `German`, `Number(decimals, decimal,
+  group)`). Limits: `MaxSeries` 12, `MaxCategories` 400.
+- **`blocks/metric.Gauge`:** `SVG` draws the gauge with `chart/svg` (and `Format` its percentage); the
+  default stays ApexCharts.
+- **`blocks/assistant`:** `WithChartOptions(ctx, ChartOptions{SVG: true, Format: …})` draws chart blocks with
+  `chart/svg` (with the data table); radar, scatter, bubble and heatmap blocks become a table of their data.
+  Without it, ApexCharts as before.
+- **Demo:** `/charts-svg` shows every variant and the SVG gauge.
+- **README:** section "SVG charts without ApexCharts" (types, look, numbers, limits, switches).
+
+- **README, "License of ApexCharts":** `chart` loads ApexCharts 7.0.0 (Tabler's version), which is no
+  longer MIT but dual-licensed (free only under 2 million USD annual revenue; OEM license for charts that
+  users configure). The section says which packages load it, which versions were MIT (up to 4.7.0) and
+  what an app accepts by loading it. No code change; `versions.ApexCharts` stays 7.0.0.
+  Options considered: pin on 4.7.0 (last clean MIT; no fixes since April 2025, options untested against it,
+  Tabler updates would reset it); a free library behind the same `chart.Props` (ECharts, Apache-2.0, all
+  chart types, about 370 kB gzipped; Chart.js, MIT, 71 kB, no treemap/heatmap/candlestick/timeline without
+  plugins; uPlot, MIT, 22 kB, time series only; Frappe Charts, MIT, 18 kB, few types); server-rendered SVG
+  for the simple cases (radial/gauge, small bar/line/area) without any library.
+
+## v0.15.2
+
+- **`layout.App`:** `Badge` puts a small count or label on the app's logo in `layout.Apps`, like Tabler's
+  notification badge on an avatar (e.g. the number of urgent tasks in that app); `BadgeColor` sets its
+  color (default `red`), `BadgeLabel` is read out instead of the badge. Apps without a badge render as
+  before.
+- **Demo:** the app menu of the navigation pages shows two apps with a badge.
 
 ## v0.15.1
 

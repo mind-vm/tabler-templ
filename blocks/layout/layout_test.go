@@ -65,3 +65,17 @@ func TestErrorPage(t *testing.T) {
 	assert.Contains(t, h, `<div class="empty-header">404</div><h1 class="empty-title">Oops… You just found an error page</h1>`)
 	assert.Contains(t, h, `Take me home`)
 }
+
+func TestAppsBadge(t *testing.T) {
+	h := render(t, layout.Apps(layout.AppsProps{Title: "Apps"}, []layout.App{
+		{Name: "Plain", Icon: "/p.svg", Href: "/p"},
+		{Name: "Tasks", Icon: "/t.svg", Href: "/t", Badge: "3", BadgeLabel: "3 urgent"},
+		{Name: "Mail", Icon: "/m.svg", Href: "/m", Badge: "New", BadgeColor: "green"},
+	}))
+	// Without a badge the tile is unchanged.
+	assert.Contains(t, h, `<img src="/p.svg" class="w-6 h-6 mx-auto mb-2" width="24" height="24" alt="">`)
+	assert.Contains(t, h, `<span class="position-relative d-inline-block mx-auto mb-2"><img src="/t.svg" class="w-6 h-6 d-block" width="24" height="24" alt="">`)
+	assert.Contains(t, h, `<span class="badge badge-notification badge-pill bg-red text-red-fg" aria-hidden="true">3</span> <span class="visually-hidden">3 urgent</span>`)
+	assert.Contains(t, h, `<span class="badge badge-notification badge-pill bg-green text-green-fg">New</span>`)
+	assert.Equal(t, 2, strings.Count(h, "badge-notification"))
+}

@@ -10,7 +10,7 @@ A ticked box matches the Tabler original; *partial* means usable, with the missi
 |---|---|
 | Components | 66 done, 1 partial, 0 open (of 67) |
 | Blocks | 142 done, 0 partial, 37 open (of 179) |
-| Preview pages | 144 done, 1 partial, 1 open (of 146) |
+| Preview pages | 145 done, 1 partial, 1 open (of 147) |
 
 ## Plan
 
@@ -315,6 +315,7 @@ Blocks of this module without a counterpart in the preview, grown from the apps 
 - `blocks/create`: create page: post form with footer
 - `blocks/detail`: detail page: sections with edit dialogs that reopen after a failed save
 - `blocks/history`: change history as a timeline
+- `chart/svg`: simple charts (bar, line, area, pie, donut, gauge) as server-rendered SVG, without a chart library
 - `blocks/signin`: sign-in page with its own look and an account picker (Tabler's own look: blocks/auth)
 
 ## Preview pages
@@ -410,6 +411,7 @@ Every page of the [Tabler preview](https://preview.tabler.io/), rebuilt in `cmd/
 
 - [x] [charts-advanced](https://preview.tabler.io/charts-advanced.html) Charts advanced
 - [x] [charts](https://preview.tabler.io/charts.html) Charts
+- [x] [charts-svg](https://preview.tabler.io/charts-svg.html) SVG charts
 - [x] [colorpicker](https://preview.tabler.io/colorpicker.html) Color picker
 - [x] [datatables](https://preview.tabler.io/datatables.html) Datatables
 - [x] [datepicker](https://preview.tabler.io/datepicker.html) Date picker

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mind-vm/tabler-templ/chart"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 )
 
 // Normalize turns a payload into JSON's shapes — float64, []any and map[string]any — which is what the
@@ -186,6 +187,28 @@ func ChartProps(id string, p map[string]any) chart.Props {
 		props.Categories, props.Series = categories(data, x), columns(data, series)
 	}
 	return props
+}
+
+// svgProps draws a chart block's props with package chart/svg: the data as a hidden table as well, and
+// the numbers in the request's format.
+func svgProps(c chart.Props, o ChartOptions) svg.Props {
+	p := svg.FromChart(c)
+	p.Format, p.Table = o.Format, true
+	if c.Funnel {
+		p.Legend = false
+	}
+	return p
+}
+
+// chartTable is a chart block's spec as a table block's: the x column, the series and the size.
+func chartTable(p map[string]any) map[string]any {
+	cols := []any{}
+	for _, c := range append([]string{str(p, "x")}, append(strs(p, "series"), str(p, "size"))...) {
+		if c != "" {
+			cols = append(cols, c)
+		}
+	}
+	return map[string]any{"title": str(p, "title"), "columns": cols, "rows": p["data"]}
 }
 
 // palette is Tabler's chart palette as CSS the chart script resolves, for

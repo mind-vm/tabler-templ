@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+
+	"github.com/mind-vm/tabler-templ/chart/svg"
 )
 
 func render(t *testing.T, b Block) string {
@@ -291,5 +293,32 @@ func TestStreamFrames(t *testing.T) {
 	}
 	if e.Type != "html" || e.Args["slot"] != "answer" || e.Args["mode"] != "set" || !strings.Contains(e.Args["html"], "<strong>hi</strong>") {
 		t.Fatalf("event = %+v", e)
+	}
+}
+
+// With ChartOptions.SVG a chart block is drawn as SVG on the server: no ECharts option, the numbers in
+// the request's format, and the variants without an SVG chart as a table of their data.
+func TestChartBlockSVG(t *testing.T) {
+	ctx := WithChartOptions(context.Background(), ChartOptions{SVG: true, Format: svg.German})
+	out, err := Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t,
+		`{"variant":"line","title":"Umsatz","x":"m","series":["v"],"data":[{"m":"Jan","v":1234.5},{"m":"Feb","v":2000}]}`)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`class="chart-svg"`, `id="chart-c"`, `aria-label="Umsatz"`, "<td>1.234,5</td>", `class="chart-svg-line"`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %s in\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "data-tabler-chart") {
+		t.Error("an SVG chart block carries an ECharts option")
+	}
+	out, err = Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t,
+		`{"variant":"scatter","title":"Pts","x":"a","series":["b"],"data":[{"a":1,"b":2}]}`)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out, "chart-svg") || !strings.Contains(out, "<th class=\"text-end\">b</th>") {
+		t.Errorf("a scatter block is not a table:\n%s", out)
 	}
 }

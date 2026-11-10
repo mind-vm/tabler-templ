@@ -2871,6 +2871,14 @@ func sampleMenu() []layout.Entry {
 	}
 }
 
+// badgedApps: the preview's apps, two of them with a badge on the logo (App.Badge).
+func badgedApps() []layout.App {
+	as := apps()
+	as[0].Badge, as[0].BadgeLabel = "3", "3 new orders"
+	as[6].Badge, as[6].BadgeColor = "12", "blue"
+	return as
+}
+
 func navUser(photo, name, detail string, hideName bool) layout.UserProps {
 	return layout.UserProps{Avatar: avatar.Props{Src: avatarURL(photo)}, Name: name, Detail: detail, HideName: hideName}
 }
@@ -2935,7 +2943,7 @@ func sampleActions(user layout.UserProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = layout.Apps(layout.AppsProps{SettingsHref: "#"}, apps()).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = layout.Apps(layout.AppsProps{SettingsHref: "#"}, badgedApps()).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2973,7 +2981,7 @@ func sampleActions(user layout.UserProps) templ.Component {
 					var templ_7745c5c3_Var132 string
 					templ_7745c5c3_Var132, templ_7745c5c3_Err = templ.JoinStringErrs(l.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 576, Col: 13}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 584, Col: 13}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var132))
 					if templ_7745c5c3_Err != nil {
@@ -3054,7 +3062,7 @@ func textBrand(text string) templ.Component {
 			var templ_7745c5c3_Var136 string
 			templ_7745c5c3_Var136, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 588, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 596, Col: 8}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var136))
 			if templ_7745c5c3_Err != nil {
@@ -3111,7 +3119,7 @@ func markBrand(title string) templ.Component {
 				var templ_7745c5c3_Var139 string
 				templ_7745c5c3_Var139, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 596, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/demo/batch_h.templ`, Line: 604, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var139))
 				if templ_7745c5c3_Err != nil {

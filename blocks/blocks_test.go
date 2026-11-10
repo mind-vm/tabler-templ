@@ -18,9 +18,11 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/history"
 	"github.com/mind-vm/tabler-templ/blocks/landing"
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
 	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/blocks/signin"
 	"github.com/mind-vm/tabler-templ/blocks/stats"
+	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/kit"
 )
 
@@ -302,4 +304,18 @@ func TestLanding(t *testing.T) {
 	assert.Regexp(t, `>2</span><h3>Auftrag</h3>`, h)
 	h = render(t, ctx, mit(landing.CallToAction(landing.CallToActionProps{Title: "Ausprobieren"}), `<a class="btn">Los</a>`))
 	assert.Contains(t, h, `<div class="kit-landing-buttons"><a class="btn">Los</a></div>`)
+}
+
+// metric.Gauge with SVG draws its ring on the server: no ECharts option, the percentage in the
+// given format.
+func TestGaugeSVG(t *testing.T) {
+	ctx := templ.InitializeContext(context.Background())
+	p := metric.GaugeProps{ID: "g", Title: "Delivery", Value: 96.5, Label: "delivered", Count: 965, Total: 1000, Color: "green"}
+	assert.Contains(t, render(t, ctx, metric.Gauge(p)), "data-tabler-chart")
+	p.SVG, p.Format = true, svg.German
+	html := render(t, ctx, metric.Gauge(p))
+	assert.NotContains(t, html, "data-tabler-chart")
+	for _, want := range []string{`id="chart-gauge-g"`, `aria-label="Delivery: 96.5%"`, `--s0: var(--tblr-green);`, `>96,5%</text>`, `>delivered</text>`} {
+		assert.Contains(t, html, want)
+	}
 }
