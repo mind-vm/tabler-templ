@@ -1,4 +1,4 @@
-// Package cdn is where the browser loads Tabler, its icons, ApexCharts, the plugins and the theme fonts
+// Package cdn is where the browser loads Tabler, its icons, ECharts, the plugins and the theme fonts
 // from: npm packages on jsDelivr by default, or the app's own copy. Every package builds its URLs with
 // URL, so one line moves them all:
 //
@@ -23,7 +23,7 @@ const JSDelivr = "https://cdn.jsdelivr.net/npm/"
 // trailing slash. Set it once at start-up, before rendering.
 var Base = JSDelivr
 
-// URL is a file of an npm package at a version, e.g. URL("apexcharts", "7.0.0", "dist/apexcharts.min.js").
+// URL is a file of an npm package at a version, e.g. URL("echarts", "6.0.0", "dist/echarts.min.js").
 func URL(pkg, version, file string) string {
 	base := Base
 	if base != "" && !strings.HasSuffix(base, "/") {

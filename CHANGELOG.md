@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+**Breaking:** the charts are drawn with Apache ECharts 6 (Apache-2.0) instead of ApexCharts. ApexCharts
+needs a paid license from USD 2M annual revenue (affiliates included), which reached every app built on
+tabler-templ.
+
+- **`chart`:** `chart.Props` stays as it was and draws the same charts (line, area, bar, pie, donut, radial
+  bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline,
+  stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles). `Library` loads
+  `echarts@6.0.0`; `versions.ECharts` replaces `versions.ApexCharts`.
+- **`Props.Options` and `RawProps`** take ECharts options now; formatter paths follow them, e.g.
+  `yAxis.0.axisLabel.formatter`. `chart.Gauge` builds the option of a single percentage ring.
+- **`data-tabler-chart`** holds `{"option": …}` instead of `{"config": …}`; `element.tablerChart` is the
+  ECharts instance, and `window.tabler_chart` is gone. `window.tablerCharts` (`init`, `flush`, `destroy`)
+  is unchanged.
+- **Funnel** charts are drawn as a funnel of trapezoids instead of centered bars.
+- **`blocks/metric.Gauge`, `chart.Radial`** use `chart.Gauge`.
+
 ## v0.15.1
 
 - **`marketing.FeatureCards`, `marketing.Plans`, `marketing.Team`:** the cards in one row are always equally

@@ -40,7 +40,7 @@ func Stylesheets(props assets.Props) []string {
 }
 
 // Head is assets.Head with Tabler served from files instead of jsDelivr: the same Props, the same
-// stylesheets in the same order. Charts still loads ApexCharts from jsDelivr (chart.Library).
+// stylesheets in the same order. Charts still loads ECharts from cdn.Base (chart.Library).
 templ Head(files *Files, props ...assets.Props) {
 	{{
 		var p assets.Props

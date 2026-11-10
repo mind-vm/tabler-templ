@@ -1,6 +1,8 @@
 # Prototyp: ECharts statt ApexCharts
 
-Stand: 2026-11-10 · Branch `proto/echarts` · Vergleichsseite: `go run ./cmd/demo`, dann `/charts-echarts`
+Stand: 2026-11-10 · Branch `proto/echarts`
+
+> **Umgesetzt:** Das Paket `chart` zeichnet inzwischen selbst mit ECharts; ApexCharts ist entfernt (siehe CHANGELOG, „Unreleased“). Die Vergleichsseite `/charts-echarts` gibt es deshalb nicht mehr. Dieses Dokument hält fest, was der Prototyp ergab.
 
 ## Warum
 

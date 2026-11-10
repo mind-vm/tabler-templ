@@ -1,6 +1,6 @@
 // Package versions pins what this module is built against: the Tabler release, its icons and the
 // libraries of Tabler's plugins, all loaded from jsDelivr in these versions. The packages read them from
-// here (chart.Version is versions.ApexCharts …), so a Tabler update changes this file only.
+// here (chart.Version is versions.ECharts …), so a Tabler update changes this file only.
 //
 // `go run ./internal/tools/versions <tabler checkout>` compares them with the versions Tabler's lockfile
 // pins (the npm package after each "npm:"); with -write it updates them. scripts/tabler-update.sh runs it.
@@ -12,7 +12,6 @@ const (
 	TablerCommit = "096491dea4886f78891c2e29310351d5aee6c460"
 	Icons        = "3.49.0" // npm: @tabler/icons
 
-	ApexCharts      = "7.0.0"  // npm: apexcharts
 	MapLibre        = "6.11.2" // npm: maplibre-gl
 	VanillaCalendar = "3.4.0"  // npm: vanilla-calendar-pro
 	TomSelect       = "2.6.2"  // npm: tom-select
@@ -35,5 +34,6 @@ const (
 
 // Libraries the kit adds itself, not from Tabler's lockfile (the versions tool leaves them alone).
 const (
-	Motion = "14.6.0" // npm: motion (motion.dev, formerly Framer Motion), its vanilla build
+	Motion  = "14.6.0" // npm: motion (motion.dev, formerly Framer Motion), its vanilla build
+	ECharts = "6.0.0"  // npm: echarts (Apache-2.0; replaces ApexCharts, whose license is not free above USD 2M revenue)
 )

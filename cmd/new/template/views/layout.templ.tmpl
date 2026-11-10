@@ -38,7 +38,7 @@ type Page struct {
 	Flash  string // a message from the last action, e.g. "Changes saved."
 }
 
-// head loads Tabler (with ApexCharts for the dashboard) and the CSS of the app blocks in use.
+// head loads Tabler (with ECharts for the dashboard) and the CSS of the app blocks in use.
 templ head() {
 	@assets.Head(assets.Props{Charts: true, Themes: true})
 	@assets.Theme()

@@ -52,9 +52,9 @@ type Props struct {
 	Marketing bool // tabler-marketing (marketing pages)
 	// Themes styles the theme settings: accent colors, gray bases, fonts and radii (package theme).
 	Themes bool
-	// Vendors styles third-party plugins the Tabler way: ApexCharts tooltips, maps, editors …
+	// Vendors styles third-party plugins the Tabler way: chart tooltips, maps, editors …
 	Vendors bool
-	Charts  bool // loads ApexCharts (chart.Library); implies Vendors
+	Charts  bool // loads ECharts (chart.Library); implies Vendors
 }
 
 func css(p Props, name string) string {

@@ -50,7 +50,7 @@ func main() {
 	replace := flag.String("replace", "", "use a local copy of tabler-templ (a replace directive), e.g. for developing tabler-templ")
 	noSetup := flag.Bool("no-setup", false, "only write the files; skip go get and templ generate")
 	themeName := flag.String("theme", "tabler", "the app's look, one of tabler-templ's themes: "+themeNames())
-	selfHost := flag.Bool("self-host", false, "serve Tabler, the icons, ApexCharts and the fonts from the app (embedded) instead of jsDelivr")
+	selfHost := flag.Bool("self-host", false, "serve Tabler, the icons, ECharts and the fonts from the app (embedded) instead of jsDelivr")
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "usage: new [flags] <directory>")
 		flag.PrintDefaults()

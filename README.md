@@ -143,7 +143,7 @@ templ Customer(c Customer) {
 
 The page must load Tabler's CSS and JS (`@tabler/core`) and, for icons, the Tabler icons webfont plus `icon.Styles()`
 (the blocks' pages include it). `assets.Head()` and `assets.Scripts()` load them from jsDelivr in the versions
-the module is built against (with flags, payments, vendors and ApexCharts as options); or serve them yourself
+the module is built against (with flags, payments, vendors and ECharts as options); or serve them yourself
 ([Serve Tabler yourself](#serve-tabler-yourself)).
 jsDelivr sends them minified, compressed and cached for a year. The pages themselves are your server's:
 wrap the handler in `compress.Handler` to gzip them (templ pages shrink to a sixth or less), unless a proxy
@@ -185,7 +185,7 @@ in front compresses already.
 | `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
 | `theme`, `themes` | Tabler's theme settings as typed values (`theme.Settings`: accent color, base, font, radius); 13 ready-made themes (`themes.Rose` …) with `Apply`, `Head`, `Section` for the settings panel, and your own via `themes.Theme` |
 | `vectormap` | Tabler's vector map: `Map` (world and other maps, values, selected regions, markers, lines, legend, zoom), `Library` |
-| `chart` | ApexCharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ApexCharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
+| `chart` | Apache ECharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, funnel, two y-axes, annotations, brush, synced groups, legend toggles; options built in Go, any ECharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
 | `imagelabel` | `Labeled`, `Label` (corner, text or icon) |
@@ -416,7 +416,7 @@ next.ServeHTTP(w, r.WithContext(templ.WithNonce(r.Context(), nonce)))
 ```
 
 Styles still need `'unsafe-inline'`: some components and blocks set `style=` attributes (widths, colors,
-images), and Tabler's and ApexCharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
+images), and Tabler's and ECharts' scripts add styles at run time. (With a nonce in `style-src`, browsers
 ignore `'unsafe-inline'`, so leave the nonce out of `style-src` for now.) `csp_test.go` checks that every
 script and style of the packages goes through `internal/csp`. With `static.WithKitCSS()` the kit's own CSS
 comes from a file instead (see "Serve Tabler yourself").
@@ -545,7 +545,7 @@ var files = static.New("/static/", must(fs.Sub(embedded, "static")), static.With
 
 **Plugins, charts and theme fonts.** Everything else the packages load in the browser comes from
 `cdn.Base` (default jsDelivr):
-- ApexCharts;
+- ECharts;
 - the plugins (date picker, select, editor, maps …);
 - the theme fonts;
 - the filled icon font;

@@ -135,8 +135,7 @@ func ChartProps(id string, p map[string]any) chart.Props {
 		types, _ := p["types"].(map[string]any)
 		props.Type = chart.Line
 		props.Categories, props.Series = categories(data, x), columns(data, series)
-		// ApexCharts draws a mixed chart's columns with the line stroke
-		// around them unless each serie gets its own width.
+		// Each serie gets its own type and line width.
 		props.StrokeWidth = make([]float64, len(series))
 		for i := range props.Series {
 			switch t, _ := types[series[i]].(string); t {
@@ -252,16 +251,16 @@ func points(data []map[string]any, x string, names []string, size string) []char
 		out = append(out, chart.Serie{Name: n, Points: pts})
 	}
 	if size != "" {
-		// One serie per value column is ApexCharts' bubble shape too, but
-		// the pack declares a single y column for it.
+		// One serie per value column is the bubble shape too, but the pack
+		// declares a single y column for it.
 		out = out[:min(1, len(out))]
 	}
 	return out
 }
 
 // calendar lays daily values out as GitHub-style weeks: one serie per
-// weekday, one column per week. ApexCharts' heatmap has no calendar mode,
-// and a heatmap of raw dates on one row is unreadable past a month.
+// weekday, one column per week: a heatmap of raw dates on one row is
+// unreadable past a month.
 func calendar(data []map[string]any, x, value string) []chart.Serie {
 	byDay := map[string]float64{}
 	weeks := map[string]bool{}
@@ -281,7 +280,7 @@ func calendar(data []map[string]any, x, value string) []chart.Serie {
 	slices.Sort(order)
 	days := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 	out := make([]chart.Serie, 0, 7)
-	// ApexCharts stacks heatmap series bottom up; reversed, Monday is on top.
+	// The heatmap stacks its rows bottom up; reversed, Monday is on top.
 	for i := 6; i >= 0; i-- {
 		pts := make([]chart.Point, len(order))
 		for j, w := range order {
