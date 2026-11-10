@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **README, "License of ApexCharts":** `chart` loads ApexCharts 7.0.0 (Tabler's version), which is no
+  longer MIT but dual-licensed (free only under 2 million USD annual revenue; OEM license for charts that
+  users configure). The section says which packages load it, which versions were MIT (up to 4.7.0) and
+  what an app accepts by loading it. No code change; `versions.ApexCharts` stays 7.0.0.
+  Options considered: pin on 4.7.0 (last clean MIT; no fixes since April 2025, options untested against it,
+  Tabler updates would reset it); a free library behind the same `chart.Props` (ECharts, Apache-2.0, all
+  chart types, about 370 kB gzipped; Chart.js, MIT, 71 kB, no treemap/heatmap/candlestick/timeline without
+  plugins; uPlot, MIT, 22 kB, time series only; Frappe Charts, MIT, 18 kB, few types); server-rendered SVG
+  for the simple cases (radial/gauge, small bar/line/area) without any library.
+
 ## v0.15.2
 
 - **`layout.App`:** `Badge` puts a small count or label on the app's logo in `layout.Apps`, like Tabler's
