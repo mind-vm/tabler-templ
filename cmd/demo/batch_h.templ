@@ -556,6 +556,14 @@ func sampleMenu() []layout.Entry {
 	}
 }
 
+// badgedApps: the preview's apps, two of them with a badge on the logo (App.Badge).
+func badgedApps() []layout.App {
+	as := apps()
+	as[0].Badge, as[0].BadgeLabel = "3", "3 new orders"
+	as[6].Badge, as[6].BadgeColor = "12", "blue"
+	return as
+}
+
 func navUser(photo, name, detail string, hideName bool) layout.UserProps {
 	return layout.UserProps{Avatar: avatar.Props{Src: avatarURL(photo)}, Name: name, Detail: detail, HideName: hideName}
 }
@@ -568,7 +576,7 @@ templ sampleActions(user layout.UserProps) {
 			@layout.Notifications(layout.NotificationsProps{Footer: notificationActions()}, previewNotifications)
 		}
 		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Icon: "ti-apps", Label: "Show app menu", Card: true}) {
-			@layout.Apps(layout.AppsProps{SettingsHref: "#"}, apps())
+			@layout.Apps(layout.AppsProps{SettingsHref: "#"}, badgedApps())
 		}
 		@layout.NavDropdown(layout.NavDropdownProps{Class: "d-none d-md-flex", Text: "EN", Label: "Select language"}) {
 			for _, l := range previewLanguages {
