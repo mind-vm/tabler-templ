@@ -83,6 +83,71 @@ func TestPaginate(t *testing.T) {
 	assert.Equal(t, [3]int{0, 0, 1}, [3]int{l.From, l.To, l.Pages})
 }
 
+// GS-51: the database does search, filter, page and count; the list says what to fetch and takes the total.
+func TestGS51_ListPagedByTheDatabase(t *testing.T) {
+	l := listpage.New(httptest.NewRequest("GET", "/x?q=M%C3%BChl+Weg&page=3", nil), listpage.Config{PageSize: 10})
+	assert.Equal(t, []string{"muehl", "weg"}, l.Words())
+	off, lim := l.Window()
+	assert.Equal(t, [2]int{20, 10}, [2]int{off, lim})
+	assert.True(t, l.SetTotal(45))
+	assert.Equal(t, [4]int{3, 5, 21, 30}, [4]int{l.Page, l.Pages, l.From, l.To})
+
+	// Beyond the last page: the last one, and fetch again.
+	l = listpage.New(httptest.NewRequest("GET", "/x?page=9", nil), listpage.Config{PageSize: 10})
+	assert.False(t, l.SetTotal(12))
+	off, _ = l.Window()
+	assert.Equal(t, [4]int{2, 10, 11, 12}, [4]int{l.Page, off, l.From, l.To})
+
+	l = listpage.New(httptest.NewRequest("GET", "/x", nil), listpage.Config{})
+	assert.True(t, l.SetTotal(0))
+	assert.Empty(t, l.Words())
+	assert.Equal(t, [3]int{0, 0, 1}, [3]int{l.From, l.To, l.Pages})
+}
+
+// The flow of Window's example with count(*) OVER (): page 9 brings no row and a total of 0; the second
+// fetch brings page 1 and the real total.
+func TestGS51_PageBeyondTheLastWithCountOver(t *testing.T) {
+	all := 12
+	fetch := func(offset, limit int) (rows, total int) { // count(*) OVER (): 0 when no row comes back
+		rows = max(0, min(limit, all-offset))
+		if rows == 0 {
+			return 0, 0
+		}
+		return rows, all
+	}
+	l := listpage.New(httptest.NewRequest("GET", "/x?page=9", nil), listpage.Config{PageSize: 10})
+	off, lim := l.Window()
+	rows, total := fetch(off, lim)
+	require.False(t, l.SetTotal(total))
+	off, lim = l.Window()
+	rows, total = fetch(off, lim)
+	assert.True(t, l.SetTotal(total))
+	assert.Equal(t, 10, rows)
+	assert.Equal(t, [5]int{1, 2, 12, 1, 10}, [5]int{l.Page, l.Pages, l.Total, l.From, l.To})
+}
+
+// FoldSQL folds like Fold: one replace per letter of the same table, inside lower().
+func TestGS50_FoldSQLMatchesFold(t *testing.T) {
+	sql := listpage.FoldSQL("c.name")
+	assert.Equal(t, `replace(replace(replace(replace(lower(c.name), 'ä', 'ae'), 'ö', 'oe'), 'ü', 'ue'), 'ß', 'ss')`, sql)
+	// Simulate the expression in Go: lower, then the replaces in their order, must equal Fold.
+	re := regexp.MustCompile(`'(.)', '([a-z]+)'`)
+	for _, in := range []string{"Mühlenweg", "GRÜẞE Straße", "Öl und Äpfel", "plain"} {
+		got := strings.ToLower(in)
+		for _, m := range re.FindAllStringSubmatch(sql, -1) {
+			got = strings.ReplaceAll(got, m[1], m[2])
+		}
+		assert.Equal(t, listpage.Fold(in), got, in)
+	}
+}
+
+func TestLikePattern(t *testing.T) {
+	assert.Equal(t, `%muehl%`, listpage.LikePattern("muehl"))
+	assert.Equal(t, `%50\%\_a\\b%`, listpage.LikePattern(`50%_a\b`))
+	l := listpage.New(httptest.NewRequest("GET", "/x?q=M%C3%BChl+10%25", nil), listpage.Config{})
+	assert.Equal(t, []string{"%muehl%", `%10\%%`}, l.Patterns())
+}
+
 func TestContains(t *testing.T) {
 	assert.True(t, listpage.Contains("BERLIN mitte", "Mitte", "Berlin"))
 	assert.False(t, listpage.Contains("berlin süd", "Berlin Mitte"))
