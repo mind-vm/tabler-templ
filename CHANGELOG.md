@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.18.0
 
 The reference app of the design concept „Gestaltung“ and the blocks it needed (nothing changes for existing code).
 
