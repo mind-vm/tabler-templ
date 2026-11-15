@@ -1,0 +1,68 @@
+// Package mark draws the named markings of the design concept „Gestaltung“ (GS-07, GS-76): text from
+// outside (from customers, suppliers, bidders) and internal notes that are never sent. Text from outside
+// is marked, escaped and never a link; an internal note says that it stays inside.
+//
+//	@mark.Text(mark.External, message.Body)       // a customer's message: label „von außen“, plain text
+//	@mark.Text(mark.Internal, note.Text)          // label „intern, nie gesendet“
+//	@mark.Badge(mark.External)                    // only the label, e.g. in a table cell
+//
+// The colours are the custom properties --kit-mark-<kind>, -text and -bg that themes.SignalCSS sets.
+package mark
+
+import (
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Kind is a marking.
+type Kind string
+
+const (
+	External Kind = "external" // text from outside
+	Internal Kind = "internal" // an internal note, never sent
+)
+
+func (k Kind) label(m kit.Messages) string {
+	if k == Internal {
+		return m.MarkInternal
+	}
+	return m.MarkExternal
+}
+
+// Badge is the marking's label.
+templ Badge(k Kind) {
+	@Styles()
+	<span class={ "kit-mark-badge kit-mark-" + string(k) }>{ k.label(kit.T(ctx)) }</span>
+}
+
+type TextProps struct {
+	Label      string // instead of the default label, e.g. „von außen · E-Mail“
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Text is a text with its marking above it. The text is plain: escaped, line breaks kept, nothing becomes a
+// link or an image.
+templ Text(k Kind, text string, props ...TextProps) {
+	{{ p := kit.First(props) }}
+	@Styles()
+	<div class={ kit.Classes("kit-mark", "kit-mark-"+string(k), p.Class) } data-mark={ string(k) } { p.Attributes... }>
+		<span class={ "kit-mark-badge kit-mark-" + string(k) }>{ kit.Or(p.Label, k.label(kit.T(ctx))) }</span>
+		<div class="kit-mark-text">{ text }</div>
+	</div>
+}
+
+var styles = csp.Sheet("mark", css)
+
+// Styles renders the package's CSS once per page; Badge and Text render it themselves.
+templ Styles() {
+	@styles
+}
+
+const css = `.kit-mark{padding:.625rem .75rem;border-left:3px solid var(--kit-mark-external,#B45309);background:var(--kit-mark-external-bg,transparent);border-radius:var(--tblr-border-radius)}
+.kit-mark.kit-mark-internal{border-left-color:var(--kit-mark-internal,#7C3AED);background:var(--kit-mark-internal-bg,transparent)}
+.kit-mark-text{margin-top:.25rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.kit-mark-badge{display:inline-block;font-size:.75rem;font-weight:500;line-height:1.4;color:var(--kit-mark-external-text,#92400E)}
+.kit-mark-badge.kit-mark-internal{color:var(--kit-mark-internal-text,#6D28D9)}
+.kit-mark-badge::before{content:"";display:inline-block;width:.5rem;height:.5rem;margin-right:.375rem;border-radius:50%;background:var(--kit-mark-external,#B45309);vertical-align:.05em}
+.kit-mark-badge.kit-mark-internal::before{background:var(--kit-mark-internal,#7C3AED)}`

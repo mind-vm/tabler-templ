@@ -5,15 +5,7 @@
 
 :root {
   --tblr-body-font-size: 14px;
-  /* Signal colours: the same in every theme and mode (GS-07) */
-  --tblr-success: #22A04B;
-  --tblr-success-rgb: 34, 160, 75;
-  --tblr-warning: #E0A100;
-  --tblr-warning-rgb: 224, 161, 0;
-  --tblr-danger: #E5484D;
-  --tblr-danger-rgb: 229, 72, 77;
-  --tblr-info: #2563EB;
-  --tblr-info-rgb: 37, 99, 235;
+  /* Signal colours and markings come from themes.SignalStyles (GS-07) */
   --kit-sidebar-width: 240px;
   --ref-ground: var(--tblr-body-bg);
   --ref-line: var(--tblr-border-color);
@@ -125,3 +117,4 @@ body {
 .ref-concept-text .ref-concept-table td { vertical-align: top; min-width: 7rem; }
 .ref-backlink { text-decoration-style: dotted !important; }
 .ref-concept-nav { max-width: 100%; overflow-x: auto; }
+.ref-dot { display: inline-block; width: .625rem; height: .625rem; border-radius: 50%; vertical-align: -.05em; }

@@ -9,6 +9,12 @@
 - **`blocks/listpage`:** `Window`, `Words`, `Patterns` and `SetTotal` let the database do search, filter, page
   and count (GS-51) instead of `Paginate` over every row; `FoldSQL` folds a column like `Fold`, `LikePattern`
   escapes a word for LIKE. `Paginate` is unchanged.
+- **`themes`:** `Signals`, `Markings`, `SignalCSS`/`SignalStyles` and `Contrast` (GS-07 of the design concept). The
+  signal colours are the same in every theme. Tabler's coloured text (pills, statuses, alerts, `text-*`) and
+  coloured buttons use their dark tones, so every pair meets WCAG 2.1 AA, in dark mode too. A test checks every
+  pair.
+- **`mark`** (new): text from outside and internal notes, marked, escaped, never a link (GS-76).
+- **`kit.Messages`:** `MarkExternal`, `MarkInternal`.
 
 ## v0.18.0
 
