@@ -91,7 +91,7 @@ document.querySelectorAll(".modal[data-kit-dialog]").forEach(function(d){
 var forms=d.querySelectorAll("form");
 forms.forEach(function(f){hidden(f,cfg.dialogField,d.id);hidden(f,cfg.returnField,location.pathname+location.search);var k=f.getAttribute(cfg.formAttribute);if(k)hidden(f,cfg.formField,k);
 if(d.classList.contains("kit-dialog-large"))f.addEventListener("submit",function(){try{sessionStorage.setItem("kitDialogOpen",d.id)}catch(_){}})});
-var f=forms.length===1?forms[0]:null;var rows=f?Array.from(f.children).filter(function(e){return!(e.tagName==="INPUT"&&e.type==="hidden")}):[];var row=rows[rows.length-1];
+var f=forms.length===1&&!forms[0].classList.contains("kit-rowedit-row")?forms[0]:null;var rows=f?Array.from(f.children).filter(function(e){return!(e.tagName==="INPUT"&&e.type==="hidden")}):[];var row=rows[rows.length-1];
 var onlyButtons=row&&row.children.length>0&&Array.from(row.children).every(function(e){return e.tagName==="BUTTON"});
 if(onlyButtons&&row.querySelector(":scope > .btn-primary, :scope > .btn-danger")){if(!f.id)f.id=d.id+"-form";var foot=document.createElement("div");foot.className="modal-footer kit-dialog-footer";
 var hint=document.createElement("span");hint.className="kit-dialog-hint";if(d.hasAttribute("data-kit-section"))hint.textContent=cfg.sectionHint;foot.appendChild(hint);

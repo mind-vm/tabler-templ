@@ -739,4 +739,6 @@ func (s *Store) seed() {
 		}
 		add(c, titles[i%len(titles)], due, due.AddDate(0, 1, 0), st, 2+i%6)
 	}
+	// An offer without positions yet: the list dialog shows only the new row.
+	add("K-1002", "Neues Angebot", day(time.November, 27), day(time.December, 31), OfferDraft, 0)
 }
