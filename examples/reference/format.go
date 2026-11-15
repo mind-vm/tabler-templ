@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
 )
 
 // Formats of GS-73: 1.234,50 €, TT.MM.JJJJ, 07:30, ranges with an en dash.
@@ -115,20 +117,8 @@ func parseDate(s string) (time.Time, error) {
 	return time.Parse("02.01.2006", strings.TrimSpace(s))
 }
 
-// fold makes text comparable for the search: lower case, ä = ae, ö = oe, ü = ue, ß = ss (GS-50).
-func fold(s string) string {
-	return folder.Replace(strings.ToLower(s))
-}
+// fold makes text comparable for sorting and the search: lower case, ä = ae … (GS-50, listpage.Fold).
+func fold(s string) string { return listpage.Fold(s) }
 
-var folder = strings.NewReplacer("ä", "ae", "ö", "oe", "ü", "ue", "ß", "ss")
-
-// matches: every word of the query occurs in one of the fields, ignoring case and umlauts (GS-50).
-func matches(query string, fields ...string) bool {
-	text := fold(strings.Join(fields, " "))
-	for _, w := range strings.Fields(fold(query)) {
-		if !strings.Contains(text, w) {
-			return false
-		}
-	}
-	return true
-}
+// matches: every word of the query occurs in one of the fields (GS-50, listpage.Contains).
+func matches(query string, fields ...string) bool { return listpage.Contains(query, fields...) }
