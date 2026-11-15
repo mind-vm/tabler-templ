@@ -139,16 +139,26 @@ func (l *List) size() int {
 }
 
 // Window is the part of the list the database fetches for the page asked for: OFFSET and LIMIT. With
-// Words, Value and SetTotal, the database does the search, the filter, the page and the count in fixed
-// queries instead of the app holding every row:
+// Patterns (or Words), Value and SetTotal, the database does the search, the filter, the page and the
+// count in fixed queries instead of the app holding every row (GS-51 of the design concept):
 //
 //	l := listpage.New(r, cfg, statusFilter)
 //	offset, limit := l.Window()
-//	rows, total := store.Customers(ctx, l.Words(), l.Value("status"), offset, limit) // SELECT …, count(*) OVER ()
+//	rows, total := store.Customers(ctx, l.Patterns(), l.Value("status"), offset, limit)
 //	if !l.SetTotal(total) { // the page asked for lies beyond the last one
 //		offset, limit = l.Window()
-//		rows, _ = store.Customers(ctx, l.Words(), l.Value("status"), offset, limit)
+//		rows, total = store.Customers(ctx, l.Patterns(), l.Value("status"), offset, limit)
+//		l.SetTotal(total)
 //	}
+//
+// SetTotal is called again after the second fetch: with count(*) OVER (), a page beyond the last brings no
+// row and so no count (0), and the list goes to page 1. A separate count query avoids the second fetch.
+// The query, e.g. for sqlc with PostgreSQL, where every pattern must match the folded text:
+//
+//	SELECT c.*, count(*) OVER () AS total FROM customers c
+//	WHERE NOT EXISTS (SELECT 1 FROM unnest(@patterns::text[]) AS p WHERE <FoldSQL("c.name || ' ' || c.city")> NOT LIKE p)
+//	  AND (@status::text = '' OR c.status = @status)
+//	ORDER BY c.name LIMIT @lim OFFSET @off
 func (l *List) Window() (offset, limit int) {
 	return (max(l.Page, 1) - 1) * l.size(), l.size()
 }
@@ -157,6 +167,16 @@ func (l *List) Window() (offset, limit int) {
 // in its searched text, folded the same way. Empty without a query.
 func (l *List) Words() []string {
 	return strings.Fields(Fold(l.Query))
+}
+
+// Patterns are Words as LIKE patterns (LikePattern): a row matches when its folded text is LIKE every one.
+func (l *List) Patterns() []string {
+	ws := l.Words()
+	ps := make([]string, len(ws))
+	for i, w := range ws {
+		ps[i] = LikePattern(w)
+	}
+	return ps
 }
 
 // SetTotal records the number of all rows that match (from the database), and sets Pages, Page, From and
@@ -189,10 +209,39 @@ func Contains(query string, fields ...string) bool {
 }
 
 // Fold is text as Contains compares it: lower case, with ä, ö, ü, ß written as ae, oe, ue, ss. Apps that
-// search in SQL fold the column and the query the same way.
+// search in SQL fold the column the same way with FoldSQL.
 func Fold(s string) string { return umlauts.Replace(strings.ToLower(s)) }
 
-var umlauts = strings.NewReplacer("ä", "ae", "ö", "oe", "ü", "ue", "ß", "ss")
+// folds are the letters Fold writes out; Fold and FoldSQL both come from this table.
+var folds = [][2]string{{"ä", "ae"}, {"ö", "oe"}, {"ü", "ue"}, {"ß", "ss"}}
+
+var umlauts = func() *strings.Replacer {
+	var args []string
+	for _, f := range folds {
+		args = append(args, f[0], f[1])
+	}
+	return strings.NewReplacer(args...)
+}()
+
+// FoldSQL is the SQL expression that folds expr like Fold, e.g. FoldSQL("c.name || ' ' || c.city") for
+// PostgreSQL or SQLite: lower() and one replace() per letter. lower() must know the umlauts (PostgreSQL
+// with a UTF-8 database does; SQLite's built-in lower() does not, so fold Ä, Ö, Ü there as well or keep a
+// folded column). expr is SQL written by the app, never input.
+func FoldSQL(expr string) string {
+	out := "lower(" + expr + ")"
+	for _, f := range folds {
+		out = "replace(" + out + ", '" + f[0] + "', '" + f[1] + "')"
+	}
+	return out
+}
+
+// LikePattern is the LIKE pattern that finds the word anywhere: % and _ in the word stand for themselves
+// (escaped with a backslash, the default escape of PostgreSQL's LIKE; SQLite needs ESCAPE '\').
+func LikePattern(word string) string {
+	return "%" + likeEscaper.Replace(word) + "%"
+}
+
+var likeEscaper = strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`)
 
 // Empty is the text for a table without rows: NoResults when search or filters are active,
 // otherwise the list's own text (e.g. "No customers yet.").

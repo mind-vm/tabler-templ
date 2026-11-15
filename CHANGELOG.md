@@ -6,8 +6,9 @@
   (GS-50 of the design concept). `Fold` is that comparison, for apps that search in SQL. A search can find more
   rows than before ("muehl" finds "Mühlhausen"); it finds none fewer.
 - **`examples/reference`** uses `listpage.Contains` instead of its own search.
-- **`blocks/listpage`:** `Window`, `Words` and `SetTotal` let the database do search, filter, page and count
-  (GS-51) instead of `Paginate` over every row; `Paginate` is unchanged.
+- **`blocks/listpage`:** `Window`, `Words`, `Patterns` and `SetTotal` let the database do search, filter, page
+  and count (GS-51) instead of `Paginate` over every row; `FoldSQL` folds a column like `Fold`, `LikePattern`
+  escapes a word for LIKE. `Paginate` is unchanged.
 
 ## v0.18.0
 
