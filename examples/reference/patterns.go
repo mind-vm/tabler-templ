@@ -96,10 +96,10 @@ var patterns = []pattern{
 		What:    "Der KI-Assistent ist ein Reiter im Panel rechts. Er liest mit den Rechten der Person, zeigt, was er gelesen hat, und füllt Formulare vor; speichern tut der Mensch.",
 		When:    "In Büro-Oberflächen, wenn die Firma ihn eingeschaltet hat. Die App ist ohne ihn vollständig nutzbar.",
 		Try:     "Fragen Sie „Trage für die Wohnungsgesellschaft Nordstadt die Anschrift Hafenstraße 12 ein“: Der Dialog öffnet sich ausgefüllt. Fragen Sie nach der IBAN: abgelehnt.",
-		Rules:   []string{"GS-13", "KA-01", "KA-02", "KA-03", "KA-15", "KA-20"},
+		Rules:   []string{"GS-13", "KA-01", "KA-02", "KA-03", "KA-15", "KA-20", "KA-28"},
 		Blocks:  []block{{"blocks/sidepanel", "Aside, Buttons"}, {"blocks/assistant", "Conversation, Catalog, Stream, ActionScript, Transcript, German"}},
 		Link:    pathConceptAssistant + "#6-wo-er-erscheint",
-		Note:    "Vorschlag: Das Konzept Gestaltung nennt den Assistenten bisher nicht als Beispiel; die Regeln KA-xx stehen im Konzept Assistent."},
+		Note:    "Die Regeln KA-xx stehen im Konzept Assistent. Ein Produkt zum Selbstbetrieb bietet den Assistenten nur mit einem Anbieter an, den der Betreiber gewählt hat; vertrauliche Daten sind nie Werkzeug."},
 }
 
 var overviewText = pattern{ID: "Übersicht", Name: "Referenz der Gestaltung",
