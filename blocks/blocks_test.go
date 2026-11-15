@@ -89,6 +89,16 @@ func TestContains(t *testing.T) {
 	assert.True(t, listpage.Contains("", "x"))
 }
 
+// GS-50: the search ignores case and umlauts (ä = ae), both ways.
+func TestGS50_ContainsFoldsUmlauts(t *testing.T) {
+	assert.True(t, listpage.Contains("muehl", "Mühlhausen"))
+	assert.True(t, listpage.Contains("Mühl", "Muehlenweg"))
+	assert.True(t, listpage.Contains("STRASSE", "Hauptstraße"))
+	assert.True(t, listpage.Contains("goethe", "Göthe"))
+	assert.False(t, listpage.Contains("mühl nord", "Mühlhausen"))
+	assert.Equal(t, "muellerstrasse", listpage.Fold("Müllerstraße"))
+}
+
 func TestListCard(t *testing.T) {
 	ctx := kit.WithMessages(context.Background(), kit.German)
 	l := listpage.New(httptest.NewRequest("GET", "/kunden?q=a", nil), listpage.Config{Placeholder: "Name …"}, status)

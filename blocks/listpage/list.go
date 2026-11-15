@@ -142,17 +142,24 @@ func Paginate[T any](l *List, rows []T, keep func(T) bool) []T {
 	return hits[from:to]
 }
 
-// Contains reports whether every word of the query occurs in one of the fields, ignoring case.
-// Apps with their own matching rules (umlauts, spaces) use their own function instead.
+// Contains reports whether every word of the query occurs in one of the fields, ignoring case and German
+// umlauts: ä, ö, ü and ß match ae, oe, ue and ss both ways ("muehl" finds "Mühlhausen", "Müller" finds
+// "Mueller"). Apps with other matching rules use their own function instead.
 func Contains(query string, fields ...string) bool {
-	text := strings.ToLower(strings.Join(fields, " "))
-	for _, w := range strings.Fields(strings.ToLower(query)) {
+	text := Fold(strings.Join(fields, " "))
+	for _, w := range strings.Fields(Fold(query)) {
 		if !strings.Contains(text, w) {
 			return false
 		}
 	}
 	return true
 }
+
+// Fold is text as Contains compares it: lower case, with ä, ö, ü, ß written as ae, oe, ue, ss. Apps that
+// search in SQL fold the column and the query the same way.
+func Fold(s string) string { return umlauts.Replace(strings.ToLower(s)) }
+
+var umlauts = strings.NewReplacer("ä", "ae", "ö", "oe", "ü", "ue", "ß", "ss")
 
 // Empty is the text for a table without rows: NoResults when search or filters are active,
 // otherwise the list's own text (e.g. "No customers yet.").
