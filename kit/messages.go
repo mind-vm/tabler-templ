@@ -40,6 +40,9 @@ type Messages struct {
 	SaveRow   string
 	DeleteRow string
 	AddRow    string
+	// Package mark: text from outside and internal notes.
+	MarkExternal string
+	MarkInternal string
 	// Create page and history.
 	Create    string
 	NoEntries string
@@ -71,6 +74,7 @@ var (
 		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
+		MarkExternal: "from outside", MarkInternal: "internal, never sent",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
 		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
@@ -83,6 +87,7 @@ var (
 		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
+		MarkExternal: "von außen", MarkInternal: "intern, nie gesendet",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
 		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",

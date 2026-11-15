@@ -6,6 +6,12 @@
   (GS-50 of the design concept). `Fold` is that comparison, for apps that search in SQL. A search can find more
   rows than before ("muehl" finds "Mühlhausen"); it finds none fewer.
 - **`examples/reference`** uses `listpage.Contains` instead of its own search.
+- **`themes`:** `Signals`, `Markings`, `SignalCSS`/`SignalStyles` and `Contrast` (GS-07 of the design concept). The
+  signal colours are the same in every theme. Tabler's coloured text (pills, statuses, alerts, `text-*`) and
+  coloured buttons use their dark tones, so every pair meets WCAG 2.1 AA, in dark mode too. A test checks every
+  pair.
+- **`mark`** (new): text from outside and internal notes, marked, escaped, never a link (GS-76).
+- **`kit.Messages`:** `MarkExternal`, `MarkInternal`.
 
 ## v0.18.0
 

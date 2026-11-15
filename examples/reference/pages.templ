@@ -1,16 +1,41 @@
 package reference
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/mind-vm/tabler-templ/blocks/detail"
 	"github.com/mind-vm/tabler-templ/blocks/metric"
 	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/mark"
 	"github.com/mind-vm/tabler-templ/placeholder"
 	"github.com/mind-vm/tabler-templ/status"
 	"github.com/mind-vm/tabler-templ/table"
+	"github.com/mind-vm/tabler-templ/themes"
 )
+
+type contrastRow struct{ Name, Meaning, Dot, Text string }
+
+func contrastRows() []contrastRow {
+	meaning := map[string][2]string{"green": {"Grün", "gut"}, "yellow": {"Gelb", "Achtung"}, "red": {"Rot", "Problem"}, "blue": {"Blau", "Info"},
+		"internal": {"Intern", "nie gesendet"}, "external": {"Von außen", "Kunde"}}
+	var rs []contrastRow
+	for _, s := range themes.Signals {
+		rs = append(rs, contrastRow{meaning[s.Name][0], meaning[s.Name][1], s.Dot, s.Text})
+	}
+	for _, m := range themes.Markings {
+		rs = append(rs, contrastRow{meaning[m.Name][0], meaning[m.Name][1], m.Dot, m.Text})
+	}
+	return rs
+}
+
+// ratio is a contrast in the German format: „5,4:1“.
+func ratio(fg, bg string) string {
+	return strings.Replace(strconv.FormatFloat(themes.Contrast(fg, bg), 'f', 1, 64), ".", ",", 1) + ":1"
+}
 
 // --- overview -------------------------------------------------------------------------------------------
 
@@ -275,6 +300,41 @@ templ brandView() {
 						@swatch("Rot", "--tblr-danger", "Problem, überfällig")
 						@swatch("Blau", "--tblr-info", "Hinweis, heute")
 					</div>
+				}
+			}
+		</div>
+		<div class="col-12">
+			@detail.Section(detail.SectionProps{Title: "Kontrast"}) {
+				@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Nowrap: true, Class: "ref-table"}) {
+					<thead>
+						<tr><th>Farbe</th><th>Punkt</th><th>Text</th><th class="text-end">Text auf Weiß</th><th class="text-end">Text auf Grund</th><th class="text-end">Punkt auf Grund</th></tr>
+					</thead>
+					<tbody>
+						for _, c := range contrastRows() {
+							<tr>
+								<td>{ c.Name }</td>
+								<td><span class="ref-dot" style={ templ.SafeCSS("background:" + c.Dot) }></span> <code>{ c.Dot }</code></td>
+								<td><span style={ templ.SafeCSS("color:" + c.Text) } class="fw-medium">{ c.Meaning }</span> <code>{ c.Text }</code></td>
+								<td class="text-end ref-num">{ ratio(c.Text, "#FFFFFF") }</td>
+								<td class="text-end ref-num">{ ratio(c.Text, "#F5F5F5") }</td>
+								<td class="text-end ref-num">{ ratio(c.Dot, "#F5F5F5") }</td>
+							</tr>
+						}
+					</tbody>
+				}
+				@card.Body() {
+					<p class="text-secondary mb-0">Text braucht mindestens 4,5:1, Punkte, Linien und Flächen 3:1. Signalfarben sind nie Textfarbe: Pillen, Ampel, Hinweise und Knöpfe nehmen die dunklen Töne. Ein Test prüft jedes Paar, auch im Dunkelmodus.</p>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Markierungen"}) {
+				@card.Body() {
+					<div class="d-grid gap-3">
+						@mark.Text(mark.External, "Guten Tag, bitte schicken Sie uns das Angebot bis Freitag. Mehr unter www.example.org.\nViele Grüße, Erika Beispiel")
+						@mark.Text(mark.Internal, "Rückruf nach dem 20.11. vereinbart; Angebot erst danach abgeben.")
+					</div>
+					<p class="text-secondary mt-3 mb-0">Text von außen ist gekennzeichnet, wird nur als Text gezeigt und wird nie zum Link. Interne Notizen sagen, dass sie nie gesendet werden.</p>
 				}
 			}
 		</div>

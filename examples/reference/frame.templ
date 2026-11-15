@@ -58,6 +58,7 @@ templ (a *App) head() {
 		<link rel="stylesheet" href={ a.files.URL("npm/@fontsource-variable/" + f.Package + "@" + themes.FontsVersion + "/index.css") }/>
 	}
 	@csp.Style(themeCSS())
+	@themes.SignalStyles()
 	@inlineScript(themeScript())
 	<link rel="stylesheet" href={ a.files.URL("reference.css") }/>
 }
