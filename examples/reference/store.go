@@ -191,6 +191,7 @@ type Store struct {
 	offers    []*Offer
 	nextID    int
 	readOnly  bool
+	demo      bool
 }
 
 // NewStore returns the sample data.
@@ -204,7 +205,7 @@ func NewStore() *Store {
 func (s *Store) Reset() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.customers, s.offers, s.nextID, s.readOnly = nil, nil, 0, false
+	s.customers, s.offers, s.nextID, s.readOnly, s.demo = nil, nil, 0, false, false
 	s.seed()
 }
 
@@ -219,6 +220,58 @@ func (s *Store) SetReadOnly(on bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.readOnly = on
+}
+
+// Demo: all data is made up; the frame says so (GS-63).
+func (s *Store) Demo() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.demo
+}
+
+func (s *Store) SetDemo(on bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.demo = on
+}
+
+// Withdraw takes a submitted offer back into the draft; it needs a reason (GS-44), which goes into the
+// customer's notes.
+func (s *Store) Withdraw(no, reason string) (Offer, error) {
+	reason = strings.TrimSpace(reason)
+	if reason == "" {
+		return Offer{}, FieldErrors{"reason": "Bitte geben Sie einen Grund an."}
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	o := s.offer(no)
+	if o == nil {
+		return Offer{}, ErrNotFound
+	}
+	if o.Status != OfferSubmitted {
+		return *o, errors.New("Nur ein abgegebenes Angebot lässt sich zurücknehmen.")
+	}
+	o.Status, o.Submitted = OfferDraft, time.Time{}
+	if c := s.customer(o.Customer); c != nil {
+		c.Notes = append([]Note{{Date: Today, Text: "Abgabe von " + o.No + " zurückgenommen: " + reason}}, c.Notes...)
+	}
+	return *o, nil
+}
+
+// DeleteCustomer deletes a customer for good after the name was typed to confirm (GS-44).
+func (s *Store) DeleteCustomer(no, typed string) (Customer, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c := s.customer(no)
+	if c == nil {
+		return Customer{}, ErrNotFound
+	}
+	if strings.TrimSpace(typed) != c.Name {
+		return *c, FieldErrors{"confirm": "Bitte tippen Sie den Namen genau so: " + c.Name}
+	}
+	s.customers = slices.DeleteFunc(s.customers, func(x *Customer) bool { return x.No == no })
+	s.offers = slices.DeleteFunc(s.offers, func(o *Offer) bool { return o.Customer == no })
+	return *c, nil
 }
 
 func (s *Store) Customers() []Customer {

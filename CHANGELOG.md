@@ -14,7 +14,13 @@
   coloured buttons use their dark tones, so every pair meets WCAG 2.1 AA, in dark mode too. A test checks every
   pair.
 - **`mark`** (new): text from outside and internal notes, marked, escaped, never a link (GS-76).
-- **`kit.Messages`:** `MarkExternal`, `MarkInternal`.
+- **`kit.Messages`:** `MarkExternal`, `MarkInternal`, `SkipToContent`.
+- **`blocks/shell`:** a link „Zum Inhalt“ first on the page, a visible focus ring (3 px), and `Props.Notice` with
+  `shell.Notice` for a lasting state above the message line: read-only, demo instance, staging (GS-63).
+- **`blocks/detail`:** a dialog whose last button is red (an action with a reason, GS-44) also gets the footer with
+  Cancel.
+- **`examples/reference`:** B-07 shows the demo instance, an action with a required reason and one with a typed
+  confirmation.
 
 ## v0.18.0
 

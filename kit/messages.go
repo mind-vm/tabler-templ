@@ -31,6 +31,8 @@ type Messages struct {
 	Of          string
 	NoResults   string
 	Breadcrumbs string
+	// Page shell: the link that skips to the content, first on the page.
+	SkipToContent string
 	// Detail block: the edit button, the dialog's cancel button and its hint for a section dialog.
 	Edit        string
 	Cancel      string
@@ -71,7 +73,7 @@ var (
 	English = Messages{Close: "Close", Pages: "Pages", PrevPage: "Previous page", NextPage: "Next page",
 		Previous: "Previous", Next: "Next", First: "First", Last: "Last", FirstPage: "First page", LastPage: "Last page", Page: "Page",
 		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu",
-		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
+		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs", SkipToContent: "Skip to content",
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
 		MarkExternal: "from outside", MarkInternal: "internal, never sent",
@@ -84,7 +86,7 @@ var (
 	German = Messages{Close: "Schließen", Pages: "Seiten", PrevPage: "Vorige Seite", NextPage: "Nächste Seite",
 		Previous: "Zurück", Next: "Weiter", First: "Erste", Last: "Letzte", FirstPage: "Erste Seite", LastPage: "Letzte Seite", Page: "Seite",
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
-		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
+		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen", SkipToContent: "Zum Inhalt",
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
 		MarkExternal: "von außen", MarkInternal: "intern, nie gesendet",

@@ -28,6 +28,7 @@ type page struct {
 
 	// set by render
 	readOnly bool
+	demo     bool
 	session  *session
 	panel    *sidepanel.Panel
 }
@@ -75,21 +76,26 @@ templ (a *App) page(p page) {
 	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(), Scripts: a.scripts(p),
 		BodyAttributes: sidepanel.BodyAttributes(p.panel, templ.Attributes{"data-page": p.Key}),
 		Sidebar: a.sidebar(p), Breadcrumbs: p.Crumbs, HeaderActions: sidepanel.Buttons(p.panel),
-		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash}) {
-		if p.readOnly {
-			@alert.Alert(alert.Props{Variant: alert.VariantWarning, Icon: "ti-lock", Attributes: templ.Attributes{"data-read-only": true}}) {
-				Die Firma Musterdienst GmbH ist gesperrt. Sie können alles lesen und Ihre Daten exportieren; ändern lässt sich nichts.
-				@alert.Action(pathStates + "#nur-lesen") {
-					Daten exportieren
-				}
-			}
-		}
+		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash, Notice: notices(p)}) {
 		if e, ok := p.explanation(); ok {
 			@explain(e)
 		}
 		<div class="ref-content">
 			{ children... }
 		</div>
+	}
+}
+
+// notices are the states of the whole app above the message line (GS-63): read-only and demo instance.
+templ notices(p page) {
+	if p.readOnly {
+		@shell.Notice(shell.NoticeProps{Variant: alert.VariantWarning, Icon: "ti-lock", Attributes: templ.Attributes{"data-read-only": true},
+			Text: "Die Firma Musterdienst GmbH ist gesperrt. Sie können alles lesen und Ihre Daten exportieren; ändern lässt sich nichts.",
+			Action: "Daten exportieren", ActionHref: pathStates + "#nur-lesen"})
+	}
+	if p.demo {
+		@shell.Notice(shell.NoticeProps{Icon: "ti-flask", Attributes: templ.Attributes{"data-demo": true},
+			Text: "Demo-Instanz: Alle Daten hier sind erfunden."})
 	}
 }
 

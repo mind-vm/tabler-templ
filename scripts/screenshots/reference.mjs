@@ -30,6 +30,7 @@ const shots = [
   ["b05-schreibgeschuetzt", "/angebote/A-2026-002"],
   ["b06-anlegen", "/kunden/neu"],
   ["b07-zustaende", "/zustaende?meldung=1", async (p) => { await p.waitForSelector("[data-ref-load]:not([aria-busy])"); }],
+  ["b07-grund", "/zustaende", async (p) => { await p.click('[data-bs-target="#dialog-zuruecknehmen"]'); await p.waitForSelector("#dialog-zuruecknehmen.show"); await p.waitForTimeout(300); }],
   ["b07-fehlerseite", "/gibt-es-nicht", null, 404],
   ["b08-marke", "/marke"],
   ["b09-assistent", "/assistent"],

@@ -23,8 +23,7 @@ type Signal struct {
 	DarkDot  string
 }
 
-// Signals are the signal colours of the design concept „Gestaltung“ (GS-07). Green's text tone is
-// #1E7537, a shade darker than the concept's #1F7A3A, which reaches only 4.44:1 in a pill on the grey ground.
+// Signals are the signal colours of the design concept „Gestaltung“ (GS-07, v0.5).
 var Signals = []Signal{
 	{Name: "green", Classes: []string{"green", "success"}, Dot: "#22A04B", Text: "#1E7537", DarkText: "#4ADE80"},
 	{Name: "yellow", Classes: []string{"yellow", "warning"}, Dot: "#B57F00", Text: "#8A5A00", DarkText: "#FACC15"},

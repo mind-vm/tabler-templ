@@ -219,6 +219,20 @@ func TestShellPage(t *testing.T) {
 	assert.NotContains(t, h, "kit_sidebar=")
 }
 
+// A link to the content comes first, and a lasting notice stands above the message (GS-63).
+func TestShellSkipLinkAndNotice(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, shell.Page(shell.Props{Title: "x", Notice: shell.Notice(shell.NoticeProps{Text: "Demo-Instanz", Action: "Mehr", ActionHref: "/demo"}),
+		Flash: &shell.Flash{Text: "Gespeichert."}}))
+	body := h[strings.Index(h, "<body"):]
+	assert.Regexp(t, `^<body[^>]*><a class="kit-skip-link" href="#kit-content">Zum Inhalt</a>`, body)
+	assert.Contains(t, h, `id="kit-content"`)
+	assert.Less(t, strings.Index(h, "Demo-Instanz"), strings.Index(h, "Gespeichert."))
+	assert.Contains(t, h, "alert-info")
+	assert.Contains(t, h, `class="alert-action">Mehr</a>`)
+	assert.NotContains(t, h[strings.Index(h, "Demo-Instanz")-400:strings.Index(h, "Demo-Instanz")], "alert-dismissible")
+}
+
 // GS-60: the message after an action offers the next step as a link.
 func TestGS60_ShellFlashWithNextStep(t *testing.T) {
 	ctx := context.Background()

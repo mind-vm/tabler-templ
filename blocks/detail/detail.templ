@@ -121,7 +121,8 @@ type DialogProps struct {
 }
 
 // Dialog is a section's edit dialog (a Tabler modal). The script turns the last row of buttons of its
-// only form into the footer with Cancel, and reopens it after a failed save.
+// only form into the footer with Cancel (when it holds a primary or a danger button: an action with a
+// reason, GS-44), and reopens it after a failed save.
 templ Dialog(p DialogProps) {
 	@Styles()
 	{{

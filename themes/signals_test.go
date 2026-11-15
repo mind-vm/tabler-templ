@@ -90,8 +90,7 @@ func TestGS07_SignalNeverText(t *testing.T) {
 	assert.Contains(t, css, "[data-bs-theme=dark]{--kit-signal-green-text:#4ADE80")
 }
 
-// The values of the concept, so a change there is a change here on purpose. Green's text tone is one
-// shade darker than the concept's #1F7A3A (4.44:1 in a pill on the grey ground); the concept follows.
+// The values of the concept (Gestaltung v0.5, GS-07), so a change there is a change here on purpose.
 func TestGS07_ValuesOfTheConcept(t *testing.T) {
 	want := map[string][2]string{"green": {"#22A04B", "#1E7537"}, "yellow": {"#B57F00", "#8A5A00"}, "red": {"#E5484D", "#B42318"}}
 	for _, s := range Signals {
