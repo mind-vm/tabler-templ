@@ -1,0 +1,52 @@
+package reference
+
+import (
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/icon"
+)
+
+// conceptView is a concept rendered from its Markdown, with the note where it comes from. The rule numbers
+// here are the concept's own text, not the product's UI (GS-71 applies to the product pages).
+templ conceptView(c concept) {
+	{{ sha, date := source() }}
+	<nav class="nav nav-segmented mb-3 ref-concept-nav" aria-label="Konzepte">
+		for _, x := range concepts {
+			<a
+				class={ "nav-link", templ.KV("active", x.Path == c.Path) }
+				href={ templ.SafeURL(x.Path) }
+				if x.Path == c.Path {
+					aria-current="page"
+				}
+			>{ x.Title }</a>
+		}
+	</nav>
+	@alert.Alert(alert.Props{Variant: alert.VariantInfo, Icon: "ti-git-commit"}) {
+		Kopie aus dem Auftragsbutler, Stand { date } ({ shortSHA(sha) }). Maßgeblich ist das Original; nach einer Änderung holt <code>scripts/reference-konzept.sh</code> den neuen Stand.
+		@alert.Action(sourceURL(c.File)) {
+			Original öffnen
+		}
+	}
+	@card.Card(card.Props{Class: "ref-concept"}) {
+		@card.Body() {
+			<article class="ref-concept-text markdown">
+				@templ.Raw(conceptHTML(c))
+			</article>
+		}
+	}
+	@inlineScript(jumpAgain)
+	<p class="text-secondary small mt-3">
+		@icon.Icon("ti-link")
+		Unterstrichene Beispiele und Regelnummern führen auf die Seite der Referenz, die sie zeigt.
+	</p>
+}
+
+func shortSHA(s string) string {
+	if len(s) > 8 {
+		return s[:8]
+	}
+	return s
+}
+
+// jumpAgain: the fonts load after the browser jumped to the anchor and move the tables; jump again then.
+const jumpAgain = `document.fonts.ready.then(function(){var h=location.hash.slice(1),t=h&&document.getElementById(decodeURIComponent(h));if(t)t.scrollIntoView()});`

@@ -4,17 +4,8 @@
    The rest of this file styles the explanation box of the reference itself (.ref-explain). */
 
 :root {
-  --ref-ground: #F5F5F5;
-  --ref-line: #DEDEDE;
-  --ref-line-soft: #EBEBEB;
-  --ref-text-3: #6B6B6B;
   --tblr-body-font-size: 14px;
-  --tblr-body-bg: var(--ref-ground);
-  --tblr-border-color: var(--ref-line);
-  --tblr-border-color-translucent: var(--ref-line-soft);
-  --tblr-box-shadow-card: none;
-  --tblr-card-box-shadow: none;
-  /* Signal colours: the same in every theme (GS-07) */
+  /* Signal colours: the same in every theme and mode (GS-07) */
   --tblr-success: #22A04B;
   --tblr-success-rgb: 34, 160, 75;
   --tblr-warning: #E0A100;
@@ -24,8 +15,22 @@
   --tblr-info: #2563EB;
   --tblr-info-rgb: 37, 99, 235;
   --kit-sidebar-width: 240px;
+  --ref-ground: var(--tblr-body-bg);
+  --ref-line: var(--tblr-border-color);
+  --ref-text-3: var(--tblr-secondary);
 }
-
+/* Light: grey ground with white islands and a clear line (GS-40, GS-12); dark modes keep the theme's colours. */
+:root:not([data-bs-theme=dark]) {
+  --ref-ground: #F5F5F5;
+  --ref-line: #DEDEDE;
+  --ref-text-3: #6B6B6B;
+  --tblr-body-bg: var(--ref-ground);
+  --tblr-border-color: var(--ref-line);
+  --tblr-border-color-translucent: #EBEBEB;
+  --tblr-box-shadow-card: none;
+  --tblr-card-box-shadow: none;
+}
+:root:not([data-bs-theme=dark]) 
 body {
   background: var(--ref-ground);
   font-variant-numeric: tabular-nums;
@@ -35,7 +40,6 @@ body {
 /* Header 56 px (GS-10), sidebar 240 px (GS-11) without a transition across lg */
 .kit-shell-header { min-height: 56px; }
 .page > .kit-sidebar, .page > .kit-sidebar ~ .page-wrapper { transition: none; }
-.kit-sidebar { --kit-sidebar-bg: #EDEDED; --kit-sidebar-active-bg: #FFFFFF; }
 .kit-sidebar-link.active { box-shadow: 0 0 0 1px var(--ref-line); }
 
 /* Content: at most 1240 px, left beside the sidebar (GS-12) */
@@ -69,8 +73,8 @@ body {
 .ref-explain {
   margin-bottom: 1.25rem;
   padding: .875rem 1.125rem;
-  background: #FFFFFF;
-  border: 1px dashed #BDBDBD;
+  background: var(--tblr-bg-surface);
+  border: 1px dashed var(--tblr-border-color-dark, #BDBDBD);
   border-radius: var(--tblr-border-radius-lg);
   font-size: 13.5px;
 }
@@ -78,7 +82,7 @@ body {
 .ref-explain-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .375rem; }
 .ref-explain-id {
   display: inline-block; padding: 0 .4rem; border-radius: 4px;
-  background: #111111; color: #FFFFFF; font-family: var(--tblr-font-monospace); font-size: 12px; line-height: 1.6;
+  background: var(--tblr-body-color); color: var(--tblr-bg-surface); font-family: var(--tblr-font-monospace); font-size: 12px; line-height: 1.6;
 }
 .ref-explain-link { margin-left: auto; color: var(--ref-text-3); }
 .ref-explain-try { color: var(--ref-text-3); }
@@ -87,17 +91,37 @@ body {
 .ref-explain-facts dt { font-weight: 400; color: var(--ref-text-3); }
 .ref-explain-facts dd { margin: 0; overflow-wrap: anywhere; }
 .ref-explain-facts code { font-size: 12px; }
-.ref-rule { margin-right: .25rem; white-space: nowrap; display: inline-block; }
+.ref-rule { display: inline-block; margin-right: .25rem; white-space: nowrap; text-decoration: none !important; }
+.ref-rule:hover code { background: var(--tblr-border-color); }
 .ref-explain-note { margin: .5rem 0 0 !important; color: var(--ref-text-3); }
 
 .ref-pattern { height: 100%; }
 .ref-tile { display: block; color: inherit; text-decoration: none; }
 .ref-tile .card { height: 100%; }
-.ref-next { border-left: 3px solid #111111; }
-.ref-logo { background: #111111; color: #FFFFFF; font-weight: 600; }
+.ref-next { border-left: 3px solid var(--tblr-primary); }
+.ref-logo { background: var(--tblr-primary); color: var(--tblr-primary-fg, #FFFFFF); font-weight: 600; }
 .ref-notes, .ref-assistant { padding: 1rem; }
 .ref-notes li + li, .ref-notes-list li + li { margin-top: .75rem; }
 
 .ref-swatches { display: grid; gap: .75rem; }
 .ref-swatch { display: flex; align-items: center; gap: .75rem; }
 .ref-swatch-color { flex: none; width: 2.25rem; height: 2.25rem; border-radius: var(--tblr-border-radius); border: 1px solid var(--ref-line); }
+
+/* Panel: grey like the content, white cards in it, calm buttons (islands on ground, GS-40) */
+.kit-sidepanel { background: var(--ref-ground); }
+.kit-sidepanel-head { background: var(--tblr-bg-surface); }
+.ref-assistant .assistant-intro { border-color: var(--ref-line); }
+.ref-assistant .assistant-composer { background: var(--ref-ground); }
+
+/* Theme picker at the foot of the sidebar (GS-15) */
+.ref-theme { display: flex; align-items: center; gap: .5rem; padding: 0 .375rem; color: var(--ref-text-3); }
+.ref-theme .form-select { flex: 1; min-width: 0; }
+
+/* Concept pages: anchors below the sticky header, the rule rows marked, links back into the reference */
+.ref-concept-text :is(h1, h2, h3, h4, td[id]) { scroll-margin-top: 72px; }
+.ref-concept-text h1 { font-size: 1.5rem; }
+.ref-concept-text td.ref-rule-cell { white-space: nowrap; font-family: var(--tblr-font-monospace); font-size: 12.5px; }
+.ref-concept-text :target { background: rgba(var(--tblr-warning-rgb), .14); }
+.ref-concept-text .ref-concept-table td { vertical-align: top; min-width: 7rem; }
+.ref-backlink { text-decoration-style: dotted !important; }
+.ref-concept-nav { max-width: 100%; overflow-x: auto; }

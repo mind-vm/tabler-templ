@@ -17,6 +17,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/mind-vm/tabler-templ/themes"
 )
 
 type client struct {
@@ -61,6 +63,7 @@ func (c *client) post(path string, form url.Values) (int, string, string) {
 var pages = map[string]int{
 	Home: 200, pathFrame: 200, pathStart: 200, pathCustomers: 200, pathCustomers + "?q=muehl": 200, pathCustomers + "?q=Zeppelin": 200,
 	customerURL("K-1001"): 200, customerURL("K-1014"): 200, pathOffers: 200, offerURL("A-2026-001"): 200, offerURL("A-2026-002"): 200,
+	pathConcept: 200, pathConceptAssistant: 200,
 	pathNew: 200, pathStates: 200, pathStates + "?meldung=1": 200, pathBrand: 200, pathAssistant: 200,
 	Home + "/gibt-es-nicht": 404, pathStates + "/keine-rechte": 403, pathStates + "/fehler": 500,
 }
@@ -161,8 +164,6 @@ func TestGS41_IslandHasAtMostOneAction(t *testing.T) {
 		}
 	}
 }
-
-var tagRE = regexp.MustCompile(`<[^>]+>`)
 
 func stripTags(s string) string { return tagRE.ReplaceAllString(s, "") }
 
@@ -271,7 +272,7 @@ func TestGS50_PagesOf25AndStateInURL(t *testing.T) {
 	c := newClient(t)
 	_, body := c.get(pathCustomers)
 	assert.Contains(t, body, "1–25 von 58")
-	assert.Equal(t, 1, strings.Count(body, `<select`), "one filter")
+	assert.Len(t, regexp.MustCompile(`<select[^>]*data-kit-list-submit`).FindAllString(body, -1), 1, "one filter")
 	_, body = c.get(pathCustomers + "?posten=gruen&page=2")
 	assert.Contains(t, body, "26–")
 	assert.Contains(t, body, `href="/reference/kunden?posten=gruen"`, "the link to page 1 keeps the filter")
@@ -453,9 +454,10 @@ func TestGS64_LoadsAfterThePage(t *testing.T) {
 }
 
 var ruleNumber = regexp.MustCompile(`\b(?:GS|GSO|KA|KAO|E|G|NV|UX|RA)-\d+\b`)
-var explainBox = regexp.MustCompile(`(?s)<section class="ref-explain".*?</section>`)
+var explainBox = regexp.MustCompile(`(?s)<section class="ref-explain".*?</section>|<article class="ref-concept-text.*?</article>`)
 
-// GS-71: the pages show no rule numbers; only the explanation of the reference names them.
+// GS-71: the pages show no rule numbers; only the explanation of the reference and the concept's own text
+// name them.
 func TestGS71_NoRuleNumbersOutsideTheExplanation(t *testing.T) {
 	c := newClient(t)
 	for p := range pages {
@@ -555,4 +557,63 @@ func TestDialogReturnsToTheRecordsPage(t *testing.T) {
 	assert.Contains(t, body, "gelöscht")
 	_, _, path = c.post(customerURL("K-1001")+"/vermerke", url.Values{"text": {"x"}, "_return": {"https://example.org/"}})
 	assert.Equal(t, customerURL("K-1001"), path)
+}
+
+// The concept is shown in the app, and links both ways: the explanation's rules lead to their rows, and the
+// examples and rules in the concept lead to the page that shows them.
+func TestConceptLinksBothWays(t *testing.T) {
+	c := newClient(t)
+	bodies := map[string]string{}
+	for _, x := range concepts {
+		got, body := c.get(x.Path)
+		require.Equal(t, http.StatusOK, got)
+		bodies[x.Path] = body
+		assert.NotRegexp(t, `href="(?:\.\./|[a-z-]+\.md)`, body, "relative links resolved")
+	}
+	g := bodies[pathConcept]
+	assert.Contains(t, g, `<td class="ref-rule-cell" id="gs-41"><a href="/reference/kunden/K-1001" class="ref-backlink"`)
+	assert.Contains(t, g, `<a href="/reference/angebote/A-2026-001" class="ref-backlink" title="In der Referenz: B-05 Liste bearbeiten">B-05</a>`)
+	assert.Contains(t, g, `id="6-inseln-und-dialoge"`)
+	assert.Contains(t, g, `href="/reference/konzept/assistent"`, "the link to the other concept stays in the app")
+	sha, _ := source()
+	assert.Contains(t, g, "https://github.com/mind-vm/auftragsbutler/blob/"+sha+"/docs/konzepte/navigation.md")
+
+	// Every link of an explanation finds its anchor.
+	for _, p := range append(patterns, overviewText) {
+		links := []string{p.Link}
+		for _, r := range p.Rules {
+			links = append(links, conceptLink(r))
+		}
+		for _, l := range links {
+			path, frag, _ := strings.Cut(l, "#")
+			require.Contains(t, bodies, path, l)
+			assert.Contains(t, bodies[path], `id="`+frag+`"`, "%s: %s has no anchor", p.ID, l)
+		}
+	}
+	_, body := c.get(customerURL("K-1001"))
+	assert.Contains(t, body, `<a class="ref-rule" href="/reference/konzept#gs-41"`)
+}
+
+func TestSlugIsGitHubs(t *testing.T) {
+	assert.Equal(t, "3-application-layout-rahmen", slug("3. Application Layout (Rahmen)"))
+	assert.Equal(t, "8-rückmeldung-und-zustände", slug("8. Rückmeldung und Zustände"))
+	assert.Equal(t, "71-anzeigen", slug("7.1 Anzeigen"))
+}
+
+// GS-15: the theme is chosen in one place; every theme is offered, Graphite by default, and its fonts come
+// from the bundle (GS-09 checks that nothing comes from outside).
+func TestGS15_ThemeInOnePlace(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathBrand)
+	assert.Equal(t, 1, strings.Count(body, `data-ref-theme aria-label`), "one switcher")
+	for _, th := range themes.All {
+		assert.Contains(t, body, `<option value="`+themeName(th)+`"`, th.Label)
+	}
+	assert.Contains(t, body, `<option value="graphite" selected>`)
+	for _, f := range themeFonts() {
+		got, _ := c.get(c.app.files.URL("npm/@fontsource-variable/" + f.Package + "@" + themes.FontsVersion + "/index.css"))
+		assert.Equal(t, http.StatusOK, got, f.Package)
+	}
+	got, _ := c.get(c.app.files.URL("core/css/tabler-themes.min.css"))
+	assert.Equal(t, http.StatusOK, got)
 }

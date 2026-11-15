@@ -1,9 +1,8 @@
 package reference
 
 import (
-	"strings"
-
 	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/assets"
 	"github.com/mind-vm/tabler-templ/blocks/assistant"
 	"github.com/mind-vm/tabler-templ/blocks/detail"
 	"github.com/mind-vm/tabler-templ/blocks/rowedit"
@@ -53,17 +52,13 @@ func (a *App) panel(p page, open bool, tab string) *sidepanel.Panel {
 	}}
 }
 
-// graphite is the theme's CSS for :root (the shell sets no attributes on <html>) and its small corners,
-// as libs/rahmen serves it.
-var graphite = strings.ReplaceAll(themes.Graphite.CSS(), `[`+themes.Attribute+`="graphite"]`, ":root") +
-	":root:not([data-bs-theme-radius]){--tblr-border-radius-scale:0.5}"
-
 templ (a *App) head() {
-	@static.Head(a.files)
-	for _, f := range []string{"geist", "geist-mono"} {
-		<link rel="stylesheet" href={ a.files.URL("npm/@fontsource-variable/" + f + "@" + themes.FontsVersion + "/index.css") }/>
+	@static.Head(a.files, assets.Props{Themes: true})
+	for _, f := range themeFonts() {
+		<link rel="stylesheet" href={ a.files.URL("npm/@fontsource-variable/" + f.Package + "@" + themes.FontsVersion + "/index.css") }/>
 	}
-	@csp.Style(graphite)
+	@csp.Style(themeCSS())
+	@inlineScript(themeScript())
 	<link rel="stylesheet" href={ a.files.URL("reference.css") }/>
 }
 
@@ -104,9 +99,9 @@ templ explain(e pattern) {
 			<span class="ref-explain-id">{ e.ID }</span>
 			<strong>{ e.Name }</strong>
 			if e.Link != "" {
-				<a class="ref-explain-link" href={ templ.SafeURL(e.Link) } target="_blank" rel="noopener">
+				<a class="ref-explain-link" href={ templ.SafeURL(e.Link) }>
+					@icon.Icon("ti-book")
 					Im Konzept
-					@icon.Icon("ti-external-link")
 				</a>
 			}
 		</div>
@@ -123,7 +118,7 @@ templ explain(e pattern) {
 					<dt>Regeln</dt>
 					<dd>
 						for _, r := range e.Rules {
-							<code class="ref-rule">{ r }</code>
+							<a class="ref-rule" href={ templ.SafeURL(conceptLink(r)) } title="Regel im Konzept"><code>{ r }</code></a>
 						}
 					</dd>
 				}
@@ -178,9 +173,26 @@ templ (a *App) sidebar(p page) {
 				@sidebar.Item(sidebar.ItemProps{Href: pathStates, Icon: "ti-traffic-lights", Label: "Zustände", Active: active(p, "B-07"), Attributes: anchor("zustaende")})
 				@sidebar.Item(sidebar.ItemProps{Href: pathBrand, Icon: "ti-palette", Label: "Marke und Form", Active: active(p, "B-08"), Attributes: anchor("marke")})
 				@sidebar.Item(sidebar.ItemProps{Href: pathAssistant, Icon: "ti-sparkles", Label: "KI-Assistent", Active: active(p, "B-09"), Attributes: anchor("assistent")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathConcept, Icon: "ti-book", Label: "Konzept", Active: active(p, "concept"), Attributes: anchor("konzept")})
 			}
 		}
+		@sidebar.Footer() {
+			@themeSwitcher()
+		}
 	}
+}
+
+// themeSwitcher picks the theme of the whole reference, in one place (GS-15); the browser remembers it.
+templ themeSwitcher() {
+	<label class="ref-theme kit-sidebar-hide-collapsed">
+		@icon.Icon("ti-palette")
+		<span class="visually-hidden">Theme</span>
+		<select class="form-select form-select-sm" data-ref-theme aria-label="Theme der Referenz">
+			for _, t := range themes.All {
+				<option value={ themeName(t) } selected?={ themeName(t) == defaultTheme }>{ t.Label }</option>
+			}
+		</select>
+	</label>
 }
 
 templ logo() {

@@ -4,11 +4,6 @@ package reference
 // implements it, and a link to the concept. It does not repeat the rules (concept §11). Rule numbers
 // stand only here, in .ref-explain: the product pages themselves show none (GS-71).
 
-const (
-	conceptURL   = "https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/gestaltung.md"
-	assistantURL = "https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/assistent.md"
-)
-
 type block struct {
 	Package string // e.g. "blocks/detail"
 	Parts   string // e.g. "Section, EditButton, Dialog"
@@ -36,7 +31,7 @@ var patterns = []pattern{
 		Try:     "Öffnen Sie oben rechts „Notizen“ oder „KI-Assistent“: Das Panel gleitet herein und bleibt beim Seitenwechsel offen. Machen Sie das Fenster schmal: Die Leiste wird zum Menü, das Panel zum Sheet.",
 		Rules:   []string{"GS-10", "GS-11", "GS-12", "GS-13", "GS-14", "GS-15", "GS-20", "GS-21", "GS-22"},
 		Blocks:  []block{{"blocks/shell", "Page"}, {"sidebar", "Sidebar, Group, Item"}, {"blocks/sidepanel", "Aside, Buttons, Script, Read"}, {"themes", "Graphite"}},
-		Link:    conceptURL + "#3-application-layout-rahmen"},
+		Link:    pathConcept + "#3-application-layout-rahmen"},
 	{ID: "B-02", Name: "Start", Path: pathStart,
 		Summary: "Was heute zu tun ist: Kacheln mit Zahlen, die auf gefilterte Listen führen, darunter „Brennt“.",
 		What:    "Die erste Seite nach der Anmeldung. Sie zeigt, was heute zu tun ist, nicht wozu die App da ist.",
@@ -44,7 +39,7 @@ var patterns = []pattern{
 		Try:     "Klicken Sie auf eine Kachel: Die Liste öffnet sich gefiltert, der Filter steht in der Adresse.",
 		Rules:   []string{"GS-30"},
 		Blocks:  []block{{"blocks/metric", "Card"}, {"table", "Table"}},
-		Link:    conceptURL + "#5-seitentypen"},
+		Link:    pathConcept + "#5-seitentypen"},
 	{ID: "B-03", Name: "Liste", Path: pathCustomers,
 		Summary: "Suche, ein Filter, 25 Zeilen und Seiten; Status als Pille, Ampel als Punkt mit Wort, Zustand in der Adresse.",
 		What:    "Eine Liste von Datensätzen mit Titel und Hauptaktion, Suche, einem Filter, Tabelle und Seiten.",
@@ -52,7 +47,7 @@ var patterns = []pattern{
 		Try:     "Suchen Sie „muehl“: Es findet auch „Mühlhausen“ und „Mühlenweg“. Blättern, filtern, dann Zurück im Browser.",
 		Rules:   []string{"GS-31", "GS-50", "GS-51", "GS-52", "GS-53", "GS-54"},
 		Blocks:  []block{{"blocks/listpage", "New, Paginate, Card"}, {"table", "Table"}, {"status", "Status"}, {"badge", "Badge"}},
-		Link:    conceptURL + "#71-anzeigen",
+		Link:    pathConcept + "#71-anzeigen",
 		Note:    "Die Suche läuft hier im Speicher. In den Produkten rechnet SQL Suche, Filter, Seite und Summen (GS-51)."},
 	{ID: "B-04", Name: "Detailseite", Path: customerURL("K-1001"),
 		Summary: "Inseln zum Lesen, je Insel höchstens ein „Bearbeiten“ mit Dialog, Fehler im Dialog, Unterliste mit „Alle N“.",
@@ -61,7 +56,7 @@ var patterns = []pattern{
 		Try:     "Leeren Sie im Dialog „Stammdaten“ den Namen und speichern Sie: Der Dialog öffnet sich wieder, mit Meldung und Ihren Werten, das Feld ist markiert.",
 		Rules:   []string{"GS-32", "GS-40", "GS-41", "GS-42", "GS-43", "GS-44", "GS-45", "GS-46"},
 		Blocks:  []block{{"blocks/detail", "Section, Fields, Field, EditButton, Dialog, Script"}},
-		Link:    conceptURL + "#6-inseln-und-dialoge",
+		Link:    pathConcept + "#6-inseln-und-dialoge",
 		Note:    "Die Produkte bearbeiten nie direkt in der Seite oder in einer Tabellenzeile. Das Beispiel examples/crud dieser Bibliothek zeigt das Bearbeiten in der Zeile als allgemeines Muster; die Produkte nutzen es nicht."},
 	{ID: "B-05", Name: "Liste bearbeiten", Path: offerURL("A-2026-001"),
 		Summary: "Lange Liste nur lesen; „Bearbeiten“ öffnet den ganzseitigen Dialog, jede Zeile ein Formular, neue Zeile unten, Summe.",
@@ -70,7 +65,7 @@ var patterns = []pattern{
 		Try:     "Ändern Sie eine Menge und drücken Sie Enter: Die Zeile wird gespeichert, Betrag und Summe stimmen wieder. Löschen fragt nach. Unten steht die nächste Positionsnummer schon da.",
 		Rules:   []string{"GS-55", "GS-56", "GS-57", "GS-58", "GS-59"},
 		Blocks:  []block{{"blocks/rowedit", "Dialog, List, Head, Row, Actions, Save, Delete, Add, Total, Locked, Script"}, {"blocks/detail", "Section, EditButton"}},
-		Link:    conceptURL + "#72-bearbeiten",
+		Link:    pathConcept + "#72-bearbeiten",
 		Note:    "Die Produkte bearbeiten nicht in der Tabelle der Seite. Das Beispiel examples/crud dieser Bibliothek zeigt das Bearbeiten in der Zeile als allgemeines Muster; die Produkte nutzen es nicht."},
 	{ID: "B-06", Name: "Anlegen", Path: pathNew,
 		Summary: "Eine eigene Seite mit wenigen Feldern; danach die neue Detailseite mit Meldung.",
@@ -79,7 +74,7 @@ var patterns = []pattern{
 		Try:     "Legen Sie einen Kunden ohne Ort an: Die Seite zeigt den Fehler am Feld. Mit Ort führt Speichern auf die neue Detailseite, mit Meldung und nächstem Schritt.",
 		Rules:   []string{"GS-33", "GS-60"},
 		Blocks:  []block{{"blocks/create", "Form, Footer"}, {"blocks/detail", "Section"}, {"form", "Field, Input"}},
-		Link:    conceptURL + "#5-seitentypen"},
+		Link:    pathConcept + "#5-seitentypen"},
 	{ID: "B-07", Name: "Zustände", Path: pathStates,
 		Summary: "Meldung mit nächstem Schritt, leerer Zustand, leere Suche, Fehlerseiten, „nur lesen“, Platzhalter beim Laden.",
 		What:    "Was eine Seite zeigt, wenn etwas geschehen ist, nichts da ist, etwas fehlt oder noch lädt.",
@@ -87,7 +82,7 @@ var patterns = []pattern{
 		Try:     "Schalten Sie „Nur lesen“ ein und gehen Sie auf eine Detailseite: Alle Knöpfe zum Bearbeiten sind weg.",
 		Rules:   []string{"GS-60", "GS-61", "GS-62", "GS-63", "GS-64"},
 		Blocks:  []block{{"blocks/shell", "Flash"}, {"empty", "Empty"}, {"alert", "Alert, Action"}, {"placeholder", "Placeholder"}},
-		Link:    conceptURL + "#8-rückmeldung-und-zustände"},
+		Link:    pathConcept + "#8-rückmeldung-und-zustände"},
 	{ID: "B-08", Name: "Marke und Form", Path: pathBrand,
 		Summary: "Theme-Tokens, Signalfarben, Schrift, Knopfarten, Pillen, Ampel, Zahlen- und Datumsformat.",
 		What:    "Die Bausteine der Form: neutraler Grund, Farbe nur mit Bedeutung, Geist als Schrift, Zahlen und Datum deutsch.",
@@ -95,7 +90,7 @@ var patterns = []pattern{
 		Try:     "Vergleichen Sie die Knopfarten: gefüllt ist nur die Hauptaktion.",
 		Rules:   []string{"GS-07", "GS-15", "GS-70", "GS-71", "GS-72", "GS-73", "GS-74", "GS-75"},
 		Blocks:  []block{{"themes", "Graphite"}, {"button", "Button"}, {"badge", "Badge"}, {"status", "Status"}},
-		Link:    conceptURL + "#9-sprache-und-form"},
+		Link:    pathConcept + "#9-sprache-und-form"},
 	{ID: "B-09", Name: "KI-Assistent", Path: pathAssistant,
 		Summary: "Der Assistent als Reiter im Panel rechts: liest, füllt Formulare vor, speichert nie.",
 		What:    "Der KI-Assistent ist ein Reiter im Panel rechts. Er liest mit den Rechten der Person, zeigt, was er gelesen hat, und füllt Formulare vor; speichern tut der Mensch.",
@@ -103,14 +98,14 @@ var patterns = []pattern{
 		Try:     "Fragen Sie „Trage für die Wohnungsgesellschaft Nordstadt die Anschrift Hafenstraße 12 ein“: Der Dialog öffnet sich ausgefüllt. Fragen Sie nach der IBAN: abgelehnt.",
 		Rules:   []string{"GS-13", "KA-01", "KA-02", "KA-03", "KA-15", "KA-20"},
 		Blocks:  []block{{"blocks/sidepanel", "Aside, Buttons"}, {"blocks/assistant", "Conversation, Catalog, Stream, ActionScript, Transcript, German"}},
-		Link:    assistantURL + "#6-wo-er-erscheint",
+		Link:    pathConceptAssistant + "#6-wo-er-erscheint",
 		Note:    "Vorschlag: Das Konzept Gestaltung nennt den Assistenten bisher nicht als Beispiel; die Regeln KA-xx stehen im Konzept Assistent."},
 }
 
 var overviewText = pattern{ID: "Übersicht", Name: "Referenz der Gestaltung",
 	What: "Diese Referenz zeigt jedes Muster des Konzepts Gestaltung mit den echten Bausteinen von tabler-templ. Ändert sich ein Baustein, ändert sich das Beispiel mit.",
 	When: "Zum Nachschlagen beim Bauen und zum Vergleichen der Produkte. Die Beispieldaten sind erfunden; Speichern wirkt nur bis zum Neustart.",
-	Link: conceptURL + "#11-beispiele-die-referenz-app-in-tabler-templ"}
+	Link: pathConcept + "#11-beispiele-die-referenz-app-in-tabler-templ"}
 
 func patternOf(key string) (pattern, bool) {
 	for _, p := range patterns {

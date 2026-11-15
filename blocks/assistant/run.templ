@@ -80,7 +80,7 @@ templ Conversation(p ConversationProps) {
 						if len(p.Examples) > 0 {
 							<div class="d-flex flex-column gap-2">
 								for _, ex := range p.Examples {
-									@button.Button(button.Props{Type: "button", Outline: true, Variant: button.VariantPrimary,
+									@button.Button(button.Props{Type: "button",
 										Class: "text-start justify-content-start", Attributes: templ.Attributes{"data-example": ex}}) {
 										{ ex }
 									}

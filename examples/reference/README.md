@@ -35,11 +35,31 @@ the Geist fonts (`cmd/vendor theme:graphite`) are embedded under `static/` and s
 ground, signal colours, content width, links, numbers, 16 px fields on phones) — the counterpart of the products'
 `theme.css`. After using a new icon, run `go run ./cmd/static -out examples/reference/static ./examples/reference/...`.
 
+## The concept inside the app
+
+`/reference/konzept` shows the concept Gestaltung and `/reference/konzept/assistent` the concept Assistent, rendered
+from their Markdown with package `markdown`. The links go both ways. The rule numbers in a page's explanation lead to
+the rule's row in the concept (`#gs-41`), and „Im Konzept“ leads to its section. In the concept, every example
+(B-01 …) and every rule a page shows (GS-41, KA-20 …) links to that page. Headings get GitHub's anchors. Links to
+other documents lead to GitHub at the commit of the copy.
+
+The concept lives in mind-vm/auftragsbutler until v1.0 (GSO-01) and stays the source of truth (GS-03).
+`konzept/` holds a copy with its commit in `konzept/QUELLE`, and each concept page says so. After the concept
+changes, `scripts/reference-konzept.sh` copies it again (it needs `gh`). `TestConceptLinksBothWays` fails when a
+heading or rule that a page links to is gone.
+
+## Themes
+
+The picker at the foot of the sidebar switches the whole reference between every theme of `themes` (GS-15). Graphite
+is the default, as in the products. The browser remembers the choice, and `?theme=midnight` sets it too. The fonts of
+all themes are in the bundle.
+
 ## Pages and rules
 
 | Page | Path | Shows | Rules | Blocks |
 |---|---|---|---|---|
 | Overview | `/reference` | all patterns with one sentence each | | |
+| Konzept | `/reference/konzept`, `/reference/konzept/assistent` | the concepts Gestaltung and Assistent, linked both ways | | `markdown` |
 | **B-01** Rahmen | `/reference/rahmen` | header, grouped sidebar, content, panel on the right with tabs; menu and sheet on phones | GS-10 – GS-15, GS-20 – GS-22 | `blocks/shell`, `sidebar`, `blocks/sidepanel`, `themes` |
 | **B-02** Start | `/reference/start` | figures that lead to filtered lists, the list „Brennt“ | GS-30 | `blocks/metric`, `table` |
 | **B-03** Liste | `/reference/kunden` | search (ä = ae), one filter, 25 rows, pages, pills, traffic light, numbers right, state in the URL | GS-31, GS-50 – GS-54 | `blocks/listpage`, `table`, `status`, `badge` |

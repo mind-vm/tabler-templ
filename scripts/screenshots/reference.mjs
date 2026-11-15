@@ -33,6 +33,14 @@ const shots = [
   ["b07-fehlerseite", "/gibt-es-nicht", null, 404],
   ["b08-marke", "/marke"],
   ["b09-assistent", "/assistent"],
+  // The concepts are long: only the visible part (a "before" step means no full-page picture).
+  ["konzept", "/konzept", async () => {}],
+  ["konzept-assistent", "/konzept/assistent", async () => {}],
+  ["konzept-regel", "/konzept#gs-41", async (p) => { await p.waitForTimeout(1000); }],
+  // Other themes last: the choice is kept in the browser for the following pages of the context.
+  ["theme-tabler-b05", "/angebote/A-2026-001?theme=tabler"],
+  ["theme-rose-b02", "/start?theme=rose"],
+  ["theme-midnight-b04", "/kunden/K-1001?theme=midnight"],
 ];
 
 const sizes = [

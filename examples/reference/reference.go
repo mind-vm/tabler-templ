@@ -131,6 +131,8 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	mux.HandleFunc("POST "+Home+"/zuruecksetzen", a.reset)
 	mux.HandleFunc("GET "+pathBrand, a.brand)
 	mux.HandleFunc("GET "+pathAssistant, a.assistantPage)
+	mux.HandleFunc("GET "+pathConcept, a.concept(concepts[0]))
+	mux.HandleFunc("GET "+pathConceptAssistant, a.concept(concepts[1]))
 	mux.HandleFunc("POST "+pathAssistant, a.run)
 	mux.HandleFunc("GET "+Home+"/{rest...}", a.notFound)
 	return a
@@ -575,6 +577,13 @@ func (a *App) assistantPage(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, 0, page{Key: "B-09", Title: "KI-Assistent", Crumbs: []shell.Crumb{{Text: "Referenz", Href: Home}, {Text: "KI-Assistent"}}}, assistantView())
 }
 
+func (a *App) concept(c concept) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		a.render(w, r, 0, page{Key: "concept", Title: "Konzept " + c.Title, Crumbs: []shell.Crumb{{Text: "Referenz", Href: Home}, {Text: "Konzept " + c.Title}}},
+			conceptView(c))
+	}
+}
+
 // --- error pages in the frame (GS-62) -------------------------------------------------------------
 
 func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
@@ -603,6 +612,6 @@ var errorTexts = map[int]errorText{
 }
 
 // pageKeys are the keys the sidebar marks; tests use them.
-var pageKeys = []string{"overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
+var pageKeys = []string{"concept", "overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
 
 func knownKey(k string) bool { return slices.Contains(pageKeys, k) }
