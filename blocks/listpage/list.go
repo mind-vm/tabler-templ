@@ -118,7 +118,7 @@ func (l *List) Link(page int) string {
 }
 
 // Paginate keeps the rows for which keep is true (all rows when keep is nil) and returns the current
-// page of them. A page beyond the last shows the last.
+// page of them. A page beyond the last shows the last. For lists the database pages, see Window.
 func Paginate[T any](l *List, rows []T, keep func(T) bool) []T {
 	var hits []T
 	for _, x := range rows {
@@ -126,20 +126,53 @@ func Paginate[T any](l *List, rows []T, keep func(T) bool) []T {
 			hits = append(hits, x)
 		}
 	}
-	size := l.PageSize
-	if size <= 0 {
-		size = DefaultPageSize
+	l.SetTotal(len(hits))
+	from, size := l.Window()
+	return hits[from:min(from+size, l.Total)]
+}
+
+func (l *List) size() int {
+	if l.PageSize <= 0 {
+		return DefaultPageSize
 	}
-	l.Total = len(hits)
-	l.Pages = max(1, (l.Total+size-1)/size)
-	l.Page = min(max(l.Page, 1), l.Pages)
-	from := (l.Page - 1) * size
-	to := min(from+size, l.Total)
+	return l.PageSize
+}
+
+// Window is the part of the list the database fetches for the page asked for: OFFSET and LIMIT. With
+// Words, Value and SetTotal, the database does the search, the filter, the page and the count in fixed
+// queries instead of the app holding every row:
+//
+//	l := listpage.New(r, cfg, statusFilter)
+//	offset, limit := l.Window()
+//	rows, total := store.Customers(ctx, l.Words(), l.Value("status"), offset, limit) // SELECT …, count(*) OVER ()
+//	if !l.SetTotal(total) { // the page asked for lies beyond the last one
+//		offset, limit = l.Window()
+//		rows, _ = store.Customers(ctx, l.Words(), l.Value("status"), offset, limit)
+//	}
+func (l *List) Window() (offset, limit int) {
+	return (max(l.Page, 1) - 1) * l.size(), l.size()
+}
+
+// Words are the words of the query as Contains compares them (Fold); a row matches when every word occurs
+// in its searched text, folded the same way. Empty without a query.
+func (l *List) Words() []string {
+	return strings.Fields(Fold(l.Query))
+}
+
+// SetTotal records the number of all rows that match (from the database), and sets Pages, Page, From and
+// To for the footer. A page beyond the last becomes the last; then it reports false, and Window gives the
+// rows to fetch instead.
+func (l *List) SetTotal(total int) bool {
+	asked := max(l.Page, 1)
+	l.Total = max(total, 0)
+	l.Pages = max(1, (l.Total+l.size()-1)/l.size())
+	l.Page = min(asked, l.Pages)
+	from := (l.Page - 1) * l.size()
 	l.From, l.To = 0, 0
 	if l.Total > 0 {
-		l.From, l.To = from+1, to
+		l.From, l.To = from+1, min(from+l.size(), l.Total)
 	}
-	return hits[from:to]
+	return l.Page == asked
 }
 
 // Contains reports whether every word of the query occurs in one of the fields, ignoring case and German

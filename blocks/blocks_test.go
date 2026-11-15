@@ -83,6 +83,27 @@ func TestPaginate(t *testing.T) {
 	assert.Equal(t, [3]int{0, 0, 1}, [3]int{l.From, l.To, l.Pages})
 }
 
+// GS-51: the database does search, filter, page and count; the list says what to fetch and takes the total.
+func TestGS51_ListPagedByTheDatabase(t *testing.T) {
+	l := listpage.New(httptest.NewRequest("GET", "/x?q=M%C3%BChl+Weg&page=3", nil), listpage.Config{PageSize: 10})
+	assert.Equal(t, []string{"muehl", "weg"}, l.Words())
+	off, lim := l.Window()
+	assert.Equal(t, [2]int{20, 10}, [2]int{off, lim})
+	assert.True(t, l.SetTotal(45))
+	assert.Equal(t, [4]int{3, 5, 21, 30}, [4]int{l.Page, l.Pages, l.From, l.To})
+
+	// Beyond the last page: the last one, and fetch again.
+	l = listpage.New(httptest.NewRequest("GET", "/x?page=9", nil), listpage.Config{PageSize: 10})
+	assert.False(t, l.SetTotal(12))
+	off, _ = l.Window()
+	assert.Equal(t, [4]int{2, 10, 11, 12}, [4]int{l.Page, off, l.From, l.To})
+
+	l = listpage.New(httptest.NewRequest("GET", "/x", nil), listpage.Config{})
+	assert.True(t, l.SetTotal(0))
+	assert.Empty(t, l.Words())
+	assert.Equal(t, [3]int{0, 0, 1}, [3]int{l.From, l.To, l.Pages})
+}
+
 func TestContains(t *testing.T) {
 	assert.True(t, listpage.Contains("BERLIN mitte", "Mitte", "Berlin"))
 	assert.False(t, listpage.Contains("berlin süd", "Berlin Mitte"))
