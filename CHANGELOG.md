@@ -1,13 +1,13 @@
 # Changelog
 
-## v0.18.0
+## Unreleased
 
 - **`blocks/listpage`:** `Contains` also ignores German umlauts: ä, ö, ü and ß match ae, oe, ue and ss both ways
   (GS-50 of the design concept). `Fold` is that comparison, for apps that search in SQL. A search can find more
   rows than before ("muehl" finds "Mühlhausen"); it finds none fewer.
 - **`examples/reference`** uses `listpage.Contains` instead of its own search.
 
-## Unreleased
+## v0.18.0
 
 The reference app of the design concept „Gestaltung“ and the blocks it needed (nothing changes for existing code).
 
