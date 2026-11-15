@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.18.0
 
 - **`blocks/listpage`:** `Contains` also ignores German umlauts: ä, ö, ü and ß match ae, oe, ue and ss both ways
   (GS-50 of the design concept). `Fold` is that comparison, for apps that search in SQL. A search can find more
