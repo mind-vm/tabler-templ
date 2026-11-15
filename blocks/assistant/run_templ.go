@@ -300,7 +300,7 @@ func Conversation(p ConversationProps) templ.Component {
 								}
 								return nil
 							})
-							templ_7745c5c3_Err = button.Button(button.Props{Type: "button", Outline: true, Variant: button.VariantPrimary,
+							templ_7745c5c3_Err = button.Button(button.Props{Type: "button",
 								Class: "text-start justify-content-start", Attributes: templ.Attributes{"data-example": ex}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var13), templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err

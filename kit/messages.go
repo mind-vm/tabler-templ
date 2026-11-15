@@ -35,6 +35,11 @@ type Messages struct {
 	Edit        string
 	Cancel      string
 	SectionHint string
+	// Row edit block: the hint above the rows and the buttons of a row.
+	RowsHint  string
+	SaveRow   string
+	DeleteRow string
+	AddRow    string
 	// Create page and history.
 	Create    string
 	NoEntries string
@@ -65,6 +70,7 @@ var (
 		ToggleSidebar: "Collapse or expand the sidebar", OpenMenu: "Open menu",
 		Search: "Search", SearchLabel: "Search", Reset: "Reset", Of: "of", NoResults: "No results.", Breadcrumbs: "Breadcrumbs",
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
+		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
 		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
@@ -76,6 +82,7 @@ var (
 		ToggleSidebar: "Seitenleiste ein- oder ausklappen", OpenMenu: "Menü öffnen",
 		Search: "Suchen", SearchLabel: "Suchen", Reset: "Zurücksetzen", Of: "von", NoResults: "Keine Treffer.", Breadcrumbs: "Brotkrumen",
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
+		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
 		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",

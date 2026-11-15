@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+The reference app of the design concept „Gestaltung“ and the blocks it needed (nothing changes for existing code).
+
+- **`examples/reference`** (`/reference` in `cmd/demo`): every pattern of the concept (B-01 frame to B-08 brand
+  and form, B-09 the AI assistant in the panel) as a page with German sample data, built from the real blocks, with a
+  short text naming the rules. Nothing from a CDN: Tabler, the icons and Geist are embedded. Tests carry the rule's
+  number in their name; `scripts/reference.sh` takes the pages at the desktop and on a phone and fails when one
+  scrolls sideways. The concepts Gestaltung and Assistent are shown in the app, linked both ways to the pages;
+  a picker switches the whole reference between all themes.
+- **`blocks/rowedit`** (new): a long list edited in a full-page dialog, one form per row with Save (Enter) and
+  Delete after a question, a new row at the bottom, the total, and `Locked` with the reason when the list can no
+  longer change.
+- **`blocks/sidepanel`** (new): the work area on the right with tabs (notes, assistant …), slides in and out, stays
+  open across pages (cookie), a sheet on small screens.
+- **`blocks/shell`:** `Flash.Next` and `Flash.NextHref` add the next step as a link to the message.
+- **`blocks/assistant`:** `German` texts; the intro's example prompts are plain buttons that wrap (they were
+  outlined in the primary colour, which is black in Graphite).
+- **`kit.Messages`:** `RowsHint`, `SaveRow`, `DeleteRow`, `AddRow` (English and German).
+
 ## v0.17.0
 
 **Breaking:** the charts are drawn with Apache ECharts 6 (Apache-2.0) instead of ApexCharts. ApexCharts

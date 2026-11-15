@@ -1,0 +1,392 @@
+package reference
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/metric"
+	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/placeholder"
+	"github.com/mind-vm/tabler-templ/status"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// --- overview -------------------------------------------------------------------------------------------
+
+templ overviewView() {
+	<div class="row row-cards">
+		for _, p := range patterns {
+			<div class="col-md-6 col-xl-4">
+				<a href={ templ.URL(p.Path) } class="card card-link ref-pattern" data-pattern={ p.ID }>
+					<div class="card-body">
+						<div class="ref-explain-id mb-2">{ p.ID }</div>
+						<h3 class="card-title mb-1">{ p.Name }</h3>
+						<p class="text-secondary mb-0">{ p.Summary }</p>
+					</div>
+				</a>
+			</div>
+		}
+		<div class="col-12">
+			@detail.Section(detail.SectionProps{Title: "Beispieldaten"}) {
+				@card.Body() {
+					<p>Alle Seiten arbeiten mit denselben erfundenen Daten: die Firma Musterdienst GmbH, der Kunde Wohnungsgesellschaft Nordstadt und sein Angebot A-2026-001 mit zwölf Positionen. Heute ist hier immer der { Date(Today) }.</p>
+					<form method="post" action={ templ.URL(Home + "/zuruecksetzen") } data-kit-confirm="Alle Änderungen an den Beispieldaten verwerfen?">
+						@button.Button(button.Props{Icon: "ti-refresh"}) {
+							Beispieldaten zurücksetzen
+						}
+					</form>
+				}
+			}
+		</div>
+	</div>
+}
+
+// --- B-01 frame ----------------------------------------------------------------------------------------
+
+templ frameView() {
+	<div class="row row-cards">
+		<div class="col-lg-7">
+			@detail.Section(detail.SectionProps{Title: "Teile des Rahmens"}) {
+				@card.Body() {
+					@detail.Fields() {
+						@fieldOf("Kopf", "56 px hoch, mit Brotkrumen; rechts die Knöpfe für Notizen und KI-Assistent. Keine eigene Navigation.")
+						@fieldOf("Seitenleiste", "240 px links, „Start“ oben, darunter Gruppen; je Eintrag ein Symbol und ein Wort.")
+						@fieldOf("Inhalt", "Grauer Grund, höchstens 1240 px breit, Titel mit Hauptaktion, darunter Meldung und Inseln.")
+						@fieldOf("Panel rechts", "Reiter Notizen und KI-Assistent; bleibt beim Seitenwechsel offen. Kein Formular zum Bearbeiten.")
+						@fieldOf("Schmal", "Die Leiste wird zum Menü, das Panel zum Sheet, ein Dialog zum Vollbild. Nichts scrollt seitlich.")
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-5">
+			@detail.Section(detail.SectionProps{Title: "Panel ausprobieren"}) {
+				@card.Body() {
+					<p class="text-secondary">Am breiten Bildschirm steht das Panel neben der Seite, die Seite rückt zur Seite. Schmaler liegt es als Sheet darüber und öffnet sich nach einem Seitenwechsel nicht von selbst.</p>
+					<div class="btn-list">
+						@button.Button(button.Props{Type: "button", Icon: "ti-notes", Attributes: sidepanel.ButtonAttributes(nil, tabNotes)}) {
+							Notizen öffnen
+						}
+						@button.Button(button.Props{Type: "button", Icon: "ti-sparkles", Attributes: sidepanel.ButtonAttributes(nil, tabAssistant)}) {
+							KI-Assistent öffnen
+						}
+					</div>
+				}
+			}
+		</div>
+		<div class="col-12">
+			@detail.Section(detail.SectionProps{Title: "Gruppen der Seitenleiste"}) {
+				@table.Table(table.Props{Card: true, Responsive: true, VCenter: true}) {
+					<thead>
+						<tr><th>Gruppe</th><th>Inhalt</th><th>hier</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>ohne Titel</td><td>Start</td><td>Start</td></tr>
+						<tr><td>Für mich</td><td>was nur die angemeldete Person betrifft</td><td class="text-secondary">–</td></tr>
+						<tr><td>Tagesgeschäft</td><td>höchstens zwei Gruppen mit den Hauptbereichen</td><td>Kunden, Angebote</td></tr>
+						<tr><td>Erledigen</td><td>Arbeitslisten</td><td class="text-secondary">–</td></tr>
+						<tr><td>Verwaltung</td><td>Stammdaten, dann Einstellungen, Importieren, Daten exportieren</td><td class="text-secondary">–</td></tr>
+					</tbody>
+				}
+			}
+		</div>
+	</div>
+}
+
+// --- B-02 start ------------------------------------------------------------------------------------------
+
+templ tile(href, label, value, note string) {
+	<a href={ templ.URL(href) } class="ref-tile" data-tile>
+		@metric.Card(metric.Props{Label: label, Value: value, Note: note, Class: "card-link"})
+	</a>
+}
+
+templ startView(c Counts, burning []Offer, names map[string]string) {
+	<div class="row row-cards">
+		<div class="col-sm-6 col-xl-3">
+			@tile(pathOffers+"?status="+string(OfferDraft), "Angebote im Entwurf", itoa(c.Drafts), itoa(c.DueThisWeek)+" davon diese Woche abzugeben")
+		</div>
+		<div class="col-sm-6 col-xl-3">
+			@tile(pathCustomers+"?posten="+string(SignalOverdue), "Kunden mit überfälligen Posten", itoa(c.Overdue), Euro(c.OverdueSum)+" überfällig")
+		</div>
+		<div class="col-sm-6 col-xl-3">
+			@tile(pathCustomers+"?posten="+string(SignalDue), "Kunden mit fälligen Posten", itoa(c.Due), "Zahlung in den nächsten Tagen")
+		</div>
+		<div class="col-sm-6 col-xl-3">
+			@tile(pathOffers+"?status="+string(OfferSubmitted), "Abgegebene Angebote", itoa(c.Submitted), "warten auf Antwort")
+		</div>
+		<div class="col-12">
+			@detail.Section(detail.SectionProps{Title: "Brennt", Extra: "Abgabe in den nächsten drei Tagen"}) {
+				if len(burning) == 0 {
+					@card.Body() {
+						<p class="text-secondary mb-0">Nichts brennt. Die nächsten Abgaben stehen unter Angebote.</p>
+					}
+				} else {
+					@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Nowrap: true, Class: "ref-table"}) {
+						<thead>
+							<tr><th>Abgabe bis</th><th>Titel</th><th>Kunde</th><th class="text-end">Summe</th></tr>
+						</thead>
+						<tbody>
+							for _, o := range burning {
+								<tr>
+									<td>
+										@status.Status(status.Props{Color: "red", Dot: true, Lite: true}) {
+											{ Date(o.Due) }
+										}
+									</td>
+									<td><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
+									<td>{ names[o.Customer] }</td>
+									<td class="text-end ref-num">{ Euro(o.Total()) }</td>
+								</tr>
+							}
+						</tbody>
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+// --- B-07 states ---------------------------------------------------------------------------------------
+
+templ statesView(readOnly bool) {
+	<div class="row row-cards">
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Meldung nach einer Aktion"}) {
+				@card.Body() {
+					<p>Über dem Inhalt, wegklickbar, mit dem nächsten Schritt als Link. Grün für Erfolg, Rot für Fehler.</p>
+					@button.Button(button.Props{Href: pathStates + "?meldung=1", Icon: "ti-message"}) {
+						Meldung zeigen
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Leere Suche"}) {
+				@card.Body() {
+					<p>Findet die Suche nichts, sagt die Liste das und bietet „Suche zurücksetzen“ an.</p>
+					@button.Button(button.Props{Href: pathCustomers + "?q=Zeppelin", Icon: "ti-search"}) {
+						Leere Suche zeigen
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Leerer Zustand"}) {
+				@empty.Empty(empty.Props{Icon: "ti-inbox", Title: "Noch keine Angebote", Subtitle: "Ein Angebot entsteht auf der Seite eines Kunden. Legen Sie zuerst einen Kunden an.",
+					Action: linkButton(pathNew, "Kunde anlegen", "ti-plus"), Attributes: templ.Attributes{"data-empty": "list"}})
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Fehlerseiten"}) {
+				@card.Body() {
+					<p>Im Rahmen mit Seitenleiste, ein Satz, was los ist. Einzelheiten stehen nur im Log.</p>
+					<div class="btn-list">
+						@button.Button(button.Props{Href: Home + "/gibt-es-nicht"}) {
+							Nicht gefunden
+						}
+						@button.Button(button.Props{Href: pathStates + "/keine-rechte"}) {
+							Keine Rechte
+						}
+						@button.Button(button.Props{Href: pathStates + "/fehler"}) {
+							Fehler
+						}
+					</div>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Nur lesen", Attributes: templ.Attributes{"id": "nur-lesen"}}) {
+				@card.Body() {
+					<p>Ist die Firma gesperrt, zeigt der Rahmen einen Hinweis mit Link zum Export, und die Knöpfe zum Bearbeiten entfallen auf allen Seiten.</p>
+					<form method="post" action={ templ.URL(pathStates + "/nur-lesen") }>
+						@button.Button(button.Props{Icon: "ti-lock"}) {
+							if readOnly {
+								Nur lesen ausschalten
+							} else {
+								Nur lesen einschalten
+							}
+						}
+					</form>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Laden"}) {
+				@card.Body() {
+					<p>Was länger braucht, kommt nach dem Seitenaufbau; bis dahin steht ein Platzhalter.</p>
+					<div data-ref-load={ pathStates + "/zahlen" } aria-busy="true">
+						<div class="placeholder-glow">
+							@placeholder.Placeholder(placeholder.Props{Class: "col-8 mb-2"})
+							@placeholder.Placeholder(placeholder.Props{Class: "col-5"})
+						</div>
+					</div>
+				}
+			}
+		</div>
+	</div>
+	@inlineScript(loadLater)
+}
+
+// loadLater fills elements with data-ref-load from the server after the page stands (GS-64); a small
+// delay makes the placeholder visible in the reference.
+const loadLater = `document.querySelectorAll("[data-ref-load]").forEach(function(el){setTimeout(function(){fetch(el.getAttribute("data-ref-load")).then(function(r){return r.text()}).then(function(h){var d=new DOMParser().parseFromString(h,"text/html");el.replaceChildren.apply(el,Array.from(d.body.childNodes));el.removeAttribute("aria-busy")})},600)});`
+
+templ lateFiguresView(c Counts) {
+	@detail.Fields() {
+		@fieldOf("Angebote im Entwurf", itoa(c.Drafts))
+		@fieldOf("Neue Kunden", itoa(c.New))
+	}
+}
+
+// --- B-08 brand and form ---------------------------------------------------------------------------------
+
+templ swatch(name, token, meaning string) {
+	<div class="ref-swatch">
+		<span class="ref-swatch-color" style={ templ.SafeCSS("background:var(" + token + ")") }></span>
+		<div>
+			<div class="fw-medium">{ name }</div>
+			<div class="text-secondary small"><code>{ token }</code> · { meaning }</div>
+		</div>
+	</div>
+}
+
+templ brandView() {
+	<div class="row row-cards">
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Grund und Linien"}) {
+				@card.Body() {
+					<div class="ref-swatches">
+						@swatch("Grund", "--tblr-body-bg", "die Fläche hinter den Inseln")
+						@swatch("Insel", "--tblr-bg-surface", "Karten und Dialoge")
+						@swatch("Linie", "--tblr-border-color", "Rahmen und Trenner")
+						@swatch("Text", "--tblr-body-color", "Schrift")
+						@swatch("Akzent", "--tblr-primary", "Hauptaktion, Links")
+					</div>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Signalfarben"}) {
+				@card.Body() {
+					<div class="ref-swatches">
+						@swatch("Grün", "--tblr-success", "gut, erledigt")
+						@swatch("Gelb", "--tblr-warning", "Achtung, bald fällig")
+						@swatch("Rot", "--tblr-danger", "Problem, überfällig")
+						@swatch("Blau", "--tblr-info", "Hinweis, heute")
+					</div>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Schrift"}) {
+				@card.Body() {
+					<p class="fs-2 mb-1">Musterdienst GmbH</p>
+					<p class="text-secondary">Geist für Text, in allen Stärken aus einer Datei.</p>
+					<p class="mono fs-3 mb-1">A-2026-001 · 01.01.0010</p>
+					<p class="text-secondary mb-0">Geist Mono für Nummern und Code.</p>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Knöpfe"}) {
+				@card.Body() {
+					<div class="btn-list mb-3">
+						@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-plus"}) {
+							Angebot anlegen
+						}
+						@button.Button(button.Props{Type: "button"}) {
+							Abbrechen
+						}
+						@button.Button(button.Props{Type: "button", Variant: button.VariantGhost}) {
+							Zurücksetzen
+						}
+						<form method="get" action={ templ.URL(pathBrand) } data-kit-confirm="Angebot A-2026-014 löschen?" class="d-inline">
+							@button.Button(button.Props{Variant: button.VariantDanger, Outline: true, Icon: "ti-trash"}) {
+								Angebot löschen
+							}
+						</form>
+					</div>
+					<p class="text-secondary mb-0">Gefüllt ist nur die Hauptaktion. Knöpfe sagen, was passiert. Gefährliches ist rot und fragt nach.</p>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Pillen und Ampel"}) {
+				@card.Body() {
+					<div class="d-flex flex-wrap gap-2 mb-3">
+						for _, s := range OfferStatuses {
+							@offerPill(s)
+						}
+						@customerPill(CustomerNew)
+					</div>
+					<div class="d-flex flex-wrap gap-3">
+						for _, s := range Signals {
+							@signal(s)
+						}
+					</div>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Zahlen, Datum, Links"}) {
+				@card.Body() {
+					@detail.Fields() {
+						@fieldOf("Betrag", Euro(123450))
+						@fieldOf("Datum", Date(Today))
+						@fieldOf("Uhrzeit", "07:30")
+						@fieldOf("Zeitraum", Period(Today, Today.AddDate(1, 4, 16)))
+						@fieldOf("Menge", DecimalOf(1234.5).String()+" Std")
+						@fieldOf("Aufzählung", "Kunden, Angebote und Positionen")
+					}
+					<p class="mt-3 mb-0">Links im Text sind dezent unterstrichen, etwa die <a href={ templ.URL(customerURL("K-1001")) }>Wohnungsgesellschaft Nordstadt</a>.</p>
+				}
+			}
+		</div>
+	</div>
+}
+
+// --- B-09 assistant ----------------------------------------------------------------------------------------
+
+templ assistantView() {
+	<div class="row row-cards">
+		<div class="col-lg-7">
+			@detail.Section(detail.SectionProps{Title: "So arbeitet der Assistent"}) {
+				@card.Body() {
+					@detail.Fields() {
+						@fieldOf("Ort", "Reiter „KI-Assistent“ im Panel rechts, neben den Notizen")
+						@fieldOf("Kennzeichnung", "„Hier antwortet eine KI“ mit dem Hinweis, dass Antworten falsch sein können")
+						@fieldOf("Lesen", "nur mit den Rechten der angemeldeten Person; was er gelesen hat, steht über der Antwort")
+						@fieldOf("Ändern", "nie selbst: Er öffnet den Dialog und füllt ihn vor, speichern tut der Mensch")
+						@fieldOf("Nie", "Bankverbindung, E-Mail-Adressen, Steuernummern; keine Links und Bilder in Antworten")
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-5">
+			@detail.Section(detail.SectionProps{Title: "Ausprobieren"}) {
+				@card.Body() {
+					<p class="text-secondary">Öffnen Sie den Assistenten und wählen Sie eine der Fragen.</p>
+					@button.Button(button.Props{Type: "button", Variant: button.VariantPrimary, Icon: "ti-sparkles", Attributes: sidepanel.ButtonAttributes(nil, tabAssistant)}) {
+						KI-Assistent öffnen
+					}
+					<ul class="mt-3 mb-0">
+						for _, e := range examples {
+							<li>{ e }</li>
+						}
+					</ul>
+				}
+			}
+		</div>
+	</div>
+}
+
+// --- error pages (GS-62) ---------------------------------------------------------------------------------
+
+templ errorView(e errorText) {
+	@card.Card() {
+		@empty.Empty(empty.Props{Icon: "ti-alert-circle", Title: e.title, Subtitle: e.text, TitleLevel: 2,
+			Action: linkButton(pathStart, "Zur Startseite", "ti-home"), Attributes: templ.Attributes{"data-error-page": true}})
+	}
+}
+
