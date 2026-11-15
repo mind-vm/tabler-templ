@@ -93,7 +93,7 @@ forms.forEach(function(f){hidden(f,cfg.dialogField,d.id);hidden(f,cfg.returnFiel
 if(d.classList.contains("kit-dialog-large"))f.addEventListener("submit",function(){try{sessionStorage.setItem("kitDialogOpen",d.id)}catch(_){}})});
 var f=forms.length===1?forms[0]:null;var rows=f?Array.from(f.children).filter(function(e){return!(e.tagName==="INPUT"&&e.type==="hidden")}):[];var row=rows[rows.length-1];
 var onlyButtons=row&&row.children.length>0&&Array.from(row.children).every(function(e){return e.tagName==="BUTTON"});
-if(onlyButtons&&row.querySelector(":scope > .btn-primary")){if(!f.id)f.id=d.id+"-form";var foot=document.createElement("div");foot.className="modal-footer kit-dialog-footer";
+if(onlyButtons&&row.querySelector(":scope > .btn-primary, :scope > .btn-danger")){if(!f.id)f.id=d.id+"-form";var foot=document.createElement("div");foot.className="modal-footer kit-dialog-footer";
 var hint=document.createElement("span");hint.className="kit-dialog-hint";if(d.hasAttribute("data-kit-section"))hint.textContent=cfg.sectionHint;foot.appendChild(hint);
 var c=document.createElement("button");c.type="button";c.className="btn";c.setAttribute("data-bs-dismiss","modal");c.textContent=cfg.cancel;foot.appendChild(c);
 Array.from(row.children).forEach(function(b){b.setAttribute("form",f.id);b.classList.remove("w-100");foot.appendChild(b)});row.remove();d.querySelector(".modal-content").appendChild(foot)}

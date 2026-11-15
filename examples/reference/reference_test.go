@@ -617,3 +617,50 @@ func TestGS15_ThemeInOnePlace(t *testing.T) {
 	got, _ := c.get(c.app.files.URL("core/css/tabler-themes.min.css"))
 	assert.Equal(t, http.StatusOK, got)
 }
+
+// GS-44: an action with a reason is a small dialog with a required field and a red button; without a
+// reason it opens again with the error at the field.
+func TestGS44_ActionWithReason(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathStates)
+	i := strings.Index(body, `id="`+dialogWithdraw+`"`)
+	require.Positive(t, i)
+	assert.Contains(t, body[i:], "btn-danger")
+	got, body, _ := c.post(pathStates+"/zuruecknehmen", url.Values{"reason": {" "}})
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, `window.kitDialogState={"error":"Bitte prüfen Sie die markierten Felder.","id":"`+dialogWithdraw+`"`)
+	assert.Contains(t, body, "Bitte geben Sie einen Grund an.")
+	_, body, _ = c.post(pathStates+"/zuruecknehmen", url.Values{"reason": {"Kunde hat neue Mengen geschickt."}})
+	assert.Contains(t, body, "Abgabe von A-2026-002 zurückgenommen")
+	o, _ := c.app.store.Offer("A-2026-002")
+	assert.Equal(t, OfferDraft, o.Status)
+	cu, _ := c.app.store.Customer(o.Customer)
+	assert.Contains(t, cu.Notes[0].Text, "Kunde hat neue Mengen geschickt.")
+}
+
+// GS-44: an irreversible action asks to type the name; a wrong one changes nothing.
+func TestGS44_TypedConfirmation(t *testing.T) {
+	c := newClient(t)
+	cu, _ := c.app.store.Customer(customerToDelete)
+	got, body, _ := c.post(pathStates+"/kunde-loeschen", url.Values{"confirm": {"ja"}})
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, "Bitte tippen Sie den Namen genau so: "+cu.Name)
+	_, ok := c.app.store.Customer(customerToDelete)
+	assert.True(t, ok, "nothing deleted")
+	_, body, _ = c.post(pathStates+"/kunde-loeschen", url.Values{"confirm": {cu.Name}})
+	assert.Contains(t, body, "Kunde "+cu.Name+" endgültig gelöscht.")
+	_, ok = c.app.store.Customer(customerToDelete)
+	assert.False(t, ok)
+}
+
+// GS-63: the notice „Demo-Instanz“ stands where „nur lesen“ stands, above the message line, in info.
+func TestGS63_DemoInstance(t *testing.T) {
+	c := newClient(t)
+	_, body, _ := c.post(pathStates+"/demo", nil)
+	i := strings.Index(body, "data-demo")
+	require.Positive(t, i)
+	assert.Less(t, i, strings.Index(body, "Der Hinweis „Demo-Instanz“ ist an"), "above the message")
+	assert.Contains(t, body[strings.LastIndex(body[:i], "<div class=\"alert"):i], "alert-info")
+	_, body = c.get(customerURL("K-1001"))
+	assert.Contains(t, body, "Demo-Instanz: Alle Daten hier sind erfunden.")
+}

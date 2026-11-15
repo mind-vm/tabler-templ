@@ -128,6 +128,9 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	mux.HandleFunc("GET "+pathStates+"/keine-rechte", a.forbidden)
 	mux.HandleFunc("GET "+pathStates+"/fehler", a.failure)
 	mux.HandleFunc("POST "+pathStates+"/nur-lesen", a.toggleReadOnly)
+	mux.HandleFunc("POST "+pathStates+"/demo", a.toggleDemo)
+	mux.HandleFunc("POST "+pathStates+"/zuruecknehmen", a.writes(a.withdraw))
+	mux.HandleFunc("POST "+pathStates+"/kunde-loeschen", a.writes(a.deleteCustomer))
 	mux.HandleFunc("POST "+Home+"/zuruecksetzen", a.reset)
 	mux.HandleFunc("GET "+pathBrand, a.brand)
 	mux.HandleFunc("GET "+pathAssistant, a.assistantPage)
@@ -148,6 +151,7 @@ func germanContext(ctx context.Context) context.Context {
 func (a *App) render(w http.ResponseWriter, r *http.Request, status int, p page, body templ.Component) {
 	ctx := germanContext(r.Context())
 	p.readOnly = a.store.ReadOnly()
+	p.demo = a.store.Demo()
 	p.session = a.session(w, r)
 	if p.Flash == nil {
 		p.Flash = takeFlash(w, r)
@@ -540,12 +544,58 @@ func (a *App) deletePosition(w http.ResponseWriter, r *http.Request) {
 	done(w, r, back(r, offerURL(no)), flashData{Text: "Position " + p.No + " gelöscht."})
 }
 
-func (a *App) states(w http.ResponseWriter, r *http.Request) {
+func (a *App) states(w http.ResponseWriter, r *http.Request) { a.statesWith(w, r, 0, dialogState{}) }
+
+func (a *App) statesWith(w http.ResponseWriter, r *http.Request, status int, st dialogState) {
 	p := page{Key: "B-07", Title: "Zustände", Crumbs: []shell.Crumb{{Text: "Referenz", Href: Home}, {Text: "Zustände"}}}
 	if r.URL.Query().Get("meldung") == "1" {
 		p.Flash = &shell.Flash{Variant: alert.VariantSuccess, Text: "Angebot A-2026-001 abgegeben.", Next: "Zu den Angeboten", NextHref: pathOffers}
 	}
-	a.render(w, r, 0, p, statesView(a.store.ReadOnly()))
+	withdrawable, _ := a.store.Offer(offerToWithdraw)
+	deletable, _ := a.store.Customer(customerToDelete)
+	a.render(w, r, status, p, statesView(a.store.ReadOnly(), a.store.Demo(), withdrawable, deletable, st))
+}
+
+// The examples of B-07's actions with a reason and with a typed confirmation.
+const (
+	offerToWithdraw  = "A-2026-002"
+	customerToDelete = "K-1058"
+)
+
+func (a *App) withdraw(w http.ResponseWriter, r *http.Request) {
+	o, err := a.store.Withdraw(offerToWithdraw, r.PostFormValue("reason"))
+	var errs FieldErrors
+	switch {
+	case errors.As(err, &errs):
+		a.statesWith(w, r, http.StatusUnprocessableEntity, failed(dialogWithdraw, r, err))
+	case err != nil:
+		done(w, r, pathStates, flashData{Variant: "danger", Text: err.Error()})
+	default:
+		done(w, r, pathStates, flashData{Text: "Abgabe von " + o.No + " zurückgenommen; der Grund steht in den Vermerken des Kunden.", Next: "Zum Angebot", NextHref: offerURL(o.No)})
+	}
+}
+
+func (a *App) deleteCustomer(w http.ResponseWriter, r *http.Request) {
+	c, err := a.store.DeleteCustomer(customerToDelete, r.PostFormValue("confirm"))
+	var errs FieldErrors
+	switch {
+	case errors.As(err, &errs):
+		a.statesWith(w, r, http.StatusUnprocessableEntity, failed(dialogDelete, r, err))
+	case errors.Is(err, ErrNotFound):
+		done(w, r, pathStates, flashData{Variant: "danger", Text: "Diesen Kunden gibt es nicht mehr. „Beispieldaten zurücksetzen“ legt ihn wieder an."})
+	default:
+		done(w, r, pathStates, flashData{Text: "Kunde " + c.Name + " endgültig gelöscht.", Next: "Zu den Kunden", NextHref: pathCustomers})
+	}
+}
+
+func (a *App) toggleDemo(w http.ResponseWriter, r *http.Request) {
+	on := !a.store.Demo()
+	a.store.SetDemo(on)
+	text := "Der Hinweis „Demo-Instanz“ ist aus."
+	if on {
+		text = "Der Hinweis „Demo-Instanz“ ist an und steht jetzt auf jeder Seite."
+	}
+	done(w, r, pathStates, flashData{Text: text})
 }
 
 // lateFigures is the part of B-07 that comes after the page (GS-64).

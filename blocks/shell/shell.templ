@@ -66,6 +66,9 @@ type Props struct {
 	// Tabs sit below the heading, e.g. the sections of a detail page (a nav with "nav-bordered").
 	Tabs  templ.Component
 	Flash *Flash
+	// Notice is a line above the message that stays while a state lasts: read-only, a demo instance, the
+	// environment (staging). Not dismissible; usually shell.Notice.
+	Notice templ.Component
 	// Compact tightens the spacing of cards, tables, forms and the sidebar for pages dense with data
 	// (the body gets "kit-compact"; put that class on any element to compact only its content).
 	Compact bool
@@ -100,6 +103,7 @@ templ Page(p Props) {
 			}
 			{ p.BodyAttributes... }
 		>
+			<a class="kit-skip-link" href="#kit-content">{ kit.T(ctx).SkipToContent }</a>
 			<div class="page">
 				if p.Sidebar != nil {
 					@p.Sidebar
@@ -107,8 +111,11 @@ templ Page(p Props) {
 				<div class="page-wrapper">
 					@Header(p)
 					@PageHeader(p)
-					<div class="page-body">
+					<div class="page-body" id="kit-content" tabindex="-1">
 						<div class="container-xl">
+							if p.Notice != nil {
+								@p.Notice
+							}
 							if f := p.Flash; f != nil {
 								@alert.Alert(alert.Props{Variant: f.Variant, Icon: f.Icon, Dismissible: true}) {
 									{ f.Text }
@@ -158,6 +165,29 @@ templ Breadcrumbs(cs []Crumb) {
 	@breadcrumb.Breadcrumb(breadcrumb.Props{Attributes: templ.Attributes{"class": "kit-shell-breadcrumbs"}}, cs)
 }
 
+// NoticeProps is a lasting notice above the content.
+type NoticeProps struct {
+	Variant alert.Variant // default info
+	Icon    string        // "ti-…"; empty = the variant's default icon
+	Text    string
+	// Action and ActionHref add a link after the text, e.g. „Daten exportieren“.
+	Action, ActionHref string
+	Attributes         templ.Attributes
+}
+
+// Notice is a state of the whole app shown above the message line (GS-63 of the design concept):
+// read-only, a demo instance, staging. It cannot be dismissed.
+templ Notice(p NoticeProps) {
+	@alert.Alert(alert.Props{Variant: alert.Variant(kit.Or(string(p.Variant), string(alert.VariantInfo))), Icon: p.Icon, Class: "kit-shell-notice", Attributes: p.Attributes}) {
+		{ p.Text }
+		if p.Action != "" && p.ActionHref != "" {
+			@alert.Action(p.ActionHref) {
+				{ p.Action }
+			}
+		}
+	}
+}
+
 // PageHeader is Tabler's .page-header: heading with extra, subtitle and actions.
 templ PageHeader(p Props) {
 	<div class="page-header d-print-none">
@@ -202,7 +232,11 @@ templ Styles() {
 
 var styles = csp.Sheet("blocks/shell", css)
 
-const css = `.kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
+const css = `.kit-skip-link{position:absolute;left:.5rem;top:-3rem;z-index:1100;padding:.5rem .75rem;background:var(--tblr-bg-surface);color:var(--tblr-body-color);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius)}
+.kit-skip-link:focus{top:.5rem}
+#kit-content:focus{outline:0}
+:is(a,button,summary,[tabindex]:not([tabindex="-1"]),.form-check-input):focus-visible{outline:3px solid var(--tblr-primary);outline-offset:2px}
+.kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
 .kit-shell-breadcrumbs{min-width:0}
 .kit-shell-header .breadcrumb{flex-wrap:nowrap;margin:0}
 .kit-shell-header .breadcrumb-item{white-space:nowrap}

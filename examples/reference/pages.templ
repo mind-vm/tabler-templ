@@ -10,6 +10,7 @@ import (
 	"github.com/mind-vm/tabler-templ/button"
 	"github.com/mind-vm/tabler-templ/card"
 	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/mark"
 	"github.com/mind-vm/tabler-templ/placeholder"
 	"github.com/mind-vm/tabler-templ/status"
@@ -174,7 +175,12 @@ templ startView(c Counts, burning []Offer, names map[string]string) {
 
 // --- B-07 states ---------------------------------------------------------------------------------------
 
-templ statesView(readOnly bool) {
+const (
+	dialogWithdraw = "dialog-zuruecknehmen"
+	dialogDelete   = "dialog-loeschen"
+)
+
+templ statesView(readOnly, demo bool, withdrawable Offer, deletable Customer, st dialogState) {
 	<div class="row row-cards">
 		<div class="col-lg-6">
 			@detail.Section(detail.SectionProps{Title: "Meldung nach einer Aktion"}) {
@@ -237,6 +243,43 @@ templ statesView(readOnly bool) {
 			}
 		</div>
 		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Demo-Instanz", Attributes: templ.Attributes{"id": "demo"}}) {
+				@card.Body() {
+					<p>Sind alle Daten erfunden, sagt der Rahmen das an derselben Stelle wie „nur lesen“, in der Farbe für Hinweise.</p>
+					<form method="post" action={ templ.URL(pathStates + "/demo") }>
+						@button.Button(button.Props{Icon: "ti-flask"}) {
+							if demo {
+								Hinweis ausschalten
+							} else {
+								Hinweis einschalten
+							}
+						}
+					</form>
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Aktion mit Grund", Action: actionIf(!readOnly && withdrawable.Status == OfferSubmitted, dialogWithdraw, "Abgabe zurücknehmen", "ti-arrow-back-up")}) {
+				@card.Body() {
+					<p>Eine rechtlich wirksame Aktion oder eine Entscheidung fragt in einem kleinen Dialog nach dem Grund. Das Feld ist Pflicht, der Knopf rot.</p>
+					@detail.Fields() {
+						<dt>Beispiel</dt>
+						<dd><a href={ templ.URL(offerURL(withdrawable.No)) }>{ withdrawable.No }</a> · { withdrawable.Status.Label() }</dd>
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Getippte Bestätigung", Action: actionIf(!readOnly && deletable.No != "", dialogDelete, "Endgültig löschen", "ti-trash")}) {
+				@card.Body() {
+					<p>Eine unumkehrbare, folgenreiche Aktion verlangt, dass man den Namen abtippt. Ein Klick allein reicht nicht.</p>
+					@detail.Fields() {
+						@fieldOf("Beispiel", deletable.Name)
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-6">
 			@detail.Section(detail.SectionProps{Title: "Laden"}) {
 				@card.Body() {
 					<p>Was länger braucht, kommt nach dem Seitenaufbau; bis dahin steht ein Platzhalter.</p>
@@ -251,6 +294,46 @@ templ statesView(readOnly bool) {
 		</div>
 	</div>
 	@inlineScript(loadLater)
+	if !readOnly && withdrawable.Status == OfferSubmitted {
+		@detail.Dialog(detail.DialogProps{ID: dialogWithdraw, Title: "Abgabe zurücknehmen", Context: withdrawable.No + " · " + withdrawable.Title, Error: errorOf(st, dialogWithdraw)}) {
+			<form method="post" action={ templ.URL(pathStates + "/zuruecknehmen") } data-form="zuruecknehmen" novalidate>
+				<p>Das Angebot geht zurück in den Entwurf. Der Grund steht danach in den Vermerken des Kunden.</p>
+				{{ err := st.field(dialogWithdraw, "reason") }}
+				@form.Field(form.FieldProps{Label: "Grund", For: "zuruecknehmen-grund", Required: true, Error: err}) {
+					@form.Textarea(form.TextareaProps{ID: "zuruecknehmen-grund", Name: "reason", Rows: 3, Value: st.value(dialogWithdraw, "reason", ""), Invalid: err != ""})
+				}
+				<div>
+					@button.Button(button.Props{Variant: button.VariantDanger, Icon: "ti-arrow-back-up"}) {
+						Abgabe zurücknehmen
+					}
+				</div>
+			</form>
+		}
+	}
+	if !readOnly && deletable.No != "" {
+		@detail.Dialog(detail.DialogProps{ID: dialogDelete, Title: "Kunde endgültig löschen", Context: deletable.No + " · " + deletable.Name, Error: errorOf(st, dialogDelete)}) {
+			<form method="post" action={ templ.URL(pathStates + "/kunde-loeschen") } data-form="kunde-loeschen" novalidate>
+				<p>Der Kunde und seine Angebote werden gelöscht. Das lässt sich nicht rückgängig machen.</p>
+				{{ err := st.field(dialogDelete, "confirm") }}
+				@form.Field(form.FieldProps{Label: "Zur Bestätigung den Namen tippen: " + deletable.Name, For: "loeschen-name", Required: true, Error: err}) {
+					@form.Input(form.InputProps{ID: "loeschen-name", Name: "confirm", Value: st.value(dialogDelete, "confirm", ""), Invalid: err != "", Autocomplete: "off"})
+				}
+				<div>
+					@button.Button(button.Props{Variant: button.VariantDanger, Icon: "ti-trash"}) {
+						Endgültig löschen
+					}
+				</div>
+			</form>
+		}
+	}
+	@reopen(st)
+}
+
+// actionIf is an island's one action when it is allowed (GS-08, GS-41).
+templ actionIf(on bool, dialog, label, ic string) {
+	if on {
+		@detail.EditButton(detail.EditButtonProps{Dialog: dialog, Label: label, Icon: ic})
+	}
 }
 
 // loadLater fills elements with data-ref-load from the server after the page stands (GS-64); a small
