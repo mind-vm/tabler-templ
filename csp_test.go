@@ -16,7 +16,9 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/invoice"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/maps"
+	"github.com/mind-vm/tabler-templ/blocks/rowedit"
 	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
 	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/chart/svg"
 	"github.com/mind-vm/tabler-templ/confetti"
@@ -59,7 +61,9 @@ func TestNonceRendered(t *testing.T) {
 		"motion":     motion.Library(),
 		"sound":      templ.Join(sound.Script(sound.Config{}), sound.Styles()),
 		"player":     templ.Join(player.Library(), player.Script()),
+		"rowedit":    templ.Join(rowedit.Styles(), rowedit.Script()),
 		"shell":      shell.Styles(),
+		"sidepanel":  templ.Join(sidepanel.Styles(), sidepanel.Script()),
 		"sidebar":    templ.Join(sidebar.Styles(), sidebar.Script()),
 		"themes":     themes.Head(themes.All...),
 		"vectormap":  vectormap.Library("world"),

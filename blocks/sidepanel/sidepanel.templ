@@ -1,0 +1,91 @@
+package sidepanel
+
+import (
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// Aside is the panel: a row of tabs (or the one tab's title), the close button and the tabs' content.
+// Put it at the end of <body>, before Script.
+templ Aside(p *Panel) {
+	if p.Has() {
+		@Styles()
+		<aside id={ ID } class="kit-sidepanel" data-active={ p.active() } aria-label={ p.label() } hidden?={ !p.Open } data-kit-from-server?={ p.Open }>
+			<div class="kit-sidepanel-head">
+				if len(p.Tabs) > 1 {
+					<div class="kit-sidepanel-tabs" role="tablist">
+						for _, t := range p.Tabs {
+							<button type="button" role="tab" id={ ID + "-tab-" + t.Name } class="kit-sidepanel-tab" data-kit-sidepanel-show={ t.Name } aria-controls={ ID + "-" + t.Name } aria-selected={ strconv.FormatBool(p.shows(t.Name)) }>
+								@icon.Icon(t.Icon)
+								<span>{ t.Title }</span>
+							</button>
+						}
+					</div>
+				} else {
+					<div class="fw-bold">
+						@icon.Icon(p.Tabs[0].Icon, icon.Props{Class: "me-1"})
+						{ p.Tabs[0].Title }
+					</div>
+				}
+				<div class="d-flex gap-1 ms-auto">
+					for _, t := range p.Tabs {
+						if t.Head != nil {
+							<span class="kit-sidepanel-tab-head" data-kit-sidepanel-only={ t.Name } hidden?={ !p.shows(t.Name) }>
+								@t.Head
+							</span>
+						}
+					}
+					@button.Button(button.Props{ID: ID + "-close", Type: "button", Size: button.SizeSmall, Variant: button.VariantGhost, Icon: "ti-x", IconOnly: true, Label: kit.T(ctx).Close})
+				</div>
+			</div>
+			for _, t := range p.Tabs {
+				<section id={ ID + "-" + t.Name } class="kit-sidepanel-content" data-kit-sidepanel-content={ t.Name } aria-label={ t.Title } hidden?={ !p.shows(t.Name) } data-kit-sidepanel-forms?={ t.Forms }>
+					if t.Content != nil {
+						@t.Content
+					}
+				</section>
+			}
+		</aside>
+	}
+}
+
+// Buttons are the header buttons, one per tab (its own Button or the default one).
+templ Buttons(p *Panel) {
+	if p.Has() {
+		for _, t := range p.Tabs {
+			if t.Button != nil {
+				@t.Button
+			} else {
+				@Button(p, t)
+			}
+		}
+	}
+}
+
+// Button is a tab's default header button: its icon, and its title from sm up.
+templ Button(p *Panel, t Tab) {
+	@button.Button(button.Props{ID: ID + "-open-" + t.Name, Type: "button", Icon: t.Icon, Attributes: kit.Attrs(ButtonAttributes(p, t.Name), templ.Attributes{"aria-label": t.Title})}) {
+		<span class="d-none d-sm-inline">{ t.Title }</span>
+	}
+}
+
+// Script opens, closes and remembers the panel. Put it after Aside. It exposes
+// window.kitSidepanel.open(tab), .close(), .active() and .isOpen().
+templ Script() {
+	@scriptOnce.Once() {
+		@scriptElement()
+	}
+}
+
+var scriptOnce = templ.NewOnceHandle()
+
+var styles = csp.Sheet("blocks/sidepanel", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. Aside renders it itself.
+templ Styles() {
+	@styles
+}

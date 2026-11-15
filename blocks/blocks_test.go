@@ -144,6 +144,15 @@ func TestShellPage(t *testing.T) {
 	assert.NotContains(t, h, "kit_sidebar=")
 }
 
+// GS-60: the message after an action offers the next step as a link.
+func TestGS60_ShellFlashWithNextStep(t *testing.T) {
+	ctx := context.Background()
+	h := render(t, ctx, shell.Page(shell.Props{Title: "x", Flash: &shell.Flash{Variant: alert.VariantSuccess, Text: "Einsatz disponiert.", Next: "Zur Plantafel", NextHref: "/plantafel"}}))
+	assert.Regexp(t, `Einsatz disponiert\.\s*<a href="/plantafel" class="alert-action">Zur Plantafel</a>`, h)
+	h = render(t, ctx, shell.Page(shell.Props{Title: "x", Flash: &shell.Flash{Text: "Gespeichert.", Next: "Weiter"}}))
+	assert.NotContains(t, h, "alert-action", "no link without an address")
+}
+
 func TestDetailSection(t *testing.T) {
 	ctx := kit.WithMessages(context.Background(), kit.German)
 	edit := detail.EditButton(detail.EditButtonProps{Dialog: "dialog-kunde"})

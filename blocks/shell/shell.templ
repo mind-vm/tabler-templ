@@ -35,6 +35,9 @@ type Flash struct {
 	Variant alert.Variant
 	Icon    string // "ti-…"; empty = the variant's default icon
 	Text    string
+	// Next is the next step as a link after the text (alert-action), e.g. "Go to the schedule"; NextHref
+	// is its address. Both must be set.
+	Next, NextHref string
 }
 
 type Props struct {
@@ -109,6 +112,11 @@ templ Page(p Props) {
 							if f := p.Flash; f != nil {
 								@alert.Alert(alert.Props{Variant: f.Variant, Icon: f.Icon, Dismissible: true}) {
 									{ f.Text }
+									if f.Next != "" && f.NextHref != "" {
+										@alert.Action(f.NextHref) {
+											{ f.Next }
+										}
+									}
 								}
 							}
 							{ children... }

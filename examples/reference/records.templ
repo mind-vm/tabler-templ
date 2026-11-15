@@ -1,0 +1,526 @@
+package reference
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/blocks/rowedit"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/empty"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// --- B-03 list --------------------------------------------------------------------------------------
+
+templ newCustomerButton() {
+	@button.Button(button.Props{Href: pathNew, Variant: button.VariantPrimary, Icon: "ti-plus", Attributes: templ.Attributes{"data-tour": "referenz.kunden.neu"}}) {
+		Neuer Kunde
+	}
+}
+
+templ customersView(l *listpage.List, rows []Customer) {
+	@listpage.Card(l) {
+		if l.Total == 0 {
+			@emptyList(l, "Kunden", "Noch keine Kunden", "Kunden legen Sie über „Neuer Kunde“ an; danach stehen sie hier.", pathNew, "Kunde anlegen")
+		} else {
+			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Nowrap: true, Class: "ref-table"}) {
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Ort</th>
+						<th>Nummer</th>
+						<th>Stand</th>
+						<th>Offene Posten</th>
+						<th class="text-end">Umsatz 2026</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, c := range rows {
+						<tr>
+							<td><a href={ templ.URL(customerURL(c.No)) }>{ c.Name }</a></td>
+							<td>{ c.City }</td>
+							<td class="mono">{ c.No }</td>
+							<td>
+								@customerPill(c.Status)
+							</td>
+							<td>
+								@signal(c.Signal)
+							</td>
+							<td class="text-end ref-num">{ Euro(c.Revenue) }</td>
+						</tr>
+					}
+				</tbody>
+			}
+		}
+	}
+}
+
+// emptyList: an empty list says why (GS-61); an empty search offers to reset it.
+templ emptyList(l *listpage.List, what, title, text, href, action string) {
+	if l.Active() {
+		@empty.Empty(empty.Props{Icon: "ti-search", Title: "Keine " + what + " gefunden", Subtitle: "Zu Ihrer Suche passt nichts. Prüfen Sie die Schreibweise oder suchen Sie mit weniger Wörtern.",
+			Action: resetSearch(l.Path), Attributes: templ.Attributes{"data-empty": "search"}})
+	} else {
+		@empty.Empty(empty.Props{Icon: "ti-inbox", Title: title, Subtitle: text, Action: linkButton(href, action, "ti-plus"), Attributes: templ.Attributes{"data-empty": "list"}})
+	}
+}
+
+templ resetSearch(path string) {
+	@button.Button(button.Props{Href: path, Icon: "ti-x"}) {
+		Suche zurücksetzen
+	}
+}
+
+templ linkButton(href, text, ic string) {
+	if href != "" {
+		@button.Button(button.Props{Href: href, Variant: button.VariantPrimary, Icon: ic}) {
+			{ text }
+		}
+	}
+}
+
+templ offersView(l *listpage.List, rows []Offer, names map[string]string) {
+	@listpage.Card(l) {
+		if l.Total == 0 {
+			@emptyList(l, "Angebote", "Noch keine Angebote", "Angebote entstehen auf der Seite eines Kunden.", "", "")
+		} else {
+			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Nowrap: true, Class: "ref-table"}) {
+				<thead>
+					<tr>
+						<th>Titel</th>
+						<th>Kunde</th>
+						<th>Nummer</th>
+						<th>Stand</th>
+						<th>Abgabe bis</th>
+						<th class="text-end">Summe</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, o := range rows {
+						<tr>
+							<td><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
+							<td><a href={ templ.URL(customerURL(o.Customer)) }>{ names[o.Customer] }</a></td>
+							<td class="mono">{ o.No }</td>
+							<td>
+								@offerPill(o.Status)
+							</td>
+							<td class="ref-num">{ Date(o.Due) }</td>
+							<td class="text-end ref-num">{ Euro(o.Total()) }</td>
+						</tr>
+					}
+				</tbody>
+			}
+		}
+	}
+}
+
+// --- B-04 detail page -----------------------------------------------------------------------------
+
+const (
+	dialogMaster    = "dialog-stammdaten"
+	dialogContact   = "dialog-ansprechpartner"
+	dialogNote      = "dialog-vermerk"
+	dialogOffer     = "dialog-angebot"
+	dialogPositions = "dialog-positionen"
+	kindPosition    = "position"
+	kindNewPosition = "position-neu"
+	// subListMax is the number of rows a sub-list in an island shows (GS-46).
+	subListMax = 10
+)
+
+templ customerHeading(c Customer) {
+	<span class="mono text-secondary">{ c.No }</span>
+	@customerPill(c.Status)
+}
+
+// edit is the island's one Edit button, only where the person may change it (GS-08, GS-41).
+templ edit(on bool, dialog string) {
+	if on {
+		@detail.EditButton(detail.EditButtonProps{Dialog: dialog})
+	}
+}
+
+templ customerView(c Customer, offers []Offer, canEdit bool, st dialogState) {
+	{{ about := c.No + " · " + c.Name }}
+	<div class="row row-cards">
+		<div class="col-lg-8">
+			<div class="row row-cards">
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Stammdaten", Action: edit(canEdit, dialogMaster), Attributes: templ.Attributes{"id": "stammdaten"}}) {
+						@card.Body() {
+							@detail.Fields() {
+								@fieldOf("Name", c.Name)
+								@fieldOf("Straße", c.Street)
+								@fieldOf("PLZ und Ort", joinSpace(c.Zip, c.City))
+								@fieldOf("Kundennummer", c.No)
+								@fieldOf("Kunde seit", Date(c.Created))
+							}
+						}
+					}
+				</div>
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Ansprechpartner", Action: edit(canEdit, dialogContact), Attributes: templ.Attributes{"id": "ansprechpartner"}}) {
+						@card.Body() {
+							@detail.Fields() {
+								@fieldOf("Name", c.Contact.Name)
+								@fieldOf("Telefon", c.Contact.Phone)
+								@fieldOf("E-Mail", c.Contact.Email)
+							}
+						}
+					}
+				</div>
+				<div class="col-12">
+					@offersIsland(c, offers)
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4">
+			<div class="row row-cards">
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Vermerke", Extra: itoa(len(c.Notes)), Action: addNoteButton(canEdit)}) {
+						@card.Body() {
+							if len(c.Notes) == 0 {
+								<p class="text-secondary mb-0">Noch keine Vermerke.</p>
+							}
+							<ul class="list-unstyled mb-0 ref-notes-list">
+								for _, n := range c.Notes {
+									<li>
+										<div class="text-secondary small">{ Date(n.Date) }</div>
+										<div>{ n.Text }</div>
+									</li>
+								}
+							</ul>
+						}
+					}
+				</div>
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Zahlung"}) {
+						@card.Body() {
+							@detail.Fields() {
+								@fieldOf("Zahlungsziel", c.Payment)
+								@fieldOf("Umsatz 2026", Euro(c.Revenue))
+							}
+						}
+					}
+				</div>
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Offene Posten", Extra: "aus der Buchhaltung"}) {
+						@card.Body() {
+							@detail.Fields() {
+								<dt>Stand</dt>
+								<dd>
+									@signal(c.Signal)
+								</dd>
+								@fieldOf("Überfällig", euroOrEmpty(c.Overdue))
+							}
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+	if canEdit {
+		@detail.Dialog(detail.DialogProps{ID: dialogMaster, Title: "Stammdaten", Context: about, Section: true, Error: errorOf(st, dialogMaster)}) {
+			<form method="post" action={ templ.URL(customerURL(c.No) + "/stammdaten") } data-form="kunde-stammdaten" novalidate>
+				@input(field{Dialog: dialogMaster, ID: "stammdaten-name", Name: "name", Label: "Name", Value: c.Name, Required: true, Autocomplete: "organization", st: st})
+				@input(field{Dialog: dialogMaster, ID: "stammdaten-strasse", Name: "street", Label: "Straße", Value: c.Street, Autocomplete: "street-address", st: st})
+				<div class="row">
+					<div class="col-sm-4">
+						@input(field{Dialog: dialogMaster, ID: "stammdaten-plz", Name: "zip", Label: "PLZ", Value: c.Zip, Autocomplete: "postal-code", Mode: "numeric", st: st})
+					</div>
+					<div class="col-sm-8">
+						@input(field{Dialog: dialogMaster, ID: "stammdaten-ort", Name: "city", Label: "Ort", Value: c.City, Required: true, Autocomplete: "address-level2", st: st})
+					</div>
+				</div>
+				@saveRow("Speichern")
+			</form>
+		}
+		@detail.Dialog(detail.DialogProps{ID: dialogContact, Title: "Ansprechpartner", Context: about, Section: true, Error: errorOf(st, dialogContact)}) {
+			<form method="post" action={ templ.URL(customerURL(c.No) + "/ansprechpartner") } data-form="kunde-ansprechpartner" novalidate>
+				@input(field{Dialog: dialogContact, ID: "kontakt-name", Name: "contact", Label: "Name", Value: c.Contact.Name, Required: true, Autocomplete: "name", st: st})
+				@input(field{Dialog: dialogContact, ID: "kontakt-telefon", Name: "phone", Label: "Telefon", Value: c.Contact.Phone, Autocomplete: "tel", Mode: "tel", st: st})
+				@input(field{Dialog: dialogContact, ID: "kontakt-email", Name: "email", Label: "E-Mail", Value: c.Contact.Email, Autocomplete: "email", Mode: "email", st: st})
+				@saveRow("Speichern")
+			</form>
+		}
+		@detail.Dialog(detail.DialogProps{ID: dialogNote, Title: "Vermerk hinzufügen", Context: about, Error: errorOf(st, dialogNote)}) {
+			<form method="post" action={ templ.URL(customerURL(c.No) + "/vermerke") } data-form="kunde-vermerk" novalidate>
+				{{ err := st.field(dialogNote, "text") }}
+				@form.Field(form.FieldProps{Label: "Vermerk", For: "vermerk-text", Required: true, Error: err}) {
+					@form.Textarea(form.TextareaProps{ID: "vermerk-text", Name: "text", Rows: 4, Value: st.value(dialogNote, "text", ""), Invalid: err != ""})
+				}
+				@saveRow("Hinzufügen")
+			</form>
+		}
+		@reopen(st)
+	}
+}
+
+// addNoteButton: a small addition is a dialog of the record's page, from its island (GS-44).
+templ addNoteButton(on bool) {
+	if on {
+		@detail.EditButton(detail.EditButtonProps{Dialog: dialogNote, Label: "Vermerk hinzufügen", Icon: "ti-plus"})
+	}
+}
+
+// offersIsland: a sub-list shows at most 10 rows and „Alle N“ to the filtered list (GS-46).
+templ offersIsland(c Customer, offers []Offer) {
+	@detail.Section(detail.SectionProps{Title: "Angebote", Extra: itoa(len(offers)), Attributes: templ.Attributes{"data-sublist": true}}) {
+		if len(offers) == 0 {
+			@card.Body() {
+				<p class="text-secondary mb-0">Für diesen Kunden gibt es noch kein Angebot.</p>
+			}
+		} else {
+			@table.Table(table.Props{Responsive: true, VCenter: true, Nowrap: true, Card: true, Class: "ref-table"}) {
+				<thead>
+					<tr>
+						<th>Titel</th>
+						<th>Nummer</th>
+						<th>Stand</th>
+						<th class="text-end">Summe</th>
+					</tr>
+				</thead>
+				<tbody>
+					for i, o := range offers {
+						if i < subListMax {
+							<tr>
+								<td><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
+								<td class="mono">{ o.No }</td>
+								<td>
+									@offerPill(o.Status)
+								</td>
+								<td class="text-end ref-num">{ Euro(o.Total()) }</td>
+							</tr>
+						}
+					}
+				</tbody>
+			}
+			if len(offers) > subListMax {
+				<div class="card-footer">
+					<a href={ templ.URL(pathOffers + "?q=" + c.No) } data-all>Alle { itoa(len(offers)) } Angebote</a>
+				</div>
+			}
+		}
+	}
+}
+
+func joinSpace(a, b string) string {
+	switch {
+	case a == "":
+		return b
+	case b == "":
+		return a
+	}
+	return a + " " + b
+}
+
+func euroOrEmpty(c int64) string {
+	if c == 0 {
+		return ""
+	}
+	return Euro(c)
+}
+
+func errorOf(st dialogState, id string) string {
+	if st.ID != id {
+		return ""
+	}
+	return st.Error
+}
+
+// --- B-05 edit a list -------------------------------------------------------------------------------
+
+templ offerHeading(o Offer) {
+	<span class="mono text-secondary">{ o.No }</span>
+	@offerPill(o.Status)
+}
+
+templ submitButton(o Offer) {
+	<form method="post" action={ templ.URL(offerURL(o.No) + "/abgeben") } data-kit-confirm={ "Angebot " + o.No + " abgeben? Danach lassen sich die Positionen nicht mehr ändern." }>
+		@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-send"}) {
+			Angebot abgeben
+		}
+	</form>
+}
+
+// positionsAction: Edit opens the full-page dialog; a submitted offer shows why it cannot change (GS-59).
+templ positionsAction(o Offer, canEdit bool) {
+	if o.Locked() {
+		@rowedit.Locked("Abgegeben am " + Date(o.Submitted) + ": Die Positionen sind schreibgeschützt.")
+	} else if canEdit {
+		@detail.EditButton(detail.EditButtonProps{Dialog: dialogPositions})
+	}
+}
+
+const positionColumns = "9rem minmax(14rem,1fr) 6.5rem 5.5rem 7rem 8rem 7.75rem"
+
+templ offerView(o Offer, c Customer, canEdit bool, st dialogState) {
+	{{ about := o.No + " · " + c.Name }}
+	<div class="row row-cards">
+		if o.Status == OfferDraft {
+			<div class="col-12">
+				@card.Card(card.Props{Class: "ref-next", Attributes: templ.Attributes{"data-next": true}}) {
+					@card.Body() {
+						<div class="d-flex flex-wrap align-items-center gap-2">
+							@icon.Icon("ti-arrow-right")
+							<strong>Als Nächstes:</strong>
+							<span>Positionen prüfen und das Angebot bis { Date(o.Due) } abgeben.</span>
+						</div>
+					}
+				}
+			</div>
+		}
+		<div class="col-lg-5">
+			@detail.Section(detail.SectionProps{Title: "Angebot", Action: edit(canEdit && !o.Locked(), dialogOffer)}) {
+				@card.Body() {
+					@detail.Fields() {
+						<dt>Kunde</dt>
+						<dd><a href={ templ.URL(customerURL(c.No)) }>{ c.Name }</a></dd>
+						@fieldOf("Titel", o.Title)
+						@fieldOf("Abgabe bis", Date(o.Due))
+						@fieldOf("Gültig bis", Date(o.Valid))
+						@fieldOf("Ansprechpartner", c.Contact.Name)
+						@fieldOf("Abgegeben am", Date(o.Submitted))
+					}
+				}
+			}
+		</div>
+		<div class="col-lg-7">
+			@detail.Section(detail.SectionProps{Title: "Positionen", Extra: itoa(len(o.Positions)), Action: positionsAction(o, canEdit), HeadClass: "flex-wrap", Attributes: templ.Attributes{"id": "positionen"}}) {
+				@table.Table(table.Props{Responsive: true, VCenter: true, Nowrap: true, Card: true, Class: "ref-table"}) {
+					<thead>
+						<tr>
+							<th>Pos.-Nr.</th>
+							<th>Bezeichnung</th>
+							<th class="text-end">Menge</th>
+							<th>ME</th>
+							<th class="text-end">EP</th>
+							<th class="text-end">Betrag</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, p := range o.Positions {
+							<tr>
+								<td class="mono">{ p.No }</td>
+								<td class="ref-wrap">{ p.Text }</td>
+								<td class="text-end ref-num">{ p.Qty.String() }</td>
+								<td>{ p.Unit }</td>
+								<td class="text-end ref-num">{ Euro(p.Price) }</td>
+								<td class="text-end ref-num">{ Euro(p.Amount()) }</td>
+							</tr>
+						}
+					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="5">Summe</th>
+							<th class="text-end ref-num" data-total>{ Euro(o.Total()) }</th>
+						</tr>
+					</tfoot>
+				}
+			}
+		</div>
+	</div>
+	if canEdit && !o.Locked() {
+		@detail.Dialog(detail.DialogProps{ID: dialogOffer, Title: "Angebot", Context: about, Section: true, Error: errorOf(st, dialogOffer)}) {
+			<form method="post" action={ templ.URL(offerURL(o.No) + "/angebot") } data-form="angebot" novalidate>
+				@input(field{Dialog: dialogOffer, ID: "angebot-titel", Name: "title", Label: "Titel", Value: o.Title, Required: true, st: st})
+				@input(field{Dialog: dialogOffer, ID: "angebot-gueltig", Name: "valid", Label: "Gültig bis (TT.MM.JJJJ)", Value: Date(o.Valid), Required: true, Mode: "numeric", st: st})
+				@saveRow("Speichern")
+			</form>
+		}
+		@positionsDialog(o, about, st)
+		@reopen(st)
+	}
+}
+
+// rowValue: the value entered in the row that failed, else the stored one.
+func rowValue(st dialogState, kind, row, name, stored string) string {
+	if st.ID == dialogPositions && st.Kind == kind && st.Row == row {
+		return st.Values.Get(name)
+	}
+	return stored
+}
+
+func rowError(st dialogState, kind, row, name string) bool {
+	return st.ID == dialogPositions && st.Kind == kind && st.Row == row && st.Fields[name] != ""
+}
+
+templ positionsDialog(o Offer, about string, st dialogState) {
+	{{ base := offerURL(o.No) + "/positionen" }}
+	@rowedit.Dialog(rowedit.DialogProps{ID: dialogPositions, Title: "Positionen bearbeiten", Context: about, Error: errorOf(st, dialogPositions)}) {
+		@rowedit.List(rowedit.ListProps{Columns: positionColumns}) {
+			@rowedit.Head() {
+				<span>Pos.-Nr.</span>
+				<span>Bezeichnung</span>
+				<span class="kit-rowedit-num">Menge</span>
+				<span>ME</span>
+				<span class="kit-rowedit-num">EP (€)</span>
+				<span class="kit-rowedit-num">Betrag</span>
+				<span></span>
+			}
+			for _, p := range o.Positions {
+				@rowedit.Row(rowedit.RowProps{Action: base + "/" + p.ID, Kind: kindPosition}) {
+					<input type="hidden" name="id" value={ p.ID }/>
+					@positionCells(st, kindPosition, p.ID, p.No, p.Text, p.Qty.String(), p.Unit, EuroField(p.Price), "")
+					<span class="kit-rowedit-num">{ Euro(p.Amount()) }</span>
+					@rowedit.Actions() {
+						@rowedit.Save(rowedit.SaveProps{Label: "Position " + p.No + " speichern"})
+						@rowedit.Delete(rowedit.DeleteProps{Action: base + "/" + p.ID + "/loeschen", Confirm: "Position " + p.No + " löschen?", Label: "Position " + p.No + " löschen"})
+					}
+				}
+			}
+			@rowedit.Row(rowedit.RowProps{Action: base, Kind: kindNewPosition, New: true}) {
+				@positionCells(st, kindNewPosition, "", o.NextNo(), "", "", "", "", " (neue Position)")
+				<span></span>
+				@rowedit.Actions() {
+					@rowedit.Add(rowedit.AddProps{})
+				}
+			}
+		}
+		@rowedit.Total("Summe", Euro(o.Total()))
+	}
+}
+
+templ positionCells(st dialogState, kind, row, no, text, qty, unit, price, suffix string) {
+	@form.Input(form.InputProps{Name: "no", Class: "mono", Value: rowValue(st, kind, row, "no", no), Required: true, Invalid: rowError(st, kind, row, "no"), AriaLabel: "Pos.-Nr." + suffix})
+	@form.Input(form.InputProps{Name: "text", Value: rowValue(st, kind, row, "text", text), Required: true, Invalid: rowError(st, kind, row, "text"), AriaLabel: "Bezeichnung" + suffix, Placeholder: pick(kind == kindNewPosition, "Bezeichnung der Position", "")})
+	@form.Input(form.InputProps{Name: "qty", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "qty", qty), Required: true, Invalid: rowError(st, kind, row, "qty"), AriaLabel: "Menge" + suffix, Attributes: mode("decimal")})
+	@form.Input(form.InputProps{Name: "unit", Value: rowValue(st, kind, row, "unit", unit), AriaLabel: "Mengeneinheit" + suffix, Placeholder: pick(kind == kindNewPosition, "St", "")})
+	@form.Input(form.InputProps{Name: "price", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "price", price), Required: true, Invalid: rowError(st, kind, row, "price"), AriaLabel: "Einheitspreis in Euro" + suffix, Attributes: mode("decimal")})
+}
+
+// --- B-06 create --------------------------------------------------------------------------------------
+
+templ newCustomerView(in CustomerInput, errs FieldErrors) {
+	{{ st := dialogState{ID: "neu", Fields: errs, Values: inputValues(in)} }}
+	@create.Form(create.FormProps{Action: pathCustomers, Attributes: templ.Attributes{"novalidate": true, "data-form": "kunde-neu"}}) {
+		<div class="row row-cards">
+			<div class="col-lg-8">
+				@detail.Section(detail.SectionProps{Title: "Kunde"}) {
+					@card.Body() {
+						@input(field{Dialog: "neu", ID: "neu-name", Name: "name", Label: "Name", Value: in.Name, Required: true, Autocomplete: "organization", st: st})
+						@input(field{Dialog: "neu", ID: "neu-strasse", Name: "street", Label: "Straße", Value: in.Street, Autocomplete: "street-address", st: st})
+						<div class="row">
+							<div class="col-sm-4">
+								@input(field{Dialog: "neu", ID: "neu-plz", Name: "zip", Label: "PLZ", Value: in.Zip, Autocomplete: "postal-code", Mode: "numeric", st: st})
+							</div>
+							<div class="col-sm-8">
+								@input(field{Dialog: "neu", ID: "neu-ort", Name: "city", Label: "Ort", Value: in.City, Required: true, Autocomplete: "address-level2", st: st})
+							</div>
+						</div>
+					}
+				}
+			</div>
+			<div class="col-12">
+				@create.Footer(create.FooterProps{Cancel: pathCustomers, Submit: "Kunde anlegen", Hint: "Danach öffnet sich die Seite des Kunden."})
+			</div>
+		</div>
+	}
+}
+
+func inputValues(in CustomerInput) map[string][]string {
+	return map[string][]string{"name": {in.Name}, "street": {in.Street}, "zip": {in.Zip}, "city": {in.City}}
+}

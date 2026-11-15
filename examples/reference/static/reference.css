@@ -1,0 +1,103 @@
+/* Surface of the reference app on top of the Graphite theme: only what no theme covers, after the model of
+   libs/rahmen/static/theme.css in the products (concept Gestaltung, column „hier“ of GS-07, GS-12, GS-74).
+   Grey ground with white islands, the signal colours, the content width, links, numbers and fields on phones.
+   The rest of this file styles the explanation box of the reference itself (.ref-explain). */
+
+:root {
+  --ref-ground: #F5F5F5;
+  --ref-line: #DEDEDE;
+  --ref-line-soft: #EBEBEB;
+  --ref-text-3: #6B6B6B;
+  --tblr-body-font-size: 14px;
+  --tblr-body-bg: var(--ref-ground);
+  --tblr-border-color: var(--ref-line);
+  --tblr-border-color-translucent: var(--ref-line-soft);
+  --tblr-box-shadow-card: none;
+  --tblr-card-box-shadow: none;
+  /* Signal colours: the same in every theme (GS-07) */
+  --tblr-success: #22A04B;
+  --tblr-success-rgb: 34, 160, 75;
+  --tblr-warning: #E0A100;
+  --tblr-warning-rgb: 224, 161, 0;
+  --tblr-danger: #E5484D;
+  --tblr-danger-rgb: 229, 72, 77;
+  --tblr-info: #2563EB;
+  --tblr-info-rgb: 37, 99, 235;
+  --kit-sidebar-width: 240px;
+}
+
+body {
+  background: var(--ref-ground);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header 56 px (GS-10), sidebar 240 px (GS-11) without a transition across lg */
+.kit-shell-header { min-height: 56px; }
+.page > .kit-sidebar, .page > .kit-sidebar ~ .page-wrapper { transition: none; }
+.kit-sidebar { --kit-sidebar-bg: #EDEDED; --kit-sidebar-active-bg: #FFFFFF; }
+.kit-sidebar-link.active { box-shadow: 0 0 0 1px var(--ref-line); }
+
+/* Content: at most 1240 px, left beside the sidebar (GS-12) */
+.page-wrapper .container-xl { max-width: 1240px; margin-left: 0; }
+
+/* Islands: white on grey with a clear line (GS-40) */
+.card { border-color: var(--ref-line); }
+
+/* Links in text, fields and tables: subtly underlined, the accent is black like the text (GS-74) */
+:is(p, .kit-fields dd, .alert, .table td, li) a:not(.btn, .badge, .card, .alert-action, .dropdown-item, .nav-link) {
+  text-decoration: underline; text-decoration-color: #BDBDBD; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+:is(p, .kit-fields dd, .alert, .table td, li) a:not(.btn, .badge, .card, .alert-action, .dropdown-item, .nav-link):hover { text-decoration-color: currentColor; }
+
+/* Numbers right-aligned with digits of equal width (GS-52) */
+.ref-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mono { font-family: var(--tblr-font-monospace); font-size: 12.5px; }
+.ref-table td.ref-wrap { white-space: normal; min-width: 12rem; }
+.ref-pill { font-weight: 500; }
+
+/* Phones: fields with 16 px so the page does not zoom (GS-14) */
+@media (max-width: 1199.98px), (pointer: coarse) {
+  :is(input:not([type=checkbox], [type=radio], [type=range], [type=hidden]), select, textarea) { font-size: max(16px, 1rem); }
+}
+
+/* The page never scrolls sideways (GS-14); wide tables scroll in their island */
+.ref-content { min-width: 0; }
+
+/* --- the reference itself ------------------------------------------------------------------------- */
+
+.ref-explain {
+  margin-bottom: 1.25rem;
+  padding: .875rem 1.125rem;
+  background: #FFFFFF;
+  border: 1px dashed #BDBDBD;
+  border-radius: var(--tblr-border-radius-lg);
+  font-size: 13.5px;
+}
+.ref-explain p { margin-bottom: .5rem; }
+.ref-explain-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .375rem; }
+.ref-explain-id {
+  display: inline-block; padding: 0 .4rem; border-radius: 4px;
+  background: #111111; color: #FFFFFF; font-family: var(--tblr-font-monospace); font-size: 12px; line-height: 1.6;
+}
+.ref-explain-link { margin-left: auto; color: var(--ref-text-3); }
+.ref-explain-try { color: var(--ref-text-3); }
+.ref-explain-try .ti { margin-right: .25rem; }
+.ref-explain-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .25rem 1rem; margin: .5rem 0 0; }
+.ref-explain-facts dt { font-weight: 400; color: var(--ref-text-3); }
+.ref-explain-facts dd { margin: 0; overflow-wrap: anywhere; }
+.ref-explain-facts code { font-size: 12px; }
+.ref-rule { margin-right: .25rem; white-space: nowrap; display: inline-block; }
+.ref-explain-note { margin: .5rem 0 0 !important; color: var(--ref-text-3); }
+
+.ref-pattern { height: 100%; }
+.ref-tile { display: block; color: inherit; text-decoration: none; }
+.ref-tile .card { height: 100%; }
+.ref-next { border-left: 3px solid #111111; }
+.ref-logo { background: #111111; color: #FFFFFF; font-weight: 600; }
+.ref-notes, .ref-assistant { padding: 1rem; }
+.ref-notes li + li, .ref-notes-list li + li { margin-top: .75rem; }
+
+.ref-swatches { display: grid; gap: .75rem; }
+.ref-swatch { display: flex; align-items: center; gap: .75rem; }
+.ref-swatch-color { flex: none; width: 2.25rem; height: 2.25rem; border-radius: var(--tblr-border-radius); border: 1px solid var(--ref-line); }

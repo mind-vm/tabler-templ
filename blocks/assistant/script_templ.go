@@ -21,6 +21,7 @@ fieldset:not(:has([data-other]:checked)) .assistant-other{display:none}
 .assistant-step>summary::-webkit-details-marker{display:none}
 .assistant-step pre{white-space:pre-wrap;font-size:12px;max-height:24rem;overflow:auto}
 .assistant .prose>:last-child{margin-bottom:0}
+.assistant-intro .btn{white-space:normal;text-align:start}
 .assistant-prompt{display:flex;flex-direction:column;gap:.5rem;padding:.5rem;border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg);background:var(--tblr-bg-surface);box-shadow:var(--tblr-shadow-card)}
 .assistant-prompt:focus-within{border-color:var(--tblr-primary)}
 .assistant-prompt textarea{border:0;box-shadow:none!important;resize:none;padding:.25rem .5rem;background:transparent}

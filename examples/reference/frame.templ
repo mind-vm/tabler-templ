@@ -1,0 +1,216 @@
+package reference
+
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/alert"
+	"github.com/mind-vm/tabler-templ/blocks/assistant"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/rowedit"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/static"
+	"github.com/mind-vm/tabler-templ/themes"
+)
+
+// page is what a handler tells the frame.
+type page struct {
+	Key          string // the pattern (B-01 …) or "overview", "offers", "error": marks the sidebar entry and picks the explanation
+	Title        string
+	Heading      string // default Title
+	Crumbs       []shell.Crumb
+	Actions      templ.Component // the page's main action (GS-06)
+	HeadingExtra templ.Component // e.g. the status pill
+	Flash        *shell.Flash
+	Explain      *pattern // default the pattern of Key
+
+	// set by render
+	readOnly bool
+	session  *session
+	panel    *sidepanel.Panel
+}
+
+func (p page) explanation() (pattern, bool) {
+	if p.Explain != nil {
+		return *p.Explain, true
+	}
+	return patternOf(p.Key)
+}
+
+// The panel's tabs (GS-13).
+const (
+	tabNotes     = "notizen"
+	tabAssistant = "assistent"
+)
+
+func (a *App) panel(p page, open bool, tab string) *sidepanel.Panel {
+	return &sidepanel.Panel{Open: open, Active: tab, Label: "Notizen und KI-Assistent", Tabs: []sidepanel.Tab{
+		{Name: tabNotes, Icon: "ti-notes", Title: "Notizen", Content: notesTab()},
+		{Name: tabAssistant, Icon: "ti-sparkles", Title: "KI-Assistent", Content: assistantTab(p), Forms: true},
+	}}
+}
+
+// graphite is the theme's CSS for :root (the shell sets no attributes on <html>) and its small corners,
+// as libs/rahmen serves it.
+var graphite = strings.ReplaceAll(themes.Graphite.CSS(), `[`+themes.Attribute+`="graphite"]`, ":root") +
+	":root:not([data-bs-theme-radius]){--tblr-border-radius-scale:0.5}"
+
+templ (a *App) head() {
+	@static.Head(a.files)
+	for _, f := range []string{"geist", "geist-mono"} {
+		<link rel="stylesheet" href={ a.files.URL("npm/@fontsource-variable/" + f + "@" + themes.FontsVersion + "/index.css") }/>
+	}
+	@csp.Style(graphite)
+	<link rel="stylesheet" href={ a.files.URL("reference.css") }/>
+}
+
+templ (a *App) scripts(p page) {
+	@sidepanel.Aside(p.panel)
+	@static.Scripts(a.files)
+	@detail.Script(detail.ScriptConfig{})
+	@rowedit.Script()
+	@sidepanel.Script()
+}
+
+templ (a *App) page(p page) {
+	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(), Scripts: a.scripts(p),
+		BodyAttributes: sidepanel.BodyAttributes(p.panel, templ.Attributes{"data-page": p.Key}),
+		Sidebar: a.sidebar(p), Breadcrumbs: p.Crumbs, HeaderActions: sidepanel.Buttons(p.panel),
+		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash}) {
+		if p.readOnly {
+			@alert.Alert(alert.Props{Variant: alert.VariantWarning, Icon: "ti-lock", Attributes: templ.Attributes{"data-read-only": true}}) {
+				Die Firma Musterdienst GmbH ist gesperrt. Sie können alles lesen und Ihre Daten exportieren; ändern lässt sich nichts.
+				@alert.Action(pathStates + "#nur-lesen") {
+					Daten exportieren
+				}
+			}
+		}
+		if e, ok := p.explanation(); ok {
+			@explain(e)
+		}
+		<div class="ref-content">
+			{ children... }
+		</div>
+	}
+}
+
+// explain is the text on top of a page of the reference (concept §11).
+templ explain(e pattern) {
+	<section class="ref-explain" aria-label="Erklärung des Musters">
+		<div class="ref-explain-head">
+			<span class="ref-explain-id">{ e.ID }</span>
+			<strong>{ e.Name }</strong>
+			if e.Link != "" {
+				<a class="ref-explain-link" href={ templ.SafeURL(e.Link) } target="_blank" rel="noopener">
+					Im Konzept
+					@icon.Icon("ti-external-link")
+				</a>
+			}
+		</div>
+		<p>{ e.What } { e.When }</p>
+		if e.Try != "" {
+			<p class="ref-explain-try">
+				@icon.Icon("ti-hand-finger")
+				{ e.Try }
+			</p>
+		}
+		if len(e.Rules) > 0 || len(e.Blocks) > 0 {
+			<dl class="ref-explain-facts">
+				if len(e.Rules) > 0 {
+					<dt>Regeln</dt>
+					<dd>
+						for _, r := range e.Rules {
+							<code class="ref-rule">{ r }</code>
+						}
+					</dd>
+				}
+				if len(e.Blocks) > 0 {
+					<dt>Baustein</dt>
+					<dd>
+						for i, b := range e.Blocks {
+							if i > 0 {
+								{ " · " }
+							}
+							<code>{ b.Package }</code> { b.Parts }
+						}
+					</dd>
+				}
+			</dl>
+		}
+		if e.Note != "" {
+			<p class="ref-explain-note">{ e.Note }</p>
+		}
+	</section>
+}
+
+func active(p page, keys ...string) bool {
+	for _, k := range keys {
+		if p.Key == k {
+			return true
+		}
+	}
+	return false
+}
+
+func anchor(name string) templ.Attributes { return templ.Attributes{"data-tour": "referenz.leiste." + name} }
+
+// sidebar: „Start“ without a title, then the groups in their fixed order (GS-20). The pages of the
+// reference itself stand in a last group of their own at the end.
+templ (a *App) sidebar(p page) {
+	@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Label: "Navigation"}) {
+		@sidebar.Header() {
+			@sidebar.Brand(sidebar.BrandProps{Href: pathStart, Title: "Musterdienst", Subtitle: "Referenz der Gestaltung", Logo: logo()})
+		}
+		@sidebar.Content() {
+			@sidebar.Group(sidebar.GroupProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: pathStart, Icon: "ti-home", Label: "Start", Active: active(p, "B-02"), Attributes: anchor("start")})
+			}
+			@sidebar.Group(sidebar.GroupProps{Label: "Tagesgeschäft"}) {
+				@sidebar.Item(sidebar.ItemProps{Href: pathCustomers, Icon: "ti-users", Label: "Kunden", Active: active(p, "B-03", "B-04", "B-06"), Attributes: anchor("kunden")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathOffers, Icon: "ti-file-text", Label: "Angebote", Active: active(p, "offers", "B-05"), Attributes: anchor("angebote")})
+			}
+			@sidebar.Group(sidebar.GroupProps{Label: "Referenz", End: true}) {
+				@sidebar.Item(sidebar.ItemProps{Href: Home, Icon: "ti-layout-grid", Label: "Alle Muster", Active: active(p, "overview"), Attributes: anchor("muster")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathFrame, Icon: "ti-layout-sidebar", Label: "Rahmen", Active: active(p, "B-01"), Attributes: anchor("rahmen")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathStates, Icon: "ti-traffic-lights", Label: "Zustände", Active: active(p, "B-07"), Attributes: anchor("zustaende")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathBrand, Icon: "ti-palette", Label: "Marke und Form", Active: active(p, "B-08"), Attributes: anchor("marke")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathAssistant, Icon: "ti-sparkles", Label: "KI-Assistent", Active: active(p, "B-09"), Attributes: anchor("assistent")})
+			}
+		}
+	}
+}
+
+templ logo() {
+	<span class="avatar avatar-sm ref-logo">M</span>
+}
+
+// notesTab: notes are read in the panel; it holds no form to edit a record (GS-13).
+templ notesTab() {
+	<div class="ref-notes">
+		<p class="text-secondary small">Notizen gehören zur Person, nicht zu einem Datensatz. Bearbeitet wird im Dialog der Seite, nie im Panel.</p>
+		<ul class="list-unstyled">
+			<li>
+				<div class="text-secondary small">14.11.2026, 16:20</div>
+				<div>Frau Beispiel zurückrufen wegen <a href={ templ.URL(offerURL("A-2026-001")) }>A-2026-001</a>.</div>
+			</li>
+			<li>
+				<div class="text-secondary small">12.11.2026, 09:05</div>
+				<div>Abgabe Jahresvertrag 2027 bis 18.11.2026.</div>
+			</li>
+		</ul>
+	</div>
+}
+
+// assistantTab: the conversation (KA-01: it reads only; the labelling of the concept Assistent §6).
+templ assistantTab(p page) {
+	@assistant.Conversation(assistant.ConversationProps{Run: pathAssistant, Examples: examples, Class: "ref-assistant",
+		Title: "Hier antwortet eine KI",
+		Text:  "Antworten können falsch sein. Der Assistent ändert nichts; Sie prüfen und speichern selbst. In dieser Referenz antwortet kein Sprachmodell, sondern ein festes Skript."}) {
+		if p.session != nil {
+			@p.session.transcript.View()
+		}
+	}
+}

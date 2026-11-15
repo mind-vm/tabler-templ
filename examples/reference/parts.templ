@@ -1,0 +1,128 @@
+package reference
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"strconv"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/status"
+)
+
+// Small parts the pages share: pills, the traffic light, fields of a dialog, the state of a failed save.
+
+// offerPill: the status as a pill (GS-52); colour only where it means something (GS-07).
+templ offerPill(s OfferStatus) {
+	@badge.Badge(badge.Props{Color: offerColor(s), Light: true, Class: "ref-pill"}) {
+		{ s.Label() }
+	}
+}
+
+func offerColor(s OfferStatus) string {
+	switch s {
+	case OfferSubmitted:
+		return "blue"
+	case OfferAccepted:
+		return "green"
+	case OfferDeclined:
+		return "red"
+	}
+	return "secondary"
+}
+
+templ customerPill(s CustomerStatus) {
+	@badge.Badge(badge.Props{Color: pick(s == CustomerNew, "blue", "secondary"), Light: true, Class: "ref-pill"}) {
+		{ s.Label() }
+	}
+}
+
+func pick(cond bool, a, b string) string {
+	if cond {
+		return a
+	}
+	return b
+}
+
+// signal: the traffic light as a dot with a word (GS-52).
+templ signal(s Signal) {
+	@status.Status(status.Props{Color: s.color(), Dot: true, Lite: true, Class: "ref-signal"}) {
+		{ s.Label() }
+	}
+}
+
+type field struct {
+	Dialog, ID, Name, Label, Value string
+	Required                       bool
+	Autocomplete                   string
+	Mode                           string // inputmode
+	st                             dialogState
+}
+
+// input is a labelled field of a dialog or the create page: the value entered after a failed save, the
+// error at the field and the field marked (GS-43).
+templ input(f field) {
+	{{ err := f.st.field(f.Dialog, f.Name) }}
+	@form.Field(form.FieldProps{Label: f.Label, For: f.ID, Required: f.Required, Error: err}) {
+		@form.Input(form.InputProps{ID: f.ID, Name: f.Name, Value: f.st.value(f.Dialog, f.Name, f.Value), Invalid: err != "",
+			Autocomplete: f.Autocomplete, Attributes: mode(f.Mode)})
+	}
+}
+
+func mode(m string) templ.Attributes {
+	if m == "" {
+		return nil
+	}
+	return templ.Attributes{"inputmode": m}
+}
+
+// saveRow is the row of buttons the dialog script turns into the footer with „Abbrechen“ (GS-42).
+templ saveRow(text string) {
+	<div>
+		@button.Button(button.Props{Variant: button.VariantPrimary}) {
+			{ text }
+		}
+	</div>
+}
+
+// reopen: after a failed save the page sets the dialog's state, and the dialog script opens it again
+// (GS-43). For a list dialog it names the row that failed, so the script marks that one.
+func reopen(st dialogState) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		if st.ID == "" {
+			return nil
+		}
+		v := map[string][]string{}
+		if st.Kind != "" {
+			v["_form"] = []string{st.Kind}
+		}
+		if st.Row != "" {
+			v["id"] = []string{st.Row}
+		}
+		b, err := json.Marshal(map[string]any{"id": st.ID, "error": st.Error, "values": v}) // escapes <, > and &
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(w, csp.Open(ctx, "script")+"window.kitDialogState="+string(b)+";</script>")
+		return err
+	})
+}
+
+// value of a field: "–" when empty (GS-40), via detail.Field.
+templ fieldOf(label, value string) {
+	@detail.Field(label, value, "–")
+}
+
+func itoa(n int) string { return strconv.Itoa(n) }
+
+// inlineScript is a small script of the page, with the nonce of templ.WithNonce.
+func inlineScript(js string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, csp.Open(ctx, "script")+js+"</script>")
+		return err
+	})
+}

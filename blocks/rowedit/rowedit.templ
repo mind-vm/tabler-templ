@@ -1,0 +1,230 @@
+// Package rowedit is a block for editing a long list (the positions of an offer, the lines of an
+// order) without editing in the page: the detail page shows the list read-only, and its Edit button opens
+// a dialog over almost the whole page (full screen below lg). In the dialog every row is a small form of
+// its own with fixed columns, Save (Enter) and Delete on the right, and a new row waits at the bottom.
+// Computed columns and the total are shown only; the server computes them again after each save.
+//
+//	@rowedit.Dialog(rowedit.DialogProps{ID: "dialog-positions", Title: "Edit positions", Context: "A-2026-001 · Acme"}) {
+//		@rowedit.List(rowedit.ListProps{Columns: "8rem minmax(12rem,1fr) 6rem 7rem 6rem"}) {
+//			@rowedit.Head() { <span>No.</span><span>Text</span><span class="kit-rowedit-num">Qty</span> … <span></span> }
+//			for _, p := range positions {
+//				@rowedit.Row(rowedit.RowProps{Action: "/offers/1/positions/" + p.ID, Kind: "position"}) {
+//					<input type="hidden" name="id" value={ p.ID }/> … inputs …
+//					@rowedit.Actions() {
+//						@rowedit.Save(rowedit.SaveProps{Label: "Save position " + p.No})
+//						@rowedit.Delete(rowedit.DeleteProps{Action: "/offers/1/positions/" + p.ID + "/delete", Confirm: "Delete position " + p.No + "?"})
+//					}
+//				}
+//			}
+//			@rowedit.Row(rowedit.RowProps{Action: "/offers/1/positions", Kind: "position-new", New: true}) { … @rowedit.Actions() { @rowedit.Add(rowedit.AddProps{}) } }
+//		}
+//		@rowedit.Total("Total", "1.234,50 €")
+//	}
+//	…
+//	@detail.Script(detail.ScriptConfig{}) // reopens the dialog after a row was saved or failed
+//	@rowedit.Script()                     // asks before deleting, marks changed rows
+//
+// The dialog is a detail.Dialog with Large set, so detail.Script reopens it after each save and, with
+// the state of a failed save (window.kitDialogState), fills the row that failed again.
+package rowedit
+
+import (
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// ConfirmAttribute on a button (or form) holds the question asked before it submits, e.g.
+// "Delete position 01.01.0010?". The button's question wins over the form's.
+const ConfirmAttribute = "data-kit-confirm"
+
+type DialogProps struct {
+	ID      string // required; the section's EditButton targets it
+	Title   string // like the section, e.g. "Edit positions"
+	Context string // small line above the title, e.g. "A-2026-001 · Acme Ltd"
+	// Hint is the line above the rows; default kit.T(ctx).RowsHint ("Each row is saved on its own.").
+	// More text (when the list becomes read-only) goes after it.
+	Hint string
+	// Error of the last save, shown on top; ErrorVariant default "danger".
+	Error        string
+	ErrorVariant string
+	Class        string
+	Attributes   templ.Attributes
+}
+
+// Dialog is the full-page dialog: almost the whole page from lg up, full screen below.
+templ Dialog(p DialogProps) {
+	@Styles()
+	@detail.Dialog(detail.DialogProps{ID: p.ID, Title: p.Title, Context: p.Context, Large: true, Error: p.Error, ErrorVariant: p.ErrorVariant,
+		Class: kit.Classes("kit-rowedit-dialog", p.Class), Attributes: p.Attributes}) {
+		<p class="kit-rowedit-hint">{ kit.Or(p.Hint, kit.T(ctx).RowsHint) }</p>
+		{ children... }
+	}
+}
+
+type ListProps struct {
+	// Columns is the CSS grid-template-columns of every row, e.g. "8rem minmax(12rem,1fr) 6rem 3rem".
+	// The last column holds the Actions.
+	Columns    string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// List holds the rows. It is as wide as its columns need and scrolls sideways inside the dialog when the
+// screen is narrower; the page itself never does.
+templ List(p ListProps) {
+	@Styles()
+	<div class="kit-rowedit-scroll">
+		<div class={ kit.Classes("kit-rowedit", p.Class) } style={ templ.SafeCSS("--kit-rowedit-columns:" + p.Columns) } { p.Attributes... }>
+			{ children... }
+		</div>
+	</div>
+}
+
+// Head is the row of column titles; give each column a <span> (an empty one for the actions). Numbers
+// get class kit-rowedit-num, like their cells.
+templ Head() {
+	<div class="kit-rowedit-row kit-rowedit-head" aria-hidden="true">
+		{ children... }
+	</div>
+}
+
+type RowProps struct {
+	Action string // where the row posts
+	// Kind is the form's kind (data-form, detail.ScriptConfig.FormAttribute): after a failed save the
+	// dialog script fills the row of that kind whose hidden fields match the values sent.
+	Kind string
+	// New marks the empty row at the bottom that adds a row.
+	New        bool
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Row is one row: a form of its own, with the cells as children and Actions as the last cell.
+templ Row(p RowProps) {
+	<form
+		method="post"
+		action={ templ.URL(p.Action) }
+		class={ kit.Classes("kit-rowedit-row", kit.If(p.New, "kit-rowedit-new"), p.Class) }
+		if p.Kind != "" {
+			data-form={ p.Kind }
+		}
+		{ p.Attributes... }
+	>
+		{ children... }
+	</form>
+}
+
+// Actions is the last cell of a row: Save and Delete, or Add in the new row. Save comes first, so Enter
+// in a field saves the row.
+templ Actions() {
+	<div class="kit-rowedit-actions">
+		{ children... }
+	</div>
+}
+
+type SaveProps struct {
+	Label string // aria-label, e.g. "Save position 01.01.0010"; default kit.T(ctx).SaveRow
+}
+
+// Save saves the row (a check mark).
+templ Save(p SaveProps) {
+	{{ m := kit.T(ctx) }}
+	@button.Button(button.Props{Size: button.SizeSmall, IconOnly: true, Icon: "ti-check", Label: kit.Or(p.Label, m.SaveRow),
+		Class: "kit-rowedit-save", Attributes: templ.Attributes{"title": m.SaveRow}})
+}
+
+type DeleteProps struct {
+	Action  string // where deleting posts (the button's formaction)
+	Confirm string // the question before, e.g. "Delete position 01.01.0010?"; required
+	Label   string // aria-label, e.g. "Delete position 01.01.0010"; default kit.T(ctx).DeleteRow
+}
+
+// Delete deletes the row after the question (a red trash can). It skips the browser's checks of the
+// fields: an invalid row can still be deleted.
+templ Delete(p DeleteProps) {
+	{{ m := kit.T(ctx) }}
+	@button.Button(button.Props{Size: button.SizeSmall, IconOnly: true, Icon: "ti-trash", Label: kit.Or(p.Label, m.DeleteRow),
+		Class: "btn-ghost-danger kit-rowedit-delete",
+		Attributes: templ.Attributes{"title": m.DeleteRow, "formaction": p.Action, "formnovalidate": true, ConfirmAttribute: p.Confirm}})
+}
+
+type AddProps struct {
+	Text string // default kit.T(ctx).AddRow ("Add")
+}
+
+// Add adds the new row (primary, with a plus).
+templ Add(p AddProps) {
+	@button.Button(button.Props{Size: button.SizeSmall, Variant: button.VariantPrimary, Icon: "ti-plus", Class: "kit-rowedit-add"}) {
+		{ kit.Or(p.Text, kit.T(ctx).AddRow) }
+	}
+}
+
+// Total is the line below the list with a computed sum, shown only.
+templ Total(label, value string) {
+	@Styles()
+	<div class="kit-rowedit-total">
+		<span>{ label }</span>
+		<span class="kit-rowedit-num">{ value }</span>
+	</div>
+}
+
+// Locked stands where the Edit button would be when the list cannot be changed any more, and says why
+// (e.g. "Submitted on 03.11.2026: the positions are read-only.").
+templ Locked(reason string) {
+	@Styles()
+	<span class="kit-rowedit-locked">
+		@icon.Icon("ti-lock")
+		<span>{ reason }</span>
+	</span>
+}
+
+// Script asks before a button or form with ConfirmAttribute submits and marks rows changed but not
+// saved yet. Put it after Tabler's script, once per page.
+templ Script() {
+	@scriptOnce.Once() {
+		<script { csp.Nonce(ctx)... }>
+			(function () {
+				"use strict";
+				document.addEventListener("submit", function (e) {
+					var b = e.submitter, f = e.target;
+					var q = (b && b.getAttribute("data-kit-confirm")) || (f.getAttribute && f.getAttribute("data-kit-confirm"));
+					if (q && !window.confirm(q)) { e.preventDefault(); e.stopImmediatePropagation(); }
+				}, true);
+				document.addEventListener("input", function (e) {
+					var row = e.target.closest ? e.target.closest("form.kit-rowedit-row") : null;
+					if (row) row.classList.add("kit-rowedit-changed");
+				});
+			})();
+		</script>
+	}
+}
+
+var scriptOnce = templ.NewOnceHandle()
+
+var styles = csp.Sheet("blocks/rowedit", css)
+
+// Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
+// it themselves; calling it is only needed to put it in <head>.
+templ Styles() {
+	@styles
+}
+
+const css = `.kit-rowedit-hint{margin-bottom:.75rem;font-size:.875rem;color:var(--tblr-secondary)}
+.kit-rowedit-scroll{max-width:100%;overflow-x:auto}
+.kit-rowedit{min-width:max-content;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}
+.kit-rowedit-row{display:grid;grid-template-columns:var(--kit-rowedit-columns);gap:.5rem;align-items:center;margin:0;padding:.5rem .75rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color-translucent)}
+.kit-rowedit-row:last-child{border-bottom:0}
+.kit-rowedit-head{padding-top:.625rem;padding-bottom:.625rem;font-size:.75rem;font-weight:500;color:var(--tblr-secondary);background:var(--tblr-bg-surface-secondary)}
+.kit-rowedit-new{background:var(--tblr-bg-surface-secondary);border-top:var(--tblr-border-width) dashed var(--tblr-border-color)}
+.kit-rowedit-changed{background:rgba(var(--tblr-warning-rgb),.08)}
+.kit-rowedit :is(.form-control,.form-select){min-height:2.125rem;padding-top:.25rem;padding-bottom:.25rem;font-size:.875rem}
+.kit-rowedit-num{text-align:right;font-variant-numeric:tabular-nums}
+.kit-rowedit .form-control.kit-rowedit-num{text-align:right}
+.kit-rowedit-actions{display:flex;gap:.25rem;justify-content:flex-end}
+.kit-rowedit-total{display:flex;justify-content:flex-end;gap:1.5rem;margin-top:.75rem;padding:0 .75rem;font-weight:600}
+.kit-rowedit-locked{display:inline-flex;align-items:center;gap:.375rem;font-size:.8125rem;color:var(--tblr-secondary)}
+@media (min-width:992px){.kit-rowedit-dialog .modal-dialog.modal-fullscreen{width:95vw;max-width:95vw;height:92vh;margin:4vh auto}.kit-rowedit-dialog .modal-fullscreen .modal-content{border-radius:var(--tblr-border-radius-lg)}}
+@media (max-width:1199.98px),(pointer:coarse){.kit-rowedit :is(.form-control,.form-select){font-size:max(16px,1rem)}}`
