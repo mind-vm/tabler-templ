@@ -70,8 +70,8 @@ all themes are in the bundle.
 | **B-08** Marke und Form | `/reference/marke` | tokens, signal colours, font, buttons, pills, traffic light, number and date formats, links | GS-07, GS-15, GS-70 – GS-75 | `themes`, `button`, `badge`, `status` |
 | **B-09** KI-Assistent | `/reference/assistent` | the assistant as a tab of the panel: reads, fills in forms, never saves; bank details refused | GS-13, KA-01 – KA-03, KA-15, KA-20 | `blocks/sidepanel`, `blocks/assistant` |
 
-B-09 is a proposal: the concept Gestaltung does not list the assistant among its examples yet; its rules (KA-xx) stand in
-the concept [Assistent](https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/assistent.md) §6. The
+B-09 follows the concept [Assistent](https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/assistent.md)
+§6 (KA-xx), which §11 of Gestaltung refers to. The
 assistant here is a fixed script, not a language model; what it asks to do goes through `assistant.Catalog` as a
 model's requests would.
 

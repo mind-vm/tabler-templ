@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | v0.2 · 15.11.2026 · Entschieden (Benutzer 15.11.2026: alle Empfehlungen GSO-01 bis GSO-07; Verbund G-66): die geltenden Regeln der Oberfläche als ein Konzept GS-01 bis GS-75, für alle Produkte nutzbar; Beispiele als lebende Referenz-App in tabler-templ (Brief). [Historie](../historie/docs/konzepte/gestaltung.md) |
+| **Status** | v0.4 · 15.11.2026 · Alles entschieden (Benutzer 15.11.2026, alle Empfehlungen GSO-01 bis GSO-44; GSO-15 bis GSO-44 in der Session tabler-templ): Regeln nachgezogen (u. a. Kontrast GS-07, Kopf ohne Verbund, Theme je Produkt, Arbeitsseite, kurze Listen, Aktionen mit Grund, Fristen, Text von außen GS-76), neue Beispiele B-10 und B-11. [Historie](../historie/docs/konzepte/gestaltung.md) |
 | **Anlass** | Wunsch des Benutzers vom 15.11.2026: aus Seitenleiste, Application Layout, „Inseln bearbeiten“ und dem Bearbeiten von Tabellen ein Design- und UX-Konzept mit Beispielen machen, das sich nach und nach überarbeiten, standardisieren und zwischen den Produkten austauschen lässt; die Beispiele als lebende Referenz-App in tabler-templ. |
 | **Gilt zusammen mit** | [Navigation](navigation.md) (NV-01 bis NV-09, G-62), [Auftrag ADR-0013](../../apps/auftrag/docs/adr/0013-inseln-mit-dialogen.md) (Inseln mit Dialogen, E-45, E-70), [Verbund](verbund.md) G-41, G-44, G-62, G-63; [`libs/rahmen`](../../libs/rahmen/README.md) (Gerüst, Theme, Panel, Fehlerseiten), [`libs/liste`](../../libs/liste/README.md); Einsatz [ux-disponent](../../apps/einsatz/docs/ux-disponent.md) (UX-01 bis UX-14); Brief [gestaltung-referenz-app](../briefs/gestaltung-referenz-app.md) |
 | **Präfix** | GS-xx (Regeln der Gestaltung), GSO-xx (offene Punkte) |
-| **Entscheidung** | Benutzer 15.11.2026: „alle Empfehlungen annehmen“ entscheidet GSO-01 bis GSO-07 jeweils wie empfohlen (§13); Verbund G-66. |
+| **Entscheidung** | Benutzer 15.11.2026: „alle Empfehlungen annehmen“ entscheidet GSO-01 bis GSO-07, „gerne eintragen“ GSO-08 bis GSO-14 (Fragen aus tabler-templ #60), „Ja, ich folge deinen Empfehlungen zu Auftragsbutler 474“ (in der Session tabler-templ) GSO-15 bis GSO-44, jeweils wie empfohlen (§13 bis §15); Verbund G-66. |
 
 ## 0. Kurzfassung
 
@@ -39,7 +39,7 @@ eine Nummer hat (NV-, E-, UX-, RA-), steht sie dabei. Die Quelle bleibt das dort
 
 | Nr. | Regel |
 |---|---|
-| GS-01 | **Gegenstand** sind die Büro-Oberflächen (am Schreibtisch, Maus und Tastatur, auch schmal am Handy). Die mobilen Portale (`/m/`, offline, ein Daumen) haben eigene Regeln und stehen nur kurz in §10. |
+| GS-01 | **Gegenstand** sind die Büro-Oberflächen (am Schreibtisch, Maus und Tastatur, auch schmal am Handy), auch öffentliche Seiten und Bereiche für Externe am Schreibtisch (GS-16, GSO-39). Die Portale am Handy (`/m/`, offline, ein Daumen) haben eigene Regeln und stehen nur kurz in §10 (GSO-22). |
 | GS-02 | **Für alle Produkte:** Die Regeln sind produktneutral geschrieben. Was nur hier gilt (Paketnamen, Apps, Nummern anderer Dokumente), steht in der Spalte oder dem Absatz „hier“. Ein anderes Produkt übernimmt die GS-Regeln mit derselben Nummer und ersetzt nur „hier“. |
 | GS-03 | **Quelle der Wahrheit:** Die Regel steht in diesem Dokument. Die Referenz-App (§11) zeigt sie, die Bausteine in tabler-templ und `libs/rahmen` setzen sie um. Weicht eins davon ab, gilt die Regel, und der Rest wird nachgezogen (oder die Regel wird per PR geändert). |
 
@@ -49,20 +49,21 @@ eine Nummer hat (NV-, E-, UX-, RA-), steht sie dabei. Die Quelle bleibt das dort
 |---|---|---|
 | GS-05 | **Lesen vor Bearbeiten.** Eine Seite zeigt zuerst an. Bearbeiten ist ein eigener, sichtbarer Schritt (Dialog oder eigene Seite). | Versehentliche Änderungen kommen seltener vor, und man sieht eindeutig, wo sich was ändern lässt (ADR-0013, abgelehnte Option „inline“). |
 | GS-06 | **Eine Aktion je Ort.** Eine Insel hat höchstens einen Knopf „Bearbeiten“, eine Seite oben höchstens eine Hauptaktion („Neuer Kunde“). Weitere Aktionen stehen im Dialog oder im Menü „…“. | Man muss nicht suchen, und die Seite bleibt ruhig. |
-| GS-07 | **Farbe nur mit Bedeutung.** Der Grund ist neutral (Graphite: schwarz-weiß). Farbig sind nur die Signalfarben: Grün (gut), Gelb (Achtung), Rot (Problem), Blau (Info, heute). Sie gelten in jedem Theme gleich. | Rot fällt auf, weil sonst nichts bunt ist (`libs/rahmen`, Theme). |
+| GS-07 | **Farbe nur mit Bedeutung.** Der Grund ist neutral (Graphite: schwarz-weiß). Farbig sind nur die Signalfarben: Grün (gut), Gelb (Achtung), Rot (Problem), Blau (Info, heute); sie gelten in jedem Theme gleich. Dazu kommen benannte Markierungen mit eigenem Token je Theme: „intern, nie gesendet“ und „von außen“ (GS-76). Frei wählbare Farben (z. B. Labels) nur aus Signalfarben und Grau. **Kontrast** in jedem Theme nach WCAG 2.1 AA: Text ≥ 4,5:1, Punkte, Linien und Flächen ≥ 3:1. Signalfarben sind nie Textfarbe, Text nimmt ihre dunklen Töne (Grün `#1F7A3A`, Gelb `#8A5A00`, Rot `#B42318`); Gelb für Punkte `#B57F00` (GSO-25, GSO-31). | Rot fällt auf, weil sonst nichts bunt ist (`libs/rahmen`, Theme); BITV 2.0 für öffentliche Auftraggeber. Ein Test in tabler-templ `themes` und `libs/rahmen` prüft alle Paare. |
 | GS-08 | **Die Rolle blendet aus, der Use Case prüft.** Die Oberfläche zeigt nur, was die Rolle darf. Geprüft wird trotzdem auf dem Server. Gibt es für einen Abschnitt keinen Use Case zum Ändern, gibt es auch keinen Knopf. | Auf ein „Bearbeiten“ soll nie ein 403 folgen (G-41, NV-04, ADR-0013). |
-| GS-09 | **Server rendert, Formulare schicken ab.** Seiten entstehen auf dem Server (templ), Formulare arbeiten mit POST und Rücksprung (PRG), wenig eigenes JavaScript. Nichts kommt von einem CDN. | Ein Binary, schnell, offline-fest, prüfbar (`libs/rahmen` `TestNichtsVonAussen`). |
+| GS-09 | **Server rendert, Formulare schicken ab.** Seiten entstehen auf dem Server (templ), Formulare arbeiten mit POST und Rücksprung (PRG), wenig eigenes JavaScript. Nichts kommt von einem CDN. Eigenes JavaScript nur mit Grund, eingebettet und getestet; ein solcher Grund ist Kryptografie beim Nutzer (WebCrypto, der Schlüssel verlässt den Browser nie; GSO-38). | Ein Binary, schnell, offline-fest, prüfbar (`libs/rahmen` `TestNichtsVonAussen`). |
 
 ## 3. Application Layout (Rahmen)
 
 | Nr. | Teil | Regel | hier |
 |---|---|---|---|
-| GS-10 | **Kopf** | 56 px hoch. Links die Marke der App, rechts Notizen, Assistent, Rechner und ganz rechts der App-Umschalter (mit der Zahl „dringend“). Keine eigene Navigation im Kopf. | `rahmen.Seite`, `rahmen.Umschalter` (G-63), Rechner RA-12 |
+| GS-10 | **Kopf** | 56 px hoch. Links die Marke der App, rechts Notizen, Assistent und Rechner, soweit das Produkt sie hat, und ganz rechts der App-Umschalter (mit der Zahl „dringend“) nur im Verbund (GSO-23). Keine eigene Navigation im Kopf. App-Umschalter und Rechner gehören dem Produkt, nicht tabler-templ (GSO-11). | `rahmen.Seite`, `rahmen.Umschalter` (G-63), Rechner RA-12 |
 | GS-11 | **Seitenleiste** | 240 px links, gruppiert nach §4, je Eintrag ein Symbol und ein Wort. Beim Wechsel über die Breite lg kein Übergang (der Inhalt springt, statt hinter die Leiste zu gleiten). | `sidebar.Group` aus tabler-templ, `rahmen.Symbol` |
 | GS-12 | **Inhalt** | Grauer Grund, Breite höchstens 1240 px, linksbündig neben der Leiste. Oben der Seitentitel (bei Detailseiten mit Brotkrumen „Bereich › Liste › Datensatz“) und rechts davon die Hauptaktion (GS-06). Darunter die Meldungszeile (GS-60), dann die Inseln. | `theme.css` (`--grund`, `--linie`) |
-| GS-13 | **Panel rechts** | Arbeitsbereich neben der Seite mit Reitern (Notizen, Assistent). Er bleibt beim Seitenwechsel offen, der Zustand steht im Cookie. Kein Formular zum Bearbeiten im Panel. | `rahmen.Panel` (RA-11, Auftrag E-70) |
-| GS-14 | **Handy und schmal** | Unter lg wird die Leiste zum Menü (gleiche Reihenfolge, NV-07), das Panel zum Sheet über der Seite (öffnet sich nach einem Seitenwechsel nicht von selbst), ein Dialog zum Vollbild. Die Seite scrollt nie seitlich; breite Tabellen scrollen in ihrer Insel. Felder haben 16 px Schrift, damit das Handy nicht zoomt. | `tools/e2e-staging/layout.mjs` prüft das |
-| GS-15 | **Theme** | Ein Theme für den ganzen Verbund, an einer Stelle wählbar. Farben, Ecken und Linien sind Tokens; Signalfarben gelten in jedem Theme (GS-07). | `VERBUND_THEME`, Standard Graphite |
+| GS-13 | **Panel rechts** | Arbeitsbereich neben der Seite mit Reitern (Notizen, Assistent). Er bleibt beim Seitenwechsel offen, der Zustand steht im Cookie. Kein Formular zum Bearbeiten im Panel. Ein Knopf im Kopf blendet es ein und aus; es gleitet herein, steht ab der Breite xl angedockt neben der Seite und darunter als Sheet über ihr (GS-14). Verlangt der Browser weniger Bewegung (`prefers-reduced-motion`), erscheint es ohne Animation (GSO-10). Der Reiter „Notizen“ zeigt die Notizen des aktuellen Datensatzes, markiert als „intern“ (GSO-33). | `rahmen.Panel` (RA-11, Auftrag E-70); tabler-templ `blocks/sidepanel` |
+| GS-14 | **Handy und schmal** | Unter lg wird die Leiste zum Menü (gleiche Reihenfolge, NV-07), das Panel zum Sheet über der Seite (öffnet sich nach einem Seitenwechsel nicht von selbst), ein Dialog zum Vollbild. Die Seite scrollt nie seitlich; breite Tabellen scrollen in ihrer Insel. Felder haben 16 px Schrift, damit das Handy nicht zoomt. Layout-Tests prüfen 1400, 1366, 1280 und 390 px Breite (GSO-21). | `tools/e2e-staging/layout.mjs` prüft das |
+| GS-15 | **Theme** | Ein Theme je Produkt (eigene Marke), im Verbund eines für alle Apps an einer Stelle wählbar. Ein Produkt zum Selbstbetrieb lässt den Betreiber das Theme je Instanz wählen, Standard Graphite. Farben, Ecken und Linien sind Tokens; gleich bleiben in jedem Theme Aufbau, Muster, Signalfarben und Kontrast (GS-07; GSO-15, GSO-24). | hier `VERBUND_THEME`, Standard Graphite |
+| GS-16 | **Ohne Anmeldung** | Öffentliche Seiten und Bereiche für Externe nutzen denselben Rahmen mit kurzer Leiste. Ohne Anmeldung steht rechts im Kopf „Anmelden“ als Hauptaktion, „Registrieren“ schlicht daneben (GSO-39, Beispiel B-11). | |
 
 ## 4. Navigation
 
@@ -73,6 +74,7 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 | GS-20 | „Start“ steht oben ohne Gruppentitel (NV-01). Danach kommen Gruppen in fester Reihenfolge: „Für mich“/„Unterwegs“, höchstens zwei Gruppen Tagesgeschäft, „Erledigen“, „Verwaltung“ (NV-02). In „Verwaltung“ erst die Stammdaten, dann Einstellungen, Importieren, Daten exportieren (NV-03). |
 | GS-21 | Höchstens etwa 5 bis 7 Einträge je Gruppe, keine Unterbereiche mit „Zurück“ (NV-06). Gleiches heißt in allen Apps gleich (NV-05). Jeder Eintrag hat einen stabilen Anker für Touren und Tests (NV-08). |
 | GS-22 | Die Leiste ist nur für die Hauptbereiche da. Von einem Datensatz zu einem anderen führt ein Link in der Insel oder in der Tabellenzeile, nie ein Eintrag in der Leiste. |
+| GS-23 | Gruppen des Tagesgeschäfts dürfen in der Reihenfolge eines echten Ablaufs stehen (Buchhalter: Erfassen, Abschließen); nur dann tragen die Einträge Nummern (GSO-17). |
 
 ## 5. Seitentypen
 
@@ -80,9 +82,9 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 |---|---|---|---|
 | GS-30 | **Start** | Was heute zu tun ist, nicht wozu die App da ist. Kacheln mit Zahlen, und jede Zahl führt auf die gefilterte Liste. Darunter Arbeitslisten („Brennt“, „Diese Woche“). | Einsatz UX-01, Konto „Mein Tag“ |
 | GS-31 | **Liste** | Titel und Hauptaktion („Neuer …“), Suche, ein Filter, Tabelle, Seiten (§7.1). | Auftrag „Kunden“, E-49 |
-| GS-32 | **Detailseite** | Kopf mit Name, Nummer und Status, darunter die Inseln in fester Reihenfolge: zuerst, woran man arbeitet, dann was aus anderen Apps kommt (§6). Eine Karte „Als Nächstes“ zeigt, was zu tun ist, wenn es einen Ablauf gibt. | Auftrag „Auftrag“, Einsatz UX-03, UX-07 |
+| GS-32 | **Detailseite** | Kopf mit Name, Nummer (wenn das Produkt eine fachliche Nummer hat, nie eine interne ID; GSO-43) und Status, darunter die Inseln in fester Reihenfolge: zuerst, woran man arbeitet, dann was aus anderen Apps kommt (§6). Eine Karte „Als Nächstes“ zeigt, was zu tun ist, wenn es einen Ablauf gibt. **Arbeitsstand und Fassung:** Wird ein Stand veröffentlicht, zeigt ein Hinweis oben „Es gibt Änderungen gegenüber Fassung N“ mit der Hauptaktion „Neue Fassung veröffentlichen“ (mit Grund, GS-44), die Fassungen stehen als Insel (GSO-40). **Einstellungen** sind eine Detailseite aus Inseln, kein großes Formular (GSO-36). | Auftrag „Auftrag“, Einsatz UX-03, UX-07 |
 | GS-33 | **Anlegen** | Eine eigene Seite (`/kunden/neu`), nicht als Dialog über der Liste. Sie hat nur die Felder, die zum Anlegen nötig sind, und führt nach dem Speichern auf die neue Detailseite. | ADR-0013 Punkt 4 |
-| GS-34 | **Arbeitsseite** | Ausnahme für Arbeit am Stück (Plantafel, Freigabe, Erfassen, Importieren): eigenes Layout erlaubt, Rahmen und Regeln §8 und §9 gelten trotzdem. | ADR-0013 |
+| GS-34 | **Arbeitsseite** | Ausnahme für Arbeit am Stück (Plantafel, Freigabe, Erfassen, Importieren, ein Vorgang im Support): eigenes Layout erlaubt, auch drei Spalten. Bearbeiten in der Seite nur für die Arbeit selbst (Antwort, Vorschlag, Notiz); Inseln mit Kontext folgen GS-41 bis GS-45. Rahmen und Regeln §8 und §9 gelten trotzdem (GSO-21, GSO-28). | ADR-0013; Support E-72 |
 
 ## 6. Inseln und Dialoge
 
@@ -92,9 +94,9 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 | GS-41 | **Bearbeiten:** rechts oben in der Insel steht genau ein Knopf „Bearbeiten“. Gibt es keinen passenden Use Case, entfällt er. | ADR-0013 Punkt 1, GS-08 |
 | GS-42 | **Dialog:** ein zentrierter Dialog mit genau den Feldern dieser Insel. Der Titel heißt wie die Insel, darunter steht klein, worum es geht („A-2026-001 · Wohnungsgesellschaft Nordstadt“). Unten links „Abbrechen“, rechts „Speichern“. Gespeichert wird nur diese Insel. | ADR-0013 Punkt 2 |
 | GS-43 | **Fehler im Dialog:** Scheitert das Speichern, öffnet die Seite den Dialog wieder, mit der Meldung oben und den eingegebenen Werten; das fehlerhafte Feld ist markiert. | ADR-0013 Punkt 2 |
-| GS-44 | **Kleine Ergänzungen** an einem bestehenden Datensatz (Nachtrag, Zuweisung, PIN) sind Dialoge seiner Detailseite, mit einem Knopf in der Insel, zu der sie gehören. | ADR-0013 Punkt 4 |
+| GS-44 | **Kleine Ergänzungen** an einem bestehenden Datensatz (Nachtrag, Zuweisung, PIN, Datei hochladen mit Datei, Art und Bezug) sind Dialoge seiner Detailseite, mit einem Knopf in der Insel, zu der sie gehören (GSO-41). **Aktionen mit Grund** (rechtlich wirksam, Entscheidung, Zurücksetzen) sind ein kleiner Dialog mit Pflichtfeld und rotem Knopf; eine unumkehrbare, folgenreiche Aktion verlangt im Dialog eine getippte Bestätigung (z. B. die Adresse; GSO-26). | ADR-0013 Punkt 4 |
 | GS-45 | **Keine Drawer, kein Bearbeiten in der Insel.** Felder stehen nie direkt in der Leseansicht. Das Panel rechts ist kein Formular (GS-13). | ADR-0013, E-70 |
-| GS-46 | **Unterlisten in einer Insel** zeigen höchstens 10 Zeilen und darunter „Alle N“, das auf die Liste mit Filter führt. | Verbund G-44 |
+| GS-46 | **Unterlisten in einer Insel** zeigen höchstens 10 Zeilen und darunter „Alle N“, das auf die Liste mit Filter führt. Das gilt für Listen anderer Datensätze (Aufträge eines Kunden). Eigene Zeilen des Datensatzes (Positionen eines Angebots) zeigt die Insel ganz; sie scrollen in der Insel (GS-54, GSO-09). Das gilt auch für ein unveränderliches Protokoll; „Alle N“ führt dann zur vollständigen Liste mit Suche (GSO-42). | Verbund G-44 |
 
 ## 7. Tabellen
 
@@ -102,20 +104,20 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 
 | Nr. | Regel | Quelle |
 |---|---|---|
-| GS-50 | **Liste:** oben eine Textsuche (jedes Wort muss vorkommen, ohne Groß- und Kleinschreibung, ä = ae), daneben höchstens ein einfacher Filter, unten Seiten mit 25 Zeilen. Suche, Filter und Seite stehen in der URL, damit Zurück, Lesezeichen und Links funktionieren. | Auftrag E-49, `libs/liste` |
+| GS-50 | **Liste:** oben eine Textsuche (jedes Wort muss vorkommen, ohne Groß- und Kleinschreibung, ä = ae), daneben höchstens ein einfacher Filter, unten Seiten mit 25 Zeilen. Eine Arbeitsliste darf daneben Schnellfilter haben („Nur meine“, GS-53); weitere Merkmale gehen in die Suche (`label:rechnung`). Jede Liste, die über 25 Zeilen wachsen kann, hat Suche und Seiten. Suche, Filter und Seite stehen in der URL, damit Zurück, Lesezeichen und Links funktionieren (GSO-19, GSO-30). | Auftrag E-49, `libs/liste`; tabler-templ `listpage.Contains`, `listpage.Fold` (ab v0.19) |
 | GS-51 | **Rechnen in der Datenbank:** Suche, Filter, Seite, Summen und Gesamtzahl rechnet SQL in wenigen festen Abfragen je Seite, nie eine je Zeile. | G-44, ADR-0011 |
-| GS-52 | **Spalten:** Was man erkennt, steht vorn (Name, Ort), Nummern dahinter. Name oder Nummer ist der Link zur Detailseite. Zahlen und Beträge stehen rechtsbündig mit gleich breiten Ziffern, Einheiten in eigener Spalte oder hinter der Zahl. Status als Pille, Ampel als Punkt mit Wort. | Einsatz UX-04, UX-06; `theme.css` |
+| GS-52 | **Spalten:** Was man erkennt, steht vorn (Name, Ort), Nummern dahinter. Name oder Nummer ist der Link zur Detailseite. Zahlen und Beträge stehen rechtsbündig mit gleich breiten Ziffern, Einheiten in eigener Spalte oder hinter der Zahl. Status als Pille, Ampel als Punkt mit Wort. Eine Frist ist eine Ampel, deren Wort die Restzeit ist („noch 58 Min.“, „überfällig seit 20 Std.“; GSO-35). | Einsatz UX-04, UX-06; `theme.css` |
 | GS-53 | **Sortierung** nach dem, was Handlung braucht (Fälligkeit, „Frist fehlt“ oben), nicht nach Anlagedatum. Eine Liste zum Abarbeiten hat Schnellfilter statt vieler Spalten. | Einsatz UX-05, Ausschreibungen AS002 |
-| GS-54 | **Breite Tabellen** scrollen seitlich in ihrer Insel. Die Seite selbst scrollt nie seitlich (GS-14). | |
+| GS-54 | **Breite Tabellen** scrollen seitlich in ihrer Insel oder werden unter 768 px zu Karten (je Tabelle gewählt; GSO-21). Die Seite selbst scrollt nie seitlich (GS-14). | Buchhalter OF-04 |
 
 ### 7.2 Bearbeiten
 
 | Nr. | Regel | Quelle |
 |---|---|---|
 | GS-55 | **Lange Listen im ganzseitigen Dialog.** Auf der Detailseite wird die Liste (z. B. Positionen eines Angebots) nur gelesen. „Bearbeiten“ öffnet einen Dialog über fast die ganze Seite, unter lg als echtes Vollbild. | ADR-0013 Punkt 3; hier `modal-ganzseitig` in Auftrag |
-| GS-56 | **Jede Zeile ein Formular.** Im Dialog ist jede Zeile ein eigenes kleines Formular mit festen Spalten. Rechts stehen „Speichern“ (Haken) und „Löschen“ (Papierkorb). Enter speichert die Zeile. Ein Hinweis oben sagt: „Jede Zeile wird für sich gespeichert.“ | hier `liste-bearbeiten` in Auftrag `seite_angebot.templ` |
+| GS-56 | **Jede Zeile ein Formular.** Jede Liste mit mehr als einem Feld je Zeile wird so bearbeitet, auch eine kurze (Labels). Im Dialog ist jede Zeile ein eigenes kleines Formular mit festen Spalten. Rechts stehen „Speichern“ (Haken) und „Löschen“ (Papierkorb). Enter speichert die Zeile. Ein Hinweis oben sagt: „Jede Zeile wird für sich gespeichert.“ **Ausnahme:** Eine kurze Liste (bis etwa 10 Zeilen), deren Zeilen nur zusammen gültig sind (Gewichte = 100 %), ist ein Formular im normalen Dialog (GS-42; GSO-27). | tabler-templ `blocks/rowedit` (v0.18); hier noch `liste-bearbeiten` in Auftrag |
 | GS-57 | **Neue Zeile unten** als leeres Formular mit Vorschlag (z. B. nächste Positionsnummer) und „Hinzufügen“. | Auftrag „Positionen bearbeiten“ |
-| GS-58 | **Löschen fragt nach** („Position 01.01.0010 löschen?“), über `data-bestaetigen` am Knopf (heute die Nachfrage des Browsers). Nach dem Löschen sagt die Meldung, was gelöscht wurde. | hier Auftrag `formulare.js`; GS-60 |
+| GS-58 | **Löschen fragt nach** („Position 01.01.0010 löschen?“), über `data-bestaetigen` am Knopf (heute die Nachfrage des Browsers). Nach dem Löschen sagt die Meldung, was gelöscht wurde. Löschen mit Grund oder unumkehrbaren Folgen ist ein Dialog nach GS-44. | hier Auftrag `formulare.js`; GS-60 |
 | GS-59 | **Summen und berechnete Spalten** (Betrag = Menge × Preis) zeigt der Dialog nur an und rechnet sie nach jedem Speichern neu. Schreibgeschützte Listen (z. B. nach Abgabe eines Angebots) zeigen den Grund statt der Knöpfe. | Auftrag „Positionen bearbeiten“ |
 
 ## 8. Rückmeldung und Zustände
@@ -125,7 +127,7 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 | GS-60 | **Meldung nach jeder Aktion:** eine wegklickbare Zeile über dem Inhalt, die sagt, was geschehen ist, und den nächsten Schritt als Link anbietet („Einsatz disponiert. Zur Plantafel“). Grün für Erfolg, Rot für Fehler. | Einsatz UX-06, `shell.Flash` |
 | GS-61 | **Leerer Zustand:** sagt, warum hier nichts steht und was hilft, mit einem Knopf für den nächsten Schritt. Eine leere Suche bietet „Suche zurücksetzen“ an. | Einsatz UX-09 |
 | GS-62 | **Fehlerseiten** (nicht gefunden, keine Rechte, Fehler) stehen im Rahmen mit Seitenleiste und erklären in einem Satz, was los ist. Technische Einzelheiten gehören ins Log, nie in den Browser. | `libs/rahmen` RA-01 bis RA-05 |
-| GS-63 | **Nur lesen:** Ist die Firma gesperrt oder gekündigt, zeigt der Rahmen einen Hinweis mit Link zum Export. Die Knöpfe zum Bearbeiten entfallen. | Datenhoheit DH-12 |
+| GS-63 | **Nur lesen:** Ist die Firma gesperrt oder gekündigt, zeigt der Rahmen einen Hinweis mit Link zum Export. Die Knöpfe zum Bearbeiten entfallen. Ebenso, an derselben Stelle über der Meldungszeile und in Info-Farbe: der Hinweis „Demo-Instanz“, wenn alle Daten erfunden sind (GSO-44). | Datenhoheit DH-12 |
 | GS-64 | **Laden:** Teile, die länger brauchen (Zahlen der Seitenleiste, „dringend“ im Umschalter), kommen nach dem Seitenaufbau nach; die Seite selbst steht sofort. | [Laden im Hintergrund](laden-im-hintergrund.md) |
 
 ## 9. Sprache und Form
@@ -133,17 +135,18 @@ Die Regeln stehen in [Navigation](navigation.md) §2 und gelten hier unveränder
 | Nr. | Regel | Quelle |
 |---|---|---|
 | GS-70 | **Begriffe der Nutzer:** die Wörter aus dem Glossar der App (`CONTEXT.md`), keine Fachsprache der Entwicklung. Gleiches heißt überall gleich. | NV-05, Einsatz UX-13 |
-| GS-71 | **Keine internen Kennungen:** keine Regelnummern (E-xx, G-xx, §), keine IDs in Texten und Meldungen. Gesetze („§ 14 UStG“) dürfen bleiben. | Auftrag E-52, `rahmen.OhneRegelnummern`, Architekturtest |
-| GS-72 | **Knöpfe sagen, was passiert:** „Speichern“, „Angebot anlegen“, „Freigeben“, nicht „OK“ oder „Weiter“. Die Hauptaktion ist gefüllt, alle anderen sind umrandet oder schlicht. Gefährliche Aktionen sind rot und fragen nach. | |
-| GS-73 | **Zahlen und Datum** im deutschen Format: 1.234,50 €, TT.MM.JJJJ, Uhrzeit 07:30. Zeiträume als „01.04.2026 – 31.03.2028“. Listen werden mit Komma verbunden. | Auftrag E-52 |
+| GS-71 | **Keine internen Kennungen:** keine Regelnummern (E-xx, G-xx, §), keine IDs in Texten und Meldungen. Gesetze („§ 14 UStG“) dürfen bleiben. Ausnahme: die Erklärtexte der Referenz-App nennen die GS-Nummern (§11, GSO-13). | Auftrag E-52, `rahmen.OhneRegelnummern`, Architekturtest |
+| GS-72 | **Knöpfe sagen, was passiert:** „Speichern“, „Angebot anlegen“, „Freigeben“, nicht „OK“ oder „Weiter“. Die Hauptaktion ist gefüllt, alle anderen sind umrandet oder schlicht. Gefährliche Aktionen sind rot und fragen nach; mit Grund oder unumkehrbar im Dialog nach GS-44 (GSO-26). | |
+| GS-73 | **Zahlen und Datum** im deutschen Format: 1.234,50 €, TT.MM.JJJJ, Uhrzeit 07:30. Fristen und Zeitpunkte mit rechtlicher Wirkung als „05.12.2026, 22:00 Uhr“ (GSO-35). Zeiträume als „01.04.2026 – 31.03.2028“. Listen werden mit Komma verbunden. Ausnahme: Eingabefelder für Datum und Zeit sind die nativen Felder (`type=date`, `datetime-local`) im Format des Browsers (GSO-32). | Auftrag E-52 |
 | GS-74 | **Links** im Fließtext und in Tabellen sind dezent unterstrichen (der Akzent ist schwarz wie der Text). | `libs/rahmen` Theme |
 | GS-75 | **Beispieldaten** ohne erkennbare Branche (Musterdienst GmbH, Wohnungsgesellschaft Nordstadt), in Referenz-App, Mockups und Screenshots gleich. | Verbund G-60 |
+| GS-76 | **Text von außen** (von Kunden, Lieferanten, Bietern) ist gekennzeichnet (Markierung „von außen“, GS-07), escaped und nie ein Link. Interne Notizen tragen die Markierung „intern, nie gesendet“ (GSO-31). | Support E-15, E-29; Baustein in tabler-templ |
 
 ## 10. Mobile Portale (nur kurz)
 
 Die mobilen Portale (`/m/` in Auftrag, Einsatz, Zeit) nutzen dieselben Werte (Akzent, Schrift, Ecken, Signalfarben)
 aus eigenem CSS ohne Tabler. Sonst sind sie anders gebaut: ein großer Knopf je Schritt, offline, kein Rahmen, keine
-Seitenleiste. Eigene Regeln dafür sind offen (GSO-07).
+Seitenleiste. Eigene Regeln dafür kommen später, zusammen mit den Portalen für andere Zielgruppen am Handy (GSO-07, GSO-22).
 
 ## 11. Beispiele: die Referenz-App in tabler-templ
 
@@ -151,6 +154,12 @@ Wunsch des Benutzers (15.11.2026): Das Konzept soll lebendig sein. Dafür kommt 
 die alle Muster dieses Dokuments mit den echten Bausteinen zeigt und jeweils kurz erklärt. Sie ist kein Mockup:
 Ändert sich ein Baustein, ändert sich das Beispiel mit, und Screenshot-Tests merken eine Abweichung. Den Auftrag dazu
 beschreibt der Brief [gestaltung-referenz-app](../briefs/gestaltung-referenz-app.md).
+
+**Gebaut** (tabler-templ PR #60, 15.11.2026): `examples/reference`, in der Demo unter `/reference`, mit den Blöcken
+`blocks/rowedit` (Liste bearbeiten, B-05) und `blocks/sidepanel` (Panel rechts, B-01, B-09). Die App zeigt dieses
+Dokument als Kopie mit Commit-Stand (`/reference/konzept`) und verlinkt in beide Richtungen. Ihre Seiten stehen in der
+Seitenleiste in einer eigenen Gruppe „Referenz“ am Ende; das ist keine Gruppe der Produkte und keine Ausnahme von
+GS-20 (GSO-08).
 
 | Beispiel | zeigt | Regeln |
 |---|---|---|
@@ -160,23 +169,31 @@ beschreibt der Brief [gestaltung-referenz-app](../briefs/gestaltung-referenz-app
 | B-04 Detailseite | Kopf, Inseln mit Bearbeiten, Dialog, Fehler im Dialog, Unterliste mit „Alle N“ | GS-32, GS-40 bis GS-46 |
 | B-05 Liste bearbeiten | ganzseitiger Dialog, Zeile speichern, löschen mit Nachfrage, neue Zeile mit Vorschlag, Summe | GS-55 bis GS-59 |
 | B-06 Anlegen | eigene Seite, wenige Felder, danach die Detailseite mit Meldung | GS-33, GS-60 |
-| B-07 Zustände | Meldung mit nächstem Schritt, leerer Zustand, leere Suche, Fehlerseite, „nur lesen“, Platzhalter beim Laden | GS-60 bis GS-64 |
+| B-07 Zustände | Meldung mit nächstem Schritt, leerer Zustand, leere Suche, Fehlerseite, „nur lesen“ und „Demo-Instanz“, Platzhalter beim Laden, Aktion mit Grund und mit getippter Bestätigung | GS-44, GS-60 bis GS-64 |
 | B-08 Marke und Form | Theme-Tokens, Signalfarben, Schrift, Knopfarten, Pillen, Ampel, Zahlen- und Datumsformat | GS-07, GS-15, GS-70 bis GS-75 |
+| B-09 KI-Assistent | Panel mit Reiter Assistent, Beispielfragen, Assistent füllt einen Dialog, die Person speichert; verweigert, was er nicht füllen darf | GS-13, [Assistent](assistent.md) KA-01 bis KA-03, KA-15, KA-20 (GSO-10) |
+| B-10 Vorschlag prüfen | KI als Fachteil: Vorschlag als Insel mit Quellen und Gründen, Entscheidungen als Knöpfe, Grund als Pflichtauswahl | GS-34, GS-44, Assistent KA-01 bis KA-04 sinngemäß (GSO-34) |
+| B-11 Öffentlich und Externe | Rahmen ohne Anmeldung mit „Anmelden“, kurzer Bereich für Externe | GS-16 (GSO-39) |
 
 Jede Seite der Referenz-App hat oben einen kurzen Text: was das Muster ist, wann man es nimmt, welche GS-Nummern
-gelten, welcher Baustein es umsetzt. Die Texte verweisen auf dieses Dokument und wiederholen es nicht.
+gelten, welcher Baustein es umsetzt. Die Texte verweisen auf dieses Dokument und wiederholen es nicht. Für sie gilt
+GS-71 nicht; der Test `TestGS71_*` der Referenz-App prüft alles außerhalb davon (GSO-13).
 
 ## 12. Weiterentwickeln und austauschen
 
 - **Eine Regel ändern** ist ein PR an diesem Dokument (neue Version, Eintrag in der Historie). Im selben PR oder
-  direkt danach wird die Referenz-App nachgezogen; welche Apps folgen, steht im PR.
+  direkt danach wird die Referenz-App nachgezogen, dazu ihre Kopie dieses Dokuments mit `scripts/reference-konzept.sh`
+  in tabler-templ (GSO-14; die Kopie entfällt ab v1.0). Welche Apps folgen, steht im PR.
 - **Nummern bleiben stabil.** Ersetzte Regeln kommen in den Anhang „Abgelöst“, ihre Nummer bleibt im Text stehen.
 - **Andere Produkte** übernehmen die Regeln mit Nummer und Version („gilt Gestaltung v0.1 GS-40 bis GS-46“) und
   ersetzen nur die Spalte „hier“. Bis v1.0 liegt das Dokument hier, danach der produktneutrale Teil in tabler-templ (GSO-01).
+- **Oberfläche über dem Theme** (grauer Grund, Inseln, Signalfarben, 1240 px, Links, 16 px in Feldern) steht heute in
+  `libs/rahmen/static/theme.css`, die Referenz-App hat eine Kopie. Mit v1.0 kommt dieser produktneutrale Teil als
+  eigene Ebene über den Themes nach tabler-templ; jedes Produkt bindet ihn mit einer Zeile ein (GSO-12).
 
 ## 13. Entschiedene Punkte
 
-Alle nach der Empfehlung entschieden (Benutzer 15.11.2026).
+Alle nach der Empfehlung entschieden (Benutzer 15.11.2026). GSO-08 bis GSO-14 sind die Fragen aus tabler-templ PR #60.
 
 | Nr. | Frage | Optionen | Empfehlung | Entscheidung |
 |---|---|---|---|---|
@@ -187,3 +204,78 @@ Alle nach der Empfehlung entschieden (Benutzer 15.11.2026).
 | GSO-05 | **Prüfbare Regeln als Test** (z. B. keine Drawer in Büro-Oberflächen, Insel höchstens ein „Bearbeiten“, keine Seite scrollt seitlich) | (a) Architektur- und Layout-Tests je Regel, wo es einfach geht; (b) nur Review | **(a):** wie bei Navigation (`navigation.go`) und Regelnummern; je Test die GS-Nummer im Namen. | **Benutzer 15.11.2026: nach der Empfehlung.** |
 | GSO-06 | **Verbund-Regel** | (a) nach der Entscheidung G-66 „Gestaltung nach dem Konzept Gestaltung“ in `verbund.md`; (b) ohne G-Nummer | **(a)**, damit der Verweis in den `kurz.md` der Apps kurz bleibt. | **Benutzer 15.11.2026: nach der Empfehlung.** |
 | GSO-07 | **Regeln für die mobilen Portale** | (a) eigener Abschnitt in diesem Dokument (GS-8x); (b) eigenes Konzept | **(a) später**, wenn ein zweites Portal neu gebaut wird. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+
+| GSO-08 | **Gruppe „Referenz“ in der Seitenleiste der Referenz-App** steht am Ende, nach GS-20 gehört dort „Verwaltung“ hin | (a) so lassen, §11 sagt, dass sie zur Referenz gehört; (b) umordnen | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-09 | **Gilt GS-46 für eigene Zeilen** eines Datensatzes (Positionen)? | (a) nein, nur für Listen anderer Datensätze; eigene Zeilen ganz, Scrollen in der Insel; (b) ja | **(a)**, so gebaut | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-10 | **KI-Assistent in §11 und Verhalten des Panels** | (a) B-09 aufnehmen, Satz zum Panel in GS-13; (b) ohne | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-11 | **App-Umschalter und Rechner** liegen in `libs/rahmen` | (a) bleiben beim Produkt, die Referenz zeigt nur die Knöpfe des Panels; (b) nach tabler-templ | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-12 | **Oberfläche über dem Theme** (`theme.css`) | (a) ab v1.0 als Ebene über den Themes nach tabler-templ; (b) bleibt je Produkt | **(a)**: Buchhalter, Support und Vergabe bekämen sie mit einer Zeile | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-13 | **Regelnummern in den Erklärtexten** der Referenz-App, obwohl GS-71 sie verbietet | (a) Ausnahme für die Erklärtexte; (b) keine Nummern | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-14 | **Kopie dieses Dokuments in der Referenz-App** | (a) zu jeder Regeländerung `scripts/reference-konzept.sh` in tabler-templ; ab v1.0 entfällt die Kopie; (b) nur Link auf GitHub | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+
+## 14. Abgleich mit Buchhalter, Support und Vergabe (Bestandsaufnahme)
+
+Entschieden nach der Empfehlung (Benutzer 15.11.2026, in der Session tabler-templ); die Regeln oben sind nachgezogen. Stand 15.11.2026, gelesen von der Session tabler-templ beim Bau der Referenz-App (PR #60), nichts geändert. Die
+Produkte liegen in eigenen Repos (`mind-vm/buchhalter`, `mind-vm/support`, `mind-vm/vergabe`); jede Umstellung ist
+ein PR dort, nach der Entscheidung hier.
+
+| Regel | Buchhalter | Support | Vergabe |
+|---|---|---|---|
+| Theme (GS-15) | Tabler statt Graphite | Tabler | Tabler |
+| Rahmen, Seitenleiste (GS-10, GS-11) | wie GS | wie GS | keine Seitenleiste |
+| Gruppen der Leiste (GS-20) | nach dem Monatsablauf, Einträge nummeriert (Buchhalter OF-01) | – | – |
+| Bearbeiten in der Seite statt Insel mit Dialog (GS-41 bis GS-45) | ja | ja | ja |
+| Listen (GS-50) | ohne Suche und Seiten | drei Filter, 50 Zeilen (Support E-72) | ohne Suche und Seiten |
+| Lange Listen (GS-55 bis GS-57) | ein großes Formular | – | ein großes Formular |
+
+Muster, die dieses Konzept noch nicht kennt: eine Arbeitsseite mit drei Spalten (Support E-72), Tabellen, die unter
+768 px zu Karten werden, und Prüfbreiten 1366 und 1280 px (Buchhalter OF-04, OF-06), ein Tastaturmodell (Buchhalter
+OF-06.4), Portale für andere Zielgruppen (Vergabe: Bieter, öffentlich).
+
+| Nr. | Frage | Optionen | Empfehlung | Entscheidung |
+|---|---|---|---|---|
+| GSO-15 | **Theme je Produkt** | (a) jedes Produkt wählt sein Theme (eigene Marke), alle GS-Regeln und die Ebene über dem Theme (GSO-12) gelten trotzdem; (b) alle auf Graphite | **(a):** Marke ist Sache des Produkts; GS-15 heißt dann „ein Theme je Produkt“. Gleich sind Aufbau, Muster und Signalfarben. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-16 | **Vergabe ohne Seitenleiste** | (a) die Büro-Oberfläche der Vergabe bekommt die Seitenleiste nach GS-11 und GS-20, ihre Portale für Bieter und Öffentlichkeit bleiben außen vor (GSO-22); (b) Ausnahme | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-17 | **Leiste nach einem Ablauf mit Nummern** (Buchhalter) | (a) als Regel GS-23 aufnehmen: Gruppen Tagesgeschäft dürfen in der Reihenfolge eines echten Ablaufs stehen, Nummern nur dann; (b) Buchhalter ordnet nach GS-20 um | **(a):** Der Monatsablauf ist eine echte Reihenfolge, und GS-20 erlaubt schon zwei Gruppen Tagesgeschäft. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-18 | **Bearbeiten in der Seite** (alle drei) | (a) nach und nach auf Inseln mit Dialog umstellen, je Seite beim nächsten Umbau, kein Großumbau; (b) Ausnahme je Produkt | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-19 | **Listen** (Filter, Seitengröße, fehlende Suche) | (a) GS-50 bleibt: eine Suche, ein Filter, 25 Zeilen; eine Arbeitsliste darf daneben Schnellfilter haben (GS-53, wie die Queue in Support), und jede Liste, die über 25 Zeilen wachsen kann, bekommt Suche und Seiten; (b) Seitengröße je Produkt | **(a)** | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-20 | **Lange Listen als ein großes Formular** (Buchhalter, Vergabe) | (a) auf `blocks/rowedit` umstellen (GS-55 bis GS-59); (b) bleibt | **(a)**, sobald tabler-templ mit dem Block veröffentlicht ist | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-21 | **Neue Muster aufnehmen** | (a) drei Spalten als Variante der Arbeitsseite (GS-34); Karten unter 768 px als Alternative zum Scrollen in der Insel, je Tabelle gewählt (GS-54); Prüfbreiten 1366 und 1280 px in die Layout-Tests (GS-14); das Tastaturmodell nach Lesen von Buchhalter OF-06.4 als eigener Abschnitt vorschlagen; (b) erst bei Bedarf | **(a)**, je Muster als Seite der Referenz-App | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-22 | **Portale für andere Zielgruppen** (Bieter, öffentlich, Kundenbereich) | (a) wie die mobilen Portale außerhalb der Büro-Regeln, später ein Abschnitt zusammen mit GSO-07; (b) gleich mitregeln | **(a) nur für Portale am Handy.** Portale für Externe am Schreibtisch regelt GSO-39. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+
+## 15. Fragen aus den Prüfungen von Support und Vergabe
+
+Support und Vergabe haben ihre Oberfläche gegen v0.2 geprüft (Berichte `docs/reviews/gestaltung-2026-11-15.md` in
+mind-vm/support#20 und mind-vm/vergabe#33, gesammelt weitergegeben von der Session tabler-templ). Die Fragen stehen
+hier zusammengefasst, Doppelte zusammengelegt; in Klammern die Nummer im Bericht (Support A-x/B-x, Vergabe a-x/b-x).
+Die Empfehlung folgt dem Bericht, wo nichts anderes steht. Entschieden nach der Empfehlung (Benutzer 15.11.2026, in der Session tabler-templ); die Regeln oben sind nachgezogen.
+
+**Kontrast (zu GSO-25), nachgerechnet 15.11.2026:** Text in Pillen und Ampeln nutzt schon dunklere Töne und erreicht
+WCAG AA (Grün `#1F7A3A` 4,9:1 auf seiner Fläche, Gelb `#8A5A00` 5,4:1, Rot `#B42318` 5,8:1). Als Textfarbe auf Weiß
+fallen die Signalfarben selbst durch (Grün `#22A04B` 3,4:1, Gelb `#E0A100` 2,3:1, Rot `#E5484D` 3,9:1; Blau `#2563EB`
+5,2:1 besteht). Für Punkte und Flächen (3:1) fällt nur Gelb durch, auf dem grauen Grund knapp auch Grün (3,1:1).
+
+| Nr. | Frage | Empfehlung | Entscheidung |
+|---|---|---|---|
+| GSO-23 | **Kopf ohne Verbund** (Support A-1, Vergabe a-1): Produkte ohne Verbund haben keinen App-Umschalter, manche keinen Rechner und kein Panel. | GS-10: Notizen, Assistent, Rechner „soweit das Produkt sie hat“, der App-Umschalter nur im Verbund. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-24 | **Theme je Instanz** (Vergabe a-3): Vergabe läuft bei fremden Betreibern. | Zusammen mit GSO-15: Theme je Produkt; ein Produkt zum Selbstbetrieb lässt den Betreiber das Theme je Instanz wählen, Standard Graphite. Signalfarben bleiben fest. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-25 | **Kontrast** (Vergabe a-4): öffentliche Auftraggeber müssen BITV 2.0 / WCAG 2.1 AA erfüllen. | GS-07 verlangt in jedem Theme Text ≥ 4,5:1 und Punkte, Linien, Flächen ≥ 3:1. Signalfarben sind nie Textfarbe, Text nimmt die dunklen Töne. Gelb für Punkte dunkler (`#B57F00`, 3,5:1 auf Weiß), Grün prüfen. Ein Test in tabler-templ `themes` und in `libs/rahmen` prüft alle Paare; Vergabe löscht dann seine Korrektur in `vergabe.css`. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-26 | **Aktionen mit Pflichtgrund und gefährliche Aktionen** (Support B-4, Vergabe b-3) | Ergänzung von GS-44, GS-58 und GS-72: Eine rechtlich wirksame Aktion oder eine Aktion mit Grund ist ein kleiner Dialog mit Pflichtfeld und rotem Knopf; eine unumkehrbare, folgenreiche Aktion verlangt im Dialog eine getippte Bestätigung (z. B. die Adresse). `data-bestaetigen` bleibt für einfaches Löschen. Beispiel in B-07. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-27 | **Kurze Listen** (Support A-6: `rowedit` schon ab mehr als einem Feld; Vergabe a-5: Liste, die nur zusammen gültig ist, z. B. Gewichte = 100 %) | Beides: `rowedit` ist der Weg für jede Liste mit mehr als einem Feld je Zeile (GS-55, GS-56). Ausnahme: eine kurze Liste (bis etwa 10 Zeilen), deren Zeilen nur zusammen gültig sind, ist ein Formular im normalen Dialog (GS-42), mit genau diesem Grund. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-28 | **Arbeitsseite mit Bearbeiten in der Seite** (Support A-3, Vorgang als Dreispalter) | GS-34 sagt ausdrücklich: Bearbeiten in der Seite nur für die Arbeit selbst (Antwort, Vorschlag, Notiz); Inseln mit Kontext folgen GS-41 bis GS-45. Dreispalter als Variante zusammen mit GSO-21. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-29 | **Arbeitsliste als Start** (Support A-2) | Keine Änderung nötig: NV-01 erlaubt schon eine App ohne eigene Startseite, `/` führt dann auf den obersten Eintrag (wie Austausch „Läufe“). Zahlen kommen als Kopf der Liste (GS-30). Abweichend vom Bericht, der den Eintrag „Start“ umbenennen wollte. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-30 | **Mehr als ein Filter** (Support A-5) | Wie GSO-19: GS-50 bleibt. Status als Filter, „Nur meine“ als Schnellfilter über der Tabelle (GS-53), Label in der Suche (`label:rechnung`). | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-31 | **Benannte Markierungen und Text von außen** (Support A-4, B-3) | GS-07 kennt neben den Signalfarben benannte Markierungen mit eigenem Token je Theme: „intern, nie gesendet“ und „von außen“. Frei wählbare Farben (Labels) nur aus Signalfarben und Grau. Neue Regel in §9: Text von außen ist gekennzeichnet, escaped und nie ein Link; Baustein in tabler-templ. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-32 | **Datumsfelder** (Support A-7): das Feld zeigt das Format des Browsers | GS-73 nennt Eingabefelder als Ausnahme: das native Feld (`type=date`, `datetime-local`) ist am Handy die beste Eingabe. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-33 | **Notizen an einem Datensatz** (Support B-1) | Panel-Reiter „Notizen“ zeigt den aktuellen Datensatz (GS-13, wie Auftrag E-70), mit der Markierung „intern“ (GSO-31). | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-34 | **KI als Fachteil** (Support B-2): ein Agent entwirft, der Mensch entscheidet mit Pflichtgrund | Beispiel **B-10 „Vorschlag prüfen“** in der Referenz-App: Vorschlag als Insel mit Quellen und Gründen, Entscheidungen als Knöpfe, Grund als Pflichtauswahl; Assistent KA-01 bis KA-04 gelten sinngemäß. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-35 | **Fristen** (Support B-5: Restzeit; Vergabe a-6: „Uhr“) | GS-52: eine Frist ist eine Ampel, deren Wort die Restzeit ist („noch 58 Min.“, „überfällig seit 20 Std.“). GS-73: „TT.MM.JJJJ, HH:MM Uhr“ für Fristen und Zeitpunkte mit rechtlicher Wirkung, sonst „07:30“. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-36 | **Einstellungen** (Support B-6) | Inseln mit Dialogen wie eine Detailseite (GS-32), kein großes Formular. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-37 | **Assistent im Selbstbetrieb** (Vergabe a-2) | Ergänzung im Konzept [Assistent](assistent.md) zu KA-04 und KA-20: Ein Produkt zum Selbstbetrieb bietet den Assistenten nur mit einem vom Betreiber gewählten Anbieter an; vertrauliche Daten (Angebote vor der Öffnung) sind nie Werkzeug. Bis dahin hat Vergabe kein Panel. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-38 | **Eigenes JavaScript für Kryptografie** (Vergabe a-7, WebCrypto bei der Abgabe) | GS-09 nennt Kryptografie beim Nutzer als zulässigen Grund für eigenes JavaScript, eingebettet und getestet. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-39 | **Öffentliche Seiten und Bereich für Externe am Schreibtisch** (Vergabe b-1) | Derselbe Rahmen mit kurzer Leiste; ohne Anmeldung rechts im Kopf „Anmelden“ als Hauptaktion, „Registrieren“ schlicht. Beispiel **B-11** in der Referenz-App. Portale am Handy bleiben bei GSO-22. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-40 | **Arbeitsstand und veröffentlichte Fassung** (Vergabe b-2) | Muster als Unterfall von GS-32 und GS-60: Hinweis oben „Es gibt Änderungen gegenüber Fassung N“ mit der Hauptaktion „Neue Fassung veröffentlichen“ (mit Grund, GSO-26), Fassungen als Insel. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-41 | **Dateien hochladen** (Vergabe b-4) | Dialog „… hinzufügen“ an der Insel (GS-44) mit Datei, Art und Bezug; die Liste bleibt lesend, Entfernen mit Nachfrage. Geht in tabler-templ schon mit `detail.Dialog` und `multipart`. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-42 | **Unveränderliches Protokoll** (Vergabe b-5) | GS-46 gilt auch hier: die letzten 10, „Alle N“ führt zur vollständigen Liste mit Suche. | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-43 | **Detailseite ohne fachliche Nummer** (Vergabe b-6) | GS-32: Nummer „wenn vorhanden“; eine interne ID nie (GS-71). | **Benutzer 15.11.2026: nach der Empfehlung.** |
+| GSO-44 | **Hinweis „Demo-Instanz“** (Vergabe b-7) | Wie „nur lesen“ (GS-63): eine Zeile im Rahmen über der Meldungszeile, Farbe Info. | **Benutzer 15.11.2026: nach der Empfehlung.** |
