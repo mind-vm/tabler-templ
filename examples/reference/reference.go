@@ -166,6 +166,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, status int, p page,
 	ctx := germanContext(r.Context())
 	p.readOnly = a.store.ReadOnly()
 	p.demo = a.store.Demo()
+	p.theme = themeOf(w, r)
 	p.session = a.session(w, r)
 	if p.Flash == nil {
 		p.Flash = takeFlash(w, r)
