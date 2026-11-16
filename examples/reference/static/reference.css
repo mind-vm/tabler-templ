@@ -52,10 +52,7 @@ body {
 .ref-table td.ref-wrap { white-space: normal; min-width: 12rem; }
 .ref-pill { font-weight: 500; }
 
-/* Phones: fields with 16 px so the page does not zoom (GS-14) */
-@media (max-width: 1199.98px), (pointer: coarse) {
-  :is(input:not([type=checkbox], [type=radio], [type=range], [type=hidden]), select, textarea) { font-size: max(16px, 1rem); }
-}
+/* Phones: fields with 16 px so the page does not zoom (GS-14) come from themes.SignalStyles. */
 
 /* The page never scrolls sideways (GS-14); wide tables scroll in their island */
 .ref-content { min-width: 0; }

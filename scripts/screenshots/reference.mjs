@@ -82,14 +82,35 @@ const sizes = [
   ["1366", { viewport: { width: 1366, height: 768 }, deviceScaleFactor: 1 }, { check: true }],
   ["1280", { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 }, { check: true }],
   ["phone", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }],
+  // Only the section head and the fields at 360 px; the pages are not checked there yet.
+  ["360", { viewport: { width: 360, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }, { fieldsOnly: true }],
 ];
+
+// A section head with a search field and two buttons (detail.Actions) wraps instead of widening the page,
+// and fields take 16 px on touch screens and below 1200 px, so iOS does not zoom in (issue #9).
+async function checkFields(page, size, touch) {
+  const r = await page.evaluate(() => {
+    const head = document.querySelector(".kit-section-head");
+    head.querySelector(".kit-section-action").outerHTML = '<div class="kit-section-actions"><form role="search">' +
+      '<input type="search" class="form-control form-control-sm" placeholder="Positionen durchsuchen"></form>' +
+      '<button type="button" class="btn btn-sm kit-section-action"><i class="ti ti-plus icon"></i><span class="kit-section-action-text">Nachtrag</span></button>' +
+      '<button type="button" class="btn btn-sm kit-section-action"><i class="ti ti-pencil icon"></i><span class="kit-section-action-text">Bearbeiten</span></button></div>';
+    const d = document.documentElement;
+    return { wide: d.scrollWidth > d.clientWidth + 1 ? `${d.scrollWidth} > ${d.clientWidth}` : "", font: getComputedStyle(head.querySelector("input")).fontSize };
+  });
+  const problems = [];
+  if (r.wide) problems.push(`${size} section actions: scroll sideways (${r.wide})`);
+  const want16 = touch || page.viewportSize().width < 1200;
+  if ((r.font === "16px") !== want16) problems.push(`${size} .form-control-sm: ${r.font}, want ${want16 ? "" : "not "}16px`);
+  return problems;
+}
 
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const problems = [];
-for (const [size, options, { check = false } = {}] of sizes) {
+for (const [size, options, { check = false, fieldsOnly = false } = {}] of sizes) {
   const context = await browser.newContext(options);
-  for (const [name, path, before, status = 200] of shots) {
+  for (const [name, path, before, status = 200] of fieldsOnly ? [] : shots) {
     const page = await context.newPage();
     const origin = new URL(base).origin;
     page.on("console", (m) => { if (m.type() === "error" && !/status of (404|403|422)/.test(m.text())) problems.push(`${size} ${name}: console: ${m.text()}`); });
@@ -117,6 +138,11 @@ for (const [size, options, { check = false } = {}] of sizes) {
     console.log(`${size} ${name}${wide ? " WIDE" : ""}`);
     await page.close();
   }
+  const page = await context.newPage();
+  await page.goto(ref + "/kunden/K-1001", { waitUntil: "networkidle" });
+  problems.push(...(await checkFields(page, size, !!options.hasTouch)));
+  console.log(`${size} fields`);
+  await page.close();
   await context.close();
 }
 await browser.close();

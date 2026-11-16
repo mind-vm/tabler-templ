@@ -272,6 +272,17 @@ func TestDetailSection(t *testing.T) {
 	assert.Equal(t, `<dl class="kit-fields"><dt>Telefon</dt><dd class="kit-field-empty">–</dd><dt>Ort</dt><dd>Bonn</dd></dl>`, h)
 }
 
+// Several actions (a search field and two buttons) wrap instead of widening the page on a phone (issue #9):
+// the group may shrink, and in a narrow section it moves below the title.
+func TestDetailSectionActionsWrap(t *testing.T) {
+	ctx := kit.WithMessages(context.Background(), kit.German)
+	h := render(t, ctx, detail.Section(detail.SectionProps{Title: "Positionen", Action: mit(detail.Actions(), "<input class=\"form-control form-control-sm\">")}))
+	assert.Contains(t, h, `<div class="kit-section-actions"><input`)
+	assert.Contains(t, h, ".kit-section-head>.kit-section-actions{min-width:0}")
+	assert.NotRegexp(t, `\.kit-section-actions[^{]*\{[^}]*flex-shrink:0`, h, "a group that cannot shrink never wraps")
+	assert.Contains(t, h, "@container (max-width:480px){.kit-section-head{flex-wrap:wrap}")
+}
+
 func TestDetailDialog(t *testing.T) {
 	ctx := kit.WithMessages(context.Background(), kit.German)
 	h := render(t, ctx, mit(detail.Dialog(detail.DialogProps{ID: "dialog-kunde", Title: "Kunde", Tooltip: "Kunde (E-32)", Context: "10001 · Stadt",

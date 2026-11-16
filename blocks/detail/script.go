@@ -75,8 +75,10 @@ const css = `.kit-section{container-type:inline-size}
 .kit-section-head+.table-responsive{margin-top:.75rem;border-top:var(--tblr-border-width) solid var(--tblr-border-color)}
 .kit-section-title{min-width:0;margin:0;overflow-wrap:anywhere;font-size:1rem;font-weight:600}
 .kit-section-title small{margin-left:.375rem;font-size:.8125rem;font-weight:400;color:var(--tblr-secondary)}
-.kit-section-head>.kit-section-action,.kit-section-head>form,.kit-section-head>.kit-section-actions{flex-shrink:0}
+.kit-section-head>.kit-section-action,.kit-section-head>form{flex-shrink:0}
+.kit-section-head>.kit-section-actions{min-width:0}
 .kit-section-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.5rem}
+@container (max-width:480px){.kit-section-head{flex-wrap:wrap}.kit-section-head>.kit-section-actions{margin-left:auto}}
 .kit-fields{display:grid;grid-template-columns:minmax(7.5rem,auto) 1fr;gap:.5rem 1.25rem;margin:0}
 .kit-fields dt{font-weight:400;color:var(--tblr-secondary)}
 .kit-fields dd{min-width:0;margin:0;overflow-wrap:anywhere}
