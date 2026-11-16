@@ -27,6 +27,7 @@ const shots = [
     await p.fill("#stammdaten-name", ""); await p.click('#dialog-stammdaten .modal-footer .btn-primary');
     await p.waitForSelector("#dialog-stammdaten.show .kit-dialog-error"); await p.waitForTimeout(300);
   }],
+  ["b04-datei", "/kunden/K-1001", async (p) => { await p.click('[data-bs-target="#dialog-unterlage"]'); await p.waitForSelector("#dialog-unterlage.show"); await p.waitForTimeout(300); }],
   ["b05-angebot", "/angebote/A-2026-001"],
   ["b05-liste-bearbeiten", "/angebote/A-2026-001", async (p) => { await p.click('[data-bs-target="#dialog-positionen"]'); await p.waitForSelector("#dialog-positionen.show"); await p.waitForTimeout(300); }],
   ["b05-langtext", "/angebote/A-2026-001", async (p) => {

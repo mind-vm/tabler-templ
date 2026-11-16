@@ -34,6 +34,7 @@ import (
 	"github.com/mind-vm/tabler-templ/sidebar"
 	"github.com/mind-vm/tabler-templ/sound"
 	"github.com/mind-vm/tabler-templ/themes"
+	"github.com/mind-vm/tabler-templ/upload"
 	"github.com/mind-vm/tabler-templ/vectormap"
 )
 
@@ -66,6 +67,7 @@ func TestNonceRendered(t *testing.T) {
 		"sidepanel":  templ.Join(sidepanel.Styles(), sidepanel.Script()),
 		"sidebar":    templ.Join(sidebar.Styles(), sidebar.Script()),
 		"themes":     themes.Head(themes.All...),
+		"upload":     templ.Join(upload.Styles(), upload.Script()),
 		"vectormap":  vectormap.Library("world"),
 	} {
 		// A fresh context each: the once-per-page CSS (icon inside shell …) must not count as rendered.

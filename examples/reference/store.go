@@ -93,7 +93,20 @@ type Customer struct {
 	Payment string // payment terms, read-only (no use case to change them here)
 	Overdue int64  // cents of overdue items, from the accounting app
 	Created time.Time
+	Files   []File
 }
+
+// File is a document added to a customer (GS-44): only its name and facts are kept in the reference.
+type File struct {
+	ID, Name, Kind, Ref string
+	Size                int64
+	Added               time.Time
+}
+
+// FileKinds are the kinds a file can be; MaxFileSize is the largest file taken.
+var FileKinds = []string{"Vertrag", "Plan", "Schriftverkehr", "Sonstiges"}
+
+const MaxFileSize = 5 << 20
 
 type Contact struct {
 	Name, Phone, Email string
@@ -386,6 +399,48 @@ func (s *Store) UpdateContact(no string, k Contact) (Customer, error) {
 	return *c, nil
 }
 
+// AddFile adds a document with its kind and an optional reference to an offer (GS-44).
+func (s *Store) AddFile(no, name string, size int64, kind, ref string) (File, error) {
+	errs := FieldErrors{}
+	if strings.TrimSpace(name) == "" {
+		errs["file"] = "Bitte wählen Sie eine Datei."
+	} else if size > MaxFileSize {
+		errs["file"] = "Die Datei ist größer als 5 MB."
+	}
+	if !slices.Contains(FileKinds, kind) {
+		errs["kind"] = "Bitte wählen Sie die Art."
+	}
+	if len(errs) > 0 {
+		return File{}, errs
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c := s.customer(no)
+	if c == nil {
+		return File{}, ErrNotFound
+	}
+	s.nextID++
+	f := File{ID: fmt.Sprintf("d%d", s.nextID), Name: name, Size: size, Kind: kind, Ref: ref, Added: Today}
+	c.Files = append(c.Files, f)
+	return f, nil
+}
+
+func (s *Store) RemoveFile(no, id string) (File, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c := s.customer(no)
+	if c == nil {
+		return File{}, ErrNotFound
+	}
+	i := slices.IndexFunc(c.Files, func(f File) bool { return f.ID == id })
+	if i < 0 {
+		return File{}, ErrNotFound
+	}
+	f := c.Files[i]
+	c.Files = slices.Delete(c.Files, i, i+1)
+	return f, nil
+}
+
 // AddNote is a small addition to the customer (GS-44).
 func (s *Store) AddNote(no, text string) (Customer, error) {
 	if strings.TrimSpace(text) == "" {
@@ -673,7 +728,9 @@ func (s *Store) seed() {
 		Status: CustomerActive, Signal: SignalOverdue, Revenue: 18_640_000, Overdue: 412_350, Payment: "30 Tage netto",
 		Contact: Contact{Name: "Erika Beispiel", Phone: "0123 456789-12", Email: "erika.beispiel@example.org"},
 		Notes: []Note{{day(time.November, 12), "Rückfrage zum Jahresvertrag: Frau Beispiel ruft nach dem 20.11. zurück."},
-			{day(time.October, 2), "Neue Ansprechpartnerin seit Oktober."}}, Created: day(time.February, 3)}
+			{day(time.October, 2), "Neue Ansprechpartnerin seit Oktober."}}, Created: day(time.February, 3),
+		Files: []File{{ID: "d1", Name: "Rahmenvertrag 2026.pdf", Kind: "Vertrag", Size: 248_311, Added: day(time.February, 3)},
+			{ID: "d2", Name: "Lageplan Nordring.png", Kind: "Plan", Ref: "A-2026-001", Size: 1_302_528, Added: day(time.November, 10)}}}
 	s.customers = append(s.customers, first)
 	for i := 1; i < 58; i++ {
 		k := kinds[i%len(kinds)]

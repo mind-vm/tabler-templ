@@ -50,6 +50,11 @@ type Messages struct {
 	Days            string // "%d days"
 	DaysSince       string // days after DeadlineOverdue where the language needs another form; empty: Days
 	DateTime        string // Go layout of a date with time, e.g. "02.01.2006, 15:04 Uhr" (GS-73)
+	// Package upload: the buttons, the empty name and the hint over a drop area.
+	ChooseFile string
+	TakePhoto  string
+	NoFile     string
+	DropHere   string
 	// Package mark: text from outside and internal notes.
 	MarkExternal string
 	MarkInternal string
@@ -85,6 +90,7 @@ var (
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
 		MarkExternal: "from outside", MarkInternal: "internal, never sent",
+		ChooseFile: "Choose file", TakePhoto: "Take photo", NoFile: "No file chosen", DropHere: "Drop to upload",
 		DeadlineLeft: "%s left", DeadlineOverdue: "overdue by %s", Minutes: "%d min", Hours: "%d h", Days: "%d days", DateTime: "2006-01-02 15:04",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
@@ -99,6 +105,7 @@ var (
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
 		MarkExternal: "von außen", MarkInternal: "intern, nie gesendet",
+		ChooseFile: "Datei wählen", TakePhoto: "Foto aufnehmen", NoFile: "Keine Datei gewählt", DropHere: "Zum Hochladen loslassen",
 		DeadlineLeft: "noch %s", DeadlineOverdue: "überfällig seit %s", Minutes: "%d Min.", Hours: "%d Std.", Days: "%d Tage", DaysSince: "%d Tagen", DateTime: "02.01.2006, 15:04 Uhr",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",

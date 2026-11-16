@@ -1,6 +1,9 @@
 package reference
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/mind-vm/tabler-templ/blocks/create"
 	"github.com/mind-vm/tabler-templ/deadline"
 	"github.com/mind-vm/tabler-templ/blocks/detail"
@@ -12,6 +15,7 @@ import (
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/table"
+	"github.com/mind-vm/tabler-templ/upload"
 )
 
 // --- B-03 list --------------------------------------------------------------------------------------
@@ -189,6 +193,9 @@ templ customerView(c Customer, offers []Offer, canEdit bool, st dialogState) {
 				<div class="col-12">
 					@offersIsland(c, offers)
 				</div>
+				<div class="col-12">
+					@filesIsland(c, canEdit)
+				</div>
 			</div>
 		</div>
 		<div class="col-lg-4">
@@ -269,8 +276,101 @@ templ customerView(c Customer, offers []Offer, canEdit bool, st dialogState) {
 				@saveRow("Hinzufügen")
 			</form>
 		}
+		@fileDialog(c, offers, about, st)
 		@reopen(st)
 	}
+}
+
+const dialogFile = "dialog-unterlage"
+
+// filesIsland: the documents read only; „Datei hinzufügen“ is the island's one action and opens the dialog
+// with file, kind and reference (GS-44). Removing asks first. Dropping files on the island and „Foto
+// aufnehmen“ (package upload has both) wait for the concept.
+templ filesIsland(c Customer, canEdit bool) {
+	@detail.Section(detail.SectionProps{Title: "Unterlagen", Extra: itoa(len(c.Files)), Action: actionIf(canEdit, dialogFile, "Datei hinzufügen", "ti-plus"), Attributes: templ.Attributes{"id": "unterlagen"}}) {
+		@filesList(c, canEdit)
+	}
+}
+
+templ filesList(c Customer, canEdit bool) {
+	if len(c.Files) == 0 {
+		@card.Body() {
+			<p class="text-secondary mb-0">Noch keine Unterlagen. „Datei hinzufügen“ legt die erste ab.</p>
+		}
+	} else {
+		@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Mobile: "md", Class: "ref-table"}) {
+			<thead>
+				<tr><th>Datei</th><th>Art</th><th>Bezug</th><th>Hinzugefügt</th><th class="text-end">Größe</th><th></th></tr>
+			</thead>
+			<tbody>
+				for _, f := range c.Files {
+					<tr>
+						<td data-label="Datei" class="ref-wrap">{ f.Name }</td>
+						<td data-label="Art">{ f.Kind }</td>
+						<td data-label="Bezug">
+							if f.Ref != "" {
+								<a href={ templ.URL(offerURL(f.Ref)) }>{ f.Ref }</a>
+							} else {
+								<span class="text-secondary">–</span>
+							}
+						</td>
+						<td data-label="Hinzugefügt" class="ref-num">{ Date(f.Added) }</td>
+						<td data-label="Größe" class="text-end ref-num">{ fileSize(f.Size) }</td>
+						<td class="text-end">
+							if canEdit {
+								<form method="post" action={ templ.URL(customerURL(c.No) + "/unterlagen/" + f.ID + "/entfernen") } data-kit-confirm={ "Datei „" + f.Name + "“ entfernen?" }>
+									@button.Button(button.Props{Size: button.SizeSmall, IconOnly: true, Icon: "ti-trash", Class: "btn-ghost-danger", Label: "„" + f.Name + "“ entfernen"})
+								</form>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		}
+	}
+}
+
+templ fileDialog(c Customer, offers []Offer, about string, st dialogState) {
+	@detail.Dialog(detail.DialogProps{ID: dialogFile, Title: "Datei hinzufügen", Context: about, Error: errorOf(st, dialogFile)}) {
+		<form method="post" enctype="multipart/form-data" action={ templ.URL(customerURL(c.No) + "/unterlagen") } id="unterlage-neu" data-form="unterlage-neu" novalidate>
+			{{ ferr := st.field(dialogFile, "file") }}
+			@form.Field(form.FieldProps{Label: "Datei", Required: true, Error: ferr, Hint: "PDF oder Bild, höchstens 5 MB."}) {
+				@upload.Button(upload.ButtonProps{ID: "unterlage-datei", Name: "file", Accept: ".pdf,image/*"})
+			}
+			{{ kerr := st.field(dialogFile, "kind") }}
+			@form.Field(form.FieldProps{Label: "Art", For: "unterlage-art", Required: true, Error: kerr}) {
+				@form.Select(form.SelectProps{ID: "unterlage-art", Name: "kind", Empty: "Bitte wählen", Options: kindOptions(), Selected: st.value(dialogFile, "kind", ""), Invalid: kerr != ""})
+			}
+			@form.Field(form.FieldProps{Label: "Bezug", For: "unterlage-bezug", Hint: "Freiwillig: das Angebot, zu dem die Datei gehört."}) {
+				@form.Select(form.SelectProps{ID: "unterlage-bezug", Name: "ref", Empty: "Kein Bezug", Options: offerOptions(offers), Selected: st.value(dialogFile, "ref", "")})
+			}
+			@saveRow("Hinzufügen")
+		</form>
+	}
+}
+
+func kindOptions() []form.Option {
+	var os []form.Option
+	for _, k := range FileKinds {
+		os = append(os, form.Option{Value: k, Label: k})
+	}
+	return os
+}
+
+func offerOptions(offers []Offer) []form.Option {
+	var os []form.Option
+	for _, o := range offers {
+		os = append(os, form.Option{Value: o.No, Label: o.No + " · " + o.Title})
+	}
+	return os
+}
+
+// fileSize: „243 KB“, „1,2 MB“ (GS-73).
+func fileSize(n int64) string {
+	if n < 1<<20 {
+		return thousands(max(1, n>>10)) + " KB"
+	}
+	return strings.Replace(strconv.FormatFloat(float64(n)/(1<<20), 'f', 1, 64), ".", ",", 1) + " MB"
 }
 
 // addNoteButton: a small addition is a dialog of the record's page, from its island (GS-44).
