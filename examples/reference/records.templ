@@ -284,18 +284,27 @@ templ customerView(c Customer, offers []Offer, canEdit bool, st dialogState) {
 const dialogFile = "dialog-unterlage"
 
 // filesIsland: the documents read only; „Datei hinzufügen“ is the island's one action and opens the dialog
-// with file, kind and reference (GS-44). Removing asks first. Dropping files on the island and „Foto
-// aufnehmen“ (package upload has both) wait for the concept.
+// with file, kind and reference. A file dropped on the island opens that dialog with the file chosen, the
+// button stays the visible way. Removing asks first (GS-44).
 templ filesIsland(c Customer, canEdit bool) {
-	@detail.Section(detail.SectionProps{Title: "Unterlagen", Extra: itoa(len(c.Files)), Action: actionIf(canEdit, dialogFile, "Datei hinzufügen", "ti-plus"), Attributes: templ.Attributes{"id": "unterlagen"}}) {
-		@filesList(c, canEdit)
+	{{ island := detail.Section(detail.SectionProps{Title: "Unterlagen", Extra: itoa(len(c.Files)), Action: actionIf(canEdit, dialogFile, "Datei hinzufügen", "ti-plus"), Attributes: templ.Attributes{"id": "unterlagen"}}) }}
+	if canEdit {
+		@upload.Drop(upload.DropProps{Form: "unterlage-neu", Open: true}) {
+			@island {
+				@filesList(c, canEdit)
+			}
+		}
+	} else {
+		@island {
+			@filesList(c, canEdit)
+		}
 	}
 }
 
 templ filesList(c Customer, canEdit bool) {
 	if len(c.Files) == 0 {
 		@card.Body() {
-			<p class="text-secondary mb-0">Noch keine Unterlagen. „Datei hinzufügen“ legt die erste ab.</p>
+			<p class="text-secondary mb-0">Noch keine Unterlagen. Nutzen Sie „Datei hinzufügen“ oder ziehen Sie eine Datei hierher.</p>
 		}
 	} else {
 		@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Mobile: "md", Class: "ref-table"}) {
@@ -335,7 +344,11 @@ templ fileDialog(c Customer, offers []Offer, about string, st dialogState) {
 		<form method="post" enctype="multipart/form-data" action={ templ.URL(customerURL(c.No) + "/unterlagen") } id="unterlage-neu" data-form="unterlage-neu" novalidate>
 			{{ ferr := st.field(dialogFile, "file") }}
 			@form.Field(form.FieldProps{Label: "Datei", Required: true, Error: ferr, Hint: "PDF oder Bild, höchstens 5 MB."}) {
-				@upload.Button(upload.ButtonProps{ID: "unterlage-datei", Name: "file", Accept: ".pdf,image/*"})
+				<div class="d-flex flex-wrap gap-2">
+					@upload.Button(upload.ButtonProps{ID: "unterlage-datei", Name: "file", Accept: ".pdf,image/*"})
+					// A photo is a fine document here (a site plan, a receipt): only on phones.
+					@upload.Button(upload.ButtonProps{ID: "unterlage-foto", Name: "file", Camera: true, Accept: "image/*", Class: "d-lg-none"})
+				</div>
 			}
 			{{ kerr := st.field(dialogFile, "kind") }}
 			@form.Field(form.FieldProps{Label: "Art", For: "unterlage-art", Required: true, Error: kerr}) {
