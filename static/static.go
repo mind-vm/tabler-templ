@@ -78,6 +78,7 @@ type Files struct {
 	prefix string
 	fsys   fs.FS
 	kit    bool // the kit's own CSS is in the bundle as KitCSS
+	filled bool // WithFilledIcons: set icon.FilledFontURL once all options are known
 
 	once    sync.Once
 	version string
@@ -102,8 +103,17 @@ func New(prefix string, fsys fs.FS, opts ...Option) *Files {
 	for _, o := range opts {
 		o(d)
 	}
+	// Work that reads the bundle comes after all options, so their order does not matter: the bundle's
+	// version includes kit.css only once WithKitCSS has run (found by Vergabe).
+	if d.filled && icon.FilledFontURL == "" {
+		if _, err := fs.Stat(d.fsys, FilledIcons); err == nil {
+			icon.FilledFontURL = d.URL(FilledIcons)
+		}
+	}
 	return d
 }
+
+// Options only record what they ask for; New acts on them once all are set.
 
 // An Option configures New.
 type Option func(*Files)
@@ -131,14 +141,7 @@ const FilledIcons = "icons/fonts/tabler-icons-filled.woff2"
 // when the bundle has it (cmd/static writes it): it sets icon.FilledFontURL for the whole program, unless
 // the app set it already. The browser fetches the font only on a page with a filled icon.
 func WithFilledIcons() Option {
-	return func(d *Files) {
-		if icon.FilledFontURL != "" {
-			return
-		}
-		if _, err := fs.Stat(d.fsys, FilledIcons); err == nil {
-			icon.FilledFontURL = d.URL(FilledIcons)
-		}
-	}
+	return func(d *Files) { d.filled = true }
 }
 
 func (d *Files) load() {

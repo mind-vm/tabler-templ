@@ -74,6 +74,8 @@ type Theme struct {
 	Grays []string
 	Font  *Font // the body font, instead of Settings.Font
 	Mono  *Font // the monospace font
+
+	fixed bool // Fixed: the head links only this theme
 }
 
 // Tailwind is a color of Tailwind CSS's palettes, e.g. Tailwind("rose", 600).
@@ -152,6 +154,9 @@ func (t Theme) CSS() string {
 			fmt.Fprintf(&b, "--tblr-gray-%d:%s;", s, t.Grays[i])
 		}
 		b.WriteString("}")
+	}
+	if r := t.Settings.Radius; r != "" && r != theme.Radius1 {
+		fmt.Fprintf(&b, "%s:not([data-bs-theme-radius]){--tblr-border-radius-scale:%s}", sel, r)
 	}
 	if t.Font != nil {
 		fmt.Fprintf(&b, "%s:not([data-bs-theme-font]){--tblr-font-sans-serif:%q,system-ui,-apple-system,\"Segoe UI\",Roboto,sans-serif;--tblr-body-font-family:var(--tblr-font-sans-serif)}", sel, t.Font.Family)

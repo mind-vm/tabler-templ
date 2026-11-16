@@ -7,6 +7,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/auth"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/marketing"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
@@ -66,11 +67,34 @@ templ Script() {
 	</script>
 }
 
+// Fixed is the theme for an app whose users do not switch themes: Apply and its siblings then link only
+// this theme's fonts, not those of all themes, and leave out Script (the panel's saved choice). Its CSS
+// is this theme's alone, or with static.WithKitCSS the sheet of all themes in kit/kit.css.
+func (t Theme) Fixed() Theme {
+	t.fixed = true
+	return t
+}
+
 func (t Theme) head(prev templ.Component) templ.Component {
-	if prev == nil {
-		return Head()
+	h := Head()
+	if t.fixed {
+		h = fixedHead(t)
 	}
-	return templ.Join(prev, Head())
+	if prev == nil {
+		return h
+	}
+	return templ.Join(prev, h)
+}
+
+templ fixedHead(t Theme) {
+	for _, f := range t.fonts() {
+		<link rel="stylesheet" href={ f.URL() }/>
+	}
+	if csp.External() {
+		@Styles()
+	} else if css := t.CSS(); css != "" {
+		@csp.Style(css)
+	}
 }
 
 func (t Theme) attrs(prev templ.Attributes) templ.Attributes {
@@ -97,6 +121,16 @@ func (t Theme) Apply(p *layout.PageProps) {
 
 // ApplyAuth gives a sign-in page (blocks/auth) the theme, like Apply.
 func (t Theme) ApplyAuth(p *auth.PageProps) {
+	p.Appearance = merge(t.Settings, p.Appearance)
+	if p.Theme == "" {
+		p.Theme = t.Mode
+	}
+	p.HTMLAttributes = t.attrs(p.HTMLAttributes)
+	p.Head = t.head(p.Head)
+}
+
+// ApplyShell gives an app page (blocks/shell) the theme, like Apply.
+func (t Theme) ApplyShell(p *shell.Props) {
 	p.Appearance = merge(t.Settings, p.Appearance)
 	if p.Theme == "" {
 		p.Theme = t.Mode

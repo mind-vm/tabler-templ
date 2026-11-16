@@ -16,6 +16,7 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/auth"
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/marketing"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
@@ -58,7 +59,7 @@ func Head(ts ...Theme) templ.Component {
 					var templ_7745c5c3_Var2 string
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression(f.URL()).ResolveURL(ctx)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 31, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 32, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 					if templ_7745c5c3_Err != nil {
@@ -156,11 +157,74 @@ func Script() templ.Component {
 	})
 }
 
+// Fixed is the theme for an app whose users do not switch themes: Apply and its siblings then link only
+// this theme's fonts, not those of all themes, and leave out Script (the panel's saved choice). Its CSS
+// is this theme's alone, or with static.WithKitCSS the sheet of all themes in kit/kit.css.
+func (t Theme) Fixed() Theme {
+	t.fixed = true
+	return t
+}
+
 func (t Theme) head(prev templ.Component) templ.Component {
-	if prev == nil {
-		return Head()
+	h := Head()
+	if t.fixed {
+		h = fixedHead(t)
 	}
-	return templ.Join(prev, Head())
+	if prev == nil {
+		return h
+	}
+	return templ.Join(prev, h)
+}
+
+func fixedHead(t Theme) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		ctx = templ.ClearChildren(ctx)
+		for _, f := range t.fonts() {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<link rel=\"stylesheet\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.NewAttributeExpression(f.URL()).ResolveURL(ctx)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 91, Col: 39}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if csp.External() {
+			templ_7745c5c3_Err = Styles().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if css := t.CSS(); css != "" {
+			templ_7745c5c3_Err = csp.Style(css).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
 }
 
 func (t Theme) attrs(prev templ.Attributes) templ.Attributes {
@@ -187,6 +251,16 @@ func (t Theme) Apply(p *layout.PageProps) {
 
 // ApplyAuth gives a sign-in page (blocks/auth) the theme, like Apply.
 func (t Theme) ApplyAuth(p *auth.PageProps) {
+	p.Appearance = merge(t.Settings, p.Appearance)
+	if p.Theme == "" {
+		p.Theme = t.Mode
+	}
+	p.HTMLAttributes = t.attrs(p.HTMLAttributes)
+	p.Head = t.head(p.Head)
+}
+
+// ApplyShell gives an app page (blocks/shell) the theme, like Apply.
+func (t Theme) ApplyShell(p *shell.Props) {
 	p.Appearance = merge(t.Settings, p.Appearance)
 	if p.Theme == "" {
 		p.Theme = t.Mode

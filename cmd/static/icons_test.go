@@ -8,6 +8,9 @@ import (
 	"testing"
 
 	"github.com/tdewolff/font"
+
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/versions"
 )
 
 // testdata holds a part of @tabler/icons-webfont 3.49.0 (MIT, testdata/LICENSE) with six icons, in the
@@ -158,5 +161,51 @@ func TestMissingIcons(t *testing.T) {
 	got := missingIcons(map[string]bool{"ti-home": true, "ti-user": true, "ti-star": true, "ti-words": true}, all, have)
 	if !reflect.DeepEqual(got, []string{"ti-star", "ti-user"}) {
 		t.Errorf("%v", got)
+	}
+}
+
+// The filled font keeps the filled variants of the used icons that have one ("ti-star", "ti-heart-filled")
+// and nothing else; without such an icon there is no font (testdata: home, star and heart, filled).
+func TestFilledSubset(t *testing.T) {
+	woff2, err := os.ReadFile("testdata/tabler-icons-filled.woff2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	used := map[string]bool{"ti-star": true, "ti-heart-filled": true, "ti-pencil-plus": true, "ti-not-an-icon": true}
+	f, n, err := filledSubset(woff2, used)
+	if err != nil || n != 2 {
+		t.Fatalf("%d icons, %v", n, err)
+	}
+	cut := parse(t, f)
+	for name, want := range map[string]bool{"ti-star": true, "ti-heart": true, "ti-home": false} {
+		r, _ := icon.FilledGlyph(name)
+		if got := cut.GlyphIndex(r) != 0; got != want {
+			t.Errorf("%s in the font: %v", name, got)
+		}
+	}
+	if missing, err := missingFilled(used, f); err != nil || len(missing) != 0 {
+		t.Errorf("missing %v, %v", missing, err)
+	}
+	if missing, _ := missingFilled(map[string]bool{"ti-home": true, "ti-home-filled": true, "ti-star": true}, f); !reflect.DeepEqual(missing, []string{"ti-home-filled"}) {
+		t.Errorf("missing %v", missing)
+	}
+	if f, n, err := filledSubset(woff2, map[string]bool{"ti-pencil-plus": true}); f != nil || n != 0 || err != nil {
+		t.Errorf("no filled icon: %d bytes, %d, %v", len(f), n, err)
+	}
+}
+
+// -check knows the icons without the network: the names of the webfont are in the program.
+func TestKnownIcons(t *testing.T) {
+	k := knownIcons()
+	if len(k) < 5000 || iconsVersion != versions.Icons {
+		t.Fatalf("%d names of %s, module at %s: run go run ./internal/tools/filledicons", len(k), iconsVersion, versions.Icons)
+	}
+	for _, n := range []string{"ti-home", "ti-star", "ti-pencil-plus"} {
+		if _, ok := k[n]; !ok {
+			t.Errorf("%s unknown", n)
+		}
+	}
+	if _, ok := k["ti-not-an-icon"]; ok {
+		t.Error("a word is an icon")
 	}
 }

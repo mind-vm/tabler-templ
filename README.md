@@ -460,7 +460,8 @@ markup stays Tabler's; a theme only sets Tabler's CSS custom properties.
 
 ```go
 props := layout.PageProps{Title: "Orders", Head: head(), …}
-themes.Rose.Apply(&props)                 // the look, its CSS and fonts; ApplyAuth for sign-in pages
+themes.Rose.Apply(&props)                 // the look, its CSS and fonts; ApplyShell, ApplyAuth, ApplyMarketing for the others
+themes.Rose.Fixed().ApplyShell(&shellProps) // users do not switch: only Rose's fonts and CSS, no panel script
 ```
 
 `themes.Section()` adds the themes to `layout.ThemeSettings`, so users can pick one; the choice is saved in
@@ -499,8 +500,9 @@ go tool static -css tabler,tabler-vendors                # writes static/core/�
 webfont down to the `ti-…` classes your packages and the tabler-templ packages they import name (in Go):
 a new app from `cmd/new` has 35 icons, a 5 KB font and 2 KB of CSS. Icons named elsewhere come in with
 `-dir templates`, icons put together at run time with `-keep ti-user,ti-star`; `-icons=all` keeps the
-whole webfont. Run it again after using a new icon; `go tool static -check` fails when a used icon is
-missing (CI).
+whole webfont. The filled webfont (`static.WithFilledIcons`) is cut down the same way, to the used icons
+that have a filled variant (73 KB whole, the reference's 51 icons 5 KB). Run it again after using a new
+icon; `go tool static -check` fails when a used icon is missing (CI), and needs no network.
 
 ```go
 //go:embed all:static

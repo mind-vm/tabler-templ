@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.23.0
+
+- **`cmd/static`:** cuts the filled icons' webfont down too, to the used icons that have a filled variant
+  (whole 73 KB, the reference's 51 icons 5 KB); without such an icon the file is left out. Whether an icon is
+  drawn filled is decided at run time, so every used icon with a filled variant is kept (found by Vergabe).
+- **`cmd/static -check`** needs no network: the names of all icons are in the program (`names_gen.go`, written
+  by `internal/tools/filledicons` with the filled glyphs). It also checks the filled font (asked by Buchhalter).
+- **`icon.FilledGlyph`** is the code point of an icon's filled variant.
+- **`blocks/shell`:** `Props.Theme`, `Props.Appearance` and `Props.HTMLAttributes` go on `<html>`, as on the
+  sign-in pages; `themes.Theme.ApplyShell` sets them. An app's own theme then works through its attribute and
+  kit.css, without rewriting its rules for `:root` (asked by Vergabe).
+- **`themes`:** `Theme.CSS()` carries the theme's corners (`--tblr-border-radius-scale`), so they hold with
+  only the theme's attribute, unless the page sets `data-bs-theme-radius` itself. `Theme.Fixed()` is for apps
+  whose users do not switch themes: `Apply…` then link only that theme's fonts (the sign-in pages linked those
+  of every theme, 8 links) and leave out the panel's script.
+- **`examples/reference`:** concept copy at Gestaltung v0.14.
+- **`static`:** the order of `New`'s options no longer matters. With `WithFilledIcons` before `WithKitCSS`, the
+  bundle was loaded before it knew about `kit/kit.css`: the stylesheet was missing, its address had no version and
+  answered 404, while the inline CSS was already off (found by Vergabe).
+
 ## v0.22.0
 
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
