@@ -5,6 +5,9 @@
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
   the cache, the icon subset with a test (`cmd/static -check`), and only the active theme's fonts, which the theme
   picker now adds when it switches (it linked the fonts of all themes before). Concept copy at Gestaltung v0.12.
+- **`static`:** with `WithKitCSS`, `Head` links `kit/kit.css` after Tabler's stylesheets (it came before, so Tabler
+  won over the signal colours, the focus ring and the themes in it; found by Buchhalter). An app that links
+  `static.Kit` itself puts it after Tabler too.
 - **`blocks/rowedit`:** `ListProps.Mobile` ("sm", "md", "lg") turns every row into a card below that breakpoint:
   each field with its label above it (`rowedit.Cell`), Save and Delete at the bottom, Details foldable, the new
   row a card at the end (GS-56, Gestaltung v0.13). B-05 shows it; the concept copy is at v0.13.
