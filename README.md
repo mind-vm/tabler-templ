@@ -460,7 +460,8 @@ markup stays Tabler's; a theme only sets Tabler's CSS custom properties.
 
 ```go
 props := layout.PageProps{Title: "Orders", Head: head(), …}
-themes.Rose.Apply(&props)                 // the look, its CSS and fonts; ApplyAuth for sign-in pages
+themes.Rose.Apply(&props)                 // the look, its CSS and fonts; ApplyShell, ApplyAuth, ApplyMarketing for the others
+themes.Rose.Fixed().ApplyShell(&shellProps) // users do not switch: only Rose's fonts and CSS, no panel script
 ```
 
 `themes.Section()` adds the themes to `layout.ThemeSettings`, so users can pick one; the choice is saved in

@@ -24,6 +24,7 @@ import (
 	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/theme"
 )
 
 // Crumb is one step of the breadcrumbs (package breadcrumb); the last one is the current page, a crumb
@@ -48,6 +49,12 @@ type Props struct {
 	Scripts templ.Component // end of <body>: Tabler's script and the app's
 	// BodyAttributes are set on <body>, e.g. data-area for a section of the app.
 	BodyAttributes templ.Attributes
+	// Theme is "light" or "dark" (data-bs-theme); Appearance the accent color, base, font and radius;
+	// HTMLAttributes go on <html> as well, e.g. a ready-made theme's (themes.Theme.ApplyShell sets all
+	// three). Without them <html> carries only lang, and Tabler's theme script sets the user's choice.
+	Theme          string
+	Appearance     theme.Settings
+	HTMLAttributes templ.Attributes
 
 	// Sidebar is usually a sidebar.Sidebar with ID SidebarID; nil renders the page without (e.g. sign-in).
 	Sidebar   templ.Component
@@ -85,10 +92,22 @@ func title(p Props) string {
 	return p.Title + " · " + p.AppName
 }
 
+func htmlAttrs(p Props) templ.Attributes {
+	a := p.Appearance.Attrs()
+	a["lang"] = kit.Or(p.Lang, "en")
+	if p.Theme != "" {
+		a["data-bs-theme"] = p.Theme
+	}
+	for k, v := range p.HTMLAttributes {
+		a[k] = v
+	}
+	return a
+}
+
 templ Page(p Props) {
 	{{ p.SidebarID = kit.Or(p.SidebarID, "sidebar") }}
 	<!DOCTYPE html>
-	<html lang={ kit.Or(p.Lang, "en") }>
+	<html { htmlAttrs(p)... }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
