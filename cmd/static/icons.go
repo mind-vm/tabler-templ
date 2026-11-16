@@ -14,6 +14,8 @@ import (
 	"strings"
 
 	"github.com/tdewolff/font"
+
+	"github.com/mind-vm/tabler-templ/icon"
 )
 
 // subsetMarker starts the comment of a subset stylesheet; without it the stylesheet is the whole webfont.
@@ -77,6 +79,62 @@ func subset(css string, woff2 []byte, used map[string]bool) (string, []byte, int
 		return "", nil, 0, err
 	}
 	return b.String(), f, len(names), nil
+}
+
+// knownIcons are the classes of all outline icons of the webfont (names_gen.go).
+func knownIcons() map[string]rune {
+	m := make(map[string]rune, len(iconNames))
+	for _, n := range iconNames {
+		m[n] = 0
+	}
+	return m
+}
+
+// filledOf are the code points of the filled variants of the used icons, sorted.
+func filledOf(used map[string]bool) []rune {
+	seen := map[rune]bool{}
+	var cps []rune
+	for n := range used {
+		if r, ok := icon.FilledGlyph(n); ok && !seen[r] {
+			seen[r] = true
+			cps = append(cps, r)
+		}
+	}
+	sort.Slice(cps, func(i, j int) bool { return cps[i] < cps[j] })
+	return cps
+}
+
+// filledSubset cuts the filled webfont down to the filled variants of the used icons; nil when none has one.
+func filledSubset(woff2 []byte, used map[string]bool) ([]byte, int, error) {
+	cps := filledOf(used)
+	if len(cps) == 0 {
+		return nil, 0, nil
+	}
+	f, err := subsetFont(woff2, cps)
+	return f, len(cps), err
+}
+
+// missingFilled are the used icons with a filled variant that the filled font lacks, sorted.
+func missingFilled(used map[string]bool, woff2 []byte) ([]string, error) {
+	b, err := font.ToSFNT(woff2)
+	if err != nil {
+		return nil, err
+	}
+	f, err := font.ParseSFNT(b, 0)
+	if err != nil {
+		return nil, err
+	}
+	var missing []string
+	seen := map[string]bool{}
+	for n := range used {
+		name := strings.TrimSuffix(n, "-filled") + "-filled"
+		if r, ok := icon.FilledGlyph(n); ok && f.GlyphIndex(r) == 0 && !seen[name] {
+			seen[name] = true
+			missing = append(missing, name)
+		}
+	}
+	sort.Strings(missing)
+	return missing, nil
 }
 
 // subsetFont keeps the glyphs of the code points (and .notdef) in a woff2 font.

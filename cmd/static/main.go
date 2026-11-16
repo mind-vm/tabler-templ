@@ -11,14 +11,14 @@
 //
 //	<out>/core/css/tabler.min.css …, core/js/tabler.min.js, core/js/tabler-theme.min.js
 //	<out>/icons/tabler-icons.min.css, icons/fonts/tabler-icons.woff2, icons/LICENSE
-//	<out>/icons/fonts/tabler-icons-filled.woff2 (whole; static.WithFilledIcons loads it)
+//	<out>/icons/fonts/tabler-icons-filled.woff2 (the used icons that have a filled variant; static.WithFilledIcons)
 //
 // The icons are the ti-… classes named in the packages (default ./...) and everything they import,
 // tabler-templ's components included: their .go files (without generated ones), .templ files and
 // embedded .html and .js files. -dir adds directories of other files (templates, scripts), -keep icons
 // that are only put together at run time ("ti-" + name). Run it again after using a new icon; -check
-// fails when a used icon is missing from the subset, e.g. in CI or a test. -icons=all keeps the whole
-// webfont. Downloads come from jsDelivr.
+// fails when a used icon is missing from the subset, e.g. in CI or a test; it needs no network. -icons=all
+// keeps the whole webfonts. Downloads come from jsDelivr.
 package main
 
 import (
@@ -103,12 +103,17 @@ func run(out string, css []string, rtl bool, icons string, pkgs, dirs, keep []st
 		if allIcons(string(b)) {
 			return nil
 		}
-		full, err := fetch(iconsURL + "dist/tabler-icons.min.css") // tells icons from words like "ti-…" in texts
-		if err != nil {
-			return err
-		}
-		if missing := missingIcons(used, glyphs(string(full)), glyphs(string(b))); len(missing) > 0 {
+		if missing := missingIcons(used, knownIcons(), glyphs(string(b))); len(missing) > 0 {
 			return fmt.Errorf("used but not in %s, run cmd/static again: %s", out, strings.Join(missing, " "))
+		}
+		if f, err := os.ReadFile(filepath.Join(out, static.FilledIcons)); err == nil {
+			missing, err := missingFilled(used, f)
+			if err != nil {
+				return err
+			}
+			if len(missing) > 0 {
+				return fmt.Errorf("used but not in %s, run cmd/static again: %s", static.FilledIcons, strings.Join(missing, " "))
+			}
 		}
 		return nil
 	}
@@ -167,17 +172,31 @@ func run(out string, css []string, rtl bool, icons string, pkgs, dirs, keep []st
 	if err := write(filepath.Join(out, "icons/fonts/tabler-icons.woff2"), fontB); err != nil {
 		return err
 	}
-	// The filled icons (icon.Props.Filled) have a webfont of their own; it is fetched whole, and the browser
-	// loads it only on a page with a filled icon (static.WithFilledIcons).
+	fmt.Printf("Tabler %s and %d icons (%s font, %s CSS) in %s\n", versions.Tabler, n, kb(len(fontB)), kb(len(cssB)), out)
+
+	// The filled icons (icon.Props.Filled) have a webfont of their own, which static.WithFilledIcons loads.
+	// Whether an icon is drawn filled is decided at run time, so the subset has the filled variant of every
+	// used icon that has one; without any, the file is left out (and an old one removed).
 	filled, err := fetch(iconsURL + "dist/fonts/tabler-icons-filled.woff2")
 	if err != nil {
 		return err
 	}
-	if err := write(filepath.Join(out, static.FilledIcons), filled); err != nil {
-		return err
+	name := filepath.Join(out, static.FilledIcons)
+	if used != nil {
+		var nf int
+		if filled, nf, err = filledSubset(filled, used); err != nil {
+			return err
+		}
+		if filled == nil {
+			if err := os.Remove(name); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+			fmt.Println("no used icon has a filled variant: no filled font")
+			return nil
+		}
+		fmt.Printf("%d filled icons (%s font)\n", nf, kb(len(filled)))
 	}
-	fmt.Printf("Tabler %s and %d icons (%s font, %s CSS) in %s\n", versions.Tabler, n, kb(len(fontB)), kb(len(cssB)), out)
-	return nil
+	return write(name, filled)
 }
 
 // missingIcons are the used icons of the webfont (all) that are not in the subset (have), sorted.

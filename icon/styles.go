@@ -1,6 +1,10 @@
 package icon
 
-import "github.com/mind-vm/tabler-templ/cdn"
+import (
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/cdn"
+)
 
 // CSS sizes webfont icons where Tabler's CSS sizes icons through width and height only, which works for
 // its inline SVG icons but not for a font glyph: avatars (and avatar uploads), card stamps, shapes, empty
@@ -27,4 +31,11 @@ func filledFontURL() string {
 func FilledCSS() string {
 	return `@font-face{font-family:"tabler-icons-filled";font-style:normal;font-weight:400;font-display:block;src:url("` + filledFontURL() + `") format("woff2")}` +
 		`.ti.ti-filled{font-family:"tabler-icons-filled"!important;font-style:normal}`
+}
+
+// FilledGlyph is the code point of the filled variant of name ("ti-star" or "ti-star-filled") in the filled
+// webfont; cmd/static cuts the font down to the used icons with it.
+func FilledGlyph(name string) (rune, bool) {
+	r, ok := filled[strings.TrimSuffix(name, "-filled")]
+	return r, ok
 }
