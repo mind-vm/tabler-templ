@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
@@ -137,7 +138,7 @@ func missingFilled(used map[string]bool, woff2 []byte) ([]string, error) {
 	return missing, nil
 }
 
-// subsetFont keeps the glyphs of the code points (and .notdef) in a woff2 font.
+// subsetFont keeps the glyphs of the code points (and .notdef) in a woff2 font, and checks the result.
 func subsetFont(woff2 []byte, cps []rune) ([]byte, error) {
 	b, err := font.ToSFNT(woff2)
 	if err != nil {
@@ -159,11 +160,84 @@ func subsetFont(woff2 []byte, cps []rune) ([]byte, error) {
 			ids = append(ids, id)
 		}
 	}
-	s, err := f.Subset(ids, font.SubsetOptions{Tables: font.KeepMinTables})
+	out, err := writeSubset(f, ids)
 	if err != nil {
 		return nil, err
 	}
+	if err := checkFont(out, f, cps); err != nil {
+		return nil, fmt.Errorf("subset font: %w", err)
+	}
+	return out, nil
+}
+
+// writeSubset writes the glyphs ids of f as a woff2 font. The woff2 writer (tdewolff/parse's
+// BitmapWriter) makes the bounding box bitmap one byte too long when the number of glyphs is a multiple
+// of 32, which shifts every bounding box stored after it, and browsers reject the font (#33). Another
+// empty glyph avoids that.
+func writeSubset(f *font.SFNT, ids []uint16) ([]byte, error) {
+	opts := font.SubsetOptions{Tables: font.KeepMinTables}
+	s, err := f.Subset(ids, opts)
+	if err != nil {
+		return nil, err
+	}
+	if s.NumGlyphs()%32 == 0 {
+		if s, err = f.Subset(append(ids[:len(ids):len(ids)], 0), opts); err != nil {
+			return nil, err
+		}
+	}
 	return s.WriteWOFF2()
+}
+
+// checkFont reads a woff2 font back and checks each glyph's bounding box: in order and within the font's,
+// as browsers want it. With the original font (orig), each code point must also have the same outline as
+// there.
+func checkFont(woff2 []byte, orig *font.SFNT, cps []rune) error {
+	b, err := font.ToSFNT(woff2)
+	if err != nil {
+		return err
+	}
+	f, err := font.ParseSFNT(b, 0)
+	if err != nil {
+		return err
+	}
+	if f.Glyf == nil {
+		return fmt.Errorf("no glyf table")
+	}
+	h := f.Head
+	for id := uint16(0); id < f.NumGlyphs(); id++ {
+		c, err := f.Glyf.Contour(id)
+		if err != nil {
+			return err
+		}
+		if len(c.EndPoints) == 0 {
+			continue
+		}
+		if c.XMin > c.XMax || c.YMin > c.YMax || c.XMin < h.XMin || c.YMin < h.YMin || c.XMax > h.XMax || c.YMax > h.YMax {
+			return fmt.Errorf("glyph %d: bad bounding box (%d,%d)-(%d,%d)", id, c.XMin, c.YMin, c.XMax, c.YMax)
+		}
+	}
+	if orig == nil {
+		return nil
+	}
+	for _, cp := range cps {
+		id := f.GlyphIndex(cp)
+		if id == 0 {
+			return fmt.Errorf("no glyph for U+%X", cp)
+		}
+		want, err := orig.Glyf.Contour(orig.GlyphIndex(cp))
+		if err != nil {
+			return err
+		}
+		got, err := f.Glyf.Contour(id)
+		if err != nil {
+			return err
+		}
+		got.GlyphID = want.GlyphID
+		if !reflect.DeepEqual(got, want) {
+			return fmt.Errorf("glyph for U+%X differs from the original", cp)
+		}
+	}
+	return nil
 }
 
 // usedIcons collects the ti-… classes of the packages (go list patterns) with everything they import, and
