@@ -85,6 +85,36 @@ func TestPieIsOneSlicePerSerie(t *testing.T) {
 	}
 }
 
+// A scatter with numbers as x draws them on a value axis (#89); with names as x it keeps the category axis.
+func TestScatterXAxis(t *testing.T) {
+	pts := func(xs ...any) []Serie {
+		s := Serie{Name: "b"}
+		for i, x := range xs {
+			s.Points = append(s.Points, Point{X: x, Y: float64(i)})
+		}
+		return []Serie{s}
+	}
+	for _, c := range []struct {
+		name   string
+		series []Serie
+		want   string
+	}{
+		{"numbers", pts(1.0, 4.0), "value"},
+		{"ints", pts(1, 4), "value"},
+		{"names", pts("Jan", "Feb"), "category"},
+		{"mixed", pts(1.0, "Feb"), "category"},
+	} {
+		x := option(t, Props{ID: "s", Type: Scatter, Series: c.series})["xAxis"].([]any)[0].(map[string]any)
+		if x["type"] != c.want {
+			t.Errorf("%s: x axis = %v, want %s", c.name, x["type"], c.want)
+		}
+	}
+	x := option(t, Props{ID: "s", Type: Scatter, Categories: []string{"a", "b"}, Series: pts(0, 1)})["xAxis"].([]any)[0].(map[string]any)
+	if x["type"] != "category" {
+		t.Errorf("with categories: x axis = %v", x["type"])
+	}
+}
+
 func TestRawProps(t *testing.T) {
 	o := option(t, RawProps(Props{ID: "r"}, Gauge(GaugeOptions{Value: 58, Color: "red"}), nil))
 	s := o["series"].([]any)[0].(map[string]any)
