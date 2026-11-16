@@ -322,3 +322,40 @@ func TestChartBlockSVG(t *testing.T) {
 		t.Errorf("a scatter block is not a table:\n%s", out)
 	}
 }
+
+// horizontal and unit reach chart.Props: bars from the left (bar only), the unit after every value.
+func TestChartHorizontalAndUnit(t *testing.T) {
+	const costs = `"x":"company","series":["cost"],"data":[{"company":"A GmbH","cost":95187.26},{"company":"B AG","cost":40000}]`
+	p := ChartProps("c", payload(t, `{"variant":"bar","horizontal":true,"unit":" €\n",`+costs+`}`))
+	if !p.Horizontal || p.Unit != "€" {
+		t.Errorf("bar: Horizontal %v, Unit %q", p.Horizontal, p.Unit)
+	}
+	if p := ChartProps("c", payload(t, `{"variant":"line","horizontal":true,"unit":"kWh",`+costs+`}`)); p.Horizontal || p.Unit != "kWh" {
+		t.Errorf("line: Horizontal %v, Unit %q", p.Horizontal, p.Unit)
+	}
+	if p := ChartProps("c", payload(t, `{"variant":"bar","unit":"abcdefghijklmnopq",`+costs+`}`)); p.Unit != "abcdefghijkl" {
+		t.Errorf("a long unit is kept whole: %q", p.Unit)
+	}
+
+	// ECharts: the categories on the y axis, the unit on the value axis (x) and in the tooltip.
+	out := render(t, Block{Type: "chart", ChartID: "c", Payload: payload(t, `{"variant":"bar","horizontal":true,"unit":"€",`+costs+`}`)})
+	cfg := chartConfig(t, out)
+	if y := cfg["yAxis"].([]any)[0].(map[string]any); y["type"] != "category" || y["data"].([]any)[0] != "A GmbH" {
+		t.Errorf("yAxis = %v", y)
+	}
+	if !strings.Contains(out, `&#34;unit&#34;:{&#34;text&#34;:&#34;€&#34;,&#34;paths&#34;:[&#34;tooltip.valueFormatter&#34;,&#34;xAxis.0.axisLabel.formatter&#34;]}`) {
+		t.Errorf("no unit in %s", out)
+	}
+
+	// SVG: the same chart, the numbers in German with the unit.
+	ctx := WithChartOptions(context.Background(), ChartOptions{SVG: true, Format: svg.German})
+	out, err := Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t, `{"variant":"bar","horizontal":true,"unit":"€",`+costs+`}`)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`<span class="chart-svg-y" style="top:25%;">A GmbH</span>`, `>100.000 €</span>`, "cost: 95.187,26 €</title>", "<td>95.187,26 €</td>"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %s in\n%s", want, out)
+		}
+	}
+}

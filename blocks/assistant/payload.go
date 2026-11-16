@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/chart/svg"
@@ -108,7 +109,10 @@ func joinAnswer(v any, t Texts) string {
 
 // ChartProps maps a chart block's spec onto chart.Props. The spec is
 // thinking-core's emitChart: variant, title, data (rows), x, series, and for some
-// variants types, size. Every chart type wants its data in its own shape; this is
+// variants types, size. Two optional keys hold for every variant: unit, the
+// values' unit ("€", "%", "kWh"), written after the numbers; and horizontal: true,
+// bars from the left (bar only), which reads better with long category names.
+// Every chart type wants its data in its own shape; this is
 // where it gets it. A key no row has gives zeros, so check the spec first (the
 // pack does).
 //
@@ -124,6 +128,7 @@ func ChartProps(id string, p map[string]any) chart.Props {
 	// monthly totals draws dips and peaks between the points that no row
 	// holds, and every number on this page has to come from the data.
 	props.StrokeCurve = "straight"
+	props.Unit = unit(str(p, "unit"))
 
 	switch str(p, "variant") {
 	case "line":
@@ -184,9 +189,24 @@ func ChartProps(id string, p map[string]any) chart.Props {
 		props.Color = "primary"
 	default:
 		props.Type = chart.Bar
+		props.Horizontal = p["horizontal"] == true
 		props.Categories, props.Series = categories(data, x), columns(data, series)
 	}
 	return props
+}
+
+// unit is a payload's unit as short plain text: a model writes it, and it goes into every label.
+func unit(s string) string {
+	var b []rune
+	for _, r := range strings.TrimSpace(s) {
+		if unicode.IsControl(r) {
+			continue
+		}
+		if b = append(b, r); len(b) == 12 {
+			break
+		}
+	}
+	return strings.TrimSpace(string(b))
 }
 
 // svgProps draws a chart block's props with package chart/svg: the data as a hidden table as well, and

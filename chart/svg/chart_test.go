@@ -141,3 +141,35 @@ func TestFromChartAndSupported(t *testing.T) {
 		t.Error("Supported")
 	}
 }
+
+// Unit follows the formatted number on the value axis, in tooltips, labels and the table; Percent has its own.
+func TestUnit(t *testing.T) {
+	c := chart.Props{Label: "Kosten", Categories: []string{"A GmbH", "B AG"}, Series: []chart.Serie{{Name: "Kosten", Data: []float64{95187.26, 40000}}},
+		Horizontal: true, DataLabels: true, Unit: "€"}
+	p := FromChart(c)
+	p.Format, p.Table = German, true
+	html := render(t, Chart(p))
+	for _, want := range []string{
+		`<span class="chart-svg-y" style="top:25%;">A GmbH</span>`, // categories on the left
+		`>100.000 €</span>`, // the value axis, below
+		`<title>A GmbH` + "\n" + `Kosten: 95.187,26 €</title>`,                                    // tooltip
+		`<span class="chart-svg-v chart-svg-end" style="left:95.19%;top:25%;">95.187,26 €</span>`, // data label
+		`<td>95.187,26 €</td>`, // table
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("missing %q in\n%s", want, html)
+		}
+	}
+	for _, c := range []struct {
+		p    Props
+		want string
+	}{
+		{Props{Unit: "€", YFormatter: chart.SuffixK}, "12,400.5K €"},
+		{Props{Unit: "€", YFormatter: chart.Percent}, "12,400.5%"},
+		{Props{Unit: " "}, "12,400.5"},
+	} {
+		if got := c.p.format(12400.5); got != c.want {
+			t.Errorf("%+v: got %q, want %q", c.p, got, c.want)
+		}
+	}
+}
