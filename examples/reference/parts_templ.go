@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
-	"encoding/json"
 	"io"
+	"net/url"
 	"strconv"
 
 	"github.com/mind-vm/tabler-templ/badge"
@@ -310,26 +310,14 @@ func saveRow(text string) templ.Component {
 }
 
 // reopen: after a failed save the page sets the dialog's state, and the dialog script opens it again
-// (GS-43). For a list dialog it names the row that failed, so the script marks that one.
+// (GS-43). For a list dialog it names the row that failed, so the script marks that one. The values are
+// rendered by the server already; the state carries only what finds the row.
 func reopen(st dialogState) templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		if st.ID == "" {
-			return nil
-		}
-		v := map[string][]string{}
-		if st.Kind != "" {
-			v["_form"] = []string{st.Kind}
-		}
-		if st.Row != "" {
-			v["id"] = []string{st.Row}
-		}
-		b, err := json.Marshal(map[string]any{"id": st.ID, "error": st.Error, "values": v}) // escapes <, > and &
-		if err != nil {
-			return err
-		}
-		_, err = io.WriteString(w, csp.Open(ctx, "script")+"window.kitDialogState="+string(b)+";</script>")
-		return err
-	})
+	v := url.Values{}
+	if st.Row != "" {
+		v.Set("id", st.Row)
+	}
+	return detail.StateScript(detail.State{ID: st.ID, Error: st.Error, Values: v, Kind: st.Kind})
 }
 
 // value of a field: "–" when empty (GS-40), via detail.Field.

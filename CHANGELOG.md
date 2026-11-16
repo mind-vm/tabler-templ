@@ -4,6 +4,9 @@
 
 - **`blocks/rowedit`:** with an empty list (only the new row) the add button stays in its row; the dialog script
   of `blocks/detail` no longer turns it into a footer.
+- **`blocks/detail`:** after a failed save, several fields of one name get their own values back, in order (they all
+  got the first). `StateScript`, `State` and `StateValues` render the state of a failed save for the dialog script,
+  so apps no longer write their own `window.kitDialogState`. `cmd/new` and the reference app use it.
 
 ## v0.19.0
 

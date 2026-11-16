@@ -205,7 +205,7 @@ templ Project(p Page, x projects.Project, f projects.Form) {
 			</form>
 		}
 		if len(f.Errors) > 0 {
-			@dialogState("dialog-project", errorOf(f))
+			@detail.StateScript(detail.State{ID: "dialog-project", Error: errorOf(f)})
 		}
 	}
 }

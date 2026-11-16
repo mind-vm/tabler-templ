@@ -105,7 +105,7 @@ if(keys.length&&keys.every(function(e){return values[e.name]!==undefined&&String
 window.kitDialog={open:open,matchForm:matchForm};
 function restore(z){var d=document.getElementById(z.id);if(!d)return;var vals=z.values||{};var f=matchForm(d.querySelectorAll("form"),vals,vals[cfg.formField]?vals[cfg.formField][0]:"");
 if(f){Object.keys(vals).forEach(function(n){if(n.charAt(0)==="_")return;var fld=f.elements.namedItem(n);if(!fld)return;var list=vals[n];var els=fld.tagName?[fld]:Array.from(fld);
-els.forEach(function(e){if(e.type==="checkbox"||e.type==="radio")e.checked=list.indexOf(e.value)>=0;else if(e.type!=="file"&&e.type!=="password")e.value=list[0]||""})});if(z.error)f.classList.add("kit-dialog-invalid")}
+els.forEach(function(e,i){if(e.type==="checkbox"||e.type==="radio")e.checked=list.indexOf(e.value)>=0;else if(e.type!=="file"&&e.type!=="password")e.value=(els.length>1?list[i]:list[0])||""})});if(z.error)f.classList.add("kit-dialog-invalid")}
 open(d.firstElementChild||d)}
 var state=window[cfg.stateVar];if(state)restore(state);else{try{var o=sessionStorage.getItem("kitDialogOpen");sessionStorage.removeItem("kitDialogOpen");var od=o&&document.getElementById(o);if(od&&bs)bs.Modal.getOrCreateInstance(od).show()}catch(_){}}
 document.addEventListener("click",function(e){var b=e.target.closest?e.target.closest("["+cfg.valuesAttribute+"][data-bs-target]"):null;if(!b)return;var d=document.querySelector(b.getAttribute("data-bs-target"));var f=d&&d.querySelector("form");if(!f)return;
