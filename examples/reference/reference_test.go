@@ -682,3 +682,27 @@ func TestGS56_LongTextOpensAfterAnError(t *testing.T) {
 	assert.Contains(t, body[i:i+strings.Index(body[i:], "</form>")], `<details class="kit-rowedit-details" open>`, "the row that failed")
 	assert.Contains(t, body, "Der Langtext hat 601 Zeichen, erlaubt sind 600.")
 }
+
+// GS-52: an open offer's deadline is a traffic light whose word is the time left; the detail page names the
+// exact time (GS-73).
+func TestGS52_DeadlineWithTimeLeft(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathStart)
+	assert.Contains(t, body, `data-deadline="near"`)
+	assert.Contains(t, body, "noch 3 Tage")
+	_, body = c.get(offerURL("A-2026-001"))
+	assert.Contains(t, body, "18.11.2026, 12:00 Uhr")
+	assert.Contains(t, body, `title="18.11.2026, 12:00 Uhr"`)
+}
+
+// GS-54: the offers become cards below 768 px, every cell names its column; the customers scroll instead.
+func TestGS54_OffersBecomeCards(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathOffers)
+	assert.Contains(t, body, "table-mobile-md")
+	i := strings.Index(body, "<tbody>")
+	row := body[i : i+strings.Index(body[i:], "</tr>")]
+	assert.Equal(t, strings.Count(row, "<td"), strings.Count(row, "data-label="), "every cell has its label")
+	_, body = c.get(pathCustomers)
+	assert.NotContains(t, body, "table-mobile-md")
+}

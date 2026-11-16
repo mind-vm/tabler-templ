@@ -13,7 +13,6 @@ import (
 	"github.com/mind-vm/tabler-templ/form"
 	"github.com/mind-vm/tabler-templ/mark"
 	"github.com/mind-vm/tabler-templ/placeholder"
-	"github.com/mind-vm/tabler-templ/status"
 	"github.com/mind-vm/tabler-templ/table"
 	"github.com/mind-vm/tabler-templ/themes"
 )
@@ -142,7 +141,7 @@ templ startView(c Counts, burning []Offer, names map[string]string) {
 			@tile(pathOffers+"?status="+string(OfferSubmitted), "Abgegebene Angebote", itoa(c.Submitted), "warten auf Antwort")
 		</div>
 		<div class="col-12">
-			@detail.Section(detail.SectionProps{Title: "Brennt", Extra: "Abgabe in den nächsten drei Tagen"}) {
+			@detail.Section(detail.SectionProps{Title: "Brennt", Extra: "Abgabe in den nächsten vier Tagen"}) {
 				if len(burning) == 0 {
 					@card.Body() {
 						<p class="text-secondary mb-0">Nichts brennt. Die nächsten Abgaben stehen unter Angebote.</p>
@@ -150,15 +149,13 @@ templ startView(c Counts, burning []Offer, names map[string]string) {
 				} else {
 					@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Nowrap: true, Class: "ref-table"}) {
 						<thead>
-							<tr><th>Abgabe bis</th><th>Titel</th><th>Kunde</th><th class="text-end">Summe</th></tr>
+							<tr><th>Frist</th><th>Titel</th><th>Kunde</th><th class="text-end">Summe</th></tr>
 						</thead>
 						<tbody>
 							for _, o := range burning {
 								<tr>
 									<td>
-										@status.Status(status.Props{Color: "red", Dot: true, Lite: true}) {
-											{ Date(o.Due) }
-										}
+										@due(o)
 									</td>
 									<td><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
 									<td>{ names[o.Customer] }</td>

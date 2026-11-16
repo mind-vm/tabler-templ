@@ -1,0 +1,15 @@
+package deadline
+
+import (
+	"github.com/mind-vm/tabler-templ/kit"
+	"github.com/mind-vm/tabler-templ/status"
+)
+
+// Deadline is the traffic light with the time left as its word; the exact time is in the title.
+templ Deadline(p Props) {
+	{{ st := StateOf(p.Due, p.Now, p.Soon) }}
+	@status.Status(status.Props{Color: st.color(), Dot: true, Lite: true, Class: kit.Classes("kit-deadline", p.Class),
+		Attributes: kit.Attrs(templ.Attributes{"title": p.Due.Format(layout(ctx, p)), "data-deadline": string(st)}, p.Attributes)}) {
+		{ Word(ctx, p.Due, p.Now) }
+	}
+}

@@ -1,5 +1,6 @@
 // Screenshots of the reference app (examples/reference) at the desktop (1400 × 950) and on a phone
-// (390 × 844), with its dialogs and the panel open, into docs/screenshots/reference/. It fails when a page
+// (390 × 844), with its dialogs and the panel open, into docs/screenshots/reference/; at 1366 and 1280 px
+// the pages are checked without pictures (GS-14). It fails when a page
 // scrolls sideways (GS-14), when the browser logs an error, or when a page loads anything from outside.
 // Usage: node reference.mjs http://localhost:8080 ../../docs/screenshots/reference
 // scripts/reference.sh starts the demo and runs it.
@@ -17,6 +18,7 @@ const shots = [
   ["b01-panel", "/rahmen", async (p) => { await p.click('[data-kit-sidepanel-tab="assistent"] >> visible=true'); await p.waitForTimeout(400); }],
   ["b02-start", "/start"],
   ["b03-liste", "/kunden"],
+  ["b03-angebote-karten", "/angebote"],
   ["b03-leere-suche", "/kunden?q=Zeppelin"],
   ["b04-detail", "/kunden/K-1001"],
   ["b04-dialog", "/kunden/K-1001", async (p) => { await p.click('[data-bs-target="#dialog-stammdaten"]'); await p.waitForSelector("#dialog-stammdaten.show"); await p.waitForTimeout(300); }],
@@ -55,15 +57,18 @@ const shots = [
   ["theme-midnight-b04", "/kunden/K-1001?theme=midnight"],
 ];
 
+// GS-14: the layout is checked at 1400, 1366, 1280 and 390 px; pictures are kept of 1400 and 390.
 const sizes = [
   ["desktop", { viewport: { width: 1400, height: 950 }, deviceScaleFactor: 1 }],
+  ["1366", { viewport: { width: 1366, height: 768 }, deviceScaleFactor: 1 }, { check: true }],
+  ["1280", { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 }, { check: true }],
   ["phone", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }],
 ];
 
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const problems = [];
-for (const [size, options] of sizes) {
+for (const [size, options, { check = false } = {}] of sizes) {
   const context = await browser.newContext(options);
   for (const [name, path, before, status = 200] of shots) {
     const page = await context.newPage();
@@ -83,7 +88,7 @@ for (const [size, options] of sizes) {
       return d.scrollWidth > d.clientWidth + 1 ? `${d.scrollWidth} > ${d.clientWidth}` : "";
     });
     if (wide) problems.push(`${size} ${name}: scrolls sideways (${wide})`);
-    await page.screenshot({ path: join(out, `${name}-${size}.png`), fullPage: !before });
+    if (!check) await page.screenshot({ path: join(out, `${name}-${size}.png`), fullPage: !before });
     console.log(`${size} ${name}${wide ? " WIDE" : ""}`);
     await page.close();
   }

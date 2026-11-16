@@ -42,6 +42,14 @@ type Messages struct {
 	SaveRow   string
 	DeleteRow string
 	AddRow    string
+	// Package deadline: the time left or overdue, with the units (fmt with a number).
+	DeadlineLeft    string // "%s left"
+	DeadlineOverdue string // "overdue by %s"
+	Minutes         string // "%d min"
+	Hours           string // "%d h"
+	Days            string // "%d days"
+	DaysSince       string // days after DeadlineOverdue where the language needs another form; empty: Days
+	DateTime        string // Go layout of a date with time, e.g. "02.01.2006, 15:04 Uhr" (GS-73)
 	// Package mark: text from outside and internal notes.
 	MarkExternal string
 	MarkInternal string
@@ -77,6 +85,7 @@ var (
 		Edit: "Edit", Cancel: "Cancel", SectionHint: "Only this section is saved.",
 		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
 		MarkExternal: "from outside", MarkInternal: "internal, never sent",
+		DeadlineLeft: "%s left", DeadlineOverdue: "overdue by %s", Minutes: "%d min", Hours: "%d h", Days: "%d days", DateTime: "2006-01-02 15:04",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
 		ShowPassword: "Show password", HidePassword: "Hide password", PasswordStrength: "Password strength",
@@ -90,6 +99,7 @@ var (
 		Edit: "Bearbeiten", Cancel: "Abbrechen", SectionHint: "Gespeichert wird nur dieser Abschnitt.",
 		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
 		MarkExternal: "von außen", MarkInternal: "intern, nie gesendet",
+		DeadlineLeft: "noch %s", DeadlineOverdue: "überfällig seit %s", Minutes: "%d Min.", Hours: "%d Std.", Days: "%d Tage", DaysSince: "%d Tagen", DateTime: "02.01.2006, 15:04 Uhr",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
 		ShowPassword: "Passwort zeigen", HidePassword: "Passwort verbergen", PasswordStrength: "Passwortstärke",

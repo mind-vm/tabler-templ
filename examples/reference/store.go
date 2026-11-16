@@ -12,8 +12,14 @@ import (
 // The data of the reference app lives in memory (GS-75: sample data without a recognisable trade). Today
 // is fixed, so pages and screenshots stay the same from day to day.
 
-// Today is the date the app pretends it is.
-var Today = time.Date(2026, 11, 15, 0, 0, 0, 0, time.UTC)
+// Today is the date the app pretends it is, Now the time (for deadlines, GS-52).
+var (
+	Today = time.Date(2026, 11, 15, 0, 0, 0, 0, time.UTC)
+	Now   = Today.Add(9 * time.Hour)
+)
+
+// dueHour is the time of day offers are due (GS-73: „TT.MM.JJJJ, HH:MM Uhr“ for deadlines with legal effect).
+const dueHour = 12
 
 // Signal is the traffic light of a customer's open items (GS-52: a dot with a word).
 type Signal string
@@ -640,11 +646,14 @@ func (s *Store) Counts() Counts {
 	return c
 }
 
-// Burning are the drafts due within three days (GS-30: „Brennt“).
+// burningWithin is how near a deadline puts an offer on „Brennt“ and turns it yellow.
+const burningWithin = 4 * 24 * time.Hour
+
+// Burning are the drafts due within four days (GS-30: „Brennt“).
 func (s *Store) Burning() []Offer {
 	var out []Offer
 	for _, o := range s.Offers() {
-		if o.Status == OfferDraft && !o.Due.After(Today.AddDate(0, 0, 3)) {
+		if o.Status == OfferDraft && o.Due.Before(Now.Add(burningWithin)) {
 			out = append(out, o)
 		}
 	}
@@ -728,7 +737,7 @@ func (s *Store) seed() {
 		return ps
 	}
 	add := func(customer, title string, due, valid time.Time, st OfferStatus, n int) {
-		o := &Offer{No: fmt.Sprintf("A-2026-%03d", len(s.offers)+1), Customer: customer, Title: title, Due: due, Valid: valid, Status: st, Positions: positions(n)}
+		o := &Offer{No: fmt.Sprintf("A-2026-%03d", len(s.offers)+1), Customer: customer, Title: title, Due: due.Add(dueHour * time.Hour), Valid: valid, Status: st, Positions: positions(n)}
 		if st != OfferDraft {
 			o.Submitted = due.AddDate(0, 0, -2)
 		}
