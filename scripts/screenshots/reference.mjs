@@ -51,6 +51,11 @@ const shots = [
   ["b10-vorschlag", "/anfragen/R-2026-001"],
   ["b10-verwerfen", "/anfragen/R-2026-001", async (p) => { await p.click('[data-bs-target="#dialog-verwerfen"]'); await p.waitForSelector("#dialog-verwerfen.show"); await p.waitForTimeout(300); }],
   ["b10-anfragen", "/anfragen"],
+  ["b11-oeffentlich", "/extern"],
+  ["b11-angemeldet", "/extern/anmelden", async (p) => {
+    await Promise.all([p.waitForNavigation({ waitUntil: "networkidle" }), p.click('form[action="/reference/extern/anmelden"] button')]);
+    await p.waitForTimeout(200);
+  }],
   ["konzept", "/konzept", async () => {}],
   ["konzept-assistent", "/konzept/assistent", async () => {}],
   ["konzept-regel", "/konzept#gs-41", async (p) => { await p.waitForTimeout(1000); }],

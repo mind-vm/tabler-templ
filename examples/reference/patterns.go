@@ -109,6 +109,14 @@ var patterns = []pattern{
 		Blocks:  []block{{"blocks/detail", "Section, Dialog"}, {"mark", "Text"}, {"deadline", "Deadline"}, {"blocks/assistant", "Level, German"}},
 		Link:    pathConcept + "#5-seitentypen",
 		Note:    "Bearbeiten in der Seite gilt hier nur für die Arbeit selbst, die Antwort. Die Inseln mit dem Zusammenhang lesen nur."},
+	{ID: "B-11", Name: "Öffentlich und Externe", Path: pathExternal,
+		Summary: "Derselbe Rahmen mit kurzer Leiste für Externe; ohne Anmeldung „Anmelden“ als Hauptaktion im Kopf.",
+		What:    "Öffentliche Seiten und ein Bereich für Externe (Kunden, Bieter) nutzen denselben Rahmen wie das Büro, mit einer kurzen Leiste von ein bis drei Einträgen und ohne Panel.",
+		When:    "Für alles, was Externe am Schreibtisch sehen. Portale am Handy haben eigene Regeln.",
+		Try:     "Ohne Anmeldung stehen rechts im Kopf „Registrieren“ und „Anmelden“. Melden Sie sich an: Die Leiste zeigt „Meine Angebote“, der Kopf Ihren Namen und „Abmelden“.",
+		Rules:   []string{"GS-16", "GS-10", "GS-11"},
+		Blocks:  []block{{"blocks/shell", "Page"}, {"sidebar", "Sidebar, Group, Item"}, {"button", "Button"}},
+		Link:    pathConcept + "#3-application-layout-rahmen"},
 }
 
 var overviewText = pattern{ID: "Übersicht", Name: "Referenz der Gestaltung",

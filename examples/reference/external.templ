@@ -1,0 +1,248 @@
+package reference
+
+import (
+	"net/http"
+
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/shell"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/sidebar"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+// B-11: public pages and an area for externals (GS-16). The same frame with a short sidebar; without
+// signing in, „Anmelden“ is the main action at the right of the header and „Registrieren“ stands plain
+// beside it. Signed in, a customer sees only their own requests and offers.
+
+const (
+	pathExternal       = Home + "/extern"
+	pathExternalSignIn = pathExternal + "/anmelden"
+	pathExternalSignUp = pathExternal + "/registrieren"
+	pathExternalOut    = pathExternal + "/abmelden"
+	pathExternalOffers = pathExternal + "/angebote"
+	guestCookie        = "reference-extern"
+)
+
+// guest is the external signed in: in the reference always Erika Beispiel of the Wohnungsgesellschaft Nordstadt.
+type guest struct {
+	Name     string
+	Customer string
+}
+
+var demoGuest = guest{Name: "Erika Beispiel", Customer: "K-1001"}
+
+func guestOf(r *http.Request) *guest {
+	if c, err := r.Cookie(guestCookie); err == nil && c.Value == "1" {
+		g := demoGuest
+		return &g
+	}
+	return nil
+}
+
+func (a *App) external(w http.ResponseWriter, r *http.Request) {
+	g := guestOf(r)
+	p := page{Key: "B-11", Title: "Kundenbereich", External: true, Guest: g, Crumbs: []shell.Crumb{{Text: "Kundenbereich"}}}
+	if g == nil {
+		a.render(w, r, 0, p, externalPublicView())
+		return
+	}
+	c, _ := a.store.Customer(g.Customer)
+	var reqs []Request
+	for _, q := range a.store.Requests() {
+		if q.Customer == g.Customer {
+			reqs = append(reqs, q)
+		}
+	}
+	a.render(w, r, 0, p, externalHomeView(*g, c, reqs))
+}
+
+func (a *App) externalOffers(w http.ResponseWriter, r *http.Request) {
+	g := guestOf(r)
+	if g == nil {
+		http.Redirect(w, r, pathExternalSignIn, http.StatusSeeOther)
+		return
+	}
+	var offers []Offer
+	for _, o := range a.store.OffersOf(g.Customer) {
+		if o.Status != OfferDraft { // drafts are internal
+			offers = append(offers, o)
+		}
+	}
+	a.render(w, r, 0, page{Key: "B-11", Title: "Meine Angebote", External: true, Guest: g,
+		Crumbs: []shell.Crumb{{Text: "Kundenbereich", Href: pathExternal}, {Text: "Meine Angebote"}}}, externalOffersView(offers))
+}
+
+func (a *App) externalSignIn(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, 0, page{Key: "B-11", Title: "Anmelden", External: true, Crumbs: []shell.Crumb{{Text: "Kundenbereich", Href: pathExternal}, {Text: "Anmelden"}}},
+		externalSignInView())
+}
+
+func (a *App) externalSignUp(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, 0, page{Key: "B-11", Title: "Registrieren", External: true, Crumbs: []shell.Crumb{{Text: "Kundenbereich", Href: pathExternal}, {Text: "Registrieren"}}},
+		externalSignUpView())
+}
+
+func (a *App) externalLogin(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: guestCookie, Value: "1", Path: Home, HttpOnly: true, SameSite: http.SameSiteLaxMode})
+	done(w, r, pathExternal, flashData{Text: "Angemeldet als " + demoGuest.Name + "."})
+}
+
+func (a *App) externalLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: guestCookie, Value: "", Path: Home, MaxAge: -1})
+	done(w, r, pathExternal, flashData{Text: "Abgemeldet."})
+}
+
+// externalSidebar: the short sidebar of the area for externals, one to three entries.
+templ externalSidebar(p page) {
+	@sidebar.Sidebar(sidebar.Props{ID: "sidebar", Label: "Navigation"}) {
+		@sidebar.Header() {
+			@sidebar.Brand(sidebar.BrandProps{Href: pathExternal, Title: "Musterdienst", Subtitle: "Kundenbereich", Logo: logo()})
+		}
+		@sidebar.Content() {
+			@sidebar.Group(sidebar.GroupProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: pathExternal, Icon: "ti-home", Label: "Übersicht", Active: p.Title == "Kundenbereich", Attributes: anchor("extern-start")})
+				if p.Guest != nil {
+					@sidebar.Item(sidebar.ItemProps{Href: pathExternalOffers, Icon: "ti-file-text", Label: "Meine Angebote", Active: p.Title == "Meine Angebote", Attributes: anchor("extern-angebote")})
+				}
+			}
+			@sidebar.Group(sidebar.GroupProps{Label: "Referenz", End: true}) {
+				@sidebar.Item(sidebar.ItemProps{Href: Home, Icon: "ti-arrow-left", Label: "Zurück zur Referenz", Attributes: anchor("extern-zurueck")})
+			}
+		}
+	}
+}
+
+// externalHeader: without signing in „Anmelden“ as the main action and „Registrieren“ plain (GS-16);
+// signed in the name and „Abmelden“.
+templ externalHeader(p page) {
+	if p.Guest == nil {
+		@button.Button(button.Props{Href: pathExternalSignUp, Variant: button.VariantGhost, Attributes: templ.Attributes{"data-tour": "referenz.extern.registrieren"}}) {
+			Registrieren
+		}
+		@button.Button(button.Props{Href: pathExternalSignIn, Variant: button.VariantPrimary, Icon: "ti-login", Attributes: templ.Attributes{"data-tour": "referenz.extern.anmelden"}}) {
+			Anmelden
+		}
+	} else {
+		<span class="text-secondary d-none d-sm-inline">{ p.Guest.Name }</span>
+		<form method="post" action={ templ.URL(pathExternalOut) }>
+			@button.Button(button.Props{Icon: "ti-logout"}) {
+				Abmelden
+			}
+		</form>
+	}
+}
+
+templ externalPublicView() {
+	<div class="row row-cards">
+		<div class="col-lg-7">
+			@detail.Section(detail.SectionProps{Title: "Willkommen"}) {
+				@card.Body() {
+					<p>Im Kundenbereich der Musterdienst GmbH sehen Sie Ihre Anfragen und Angebote und stellen neue Anfragen. Melden Sie sich dafür an.</p>
+					<p class="text-secondary mb-0">Öffentlich sind nur diese Seite und die Kontaktdaten.</p>
+				}
+			}
+		</div>
+		<div class="col-lg-5">
+			@detail.Section(detail.SectionProps{Title: "Kontakt"}) {
+				@card.Body() {
+					@detail.Fields() {
+						@fieldOf("Firma", "Musterdienst GmbH")
+						@fieldOf("Telefon", "0123 456789-0")
+						@fieldOf("Erreichbar", "Mo–Fr 07:30 – 17:00 Uhr")
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+templ externalHomeView(g guest, c Customer, reqs []Request) {
+	<div class="row row-cards">
+		<div class="col-lg-7">
+			@detail.Section(detail.SectionProps{Title: "Meine Anfragen", Extra: itoa(len(reqs))}) {
+				@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Mobile: "md", Class: "ref-table"}) {
+					<thead>
+						<tr><th>Betreff</th><th>Eingang</th><th>Stand</th></tr>
+					</thead>
+					<tbody>
+						for _, q := range reqs {
+							<tr>
+								<td data-label="Betreff">{ q.Subject }</td>
+								<td data-label="Eingang" class="ref-num">{ Date(q.Received) }</td>
+								<td data-label="Stand">
+									@requestPill(q.Status)
+								</td>
+							</tr>
+						}
+					</tbody>
+				}
+			}
+		</div>
+		<div class="col-lg-5">
+			@detail.Section(detail.SectionProps{Title: "Ihre Firma"}) {
+				@card.Body() {
+					@detail.Fields() {
+						@fieldOf("Firma", c.Name)
+						@fieldOf("Kundennummer", c.No)
+						@fieldOf("Angemeldet als", g.Name)
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+templ externalOffersView(offers []Offer) {
+	@detail.Section(detail.SectionProps{Title: "Angebote", Extra: itoa(len(offers))}) {
+		@table.Table(table.Props{Card: true, Responsive: true, VCenter: true, Mobile: "md", Class: "ref-table"}) {
+			<thead>
+				<tr><th>Titel</th><th>Nummer</th><th>Stand</th><th class="text-end">Summe</th></tr>
+			</thead>
+			<tbody>
+				for _, o := range offers {
+					<tr>
+						<td data-label="Titel">{ o.Title }</td>
+						<td data-label="Nummer" class="mono">{ o.No }</td>
+						<td data-label="Stand">
+							@offerPill(o.Status)
+						</td>
+						<td data-label="Summe" class="text-end ref-num">{ Euro(o.Total()) }</td>
+					</tr>
+				}
+			</tbody>
+		}
+	}
+}
+
+templ externalSignInView() {
+	<div class="row row-cards">
+		<div class="col-md-8 col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Anmelden"}) {
+				@card.Body() {
+					<p>In den Produkten steht hier die Anmeldung mit E-Mail und Passwort. Die Referenz meldet Sie mit einem Klick als Kundin an.</p>
+					<form method="post" action={ templ.URL(pathExternalSignIn) }>
+						@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-login"}) {
+							Als Erika Beispiel anmelden
+						}
+					</form>
+				}
+			}
+		</div>
+	</div>
+}
+
+templ externalSignUpView() {
+	<div class="row row-cards">
+		<div class="col-md-8 col-lg-6">
+			@detail.Section(detail.SectionProps{Title: "Registrieren"}) {
+				@card.Body() {
+					<p>In den Produkten legt man hier ein Konto für den Kundenbereich an. In der Referenz gibt es nur das Beispielkonto.</p>
+					@button.Button(button.Props{Href: pathExternalSignIn}) {
+						Zur Anmeldung
+					}
+				}
+			}
+		</div>
+	</div>
+}

@@ -70,6 +70,7 @@ all themes are in the bundle.
 | **B-08** Marke und Form | `/reference/marke` | tokens, signal colours with their contrast, markings, font, buttons, pills, traffic light, number and date formats, links | GS-07, GS-15, GS-70 – GS-76 | `themes`, `mark`, `button`, `badge`, `status` |
 | **B-09** KI-Assistent | `/reference/assistent` | the assistant as a tab of the panel: reads, fills in forms, never saves; bank details refused | GS-13, KA-01 – KA-03, KA-15, KA-20 | `blocks/sidepanel`, `blocks/assistant` |
 | **B-10** Vorschlag prüfen | `/reference/anfragen/R-2026-001` | a work page in three columns: history (from outside, internal), the AI's proposal with confidence, sources and reasons, the context; the person changes and sends, or discards with a reason | GS-34, GS-44, GS-52, GS-76, KA-01 – KA-04 | `blocks/detail`, `mark`, `deadline`, `blocks/assistant` |
+| **B-11** Öffentlich und Externe | `/reference/extern` | the same frame with a short sidebar and no panel; signed out „Anmelden“ as the main action and „Registrieren“ plain in the header; signed in the customer's own requests and offers | GS-16, GS-10, GS-11 | `blocks/shell`, `sidebar` |
 
 B-09 follows the concept [Assistent](https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/assistent.md)
 §6 (KA-xx), which §11 of Gestaltung refers to. The

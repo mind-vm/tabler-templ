@@ -129,6 +129,12 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	mux.HandleFunc("GET "+pathRequests+"/{no}", a.request)
 	mux.HandleFunc("POST "+pathRequests+"/{no}/senden", a.writes(a.sendReply))
 	mux.HandleFunc("POST "+pathRequests+"/{no}/verwerfen", a.writes(a.discard))
+	mux.HandleFunc("GET "+pathExternal, a.external)
+	mux.HandleFunc("GET "+pathExternalOffers, a.externalOffers)
+	mux.HandleFunc("GET "+pathExternalSignIn, a.externalSignIn)
+	mux.HandleFunc("POST "+pathExternalSignIn, a.externalLogin)
+	mux.HandleFunc("GET "+pathExternalSignUp, a.externalSignUp)
+	mux.HandleFunc("POST "+pathExternalOut, a.externalLogout)
 	mux.HandleFunc("GET "+pathStates, a.states)
 	mux.HandleFunc("GET "+pathStates+"/zahlen", a.lateFigures)
 	mux.HandleFunc("GET "+pathStates+"/keine-rechte", a.forbidden)
@@ -747,6 +753,6 @@ var errorTexts = map[int]errorText{
 }
 
 // pageKeys are the keys the sidebar marks; tests use them.
-var pageKeys = []string{"requests", "B-10", "concept", "overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
+var pageKeys = []string{"B-11", "requests", "B-10", "concept", "overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
 
 func knownKey(k string) bool { return slices.Contains(pageKeys, k) }

@@ -25,6 +25,10 @@ type page struct {
 	HeadingExtra templ.Component // e.g. the status pill
 	Flash        *shell.Flash
 	Explain      *pattern // default the pattern of Key
+	// External makes it a page of the area for externals (B-11, GS-16): a short sidebar of its own, no
+	// panel, and „Anmelden“/„Registrieren“ in the header while nobody is signed in.
+	External bool
+	Guest    *guest // the external signed in, nil = nobody
 
 	// set by render
 	readOnly bool
@@ -65,7 +69,9 @@ templ (a *App) head() {
 }
 
 templ (a *App) scripts(p page) {
-	@sidepanel.Aside(p.panel)
+	if !p.External {
+		@sidepanel.Aside(p.panel)
+	}
 	@static.Scripts(a.files)
 	@detail.Script(detail.ScriptConfig{})
 	@rowedit.Script()
@@ -75,7 +81,7 @@ templ (a *App) scripts(p page) {
 templ (a *App) page(p page) {
 	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(), Scripts: a.scripts(p),
 		BodyAttributes: sidepanel.BodyAttributes(p.panel, templ.Attributes{"data-page": p.Key}),
-		Sidebar: a.sidebar(p), Brand: brand(), Breadcrumbs: p.Crumbs, HeaderActions: sidepanel.Buttons(p.panel),
+		Sidebar: a.sidebarFor(p), Brand: brand(), Breadcrumbs: p.Crumbs, HeaderActions: headerActions(p),
 		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash, Notice: notices(p)}) {
 		if e, ok := p.explanation(); ok {
 			@explain(e)
@@ -157,6 +163,20 @@ func active(p page, keys ...string) bool {
 	return false
 }
 
+func (a *App) sidebarFor(p page) templ.Component {
+	if p.External {
+		return externalSidebar(p)
+	}
+	return a.sidebar(p)
+}
+
+func headerActions(p page) templ.Component {
+	if p.External {
+		return externalHeader(p)
+	}
+	return sidepanel.Buttons(p.panel)
+}
+
 func anchor(name string) templ.Attributes { return templ.Attributes{"data-tour": "referenz.leiste." + name} }
 
 // sidebar: „Start“ without a title, then the groups in their fixed order (GS-20). The pages of the
@@ -183,6 +203,7 @@ templ (a *App) sidebar(p page) {
 				@sidebar.Item(sidebar.ItemProps{Href: pathStates, Icon: "ti-traffic-lights", Label: "Zustände", Active: active(p, "B-07"), Attributes: anchor("zustaende")})
 				@sidebar.Item(sidebar.ItemProps{Href: pathBrand, Icon: "ti-palette", Label: "Marke und Form", Active: active(p, "B-08"), Attributes: anchor("marke")})
 				@sidebar.Item(sidebar.ItemProps{Href: pathAssistant, Icon: "ti-sparkles", Label: "KI-Assistent", Active: active(p, "B-09"), Attributes: anchor("assistent")})
+				@sidebar.Item(sidebar.ItemProps{Href: pathExternal, Icon: "ti-world", Label: "Kundenbereich", Active: active(p, "B-11"), Attributes: anchor("kundenbereich")})
 				@sidebar.Item(sidebar.ItemProps{Href: pathConcept, Icon: "ti-book", Label: "Konzept", Active: active(p, "concept"), Attributes: anchor("konzept")})
 			}
 		}
