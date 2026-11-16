@@ -50,6 +50,7 @@ import (
 
 	"github.com/andybalholm/brotli"
 
+	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/internal/csp"
 )
 
@@ -120,6 +121,23 @@ func WithKitCSS() Option {
 	return func(d *Files) {
 		d.kit = true
 		csp.SetExternal(true)
+	}
+}
+
+// FilledIcons is the bundle's name of the filled icons' webfont, as cmd/static writes it.
+const FilledIcons = "icons/fonts/tabler-icons-filled.woff2"
+
+// WithFilledIcons loads the filled icons' webfont (icon.Props.Filled) from the bundle instead of cdn.Base,
+// when the bundle has it (cmd/static writes it): it sets icon.FilledFontURL for the whole program, unless
+// the app set it already. The browser fetches the font only on a page with a filled icon.
+func WithFilledIcons() Option {
+	return func(d *Files) {
+		if icon.FilledFontURL != "" {
+			return
+		}
+		if _, err := fs.Stat(d.fsys, FilledIcons); err == nil {
+			icon.FilledFontURL = d.URL(FilledIcons)
+		}
 	}
 }
 

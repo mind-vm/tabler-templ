@@ -17,7 +17,8 @@ import (
 // switch between them.
 templ Head(ts ...Theme) {
 	{{
-		if len(ts) == 0 {
+		all := len(ts) == 0
+		if all {
 			ts = All
 		}
 		seen := map[string]bool{}
@@ -32,11 +33,25 @@ templ Head(ts ...Theme) {
 		}
 		{{ css.WriteString(t.CSS()) }}
 	}
-	if css.Len() > 0 {
+	if all {
+		@Styles()
+	} else if css.Len() > 0 {
 		@csp.Style(css.String())
 	}
 	@Script()
 }
+
+// Styles is the CSS of all themes as one of the kit's sheets: inline once per page, or in the bundle's
+// kit/kit.css with static.WithKitCSS, so pages do not carry it. Head without arguments renders it.
+func Styles() templ.Component { return allSheet }
+
+var allSheet = csp.SheetFunc("themes/all", func() string {
+	var b strings.Builder
+	for _, t := range All {
+		b.WriteString(t.CSS())
+	}
+	return b.String()
+})
 
 // Script restores the theme saved by the panel (localStorage tabler-theme-pack, or ?theme-pack=), the way
 // Tabler's theme script restores its own settings. Head includes it.

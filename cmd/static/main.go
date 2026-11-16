@@ -11,6 +11,7 @@
 //
 //	<out>/core/css/tabler.min.css …, core/js/tabler.min.js, core/js/tabler-theme.min.js
 //	<out>/icons/tabler-icons.min.css, icons/fonts/tabler-icons.woff2, icons/LICENSE
+//	<out>/icons/fonts/tabler-icons-filled.woff2 (whole; static.WithFilledIcons loads it)
 //
 // The icons are the ti-… classes named in the packages (default ./...) and everything they import,
 // tabler-templ's components included: their .go files (without generated ones), .templ files and
@@ -164,6 +165,15 @@ func run(out string, css []string, rtl bool, icons string, pkgs, dirs, keep []st
 		return err
 	}
 	if err := write(filepath.Join(out, "icons/fonts/tabler-icons.woff2"), fontB); err != nil {
+		return err
+	}
+	// The filled icons (icon.Props.Filled) have a webfont of their own; it is fetched whole, and the browser
+	// loads it only on a page with a filled icon (static.WithFilledIcons).
+	filled, err := fetch(iconsURL + "dist/fonts/tabler-icons-filled.woff2")
+	if err != nil {
+		return err
+	}
+	if err := write(filepath.Join(out, static.FilledIcons), filled); err != nil {
 		return err
 	}
 	fmt.Printf("Tabler %s and %d icons (%s font, %s CSS) in %s\n", versions.Tabler, n, kb(len(fontB)), kb(len(cssB)), out)

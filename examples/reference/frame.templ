@@ -9,7 +9,6 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
 	"github.com/mind-vm/tabler-templ/icon"
-	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/sidebar"
 	"github.com/mind-vm/tabler-templ/static"
 	"github.com/mind-vm/tabler-templ/themes"
@@ -83,7 +82,7 @@ templ (a *App) head(p page) {
 			<link rel="stylesheet" href={ a.fontURL(f) } data-ref-font/>
 		}
 	}
-	@csp.Style(themeCSS())
+	@themes.Styles()
 	@themes.SignalStyles()
 	@inlineScript(themeScript(p.theme, a.fontURLs()))
 	<link rel="stylesheet" href={ a.files.URL("reference.css") }/>

@@ -3,7 +3,6 @@ package reference
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/mind-vm/tabler-templ/themes"
 )
@@ -75,15 +74,6 @@ func themeOf(w http.ResponseWriter, r *http.Request) string {
 		}
 	}
 	return defaultTheme
-}
-
-// themeCSS are the rules of all themes; each applies only under its data-bs-theme-pack.
-func themeCSS() string {
-	var b strings.Builder
-	for _, t := range themes.All {
-		b.WriteString(t.CSS())
-	}
-	return b.String()
 }
 
 type themeAttrs struct {

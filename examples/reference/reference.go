@@ -47,7 +47,6 @@ import (
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/blocks/shell"
 	"github.com/mind-vm/tabler-templ/blocks/sidepanel"
-	"github.com/mind-vm/tabler-templ/icon"
 	"github.com/mind-vm/tabler-templ/kit"
 	"github.com/mind-vm/tabler-templ/static"
 )
@@ -100,12 +99,9 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	if err != nil {
 		panic(err)
 	}
-	a := &App{store: store, files: static.New(pathStatic, sub), sessions: map[string]*session{}}
+	// The filled icons' webfont comes from the bundle too (GS-09).
+	a := &App{store: store, files: static.New(pathStatic, sub, static.WithFilledIcons()), sessions: map[string]*session{}}
 	mux.Handle("GET "+pathStatic, a.files)
-	// The filled icons' webfont comes from the bundle too (GS-09), unless the app set its own address.
-	if icon.FilledFontURL == "" {
-		icon.FilledFontURL = a.files.URL("icons/fonts/tabler-icons-filled.woff2")
-	}
 
 	mux.HandleFunc("GET "+Home, a.overview)
 	mux.HandleFunc("GET "+Home+"/{$}", func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, Home, http.StatusMovedPermanently) })
