@@ -119,3 +119,9 @@ body {
 .ref-concept-nav { max-width: 100%; overflow-x: auto; }
 .ref-dot { display: inline-block; width: .625rem; height: .625rem; border-radius: 50%; vertical-align: -.05em; }
 .ref-brand { display: inline-flex; text-decoration: none; }
+
+/* B-10 work page */
+.ref-ai-note { display: flex; gap: .375rem; align-items: baseline; font-size: 13px; color: var(--ref-text-3); }
+.ref-subhead { font-size: .8125rem; font-weight: 600; margin-bottom: .375rem; }
+.ref-reply { white-space: pre-wrap; padding: .75rem; background: var(--tblr-bg-surface-secondary); border-radius: var(--tblr-border-radius); }
+.ref-decide { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }

@@ -63,7 +63,7 @@ func (c *client) post(path string, form url.Values) (int, string, string) {
 var pages = map[string]int{
 	Home: 200, pathFrame: 200, pathStart: 200, pathCustomers: 200, pathCustomers + "?q=muehl": 200, pathCustomers + "?q=Zeppelin": 200,
 	customerURL("K-1001"): 200, customerURL("K-1014"): 200, pathOffers: 200, offerURL("A-2026-001"): 200, offerURL("A-2026-002"): 200,
-	pathConcept: 200, pathConceptAssistant: 200,
+	pathConcept: 200, pathConceptAssistant: 200, pathRequests: 200, requestURL("R-2026-001"): 200, requestURL("R-2026-003"): 200,
 	pathNew: 200, pathStates: 200, pathStates + "?meldung=1": 200, pathBrand: 200, pathAssistant: 200,
 	Home + "/gibt-es-nicht": 404, pathStates + "/keine-rechte": 403, pathStates + "/fehler": 500,
 }
@@ -119,7 +119,7 @@ func TestGS20_SidebarOrder(t *testing.T) {
 	for _, m := range groupLabel.FindAllStringSubmatch(nav, -1) {
 		labels = append(labels, m[1])
 	}
-	assert.Equal(t, []string{"Tagesgeschäft", "Referenz"}, labels)
+	assert.Equal(t, []string{"Tagesgeschäft", "Erledigen", "Referenz"}, labels)
 	assert.Less(t, strings.Index(nav, `href="/reference/start"`), strings.Index(nav, `kit-sidebar-label`), "Start stands above the first group")
 }
 
@@ -186,6 +186,9 @@ func TestGS45_NoDrawersNoFieldsInIslands(t *testing.T) {
 			continue // the create page is a form
 		}
 		for _, island := range islands(body) {
+			if strings.Contains(island[:min(200, len(island))], "data-work") {
+				continue // GS-34: on a work page the work itself (here the reply) is edited in the page
+			}
 			for _, f := range fieldRE.FindAllString(island, -1) {
 				assert.Contains(t, f, `type="hidden"`, "%s: a field in an island: %s", p, f)
 			}
@@ -705,4 +708,33 @@ func TestGS54_OffersBecomeCards(t *testing.T) {
 	assert.Equal(t, strings.Count(row, "<td"), strings.Count(row, "data-label="), "every cell has its label")
 	_, body = c.get(pathCustomers)
 	assert.NotContains(t, body, "table-mobile-md")
+}
+
+// B-10, GS-34, KA-01, KA-02: the AI proposes, the person changes and sends; nothing is sent without them.
+func TestB10_ProposalTheyDecide(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(requestURL("R-2026-001"))
+	assert.Contains(t, body, "Hier schlägt eine KI vor.")
+	assert.Contains(t, body, "Sicherheit: hoch")
+	assert.Contains(t, body, `href="/reference/angebote/A-2026-002"`, "what it read")
+	assert.Contains(t, body, `data-mark="external"`)
+	got, body, _ := c.post(requestURL("R-2026-001")+"/senden", url.Values{"reply": {" "}})
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, "Die Antwort ist leer.")
+	_, body, _ = c.post(requestURL("R-2026-001")+"/senden", url.Values{"reply": {"Guten Tag, wir bestätigen den 4. und 11.12."}})
+	assert.Contains(t, body, "Antwort an Wohnungsgesellschaft Nordstadt gesendet.")
+	assert.Contains(t, body, "Antwort gesendet (geändert):")
+	assert.NotContains(t, body, `id="antwort-text"`, "decided: nothing to send any more")
+}
+
+// GS-44: discarding needs a reason from the list; without one the dialog opens again.
+func TestB10_DiscardNeedsAReason(t *testing.T) {
+	c := newClient(t)
+	got, body, _ := c.post(requestURL("R-2026-002")+"/verwerfen", url.Values{"reason": {""}})
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, `"id":"`+dialogDiscard+`"`)
+	assert.Contains(t, body, "Bitte wählen Sie einen Grund.")
+	_, body, _ = c.post(requestURL("R-2026-002")+"/verwerfen", url.Values{"reason": {"Erst intern klären"}})
+	assert.Contains(t, body, "Vorschlag verworfen; nichts wurde gesendet.")
+	assert.Contains(t, body, "Vorschlag verworfen: Erst intern klären")
 }
