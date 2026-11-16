@@ -7,6 +7,7 @@ package reference
 import (
 	"bytes"
 	"io"
+	"os/exec"
 	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
@@ -805,4 +806,38 @@ func TestGS44_AddFile(t *testing.T) {
 	cu, _ := c.app.store.Customer("K-1001")
 	_, body, _ = c.post(customerURL("K-1001")+"/unterlagen/"+cu.Files[0].ID+"/entfernen", nil)
 	assert.Contains(t, body, "Datei „Rahmenvertrag 2026.pdf“ entfernt.")
+}
+
+// GS-09: static files have a version in the path and stay in the cache (immutable); icons only as a subset
+// of the ones used; fonts only of the active theme.
+func TestGS09_StaticFilesCachedSubsetOwnFonts(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathFrame)
+	fonts := regexp.MustCompile(`<link rel="stylesheet" href="([^"]+)" data-ref-font>`).FindAllStringSubmatch(body, -1)
+	require.Len(t, fonts, 2, "Graphite: Geist and Geist Mono")
+	assert.Contains(t, fonts[0][1], "/geist@")
+	_, body = c.get(pathFrame + "?theme=midnight")
+	assert.Contains(t, body, "/manrope@")
+	assert.NotContains(t, body, `/geist@5.3.0/index.css" data-ref-font`)
+	_, body = c.get(pathFrame)
+	assert.Contains(t, body, "/manrope@", "the choice is remembered (cookie)")
+
+	res, err := c.c.Get(c.srv.URL + c.app.files.URL("core/css/tabler.min.css"))
+	require.NoError(t, err)
+	res.Body.Close()
+	assert.Regexp(t, `/reference/static/v[0-9a-f]+/`, c.app.files.URL("core/css/tabler.min.css"))
+	assert.Equal(t, "public, max-age=31536000, immutable", res.Header.Get("Cache-Control"))
+
+	icons, err := embedded.ReadFile("static/icons/tabler-icons.min.css")
+	require.NoError(t, err)
+	assert.Less(t, len(icons), 20_000, "a subset, not the whole webfont (210 KB)")
+}
+
+// GS-09: every icon the reference uses is in its subset (cmd/static -check fetches nothing).
+func TestGS09_IconSubsetComplete(t *testing.T) {
+	if testing.Short() {
+		t.Skip("builds cmd/static")
+	}
+	out, err := exec.Command("go", "run", "../../cmd/static", "-check", "-out", "static", ".").CombinedOutput()
+	assert.NoError(t, err, "%s\nrun: go run ./cmd/static -out examples/reference/static -css tabler,tabler-themes ./examples/reference/...", out)
 }

@@ -35,6 +35,20 @@ the Geist fonts (`cmd/vendor theme:graphite`) are embedded under `static/` and s
 ground, signal colours, content width, links, numbers, 16 px fields on phones) — the counterpart of the products'
 `theme.css`. After using a new icon, run `go run ./cmd/static -out examples/reference/static ./examples/reference/...`.
 
+## Static files (GS-09)
+
+Everything the browser loads comes from the app, with a version in the path and `Cache-Control: public,
+max-age=31536000, immutable` (package `static`: `static.New`, `Files.URL`, `static.Head`). After the first page a
+page change loads only the page itself. The icon webfont is a subset of the icons used (`cmd/static`, about 12 KB
+instead of 506 KB); `TestGS09_IconSubsetComplete` runs `cmd/static -check` and fails when a used `ti-…` is missing,
+so after using a new icon run `go run ./cmd/static -out examples/reference/static -css tabler,tabler-themes
+./examples/reference/...`. Only the fonts of the active theme are linked; the theme picker adds the next theme's fonts
+when it switches.
+
+An app does the same with three steps: `go tool static -out <dir> ./...` for Tabler and the icon subset,
+`go tool vendor -out <dir>/npm theme:<name>` for its theme's fonts, and `static.New` with `static.Head(files)` in the
+page's head.
+
 ## The concept inside the app
 
 `/reference/konzept` shows the concept Gestaltung and `/reference/konzept/assistent` the concept Assistent, rendered

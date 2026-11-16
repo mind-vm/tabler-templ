@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
+  the cache, the icon subset with a test (`cmd/static -check`), and only the active theme's fonts, which the theme
+  picker now adds when it switches (it linked the fonts of all themes before).
+
 ## v0.21.0
 
 - **`deadline`** (new): a deadline as a traffic light whose word is the time left, „noch 58 Min.“, „überfällig

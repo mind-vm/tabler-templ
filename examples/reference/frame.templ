@@ -34,6 +34,7 @@ type page struct {
 	// set by render
 	readOnly bool
 	demo     bool
+	theme    string
 	session  *session
 	panel    *sidepanel.Panel
 }
@@ -43,6 +44,21 @@ func (p page) explanation() (pattern, bool) {
 		return *p.Explain, true
 	}
 	return patternOf(p.Key)
+}
+
+func (a *App) fontURL(f themes.Font) string {
+	return a.files.URL("npm/@fontsource-variable/" + f.Package + "@" + themes.FontsVersion + "/index.css")
+}
+
+// fontURLs are the font stylesheets of each theme, for the switcher.
+func (a *App) fontURLs() map[string][]string {
+	m := map[string][]string{}
+	for _, t := range themes.All {
+		for _, f := range fontsOf(t) {
+			m[themeName(t)] = append(m[themeName(t)], a.fontURL(f))
+		}
+	}
+	return m
 }
 
 // The panel's tabs (GS-13).
@@ -58,14 +74,18 @@ func (a *App) panel(p page, open bool, tab string) *sidepanel.Panel {
 	}}
 }
 
-templ (a *App) head() {
+// head: Tabler and the icon subset from the bundle, the fonts of the active theme only (GS-09), the
+// themes' rules and the signal colours.
+templ (a *App) head(p page) {
 	@static.Head(a.files, assets.Props{Themes: true})
-	for _, f := range themeFonts() {
-		<link rel="stylesheet" href={ a.files.URL("npm/@fontsource-variable/" + f.Package + "@" + themes.FontsVersion + "/index.css") }/>
+	if t, ok := themeNamed(p.theme); ok {
+		for _, f := range fontsOf(t) {
+			<link rel="stylesheet" href={ a.fontURL(f) } data-ref-font/>
+		}
 	}
 	@csp.Style(themeCSS())
 	@themes.SignalStyles()
-	@inlineScript(themeScript())
+	@inlineScript(themeScript(p.theme, a.fontURLs()))
 	<link rel="stylesheet" href={ a.files.URL("reference.css") }/>
 }
 
@@ -81,7 +101,7 @@ templ (a *App) scripts(p page) {
 }
 
 templ (a *App) page(p page) {
-	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(), Scripts: a.scripts(p),
+	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(p), Scripts: a.scripts(p),
 		BodyAttributes: sidepanel.BodyAttributes(p.panel, templ.Attributes{"data-page": p.Key}),
 		Sidebar: a.sidebarFor(p), Brand: brand(), Breadcrumbs: p.Crumbs, HeaderActions: headerActions(p),
 		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash, Notice: notices(p)}) {
