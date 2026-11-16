@@ -75,7 +75,7 @@ templ (a *App) scripts(p page) {
 templ (a *App) page(p page) {
 	@shell.Page(shell.Props{Lang: "de", Title: p.Title, AppName: "Musterdienst", Head: a.head(), Scripts: a.scripts(p),
 		BodyAttributes: sidepanel.BodyAttributes(p.panel, templ.Attributes{"data-page": p.Key}),
-		Sidebar: a.sidebar(p), Breadcrumbs: p.Crumbs, HeaderActions: sidepanel.Buttons(p.panel),
+		Sidebar: a.sidebar(p), Brand: brand(), Breadcrumbs: p.Crumbs, HeaderActions: sidepanel.Buttons(p.panel),
 		Heading: p.Heading, HeadingExtra: p.HeadingExtra, Actions: p.Actions, Flash: p.Flash, Notice: notices(p)}) {
 		if e, ok := p.explanation(); ok {
 			@explain(e)
@@ -200,6 +200,13 @@ templ themeSwitcher() {
 			}
 		</select>
 	</label>
+}
+
+// brand is the app's mark in the header on phones, where the sidebar is a menu (GS-10).
+templ brand() {
+	<a href={ templ.URL(pathStart) } class="ref-brand" aria-label="Musterdienst, Start">
+		@logo()
+	</a>
 }
 
 templ logo() {

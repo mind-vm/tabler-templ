@@ -110,3 +110,9 @@ func TestGS54_ListScrollsInItsBox(t *testing.T) {
 	assert.Contains(t, html, `<div class="kit-rowedit-scroll">`)
 	assert.Contains(t, html, ".kit-rowedit-scroll{max-width:100%;overflow-x:auto}")
 }
+
+// GS-56: Save and Delete stand at the right, also while the row scrolls sideways.
+func TestGS56_ActionsStayAtTheRight(t *testing.T) {
+	html := render(t, context.Background(), dialog())
+	assert.Contains(t, html, ".kit-rowedit-actions{position:sticky;right:0")
+}

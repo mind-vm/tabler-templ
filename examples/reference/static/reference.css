@@ -118,3 +118,4 @@ body {
 .ref-backlink { text-decoration-style: dotted !important; }
 .ref-concept-nav { max-width: 100%; overflow-x: auto; }
 .ref-dot { display: inline-block; width: .625rem; height: .625rem; border-radius: 50%; vertical-align: -.05em; }
+.ref-brand { display: inline-flex; text-decoration: none; }
