@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v0.18 · 15.11.2026 · KA-28: Assistent im Selbstbetrieb nur mit vom Betreiber gewähltem Anbieter, vertrauliche Daten nie Werkzeug (Benutzer 15.11.2026, Gestaltung GSO-37). [Historie](../historie/docs/konzepte/assistent.md) |
+| **Status** | v0.19 · 15.11.2026 · Panel rechts: Hülle `rahmen.Panel` jetzt auf tabler-templ `blocks/sidepanel` (Cookie `kit-sidepanel`, Ereignis `kit-sidepanel:shown`); kein Verhalten geändert. [Historie](../historie/docs/konzepte/assistent.md) |
 | **Anlass** | Wunsch des Benutzers vom 25.10.2026: „Der originale Auftrag hatte einen AI-Assistenten als Sidebar. Haben wir den Code noch? Wenn ja, können wir ihn als wiederverwendbare Komponente in die Apps einbauen? Wie der Assistent in Auftrag soll er nur lesend auf Daten zugreifen und im UI Formulare vorausfüllen oder UI-Elemente für den Kunden zeigen. […] Fachkonzept KI-Assistent: lesend zugreifen, visualisieren, Daten anzeigen und das UI bedienen können.“ |
 | **Gilt zusammen mit** | [Verbund](verbund.md) (G-11, G-23, G-25, G-28), [ADR-0002](../adr/0002-rollen-und-rechte-je-app.md), [ADR-0005](../adr/0005-mehrere-instanzen-je-app.md) Punkt 4 (Verlauf des Assistenten in die Datenbank), [ADR-0007](../adr/0007-gemeinsame-datenbank-schema-je-app.md) (DB-03 `<app>_lesen`, DB-15), [ADR-0008](../adr/0008-verbund-als-ein-prozess.md) (ein Prozess); Auftrag [ADR-0009](../../apps/auftrag/docs/adr/0009-assistent-nur-lesen-und-oberflaechenaktionen.md), E-30, E-70, E-157, E-189; Einsatz E-20; [Simulation](simulation.md) SI-11; [Werkzeuge](werkzeuge.md) WZ-01 (Beigabe); [`libs/rahmen`](../../libs/rahmen/README.md) RA-10 (Anker `data-tour`) |
 | **Präfix** | KA-xx (Leitsätze), KAO-xx (Fragen; KAO-01 bis KAO-16 entschieden 25.10.2026, KAO-17 bis KAO-21 entschieden 27.10.2026, KAO-22 entschieden 08.11.2026, KAO-10 ergänzt 10.11.2026, KAO-23 bis KAO-28 entschieden 10.11.2026, KAO-23 ergänzt 10.11.2026) |
@@ -77,7 +77,7 @@ Panel-Skript in [`libs/assistent`](../../libs/assistent/README.md); Auftrag beh�
 | Lese-Pool | `apps/auftrag/internal/erp/erp.go` (`LesenPool`, `NurLesen`) | `AUFTRAG_LESEN_DATABASE_URL` als `auftrag_lesen`, lokal `SET ROLE`; lesende Use Cases laufen in `pgx.ReadOnly`-Transaktionen; Mandant über `mandant_id` in jeder Abfrage (Auftrag ADR-0017), dazu RLS nur für `auftrag_lesen` (KAO-05 (b), Auftrag E-209) |
 | Rolle | `deploy/postgres/verbund.sh` (`MIT_LESEN`), Migrationen `00006`, `00010` | `auftrag_lesen` LOGIN, `SELECT` über Voreinstellungen; zurückgenommen für `sitzung` (ID-Tokens) und `feedback`/`feedback_v1` (E-189) |
 | Web | `apps/auftrag/internal/web/handler_assistent.go` | `POST /assistent`: JSON rein (`gespraech`, `text`, `seite`), JSON raus (`text`, `aktionen[]`, `diagramme[]`, `schritte`, `status`); 401/403/400/409/502; Option `MitAssistentJeMandant` |
-| Panel | `apps/auftrag/internal/web/layout.templ` (`ASIDE#seitenpanel.seitenpanel`, Reiter `assistent`), `seitenpanel.go`, `static/seitenpanel.js` | Panel rechts mit Reitern, Zustand im Cookie `seitenpanel`, auf dem Handy als Sheet |
+| Panel | `apps/auftrag/internal/web/layout.templ` (`ASIDE#kit-sidepanel`, Reiter `assistent`), `seitenpanel.go`; Hülle `rahmen.Panel` auf tabler-templ `blocks/sidepanel` | Panel rechts mit Reitern, Zustand im Cookie `kit-sidepanel`, auf dem Handy als Sheet |
 | Browser | `apps/auftrag/internal/web/static/assistent.js` (520 Zeilen), `assistent.css` | Verlauf und Gesprächs-ID in `sessionStorage`; Mini-Markdown nur als DOM-Knoten (fett, Code, Listen, Tabellen; **keine Links, keine Bilder, nie `innerHTML`** mit Modelltext); Diagramme als SVG; Aktionen: navigieren (nur Pfade mit `/`, nicht `//`), ausstehende Aktion über einen Seitenwechsel merken, Formular per `form[data-formular=…]` finden, Dialog oder Panel öffnen, Felder setzen (Text, Auswahl auch über die Beschriftung, Checkbox, Radio), versteckte Felder nie ändern, geänderte Felder markieren, Banner, Probleme als Hinweis zurück |
 | agentloop | `apps/auftrag/third_party/agentloop` (Kopie, `replace` in `go.mod`), dieselbe Kopie in `tools/simulation/third_party/agentloop` | Herkunft `mind-vm/studio-apps` `libs/agentloop`, Commit `d2c8898` vom 13.10.2026 (`tools/simulation/third_party/STAND.md`); **MIT-Lizenz**, © 2026 Jürgen Ryannel; Modul `github.com/mind-vm/agentloop` gibt es auch mit Version (v0.4.1 im Modul-Cache). Der Assistent nutzt nur die Fähigkeit `require` und sein eigenes Pack; `http`, `fetch` und die übrigen Standard-Fähigkeiten sind **nicht** eingeschaltet. Compactor fasst lange Gespräche zusammen |
 
@@ -477,8 +477,8 @@ die vorhandene Schicht **als Regel festzuschreiben und lückenlos zu prüfen**:
   mit `libs/assistent` wandert die Hülle (`seitenpanel`) nach `libs/rahmen`, der Reiter nach `libs/assistent`
   (KAO-08).
 - **Umgesetzt mit Etappe 3 (25.10.2026, KAO-08, `libs/rahmen` RA-11):** Die Hülle ist `rahmen.Panel` mit Reitern
-  (`Seitenpanel`, Knöpfe in der Kopfzeile vor dem App-Umschalter, Zustand im Cookie `seitenpanel`, `seitenpanel.js` und
-  `seitenpanel.css` im Bündel des Rahmens); Seiten im Gerüst `rahmen.Seite` setzen nur `Props.Panel`. Auftrag nimmt
+  (`Seitenpanel`, Knöpfe in der Kopfzeile vor dem App-Umschalter, Zustand im Cookie `kit-sidepanel`; Skript und CSS seit
+  15.11.2026 aus tabler-templ `blocks/sidepanel`, Gestaltung GS-13); Seiten im Gerüst `rahmen.Seite` setzen nur `Props.Panel`. Auftrag nimmt
   dieselbe Hülle in seinem eigenen Gerüst (Reiter Notizen und KI-Assistent, funktionsgleich), Einsatz hat einen Reiter
   KI-Assistent. `libs/assistent` liefert Reiter, Kennung (`ReiterName`) und den Knopf „Neues Gespräch“ (`NeuKnopf`).
 - **Kennzeichnung:** Kopf des Panels „KI-Assistent“ und ein Satz beim ersten Öffnen: „Antworten können falsch sein.

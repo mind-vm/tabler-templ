@@ -12,6 +12,9 @@
 - **`blocks/shell`:** with a sidebar, `Brand` stands next to the menu button below lg, where the sidebar is hidden
   (GS-10).
 - **`blocks/rowedit`:** the actions stay at the right while a row scrolls sideways (GS-56); Delete is optional.
+  `Details` is an optional second line of a row for long texts, closed and open after an error in it (GS-56,
+  Gestaltung v0.7).
+- **`examples/reference`:** concept copy at Gestaltung v0.7; B-05 shows a long text per position.
 
 ## v0.19.0
 

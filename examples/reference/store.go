@@ -121,6 +121,7 @@ type Position struct {
 	ID    string
 	No    string // 01.01.0010
 	Text  string
+	Long  string // the long text, edited in the row's second line
 	Qty   Decimal
 	Unit  string
 	Price int64 // cents per unit
@@ -176,7 +177,7 @@ func (e FieldErrors) Error() string { return "Bitte prüfen Sie die markierten F
 // room for a message at the field.
 func (e FieldErrors) Detail() string {
 	var out []string
-	for _, k := range []string{"no", "text", "qty", "unit", "price"} {
+	for _, k := range []string{"no", "text", "qty", "unit", "price", "long"} {
 		if m := e[k]; m != "" {
 			out = append(out, m)
 		}
@@ -492,12 +493,18 @@ func (s *Store) Submit(no string) (Offer, error) {
 
 // PositionInput is one row of the dialog „Positionen bearbeiten“.
 type PositionInput struct {
-	No, Text, Qty, Unit, Price string
+	No, Text, Qty, Unit, Price, Long string
 }
+
+// maxLong is the longest long text of a position.
+const maxLong = 600
 
 func (in PositionInput) parse() (Position, FieldErrors) {
 	errs := FieldErrors{}
-	p := Position{No: strings.TrimSpace(in.No), Text: strings.TrimSpace(in.Text), Unit: strings.TrimSpace(in.Unit)}
+	p := Position{No: strings.TrimSpace(in.No), Text: strings.TrimSpace(in.Text), Unit: strings.TrimSpace(in.Unit), Long: strings.TrimSpace(in.Long)}
+	if n := len([]rune(p.Long)); n > maxLong {
+		errs["long"] = fmt.Sprintf("Der Langtext hat %d Zeichen, erlaubt sind %d.", n, maxLong)
+	}
 	var a, b, c int
 	if n, _ := fmt.Sscanf(p.No, "%d.%d.%d", &a, &b, &c); n != 3 || len(p.No) != 10 {
 		errs["no"] = "Die Positionsnummer hat die Form 01.01.0010."
@@ -706,13 +713,17 @@ func (s *Store) seed() {
 		{"Abstimmung vor Ort", "Termin", 4, 12_000},
 		{"Jahresbericht", "St", 1, 45_000},
 	}
+	longs := map[int]string{
+		0: "Je Einsatz: Anfahrt, Leistung nach Leistungsbeschreibung, Kurzbericht. Einsätze nach Plan, Abweichungen nach Absprache.",
+		1: "Nur nach schriftlichem Auftrag. Abrechnung je angefangene Viertelstunde mit Nachweis.",
+	}
 	nos := []string{"01.01.0010", "01.01.0020", "01.01.0030", "01.01.0040", "01.02.0010", "01.02.0020", "01.02.0030", "01.03.0010", "01.03.0020", "01.03.0030", "02.01.0010", "02.01.0020"}
 	positions := func(n int) []Position {
 		var ps []Position
 		for i := range n {
 			t := texts[i%len(texts)]
 			s.nextID++
-			ps = append(ps, Position{ID: fmt.Sprintf("p%d", 1000+s.nextID), No: nos[i%len(nos)], Text: t.text, Qty: DecimalOf(t.qty), Unit: t.unit, Price: t.price})
+			ps = append(ps, Position{ID: fmt.Sprintf("p%d", 1000+s.nextID), No: nos[i%len(nos)], Text: t.text, Long: longs[i%len(texts)], Qty: DecimalOf(t.qty), Unit: t.unit, Price: t.price})
 		}
 		return ps
 	}
