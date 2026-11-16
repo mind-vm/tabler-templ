@@ -36,9 +36,11 @@ func TestWithKitCSS(t *testing.T) {
 	if strings.Contains(h, "<style") {
 		t.Errorf("page still has inline CSS")
 	}
+	// After Tabler, where the blocks' inline CSS stands: the signal colours, the focus ring and the themes
+	// in kit.css must win over Tabler's rules of the same weight (found by Buchhalter).
 	kit, tabler := strings.Index(h, d.URL(KitCSS)), strings.Index(h, "tabler.min.css")
-	if kit < 0 || tabler < 0 || kit > tabler {
-		t.Errorf("kit.css must be linked before Tabler's CSS:\n%s", h)
+	if kit < 0 || tabler < 0 || kit < tabler {
+		t.Errorf("kit.css must be linked after Tabler's CSS:\n%s", h)
 	}
 }
 
