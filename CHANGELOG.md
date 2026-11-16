@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.22.0
 
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
   the cache, the icon subset with a test (`cmd/static -check`), and only the active theme's fonts, which the theme
