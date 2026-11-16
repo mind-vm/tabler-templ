@@ -16,6 +16,9 @@
   wählen“, „Foto aufnehmen“ with the camera on phones), the chosen file's name, sending at once, and an area files
   are dropped on, which sends the form or opens its dialog. B-04 shows the dialog „Datei hinzufügen“ in an island
   „Unterlagen“ (GS-44); dropping and the camera wait for the design concept.
+- **`blocks/detail`:** a dialog is full screen below lg (GS-14; it was a centered dialog with a margin on phones);
+  on phones the footer's hint takes a line of its own, so Cancel and Save stay side by side.
+- **`blocks/rowedit`:** the docs of `ListProps.Columns` say to give the columns fixed widths.
 - **`blocks/detail`:** in a very narrow island (under 260 px) label and value of `Fields` stand one above the other.
 
 ## v0.20.0

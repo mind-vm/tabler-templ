@@ -233,6 +233,12 @@ func TestShellSkipLinkAndNotice(t *testing.T) {
 	assert.NotContains(t, h[strings.Index(h, "Demo-Instanz")-400:strings.Index(h, "Demo-Instanz")], "alert-dismissible")
 }
 
+// GS-14: a dialog is full screen below lg.
+func TestGS14_DialogFullScreenOnPhones(t *testing.T) {
+	h := markup(t, context.Background(), detail.Dialog(detail.DialogProps{ID: "d", Title: "x"}))
+	assert.Contains(t, h, "modal-fullscreen-lg-down")
+}
+
 // GS-10: the brand stands in the header on small screens, also with a sidebar (hidden there).
 func TestShellBrandWithSidebarOnPhones(t *testing.T) {
 	h := markup(t, context.Background(), shell.Page(shell.Props{Title: "x", Sidebar: templ.Raw(`<aside id="sidebar"></aside>`), Brand: templ.Raw(`<a class="brand">Acme</a>`)}))

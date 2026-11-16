@@ -66,7 +66,10 @@ templ Dialog(p DialogProps) {
 
 type ListProps struct {
 	// Columns is the CSS grid-template-columns of every row, e.g. "8rem minmax(12rem,1fr) 6rem 3rem".
-	// The last column holds the Actions.
+	// The last column holds the Actions. Give the columns fixed widths (rem), with at most one minmax(…,1fr)
+	// for the text: the list is as wide as its columns need (max-content), so plain fr columns grow with
+	// the fields' natural width, the row gets wider than the dialog, and columns pass under the actions,
+	// which stay at the right.
 	Columns    string
 	Class      string
 	Attributes templ.Attributes

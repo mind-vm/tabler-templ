@@ -483,7 +483,7 @@ type DialogProps struct {
 	Attributes   templ.Attributes
 }
 
-// Dialog is a section's edit dialog (a Tabler modal). The script turns the last row of buttons of its
+// Dialog is a section's edit dialog (a Tabler modal), full screen below lg (GS-14 of the design concept). The script turns the last row of buttons of its
 // only form into the footer with Cancel (when it holds a primary or a danger button: an action with a
 // reason, GS-44), and reopens it after a failed save.
 func Dialog(p DialogProps) templ.Component {
@@ -509,7 +509,7 @@ func Dialog(p DialogProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		mp := modal.Props{ID: p.ID, Fade: true, Class: kit.Classes("kit-dialog", kit.If(p.Large, "kit-dialog-large"), p.Class),
-			Header: dialogHeader(p), Centered: true, Scrollable: true,
+			Header: dialogHeader(p), Centered: true, Scrollable: true, DialogClass: "modal-fullscreen-lg-down",
 			Attributes: kit.Attrs(templ.Attributes{"data-kit-dialog": true}, p.Attributes)}
 		if p.Large {
 			mp.Size = modal.SizeFullscreen
