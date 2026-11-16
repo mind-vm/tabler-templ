@@ -92,3 +92,51 @@ func TestRawProps(t *testing.T) {
 		t.Errorf("gauge = %v", s)
 	}
 }
+
+// whole is the whole config of a rendered chart: option, formatters and unit.
+func whole(t *testing.T, p Props) map[string]any {
+	t.Helper()
+	m := regexp.MustCompile(`data-tabler-chart="([^"]*)"`).FindStringSubmatch(render(t, Chart(p)))
+	var c map[string]any
+	if err := json.Unmarshal([]byte(html.UnescapeString(m[1])), &c); err != nil {
+		t.Fatal(err)
+	}
+	return c
+}
+
+// Unit goes to the value axis, the tooltip and the data labels; on horizontal bars the value axis is x.
+func TestUnit(t *testing.T) {
+	bars := []Serie{{Name: "a", Data: []float64{1, 2}}, {Name: "b", Data: []float64{3, 4}}}
+	paths := func(p Props) string {
+		u, _ := whole(t, p)["unit"].(map[string]any)
+		if u == nil {
+			return ""
+		}
+		var s []string
+		for _, x := range u["paths"].([]any) {
+			s = append(s, x.(string))
+		}
+		return u["text"].(string) + " " + strings.Join(s, ",")
+	}
+	for _, c := range []struct {
+		p    Props
+		want string
+	}{
+		{Props{ID: "v", Series: bars, Unit: "€", DataLabels: true},
+			"€ tooltip.valueFormatter,yAxis.0.axisLabel.formatter,series.0.label.formatter,series.1.label.formatter"},
+		{Props{ID: "h", Series: bars, Unit: " kWh ", Horizontal: true, YFormatter: Thousands}, "kWh tooltip.valueFormatter,xAxis.0.axisLabel.formatter"},
+		{Props{ID: "s", Type: Area, Series: bars, Unit: "h", Sparkline: true, HideTooltip: true}, ""},
+		{Props{ID: "d", Type: Donut, Series: bars, Unit: "€"}, "€ tooltip.valueFormatter"},
+		{Props{ID: "p", Series: bars, Unit: "€", YFormatter: Percent}, ""},
+		{Props{ID: "r", Type: RadialBar, Series: bars, Unit: "€"}, ""},
+		{Props{ID: "x", Series: bars, Unit: `<img src=x onerror="alert(1)">{a}`}, "img src=x on tooltip.valueFormatter,yAxis.0.axisLabel.formatter"},
+		{Props{ID: "n", Series: bars}, ""},
+	} {
+		if got := paths(c.p); got != c.want {
+			t.Errorf("%s: got %q, want %q", c.p.ID, got, c.want)
+		}
+	}
+	if f := whole(t, Props{ID: "h", Series: bars, Unit: "€", Horizontal: true, YFormatter: Thousands})["formatters"].(map[string]any); f["xAxis.0.axisLabel.formatter"] != "thousands" {
+		t.Errorf("formatters = %v", f)
+	}
+}

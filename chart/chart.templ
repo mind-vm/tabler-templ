@@ -150,15 +150,18 @@ type Props struct {
 	ShowX         bool // vertical grid lines
 	XFormatter    Formatter
 	YFormatter    Formatter
-	YMax          *float64
-	YTitle        string
-	YTooltip      bool
-	YAxes         []YAxis
-	HideTooltip   bool
-	HidePoints    bool // no dot on hover
-	ShowMarkers   bool // a dot on every point
-	AnnotationsX  []Annotation
-	AnnotationsY  []Annotation
+	// Unit is the values' unit, e.g. "€": written after the number on the value axis, in tooltips and
+	// in data labels ("1,250 €"). Percent has its own, so with it Unit is ignored.
+	Unit         string
+	YMax         *float64
+	YTitle       string
+	YTooltip     bool
+	YAxes        []YAxis
+	HideTooltip  bool
+	HidePoints   bool // no dot on hover
+	ShowMarkers  bool // a dot on every point
+	AnnotationsX []Annotation
+	AnnotationsY []Annotation
 	// Group syncs the tooltip and zoom of charts with the same group.
 	Group string
 	// BrushTarget makes this chart the range selector of the chart with that ID, selecting
@@ -358,6 +361,21 @@ templ Script() {
 					}
 					obj[keys[keys.length - 1]] = value;
 				}
+				function get(obj, path) {
+					var keys = path.split('.');
+					for (var i = 0; i < keys.length && obj != null; i++) obj = obj[keys[i]];
+					return obj;
+				}
+				// withUnit writes unit u after the number that f (or ECharts) writes; a data label's formatter
+				// gets the point, a [day, value] pair has the value last.
+				function withUnit(f, u) {
+					return function (v) {
+						if (v && typeof v === 'object' && !Array.isArray(v)) v = v.value;
+						if (Array.isArray(v)) v = v[v.length - 1];
+						if (typeof v !== 'number' || isNaN(v)) return v == null ? '' : String(v);
+						return (f ? f(v) : echarts.format.addCommas(v)) + ' ' + u;
+					};
+				}
 				function data(el) { return JSON.parse(el.getAttribute('data-tabler-chart')); }
 				// option is a chart's ECharts option with formatters, the page's font and resolved colors.
 				function option(el) {
@@ -367,6 +385,10 @@ templ Script() {
 					Object.keys(d.formatters || {}).forEach(function (path) {
 						var f = formatters[d.formatters[path]];
 						if (f) set(o, path, f);
+					});
+					if (d.unit) d.unit.paths.forEach(function (path) {
+						var f = get(o, path);
+						if (f == null || typeof f === 'function') set(o, path, withUnit(f, d.unit.text));
 					});
 					if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) o.animation = false;
 					return o;
