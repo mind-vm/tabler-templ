@@ -664,3 +664,21 @@ func TestGS63_DemoInstance(t *testing.T) {
 	_, body = c.get(customerURL("K-1001"))
 	assert.Contains(t, body, "Demo-Instanz: Alle Daten hier sind erfunden.")
 }
+
+// GS-56: the long text is in a closed second line of the row; after an error in it, that row's line is open.
+func TestGS56_LongTextOpensAfterAnError(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(offerURL("A-2026-001"))
+	assert.Contains(t, body, `<details class="kit-rowedit-details"><summary>Langtext (`)
+	assert.NotContains(t, body, `<details class="kit-rowedit-details" open>`)
+	o, _ := c.app.store.Offer("A-2026-001")
+	p := o.Positions[1]
+	got, body, _ := c.post(offerURL(o.No)+"/positionen/"+p.ID, url.Values{"id": {p.ID}, "no": {p.No}, "text": {p.Text}, "qty": {"1"}, "price": {"1"},
+		"long": {strings.Repeat("x", maxLong+1)}})
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Equal(t, 1, strings.Count(body, `<details class="kit-rowedit-details" open>`))
+	i := strings.Index(body, `value="`+p.ID+`"`)
+	require.Positive(t, i)
+	assert.Contains(t, body[i:i+strings.Index(body[i:], "</form>")], `<details class="kit-rowedit-details" open>`, "the row that failed")
+	assert.Contains(t, body, "Der Langtext hat 601 Zeichen, erlaubt sind 600.")
+}

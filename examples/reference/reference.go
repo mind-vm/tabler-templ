@@ -500,7 +500,7 @@ func (a *App) submitOffer(w http.ResponseWriter, r *http.Request) {
 }
 
 func positionInput(r *http.Request) PositionInput {
-	return PositionInput{No: r.PostFormValue("no"), Text: r.PostFormValue("text"), Qty: r.PostFormValue("qty"), Unit: r.PostFormValue("unit"), Price: r.PostFormValue("price")}
+	return PositionInput{No: r.PostFormValue("no"), Text: r.PostFormValue("text"), Qty: r.PostFormValue("qty"), Unit: r.PostFormValue("unit"), Price: r.PostFormValue("price"), Long: r.PostFormValue("long")}
 }
 
 func (a *App) addPosition(w http.ResponseWriter, r *http.Request) {

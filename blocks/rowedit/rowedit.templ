@@ -163,6 +163,26 @@ templ Add(p AddProps) {
 	}
 }
 
+type DetailsProps struct {
+	Summary string // the toggle's text, e.g. "Langtext und Anforderungen"
+	// Open shows the fields: after a failed save with an error in one of them.
+	Open       bool
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Details is an optional second line of a row, inside the row's form: text fields over the whole width
+// for long texts. It is closed and opens after an error in one of its fields; Save and Delete stay in the
+// first line, and Enter in a text area makes a new line instead of saving. Put it after Actions.
+templ Details(p DetailsProps) {
+	<details class={ kit.Classes("kit-rowedit-details", p.Class) } open?={ p.Open } { p.Attributes... }>
+		<summary>{ p.Summary }</summary>
+		<div class="kit-rowedit-details-body">
+			{ children... }
+		</div>
+	</details>
+}
+
 // Total is the line below the list with a computed sum, shown only.
 templ Total(label, value string) {
 	@Styles()
@@ -225,6 +245,15 @@ const css = `.kit-rowedit-hint{margin-bottom:.75rem;font-size:.875rem;color:var(
 .kit-rowedit-num{text-align:right;font-variant-numeric:tabular-nums}
 .kit-rowedit .form-control.kit-rowedit-num{text-align:right}
 .kit-rowedit-actions{position:sticky;right:0;z-index:1;display:flex;gap:.25rem;justify-content:flex-end;align-self:stretch;align-items:center;margin:-.5rem -.75rem -.5rem 0;padding:.5rem .75rem .5rem .5rem;background:inherit}
+.kit-rowedit-details{grid-column:1/-1;margin:0}
+.kit-rowedit-details>summary{display:inline-flex;align-items:center;gap:.25rem;font-size:.8125rem;color:var(--tblr-secondary);cursor:pointer}
+.kit-rowedit-details>summary:hover{color:var(--tblr-body-color)}
+.kit-rowedit-details>summary{list-style:none}
+.kit-rowedit-details>summary::-webkit-details-marker{display:none}
+.kit-rowedit-details>summary::before{content:"";width:.4em;height:.4em;margin:0 .25rem 0 .125rem;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.kit-rowedit-details[open]>summary::before{transform:rotate(45deg)}
+.kit-rowedit-details-body{display:grid;gap:.5rem;padding:.5rem 0 .25rem}
+.kit-rowedit-details-body textarea{width:100%}
 .kit-rowedit-total{display:flex;justify-content:flex-end;gap:1.5rem;margin-top:.75rem;padding:0 .75rem;font-weight:600}
 .kit-rowedit-locked{display:inline-flex;align-items:center;gap:.375rem;font-size:.8125rem;color:var(--tblr-secondary)}
 @media (min-width:992px){.kit-rowedit-dialog .modal-dialog.modal-fullscreen{width:95vw;max-width:95vw;height:92vh;margin:4vh auto}.kit-rowedit-dialog .modal-fullscreen .modal-content{border-radius:var(--tblr-border-radius-lg)}}

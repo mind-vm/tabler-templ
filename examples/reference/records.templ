@@ -405,7 +405,12 @@ templ offerView(o Offer, c Customer, canEdit bool, st dialogState) {
 						for _, p := range o.Positions {
 							<tr>
 								<td class="mono">{ p.No }</td>
-								<td class="ref-wrap">{ p.Text }</td>
+								<td class="ref-wrap">
+									{ p.Text }
+									if p.Long != "" {
+										<div class="text-secondary small">{ p.Long }</div>
+									}
+								</td>
 								<td class="text-end ref-num">{ p.Qty.String() }</td>
 								<td>{ p.Unit }</td>
 								<td class="text-end ref-num">{ Euro(p.Price) }</td>
@@ -470,6 +475,7 @@ templ positionsDialog(o Offer, about string, st dialogState) {
 						@rowedit.Save(rowedit.SaveProps{Label: "Position " + p.No + " speichern"})
 						@rowedit.Delete(rowedit.DeleteProps{Action: base + "/" + p.ID + "/loeschen", Confirm: "Position " + p.No + " löschen?", Label: "Position " + p.No + " löschen"})
 					}
+					@longText(st, kindPosition, p.ID, p.Long, "")
 				}
 			}
 			@rowedit.Row(rowedit.RowProps{Action: base, Kind: kindNewPosition, New: true}) {
@@ -478,10 +484,25 @@ templ positionsDialog(o Offer, about string, st dialogState) {
 				@rowedit.Actions() {
 					@rowedit.Add(rowedit.AddProps{})
 				}
+				@longText(st, kindNewPosition, "", "", " (neue Position)")
 			}
 		}
 		@rowedit.Total("Summe", Euro(o.Total()))
 	}
+}
+
+// longText is the row's second line with the long text (GS-56): closed, open after an error in it.
+templ longText(st dialogState, kind, row, long, suffix string) {
+	@rowedit.Details(rowedit.DetailsProps{Summary: longSummary(rowValue(st, kind, row, "long", long)), Open: rowError(st, kind, row, "long")}) {
+		@form.Textarea(form.TextareaProps{Name: "long", Rows: 3, Value: rowValue(st, kind, row, "long", long), Invalid: rowError(st, kind, row, "long"), AriaLabel: "Langtext" + suffix})
+	}
+}
+
+func longSummary(long string) string {
+	if long == "" {
+		return "Langtext"
+	}
+	return "Langtext (" + itoa(len([]rune(long))) + " Zeichen)"
 }
 
 templ positionCells(st dialogState, kind, row, no, text, qty, unit, price, suffix string) {

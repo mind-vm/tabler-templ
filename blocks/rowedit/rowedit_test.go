@@ -116,3 +116,17 @@ func TestGS56_ActionsStayAtTheRight(t *testing.T) {
 	html := render(t, context.Background(), dialog())
 	assert.Contains(t, html, ".kit-rowedit-actions{position:sticky;right:0")
 }
+
+// GS-56: long texts in an optional second line of the row, inside its form; closed, open after an error.
+func TestGS56_DetailsLine(t *testing.T) {
+	row := with(rowedit.Row(rowedit.RowProps{Action: "/p/1"}),
+		templ.Raw(`<input name="qty">`), with(rowedit.Actions(), rowedit.Save(rowedit.SaveProps{})),
+		with(rowedit.Details(rowedit.DetailsProps{Summary: "Langtext"}), templ.Raw(`<textarea name="long"></textarea>`)))
+	html := render(t, context.Background(), row)
+	form := html[strings.Index(html, "<form"):strings.Index(html, "</form>")]
+	assert.Contains(t, form, `<details class="kit-rowedit-details"><summary>Langtext</summary>`)
+	assert.Contains(t, form, `<textarea name="long">`)
+	assert.Less(t, strings.Index(form, "kit-rowedit-save"), strings.Index(form, "<details"), "Save stays in the first line")
+	open := render(t, context.Background(), rowedit.Details(rowedit.DetailsProps{Summary: "x", Open: true}))
+	assert.Contains(t, open, `<details class="kit-rowedit-details" open>`)
+}

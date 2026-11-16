@@ -27,6 +27,10 @@ const shots = [
   }],
   ["b05-angebot", "/angebote/A-2026-001"],
   ["b05-liste-bearbeiten", "/angebote/A-2026-001", async (p) => { await p.click('[data-bs-target="#dialog-positionen"]'); await p.waitForSelector("#dialog-positionen.show"); await p.waitForTimeout(300); }],
+  ["b05-langtext", "/angebote/A-2026-001", async (p) => {
+    await p.click('[data-bs-target="#dialog-positionen"]'); await p.waitForSelector("#dialog-positionen.show");
+    await p.click("#dialog-positionen form.kit-rowedit-row details > summary"); await p.waitForTimeout(300);
+  }],
   ["b05-leere-liste", "/angebote/A-2026-041", async (p) => {
     await p.click('[data-bs-target="#dialog-positionen"]'); await p.waitForSelector("#dialog-positionen.show");
     // With only the new row the add button stays in the row, not in a dialog footer.
