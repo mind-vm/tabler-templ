@@ -789,6 +789,8 @@ func TestGS44_AddFile(t *testing.T) {
 	c := newClient(t)
 	_, body := c.get(customerURL("K-1001"))
 	assert.Contains(t, body, `enctype="multipart/form-data"`)
+	assert.Contains(t, body, `data-kit-drop="unterlage-neu" data-kit-drop-open`, "a file dropped on the island opens the dialog")
+	assert.Contains(t, body, `capture="environment"`, "„Foto aufnehmen“ on phones")
 	assert.Contains(t, body, `data-kit-confirm="Datei „Rahmenvertrag 2026.pdf“ entfernen?"`)
 	got, body := c.postFile(customerURL("K-1001")+"/unterlagen", "Angebot Winter.pdf", "")
 	assert.Equal(t, http.StatusUnprocessableEntity, got)

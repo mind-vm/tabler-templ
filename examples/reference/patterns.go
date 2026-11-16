@@ -53,7 +53,7 @@ var patterns = []pattern{
 		Summary: "Inseln zum Lesen, je Insel höchstens ein „Bearbeiten“ mit Dialog, Fehler im Dialog, Unterliste mit „Alle N“, Datei hinzufügen.",
 		What:    "Ein Datensatz als weiße Inseln auf grauem Grund. Jede Insel zeigt nur an; „Bearbeiten“ öffnet einen Dialog nur mit ihren Feldern.",
 		When:    "Für jeden Datensatz. Zuerst die Inseln, an denen man arbeitet, dann was aus anderen Apps kommt (hier: offene Posten).",
-		Try:     "Leeren Sie im Dialog „Stammdaten“ den Namen und speichern Sie: Der Dialog öffnet sich wieder, mit Meldung und Ihren Werten, das Feld ist markiert.",
+		Try:     "Leeren Sie im Dialog „Stammdaten“ den Namen und speichern Sie: Der Dialog öffnet sich wieder, mit Meldung und Ihren Werten, das Feld ist markiert. Ziehen Sie eine Datei auf die Insel „Unterlagen“: Der Dialog öffnet sich mit der Datei.",
 		Rules:   []string{"GS-32", "GS-40", "GS-41", "GS-42", "GS-43", "GS-44", "GS-45", "GS-46"},
 		Blocks:  []block{{"blocks/detail", "Section, Fields, Field, EditButton, Dialog, Script"}, {"upload", "Button, Drop, Script"}},
 		Link:    pathConcept + "#6-inseln-und-dialoge",
