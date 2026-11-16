@@ -5,7 +5,9 @@ package reference
 // scripts/reference.sh checks it at the desktop and on a phone.
 
 import (
+	"bytes"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -761,4 +763,44 @@ func TestGS16_ExternalArea(t *testing.T) {
 	_, body = c.get(pathExternalOffers)
 	assert.Contains(t, body, "A-2026-002")
 	assert.NotContains(t, body, "A-2026-001", "drafts stay internal")
+}
+
+// postFile sends the dialog's multipart form; name "" sends no file.
+func (c *client) postFile(path, name, kind string) (int, string) {
+	c.t.Helper()
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	fw, _ := w.CreateFormFile("file", name)
+	if name != "" {
+		_, _ = fw.Write([]byte("%PDF-1.4 sample"))
+	}
+	_ = w.WriteField("kind", kind)
+	_ = w.Close()
+	res, err := c.c.Post(c.srv.URL+path, w.FormDataContentType(), &b)
+	require.NoError(c.t, err)
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	return res.StatusCode, string(body)
+}
+
+// GS-44: a file is added in a dialog of the record's page, with its kind; the list stays read-only and
+// removing asks first. A failed upload says to choose the file again.
+func TestGS44_AddFile(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(customerURL("K-1001"))
+	assert.Contains(t, body, `enctype="multipart/form-data"`)
+	assert.Contains(t, body, `data-kit-confirm="Datei „Rahmenvertrag 2026.pdf“ entfernen?"`)
+	got, body := c.postFile(customerURL("K-1001")+"/unterlagen", "Angebot Winter.pdf", "")
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, "Bitte wählen Sie die Art.")
+	assert.Contains(t, body, "Bitte wählen Sie die Datei noch einmal.")
+	got, body = c.postFile(customerURL("K-1001")+"/unterlagen", "", "Vertrag")
+	assert.Equal(t, http.StatusUnprocessableEntity, got)
+	assert.Contains(t, body, "Bitte wählen Sie eine Datei.")
+	got, body = c.postFile(customerURL("K-1001")+"/unterlagen", "Angebot Winter.pdf", "Schriftverkehr")
+	assert.Equal(t, http.StatusOK, got)
+	assert.Contains(t, body, "Datei „Angebot Winter.pdf“ hinzugefügt.")
+	cu, _ := c.app.store.Customer("K-1001")
+	_, body, _ = c.post(customerURL("K-1001")+"/unterlagen/"+cu.Files[0].ID+"/entfernen", nil)
+	assert.Contains(t, body, "Datei „Rahmenvertrag 2026.pdf“ entfernt.")
 }

@@ -12,6 +12,10 @@
   KA-01 to KA-04); requests are a list under „Erledigen“.
 - **`examples/reference`:** B-11 „Öffentlich und Externe“, a customer area with the same frame, a short sidebar and
   no panel; signed out „Anmelden“ and „Registrieren“ in the header (GS-16).
+- **`upload`** (new): files for an ordinary form without a plugin: a button with the app's own words („Datei
+  wählen“, „Foto aufnehmen“ with the camera on phones), the chosen file's name, sending at once, and an area files
+  are dropped on, which sends the form or opens its dialog. B-04 shows the dialog „Datei hinzufügen“ in an island
+  „Unterlagen“ (GS-44); dropping and the camera wait for the design concept.
 - **`blocks/detail`:** in a very narrow island (under 260 px) label and value of `Fields` stand one above the other.
 
 ## v0.20.0

@@ -118,6 +118,8 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	mux.HandleFunc("POST "+pathCustomers+"/{no}/stammdaten", a.writes(a.saveMaster))
 	mux.HandleFunc("POST "+pathCustomers+"/{no}/ansprechpartner", a.writes(a.saveContact))
 	mux.HandleFunc("POST "+pathCustomers+"/{no}/vermerke", a.writes(a.addNote))
+	mux.HandleFunc("POST "+pathCustomers+"/{no}/unterlagen", a.writes(a.addFile))
+	mux.HandleFunc("POST "+pathCustomers+"/{no}/unterlagen/{id}/entfernen", a.writes(a.removeFile))
 	mux.HandleFunc("GET "+pathOffers, a.offers)
 	mux.HandleFunc("GET "+pathOffers+"/{no}", a.offer)
 	mux.HandleFunc("POST "+pathOffers+"/{no}/angebot", a.writes(a.saveOffer))
@@ -460,6 +462,51 @@ func (a *App) addNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	done(w, r, back(r, customerURL(no)), flashData{Text: "Vermerk hinzugefügt."})
+}
+
+func (a *App) addFile(w http.ResponseWriter, r *http.Request) {
+	no := r.PathValue("no")
+	r.Body = http.MaxBytesReader(w, r.Body, MaxFileSize+1<<20)
+	var name string
+	var size int64
+	if err := r.ParseMultipartForm(1 << 20); err == nil {
+		for _, fh := range r.MultipartForm.File["file"] { // the button and, on phones, the camera
+			if fh.Filename != "" {
+				name, size = fh.Filename, fh.Size
+				break
+			}
+		}
+	} else {
+		name, size = "zu groß", MaxFileSize+1
+	}
+	f, err := a.store.AddFile(no, name, size, r.PostFormValue("kind"), r.PostFormValue("ref"))
+	if err != nil {
+		st := failed(dialogFile, r, err)
+		if st.Fields["file"] == "" {
+			st.Error += " Bitte wählen Sie die Datei noch einmal."
+		}
+		a.customerFailedWith(w, r, err, st)
+		return
+	}
+	done(w, r, back(r, customerURL(no)), flashData{Text: "Datei „" + f.Name + "“ hinzugefügt."})
+}
+
+func (a *App) removeFile(w http.ResponseWriter, r *http.Request) {
+	no := r.PathValue("no")
+	f, err := a.store.RemoveFile(no, r.PathValue("id"))
+	if err != nil {
+		a.errorPage(w, r, http.StatusNotFound)
+		return
+	}
+	done(w, r, customerURL(no), flashData{Text: "Datei „" + f.Name + "“ entfernt."})
+}
+
+func (a *App) customerFailedWith(w http.ResponseWriter, r *http.Request, err error, st dialogState) {
+	if errors.Is(err, ErrNotFound) {
+		a.errorPage(w, r, http.StatusNotFound)
+		return
+	}
+	a.customerWith(w, r, http.StatusUnprocessableEntity, st)
 }
 
 func (a *App) offer(w http.ResponseWriter, r *http.Request) { a.offerWith(w, r, 0, dialogState{}) }

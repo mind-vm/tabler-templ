@@ -13,6 +13,7 @@ import (
 	"github.com/mind-vm/tabler-templ/sidebar"
 	"github.com/mind-vm/tabler-templ/static"
 	"github.com/mind-vm/tabler-templ/themes"
+	"github.com/mind-vm/tabler-templ/upload"
 )
 
 // page is what a handler tells the frame.
@@ -75,6 +76,7 @@ templ (a *App) scripts(p page) {
 	@static.Scripts(a.files)
 	@detail.Script(detail.ScriptConfig{})
 	@rowedit.Script()
+	@upload.Script()
 	@sidepanel.Script()
 }
 

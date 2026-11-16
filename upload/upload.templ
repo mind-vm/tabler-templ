@@ -1,0 +1,137 @@
+// Package upload picks files for an ordinary form (multipart, POST), without a plugin: a button with the
+// app's own words instead of the browser's text, the camera on phones, the name of the file chosen, and an
+// area files can be dropped on. Files to a record are added in a dialog of its page (GS-44 of the design
+// concept „Gestaltung“).
+//
+//	<form id="file-add" method="post" enctype="multipart/form-data" action="/customers/1/files">
+//		@upload.Button(upload.ButtonProps{ID: "file", Name: "file", Accept: ".pdf,image/*"})
+//		@upload.Button(upload.ButtonProps{ID: "photo", Name: "file", Camera: true, Submit: true}) // phones
+//	</form>
+//	@upload.Drop(upload.DropProps{Form: "file-add"}) { … the list or island … }
+//	@upload.Script() // once, after Tabler's script
+package upload
+
+import (
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+type ButtonProps struct {
+	ID     string // of the file field; required
+	Name   string // of the file field
+	Accept string // e.g. ".pdf,image/*"
+	Label  string // default kit.T(ctx).ChooseFile, with Camera kit.T(ctx).TakePhoto
+	// Camera opens the camera on phones (capture="environment").
+	Camera bool
+	// Submit sends the form as soon as a file is chosen; without it the file's name shows beside the button.
+	Submit   bool
+	Required bool
+	Multiple bool
+	Primary  bool // the main action of the page
+	Class    string
+}
+
+// Button is a button that picks a file. The file field stays in the page, invisible but reachable with the
+// keyboard; the button shows its focus.
+templ Button(p ButtonProps) {
+	{{ m := kit.T(ctx) }}
+	@Styles()
+	<span class={ kit.Classes("kit-upload", p.Class) } data-kit-upload>
+		<label class={ kit.Classes("btn", kit.If(p.Primary, "btn-primary"), "mb-0") } for={ p.ID }>
+			@icon.Icon(iconOf(p))
+			{ labelOf(m, p) }
+		</label>
+		<input
+			class="kit-upload-input"
+			type="file"
+			id={ p.ID }
+			name={ p.Name }
+			if p.Accept != "" {
+				accept={ p.Accept }
+			}
+			if p.Camera {
+				capture="environment"
+			}
+			if p.Submit {
+				data-kit-upload-submit
+			}
+			required?={ p.Required }
+			multiple?={ p.Multiple }
+		/>
+		if !p.Submit {
+			<span class="kit-upload-name" data-kit-upload-name data-none={ m.NoFile } aria-live="polite">{ m.NoFile }</span>
+		}
+	</span>
+}
+
+type DropProps struct {
+	Form string // the id of the form the files go into
+	// Open opens the dialog the form is in instead of sending it, when the form needs more than the file
+	// (kind, reference); else the form is sent.
+	Open       bool
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Drop makes its children an area files can be dropped on: they go into the file field of Form.
+templ Drop(p DropProps) {
+	@Styles()
+	<div class={ kit.Classes("kit-upload-drop", p.Class) } data-kit-drop={ p.Form } data-kit-drop-open?={ p.Open } data-kit-drop-hint={ kit.T(ctx).DropHere } { p.Attributes... }>
+		{ children... }
+	</div>
+}
+
+// Script shows the chosen file's name, sends forms with Submit, and handles drop areas. Once per page,
+// after Tabler's script.
+templ Script() {
+	@scriptOnce.Once() {
+		<script { csp.Nonce(ctx)... }>
+			(function () {
+				"use strict";
+				document.addEventListener("change", function (e) {
+					var f = e.target;
+					if (!f.matches || !f.matches("input[type=file]")) return;
+					var w = f.closest("[data-kit-upload]"), n = w && w.querySelector("[data-kit-upload-name]");
+					if (n) n.textContent = f.files.length ? Array.from(f.files).map(function (x) { return x.name; }).join(", ") : n.dataset.none;
+					if (f.hasAttribute("data-kit-upload-submit") && f.files.length && f.form) f.form.requestSubmit ? f.form.requestSubmit() : f.form.submit();
+				});
+				document.querySelectorAll("[data-kit-drop]").forEach(function (zone) {
+					var form = document.getElementById(zone.dataset.kitDrop), field = form && form.querySelector("input[type=file]");
+					if (!field) return;
+					var on = function (ev) { if (ev.dataTransfer && Array.from(ev.dataTransfer.types).indexOf("Files") >= 0) { ev.preventDefault(); zone.classList.add("kit-upload-over"); } };
+					zone.addEventListener("dragenter", on);
+					zone.addEventListener("dragover", on);
+					zone.addEventListener("dragleave", function (ev) { if (!zone.contains(ev.relatedTarget)) zone.classList.remove("kit-upload-over"); });
+					zone.addEventListener("drop", function (ev) {
+						zone.classList.remove("kit-upload-over");
+						if (!ev.dataTransfer || !ev.dataTransfer.files.length) return;
+						ev.preventDefault();
+						field.files = ev.dataTransfer.files;
+						field.dispatchEvent(new Event("change", { bubbles: true }));
+						var modal = form.closest(".modal"), bs = window.tabler && window.tabler.Modal ? window.tabler : window.bootstrap;
+						if (zone.hasAttribute("data-kit-drop-open") && modal && bs) bs.Modal.getOrCreateInstance(modal).show();
+						else if (!field.hasAttribute("data-kit-upload-submit")) form.requestSubmit ? form.requestSubmit() : form.submit();
+					});
+				});
+			})();
+		</script>
+	}
+}
+
+var scriptOnce = templ.NewOnceHandle()
+
+var styles = csp.Sheet("upload", css)
+
+// Styles renders the package's CSS once per page; Button and Drop render it themselves.
+templ Styles() {
+	@styles
+}
+
+const css = `.kit-upload{position:relative;display:inline-flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.kit-upload-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.kit-upload:focus-within>label{outline:3px solid var(--tblr-primary);outline-offset:2px}
+.kit-upload-name{font-size:.8125rem;color:var(--tblr-secondary);overflow-wrap:anywhere}
+.kit-upload-drop{position:relative;border-radius:var(--tblr-border-radius-lg)}
+.kit-upload-drop.kit-upload-over{outline:2px dashed var(--tblr-primary);outline-offset:4px}
+.kit-upload-drop.kit-upload-over::after{content:attr(data-kit-drop-hint);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;background:color-mix(in srgb,var(--tblr-bg-surface) 85%,transparent);border-radius:inherit;pointer-events:none}`
