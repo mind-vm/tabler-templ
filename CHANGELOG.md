@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.20.0
 
 - **`blocks/rowedit`:** with an empty list (only the new row) the add button stays in its row; the dialog script
   of `blocks/detail` no longer turns it into a footer.
