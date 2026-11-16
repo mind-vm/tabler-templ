@@ -130,3 +130,18 @@ func TestGS56_DetailsLine(t *testing.T) {
 	open := render(t, context.Background(), rowedit.Details(rowedit.DetailsProps{Summary: "x", Open: true}))
 	assert.Contains(t, open, `<details class="kit-rowedit-details" open>`)
 }
+
+// GS-54 on a list to edit: below the breakpoint every row is a card; each field carries its label.
+func TestGS54_RowsBecomeCards(t *testing.T) {
+	list := with(rowedit.List(rowedit.ListProps{Columns: "8rem 1fr 3rem", Mobile: "md"}),
+		with(rowedit.Row(rowedit.RowProps{Action: "/p/1"}),
+			with(rowedit.Cell("Menge"), templ.Raw(`<input name="qty" aria-label="Menge">`)),
+			with(rowedit.Actions(), rowedit.Save(rowedit.SaveProps{}))))
+	html := render(t, context.Background(), list)
+	assert.Contains(t, html, `class="kit-rowedit kit-rowedit-mobile-md"`)
+	assert.Contains(t, html, `<div class="kit-rowedit-cell"><span class="kit-rowedit-label" aria-hidden="true">Menge</span><input name="qty"`)
+	assert.Contains(t, html, "@media (max-width:767.98px){.kit-rowedit-mobile-md{min-width:0}")
+	assert.Contains(t, html, ".kit-rowedit-mobile-md .kit-rowedit-actions{order:2;position:static")
+	css := html[strings.Index(html, "@media (max-width:767.98px){.kit-rowedit-mobile-md"):]
+	assert.Less(t, strings.Index(css, " .kit-rowedit-row{display:flex"), strings.Index(css, " .kit-rowedit-head{display:none}"), "the head is hidden after the rows become flex (it has both classes)")
+}

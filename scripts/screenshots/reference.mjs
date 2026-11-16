@@ -91,10 +91,16 @@ for (const [size, options, { check = false } = {}] of sizes) {
     if (res.status() !== status) problems.push(`${size} ${name}: status ${res.status()}, want ${status}`);
     await page.evaluate(() => document.fonts.ready);
     if (before) await before(page);
-    // GS-14: the page never scrolls sideways; wide tables scroll inside their island.
+    // GS-14: the page never scrolls sideways; wide tables scroll inside their island. A list to edit that
+    // becomes cards on phones (GS-54) does not scroll either.
     const wide = await page.evaluate(() => {
       const d = document.documentElement;
-      return d.scrollWidth > d.clientWidth + 1 ? `${d.scrollWidth} > ${d.clientWidth}` : "";
+      if (d.scrollWidth > d.clientWidth + 1) return `${d.scrollWidth} > ${d.clientWidth}`;
+      for (const l of document.querySelectorAll(".modal.show [class*=kit-rowedit-mobile-]")) {
+        const box = l.parentElement;
+        if (getComputedStyle(l).minWidth === "0px" && box.scrollWidth > box.clientWidth + 1) return `list ${box.scrollWidth} > ${box.clientWidth}`;
+      }
+      return "";
     });
     if (wide) problems.push(`${size} ${name}: scrolls sideways (${wide})`);
     if (!check) await page.screenshot({ path: join(out, `${name}-${size}.png`), fullPage: !before });

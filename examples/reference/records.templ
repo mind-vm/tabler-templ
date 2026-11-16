@@ -591,7 +591,8 @@ func rowError(st dialogState, kind, row, name string) bool {
 templ positionsDialog(o Offer, about string, st dialogState) {
 	{{ base := offerURL(o.No) + "/positionen" }}
 	@rowedit.Dialog(rowedit.DialogProps{ID: dialogPositions, Title: "Positionen bearbeiten", Context: about, Error: errorOf(st, dialogPositions)}) {
-		@rowedit.List(rowedit.ListProps{Columns: positionColumns}) {
+		// GS-54: on phones every position is a card.
+		@rowedit.List(rowedit.ListProps{Columns: positionColumns, Mobile: "md"}) {
 			@rowedit.Head() {
 				<span>Pos.-Nr.</span>
 				<span>Bezeichnung</span>
@@ -605,7 +606,9 @@ templ positionsDialog(o Offer, about string, st dialogState) {
 				@rowedit.Row(rowedit.RowProps{Action: base + "/" + p.ID, Kind: kindPosition}) {
 					<input type="hidden" name="id" value={ p.ID }/>
 					@positionCells(st, kindPosition, p.ID, p.No, p.Text, p.Qty.String(), p.Unit, EuroField(p.Price), "")
-					<span class="kit-rowedit-num">{ Euro(p.Amount()) }</span>
+					@rowedit.Cell("Betrag", "kit-rowedit-num") {
+						{ Euro(p.Amount()) }
+					}
 					@rowedit.Actions() {
 						@rowedit.Save(rowedit.SaveProps{Label: "Position " + p.No + " speichern"})
 						@rowedit.Delete(rowedit.DeleteProps{Action: base + "/" + p.ID + "/loeschen", Confirm: "Position " + p.No + " löschen?", Label: "Position " + p.No + " löschen"})
@@ -641,11 +644,21 @@ func longSummary(long string) string {
 }
 
 templ positionCells(st dialogState, kind, row, no, text, qty, unit, price, suffix string) {
-	@form.Input(form.InputProps{Name: "no", Class: "mono", Value: rowValue(st, kind, row, "no", no), Required: true, Invalid: rowError(st, kind, row, "no"), AriaLabel: "Pos.-Nr." + suffix})
-	@form.Input(form.InputProps{Name: "text", Value: rowValue(st, kind, row, "text", text), Required: true, Invalid: rowError(st, kind, row, "text"), AriaLabel: "Bezeichnung" + suffix, Placeholder: pick(kind == kindNewPosition, "Bezeichnung der Position", "")})
-	@form.Input(form.InputProps{Name: "qty", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "qty", qty), Required: true, Invalid: rowError(st, kind, row, "qty"), AriaLabel: "Menge" + suffix, Attributes: mode("decimal")})
-	@form.Input(form.InputProps{Name: "unit", Value: rowValue(st, kind, row, "unit", unit), AriaLabel: "Mengeneinheit" + suffix, Placeholder: pick(kind == kindNewPosition, "St", "")})
-	@form.Input(form.InputProps{Name: "price", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "price", price), Required: true, Invalid: rowError(st, kind, row, "price"), AriaLabel: "Einheitspreis in Euro" + suffix, Attributes: mode("decimal")})
+	@rowedit.Cell("Pos.-Nr.") {
+		@form.Input(form.InputProps{Name: "no", Class: "mono", Value: rowValue(st, kind, row, "no", no), Required: true, Invalid: rowError(st, kind, row, "no"), AriaLabel: "Pos.-Nr." + suffix})
+	}
+	@rowedit.Cell("Bezeichnung") {
+		@form.Input(form.InputProps{Name: "text", Value: rowValue(st, kind, row, "text", text), Required: true, Invalid: rowError(st, kind, row, "text"), AriaLabel: "Bezeichnung" + suffix, Placeholder: pick(kind == kindNewPosition, "Bezeichnung der Position", "")})
+	}
+	@rowedit.Cell("Menge") {
+		@form.Input(form.InputProps{Name: "qty", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "qty", qty), Required: true, Invalid: rowError(st, kind, row, "qty"), AriaLabel: "Menge" + suffix, Attributes: mode("decimal")})
+	}
+	@rowedit.Cell("ME") {
+		@form.Input(form.InputProps{Name: "unit", Value: rowValue(st, kind, row, "unit", unit), AriaLabel: "Mengeneinheit" + suffix, Placeholder: pick(kind == kindNewPosition, "St", "")})
+	}
+	@rowedit.Cell("EP (€)") {
+		@form.Input(form.InputProps{Name: "price", Class: "kit-rowedit-num", Value: rowValue(st, kind, row, "price", price), Required: true, Invalid: rowError(st, kind, row, "price"), AriaLabel: "Einheitspreis in Euro" + suffix, Attributes: mode("decimal")})
+	}
 }
 
 // --- B-06 create --------------------------------------------------------------------------------------

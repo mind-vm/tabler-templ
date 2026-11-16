@@ -70,7 +70,11 @@ type ListProps struct {
 	// for the text: the list is as wide as its columns need (max-content), so plain fr columns grow with
 	// the fields' natural width, the row gets wider than the dialog, and columns pass under the actions,
 	// which stay at the right.
-	Columns    string
+	Columns string
+	// Mobile turns every row into a card below this breakpoint ("sm", "md" or "lg"; GS-54 of the design
+	// concept): each field with its label above it (wrap the fields in Cell), Save and Delete at the bottom,
+	// Details foldable, the new row a card at the end. Empty: the list scrolls sideways as above.
+	Mobile     string
 	Class      string
 	Attributes templ.Attributes
 }
@@ -80,7 +84,7 @@ type ListProps struct {
 templ List(p ListProps) {
 	@Styles()
 	<div class="kit-rowedit-scroll">
-		<div class={ kit.Classes("kit-rowedit", p.Class) } style={ templ.SafeCSS("--kit-rowedit-columns:" + p.Columns) } { p.Attributes... }>
+		<div class={ kit.Classes("kit-rowedit", kit.If(p.Mobile != "", "kit-rowedit-mobile-"+p.Mobile), p.Class) } style={ templ.SafeCSS("--kit-rowedit-columns:" + p.Columns) } { p.Attributes... }>
 			{ children... }
 		</div>
 	</div>
@@ -118,6 +122,15 @@ templ Row(p RowProps) {
 	>
 		{ children... }
 	</form>
+}
+
+// Cell is a field of a row with its label. The label is for the cards below ListProps.Mobile; at wider
+// screens the Head names the columns and the label is hidden (give the field its aria-label as before).
+templ Cell(label string, class ...string) {
+	<div class={ kit.Classes("kit-rowedit-cell", kit.First(class)) }>
+		<span class="kit-rowedit-label" aria-hidden="true">{ label }</span>
+		{ children... }
+	</div>
 }
 
 // Actions is the last cell of a row: Save and Delete, or Add in the new row. Save comes first, so Enter
@@ -228,7 +241,22 @@ templ Script() {
 
 var scriptOnce = templ.NewOnceHandle()
 
-var styles = csp.Sheet("blocks/rowedit", css)
+var styles = csp.Sheet("blocks/rowedit", css+cards("sm", "575.98px")+cards("md", "767.98px")+cards("lg", "991.98px"))
+
+// cards is the CSS of ListProps.Mobile at one breakpoint: every row a card.
+func cards(bp, max string) string {
+	m := ".kit-rowedit-mobile-" + bp
+	return "\n@media (max-width:" + max + "){" +
+		m + "{min-width:0}" +
+		m + " .kit-rowedit-row{display:flex;flex-direction:column;align-items:stretch;gap:.625rem;padding:.875rem 1rem}" +
+		m + " .kit-rowedit-head{display:none}" +
+		m + " .kit-rowedit-label{display:block;margin-bottom:.25rem;font-size:.75rem;font-weight:500;color:var(--tblr-secondary)}" +
+		m + " .kit-rowedit-details{order:1}" +
+		m + " .kit-rowedit-actions{order:2;position:static;margin:0;padding:0;justify-content:flex-end;background:none}" +
+		m + " .kit-rowedit-num{text-align:left}" +
+		m + " .form-control.kit-rowedit-num{text-align:right}" +
+		"}"
+}
 
 // Styles renders the block's CSS (Tabler variables only), once per page. The block's components render
 // it themselves; calling it is only needed to put it in <head>.
@@ -248,6 +276,9 @@ const css = `.kit-rowedit-hint{margin-bottom:.75rem;font-size:.875rem;color:var(
 .kit-rowedit-num{text-align:right;font-variant-numeric:tabular-nums}
 .kit-rowedit .form-control.kit-rowedit-num{text-align:right}
 .kit-rowedit-actions{position:sticky;right:0;z-index:1;display:flex;gap:.25rem;justify-content:flex-end;align-self:stretch;align-items:center;margin:-.5rem -.75rem -.5rem 0;padding:.5rem .75rem .5rem .5rem;background:inherit}
+.kit-rowedit-cell{min-width:0}
+.kit-rowedit-cell>.form-control,.kit-rowedit-cell>.form-select{width:100%}
+.kit-rowedit-label{display:none}
 .kit-rowedit-details{grid-column:1/-1;margin:0}
 .kit-rowedit-details>summary{display:inline-flex;align-items:center;gap:.25rem;font-size:.8125rem;color:var(--tblr-secondary);cursor:pointer}
 .kit-rowedit-details>summary:hover{color:var(--tblr-body-color)}
