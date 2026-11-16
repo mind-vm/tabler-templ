@@ -62,13 +62,14 @@ all themes are in the bundle.
 | Konzept | `/reference/konzept`, `/reference/konzept/assistent` | the concepts Gestaltung and Assistent, linked both ways | | `markdown` |
 | **B-01** Rahmen | `/reference/rahmen` | header, grouped sidebar, content, panel on the right with tabs; menu and sheet on phones | GS-10 – GS-15, GS-20 – GS-22 | `blocks/shell`, `sidebar`, `blocks/sidepanel`, `themes` |
 | **B-02** Start | `/reference/start` | figures that lead to filtered lists, the list „Brennt“ | GS-30 | `blocks/metric`, `table` |
-| **B-03** Liste | `/reference/kunden` | search (ä = ae), one filter, 25 rows, pages, pills, traffic light, numbers right, state in the URL | GS-31, GS-50 – GS-54 | `blocks/listpage`, `table`, `status`, `badge` |
+| **B-03** Liste | `/reference/kunden`, `/reference/angebote` | search (ä = ae), one filter, 25 rows, pages, pills, traffic light, deadlines with the time left, numbers right, state in the URL; customers scroll in their island, offers become cards below 768 px | GS-31, GS-50 – GS-54 | `blocks/listpage`, `table`, `deadline`, `status`, `badge` |
 | **B-04** Detailseite | `/reference/kunden/K-1001` | islands with one Edit each, dialogs, error in the dialog, addition (note), sub-list with „Alle N“ | GS-32, GS-40 – GS-46 | `blocks/detail` |
-| **B-05** Liste bearbeiten | `/reference/angebote/A-2026-001` | the full-page dialog: save a row (Enter), delete after a question, new row with the next number, total; read-only after submitting (`A-2026-002`) | GS-55 – GS-59 | `blocks/rowedit` (new), `blocks/detail` |
+| **B-05** Liste bearbeiten | `/reference/angebote/A-2026-001` | the full-page dialog: save a row (Enter), delete after a question, a long text in a second line, new row with the next number, total; read-only after submitting (`A-2026-002`), empty list (`A-2026-041`) | GS-55 – GS-59 | `blocks/rowedit`, `blocks/detail` |
 | **B-06** Anlegen | `/reference/kunden/neu` | a page of its own with few fields, then the detail page with a message | GS-33, GS-60 | `blocks/create` |
-| **B-07** Zustände | `/reference/zustaende` | message with next step, empty state, empty search, error pages in the frame, read-only, placeholder while loading | GS-60 – GS-64 | `blocks/shell` (`Flash.Next`), `empty`, `alert`, `placeholder` |
-| **B-08** Marke und Form | `/reference/marke` | tokens, signal colours, font, buttons, pills, traffic light, number and date formats, links | GS-07, GS-15, GS-70 – GS-75 | `themes`, `button`, `badge`, `status` |
+| **B-07** Zustände | `/reference/zustaende` | message with next step, empty state, empty search, error pages in the frame, read-only and demo instance, placeholder while loading, an action with a reason and one with a typed confirmation | GS-44, GS-60 – GS-64 | `blocks/shell` (`Flash`, `Notice`), `blocks/detail`, `empty`, `placeholder` |
+| **B-08** Marke und Form | `/reference/marke` | tokens, signal colours with their contrast, markings, font, buttons, pills, traffic light, number and date formats, links | GS-07, GS-15, GS-70 – GS-76 | `themes`, `mark`, `button`, `badge`, `status` |
 | **B-09** KI-Assistent | `/reference/assistent` | the assistant as a tab of the panel: reads, fills in forms, never saves; bank details refused | GS-13, KA-01 – KA-03, KA-15, KA-20 | `blocks/sidepanel`, `blocks/assistant` |
+| **B-10** Vorschlag prüfen | `/reference/anfragen/R-2026-001` | a work page in three columns: history (from outside, internal), the AI's proposal with confidence, sources and reasons, the context; the person changes and sends, or discards with a reason | GS-34, GS-44, GS-52, GS-76, KA-01 – KA-04 | `blocks/detail`, `mark`, `deadline`, `blocks/assistant` |
 
 B-09 follows the concept [Assistent](https://github.com/mind-vm/auftragsbutler/blob/main/docs/konzepte/assistent.md)
 §6 (KA-xx), which §11 of Gestaltung refers to. The
@@ -87,8 +88,8 @@ name (GSO-05), e.g. `TestGS41_IslandHasAtMostOneAction`, `TestGS45_NoDrawersNoFi
 
 GS-14 (no page scrolls sideways) needs a browser: `scripts/reference.sh` starts the demo and runs
 `scripts/screenshots/reference.mjs`, which takes every page with its dialogs and the panel at the desktop (1400 × 950)
-and on a phone (390 × 844) into `docs/screenshots/reference/`, and fails when a page scrolls sideways, logs an error or
-loads anything from outside.
+and on a phone (390 × 844) into `docs/screenshots/reference/`, checks them at 1366 and 1280 px as well, and fails when a
+page scrolls sideways, logs an error or loads anything from outside.
 
 | Desktop | Phone |
 |---|---|

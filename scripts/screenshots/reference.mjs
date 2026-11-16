@@ -48,6 +48,9 @@ const shots = [
   ["b08-marke", "/marke"],
   ["b09-assistent", "/assistent"],
   // The concepts are long: only the visible part (a "before" step means no full-page picture).
+  ["b10-vorschlag", "/anfragen/R-2026-001"],
+  ["b10-verwerfen", "/anfragen/R-2026-001", async (p) => { await p.click('[data-bs-target="#dialog-verwerfen"]'); await p.waitForSelector("#dialog-verwerfen.show"); await p.waitForTimeout(300); }],
+  ["b10-anfragen", "/anfragen"],
   ["konzept", "/konzept", async () => {}],
   ["konzept-assistent", "/konzept/assistent", async () => {}],
   ["konzept-regel", "/konzept#gs-41", async (p) => { await p.waitForTimeout(1000); }],

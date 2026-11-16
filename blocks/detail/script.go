@@ -82,6 +82,7 @@ const css = `.kit-section{container-type:inline-size}
 .kit-fields dd{min-width:0;margin:0;overflow-wrap:anywhere}
 .kit-fields dd.kit-field-empty{color:var(--tblr-secondary)}
 @container (max-width:320px){.kit-section-action-text{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}.kit-section-action{padding-left:.5rem;padding-right:.5rem}.kit-section-action .ti{margin-right:0}.kit-fields{grid-template-columns:max-content minmax(0,1fr);column-gap:.75rem}}
+@container (max-width:260px){.kit-fields{grid-template-columns:minmax(0,1fr);row-gap:.125rem}.kit-fields dt{margin-top:.375rem}.kit-fields dd{overflow-wrap:break-word}}
 .kit-dialog-context{margin-bottom:.125rem;font-size:.8125rem;color:var(--tblr-secondary)}
 .kit-dialog-footer{justify-content:flex-end;gap:.5rem}
 .kit-dialog-footer>*{margin:0}

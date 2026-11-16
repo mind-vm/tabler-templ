@@ -196,6 +196,7 @@ type Store struct {
 	mu        sync.Mutex
 	customers []*Customer
 	offers    []*Offer
+	requests  []*Request
 	nextID    int
 	readOnly  bool
 	demo      bool
@@ -212,7 +213,7 @@ func NewStore() *Store {
 func (s *Store) Reset() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.customers, s.offers, s.nextID, s.readOnly, s.demo = nil, nil, 0, false, false
+	s.customers, s.offers, s.requests, s.nextID, s.readOnly, s.demo = nil, nil, nil, 0, false, false
 	s.seed()
 }
 
@@ -663,6 +664,7 @@ func (s *Store) Burning() []Offer {
 func day(m time.Month, d int) time.Time { return time.Date(2026, m, d, 0, 0, 0, 0, time.UTC) }
 
 func (s *Store) seed() {
+	defer s.seedRequests()
 	kinds := []string{"Hausverwaltung", "Genossenschaft", "Stiftung", "Bürgerhaus", "Verwaltung", "Zweckverband", "Wohnungsbau", "Gemeindehaus"}
 	places := []string{"Südstadt", "Lindenhof", "Am Markt", "Mühlenweg", "Westend", "Höhenberg", "Seeufer", "Altstadt"}
 	cities := []string{"Musterstadt", "Neustadt", "Altdorf", "Mühlhausen", "Bergheim", "Seefeld", "Talheim", "Großenbach"}

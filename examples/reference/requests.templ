@@ -1,0 +1,222 @@
+package reference
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/mind-vm/tabler-templ/badge"
+	"github.com/mind-vm/tabler-templ/blocks/assistant"
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/blocks/listpage"
+	"github.com/mind-vm/tabler-templ/button"
+	"github.com/mind-vm/tabler-templ/card"
+	"github.com/mind-vm/tabler-templ/deadline"
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/mark"
+	"github.com/mind-vm/tabler-templ/table"
+)
+
+const dialogDiscard = "dialog-verwerfen"
+
+templ requestPill(s RequestStatus) {
+	@badge.Badge(badge.Props{Color: pick(s == RequestOpen, "blue", "secondary"), Light: true, Class: "ref-pill"}) {
+		{ s.Label() }
+	}
+}
+
+templ requestDue(r Request) {
+	if r.Status == RequestOpen {
+		@deadline.Deadline(deadline.Props{Due: r.Due, Now: Now})
+	} else {
+		<span class="ref-num">{ Date(r.Due) }</span>
+	}
+}
+
+templ requestsView(l *listpage.List, rows []Request, names map[string]string) {
+	@listpage.Card(l) {
+		if l.Total == 0 {
+			@emptyList(l, "Anfragen", "Keine Anfragen", "Neue Anfragen von Kunden erscheinen hier.", "", "")
+		} else {
+			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Nowrap: true, Mobile: "md", Class: "ref-table"}) {
+				<thead>
+					<tr><th>Betreff</th><th>Kunde</th><th>Frist</th><th>Stand</th><th>Nummer</th></tr>
+				</thead>
+				<tbody>
+					for _, r := range rows {
+						<tr>
+							<td data-label="Betreff"><a href={ templ.URL(requestURL(r.No)) }>{ r.Subject }</a></td>
+							<td data-label="Kunde">{ names[r.Customer] }</td>
+							<td data-label="Frist">
+								@requestDue(r)
+							</td>
+							<td data-label="Stand">
+								@requestPill(r.Status)
+							</td>
+							<td data-label="Nummer" class="mono">{ r.No }</td>
+						</tr>
+					}
+				</tbody>
+			}
+		}
+	}
+}
+
+templ requestHeading(r Request) {
+	<span class="mono text-secondary">{ r.No }</span>
+	@requestPill(r.Status)
+	@requestDue(r)
+}
+
+// requestView is a work page (GS-34) in three columns: what happened, the proposal to decide on, and the
+// context. Editing in the page is only for the work itself, the reply; the context islands only read.
+templ requestView(r Request, c Customer, open []Offer, canDecide bool, st dialogState) {
+	<div class="row row-cards ref-workpage">
+		<div class="col-xl-3 col-lg-6 order-2 order-xl-1">
+			@detail.Section(detail.SectionProps{Title: "Verlauf", Extra: itoa(len(r.History))}) {
+				@card.Body() {
+					<div class="d-grid gap-3">
+						for _, e := range r.History {
+							@mark.Text(pickKind(e.External), e.Text, mark.TextProps{Label: eventLabel(ctx, e)})
+						}
+					</div>
+				}
+			}
+		</div>
+		<div class="col-xl-6 order-1 order-xl-2">
+			@proposalIsland(r, canDecide, st)
+		</div>
+		<div class="col-xl-3 col-lg-6 order-3">
+			<div class="row row-cards">
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Kunde"}) {
+						@card.Body() {
+							@detail.Fields() {
+								<dt>Name</dt>
+								<dd><a href={ templ.URL(customerURL(c.No)) }>{ c.Name }</a></dd>
+								@fieldOf("Ansprechpartner", c.Contact.Name)
+								@fieldOf("Telefon", c.Contact.Phone)
+								<dt>Offene Posten</dt>
+								<dd>
+									@signal(c.Signal)
+								</dd>
+							}
+						}
+					}
+				</div>
+				<div class="col-12">
+					@detail.Section(detail.SectionProps{Title: "Angebote im Entwurf", Extra: itoa(len(open))}) {
+						@card.Body() {
+							if len(open) == 0 {
+								<p class="text-secondary mb-0">Keine.</p>
+							}
+							<ul class="list-unstyled mb-0 d-grid gap-2">
+								for _, o := range open {
+									<li><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a> <span class="mono text-secondary">{ o.No }</span></li>
+								}
+							</ul>
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+	if canDecide {
+		@detail.Dialog(detail.DialogProps{ID: dialogDiscard, Title: "Vorschlag verwerfen", Context: r.No + " · " + r.Subject, Error: errorOf(st, dialogDiscard)}) {
+			<form method="post" action={ templ.URL(requestURL(r.No) + "/verwerfen") } data-form="verwerfen" novalidate>
+				<p>Die Antwort wird nicht gesendet. Der Grund steht danach im Verlauf.</p>
+				{{ err := st.field(dialogDiscard, "reason") }}
+				@form.Field(form.FieldProps{Label: "Grund", For: "verwerfen-grund", Required: true, Error: err}) {
+					@form.Select(form.SelectProps{ID: "verwerfen-grund", Name: "reason", Empty: "Bitte wählen", Options: reasonOptions(), Selected: st.value(dialogDiscard, "reason", ""), Invalid: err != ""})
+				}
+				@form.Field(form.FieldProps{Label: "Notiz", For: "verwerfen-notiz", Hint: "Freiwillig, nur intern."}) {
+					@form.Textarea(form.TextareaProps{ID: "verwerfen-notiz", Name: "note", Rows: 2, Value: st.value(dialogDiscard, "note", "")})
+				}
+				<div>
+					@button.Button(button.Props{Variant: button.VariantDanger, Icon: "ti-x"}) {
+						Vorschlag verwerfen
+					}
+				</div>
+			</form>
+		}
+		@reopen(st)
+	}
+}
+
+// proposalIsland: the AI's proposal with how sure it is, what it read and why; the person checks, may change
+// the reply and decides. It never sends by itself (Assistent KA-01, KA-02).
+templ proposalIsland(r Request, canDecide bool, st dialogState) {
+	{{ word, color := assistant.Level(r.Proposal.Confidence, assistant.German) }}
+	@detail.Section(detail.SectionProps{Title: "Vorschlag der KI", Extra: "Sicherheit: " + word, Attributes: templ.Attributes{"data-work": true, "data-proposal": true, "data-confidence": color}}) {
+		@card.Body() {
+			<p class="ref-ai-note">
+				@icon.Icon("ti-sparkles")
+				Hier schlägt eine KI vor. Antworten können falsch sein; Sie prüfen, ändern und entscheiden selbst.
+			</p>
+			if r.Status == RequestOpen && canDecide {
+				<form method="post" action={ templ.URL(requestURL(r.No) + "/senden") } id="antwort" data-form="antwort" novalidate>
+					{{ err := st.field("antwort", "reply") }}
+					@form.Field(form.FieldProps{Label: "Antwort an den Kunden", For: "antwort-text", Required: true, Error: err}) {
+						@form.Textarea(form.TextareaProps{ID: "antwort-text", Name: "reply", Rows: 9, Value: st.value("antwort", "reply", r.Proposal.Reply), Invalid: err != ""})
+					}
+				</form>
+			} else {
+				<div class="ref-reply">{ r.Proposal.Reply }</div>
+			}
+			<div class="row mt-3">
+				<div class="col-md-6">
+					<h4 class="ref-subhead">Gelesen</h4>
+					<ul class="mb-0">
+						for _, s := range r.Proposal.Sources {
+							<li><a href={ templ.URL(s.Href) }>{ s.Label }</a></li>
+						}
+					</ul>
+				</div>
+				<div class="col-md-6">
+					<h4 class="ref-subhead">Gründe</h4>
+					<ul class="mb-0">
+						for _, g := range r.Proposal.Reasons {
+							<li>{ g }</li>
+						}
+					</ul>
+				</div>
+			</div>
+		}
+		<div class="card-footer ref-decide">
+			if r.Status == RequestOpen && canDecide {
+				@button.Button(button.Props{Type: "button", Icon: "ti-x", Attributes: templ.Attributes{"data-bs-toggle": "modal", "data-bs-target": "#" + dialogDiscard}}) {
+					Verwerfen
+				}
+				@button.Button(button.Props{Variant: button.VariantPrimary, Icon: "ti-send", Attributes: templ.Attributes{"form": "antwort"}}) {
+					Antwort senden
+				}
+			} else if r.Status != RequestOpen {
+				<span class="text-secondary">Entschieden: { r.Status.Label() }. Was gesendet oder verworfen wurde, steht im Verlauf.</span>
+			}
+		</div>
+	}
+}
+
+func pickKind(external bool) mark.Kind {
+	if external {
+		return mark.External
+	}
+	return mark.Internal
+}
+
+// eventLabel: „von außen · Erika Beispiel · 14.11.2026, 16:02“.
+func eventLabel(ctx context.Context, e Event) string {
+	k := "intern, nie gesendet"
+	if e.External {
+		k = "von außen"
+	}
+	return fmt.Sprintf("%s · %s · %s", k, e.Who, e.At.Format("02.01.2006, 15:04"))
+}
+
+func reasonOptions() []form.Option {
+	var os []form.Option
+	for _, r := range DiscardReasons {
+		os = append(os, form.Option{Value: r, Label: r})
+	}
+	return os
+}

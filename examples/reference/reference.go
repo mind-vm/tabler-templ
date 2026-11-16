@@ -65,11 +65,13 @@ const (
 	pathStates    = Home + "/zustaende"
 	pathBrand     = Home + "/marke"
 	pathAssistant = Home + "/assistent"
+	pathRequests  = Home + "/anfragen"
 	pathStatic    = Home + "/static/"
 )
 
 func customerURL(no string) string { return pathCustomers + "/" + no }
 func offerURL(no string) string    { return pathOffers + "/" + no }
+func requestURL(no string) string  { return pathRequests + "/" + no }
 
 //go:embed all:static
 var embedded embed.FS
@@ -123,6 +125,10 @@ func RegisterWith(mux *http.ServeMux, store *Store) *App {
 	mux.HandleFunc("POST "+pathOffers+"/{no}/positionen", a.writes(a.addPosition))
 	mux.HandleFunc("POST "+pathOffers+"/{no}/positionen/{id}", a.writes(a.savePosition))
 	mux.HandleFunc("POST "+pathOffers+"/{no}/positionen/{id}/loeschen", a.writes(a.deletePosition))
+	mux.HandleFunc("GET "+pathRequests, a.requests)
+	mux.HandleFunc("GET "+pathRequests+"/{no}", a.request)
+	mux.HandleFunc("POST "+pathRequests+"/{no}/senden", a.writes(a.sendReply))
+	mux.HandleFunc("POST "+pathRequests+"/{no}/verwerfen", a.writes(a.discard))
 	mux.HandleFunc("GET "+pathStates, a.states)
 	mux.HandleFunc("GET "+pathStates+"/zahlen", a.lateFigures)
 	mux.HandleFunc("GET "+pathStates+"/keine-rechte", a.forbidden)
@@ -634,6 +640,85 @@ func (a *App) concept(c concept) http.HandlerFunc {
 	}
 }
 
+var requestFilter = listpage.Filter{Name: "stand", Label: "Alle Stände", Options: func() []listpage.Option {
+	var os []listpage.Option
+	for _, s := range RequestStatuses {
+		os = append(os, listpage.Option{Value: string(s), Label: s.Label()})
+	}
+	return os
+}()}
+
+func (a *App) requests(w http.ResponseWriter, r *http.Request) {
+	names := a.customerNames()
+	l := listpage.New(r, listpage.Config{Placeholder: "Betreff, Kunde oder Nummer"}, requestFilter)
+	all := a.store.Requests()
+	// GS-53: open ones first, by deadline.
+	slices.SortStableFunc(all, func(x, y Request) int {
+		if (x.Status == RequestOpen) != (y.Status == RequestOpen) {
+			if x.Status == RequestOpen {
+				return -1
+			}
+			return 1
+		}
+		return x.Due.Compare(y.Due)
+	})
+	rows := listpage.Paginate(l, all, func(q Request) bool {
+		return (l.Value("stand") == "" || string(q.Status) == l.Value("stand")) && matches(l.Query, q.Subject, q.No, names[q.Customer])
+	})
+	a.render(w, r, 0, page{Key: "requests", Title: "Anfragen", Crumbs: []shell.Crumb{{Text: "Erledigen"}, {Text: "Anfragen"}}}, requestsView(l, rows, names))
+}
+
+func (a *App) request(w http.ResponseWriter, r *http.Request) { a.requestWith(w, r, 0, dialogState{}) }
+
+func (a *App) requestWith(w http.ResponseWriter, r *http.Request, status int, st dialogState) {
+	q, ok := a.store.Request(r.PathValue("no"))
+	if !ok {
+		a.errorPage(w, r, http.StatusNotFound)
+		return
+	}
+	c, _ := a.store.Customer(q.Customer)
+	var open []Offer
+	for _, o := range a.store.OffersOf(c.No) {
+		if o.Status == OfferDraft {
+			open = append(open, o)
+		}
+	}
+	a.render(w, r, status, page{Key: "B-10", Title: q.Subject, HeadingExtra: requestHeading(q),
+		Crumbs: []shell.Crumb{{Text: "Erledigen"}, {Text: "Anfragen", Href: pathRequests}, {Text: q.No}}}, requestView(q, c, open, !a.store.ReadOnly(), st))
+}
+
+func (a *App) sendReply(w http.ResponseWriter, r *http.Request) {
+	no := r.PathValue("no")
+	q, err := a.store.Send(no, r.PostFormValue("reply"))
+	var errs FieldErrors
+	switch {
+	case errors.Is(err, ErrNotFound):
+		a.errorPage(w, r, http.StatusNotFound)
+	case errors.As(err, &errs):
+		a.requestWith(w, r, http.StatusUnprocessableEntity, failed("antwort", r, err))
+	case err != nil:
+		done(w, r, requestURL(no), flashData{Variant: "danger", Text: err.Error()})
+	default:
+		done(w, r, requestURL(no), flashData{Text: "Antwort an " + a.customerNames()[q.Customer] + " gesendet.", Next: "Zur nächsten Anfrage", NextHref: pathRequests + "?stand=" + string(RequestOpen)})
+	}
+}
+
+func (a *App) discard(w http.ResponseWriter, r *http.Request) {
+	no := r.PathValue("no")
+	_, err := a.store.Discard(no, r.PostFormValue("reason"), r.PostFormValue("note"))
+	var errs FieldErrors
+	switch {
+	case errors.Is(err, ErrNotFound):
+		a.errorPage(w, r, http.StatusNotFound)
+	case errors.As(err, &errs):
+		a.requestWith(w, r, http.StatusUnprocessableEntity, failed(dialogDiscard, r, err))
+	case err != nil:
+		done(w, r, requestURL(no), flashData{Variant: "danger", Text: err.Error()})
+	default:
+		done(w, r, requestURL(no), flashData{Text: "Vorschlag verworfen; nichts wurde gesendet.", Next: "Zur nächsten Anfrage", NextHref: pathRequests + "?stand=" + string(RequestOpen)})
+	}
+}
+
 // --- error pages in the frame (GS-62) -------------------------------------------------------------
 
 func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
@@ -662,6 +747,6 @@ var errorTexts = map[int]errorText{
 }
 
 // pageKeys are the keys the sidebar marks; tests use them.
-var pageKeys = []string{"concept", "overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
+var pageKeys = []string{"requests", "B-10", "concept", "overview", "B-01", "B-02", "B-03", "offers", "B-04", "B-05", "B-06", "B-07", "B-08", "B-09"}
 
 func knownKey(k string) bool { return slices.Contains(pageKeys, k) }

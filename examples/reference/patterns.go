@@ -100,6 +100,15 @@ var patterns = []pattern{
 		Blocks:  []block{{"blocks/sidepanel", "Aside, Buttons"}, {"blocks/assistant", "Conversation, Catalog, Stream, ActionScript, Transcript, German"}},
 		Link:    pathConceptAssistant + "#6-wo-er-erscheint",
 		Note:    "Die Regeln KA-xx stehen im Konzept Assistent. Ein Produkt zum Selbstbetrieb bietet den Assistenten nur mit einem Anbieter an, den der Betreiber gewählt hat; vertrauliche Daten sind nie Werkzeug."},
+	{ID: "B-10", Name: "Vorschlag prüfen", Path: requestURL("R-2026-001"),
+		Summary: "KI als Fachteil auf einer Arbeitsseite in drei Spalten: Vorschlag mit Quellen und Gründen, die Person entscheidet.",
+		What:    "Eine KI bereitet die Arbeit vor, hier die Antwort auf eine Anfrage; der Mensch prüft, ändert und entscheidet. Die Arbeitsseite zeigt in drei Spalten, was geschah, den Vorschlag und den Zusammenhang.",
+		When:    "Wo ein Agent einen Schritt vorschlägt, der nach außen wirkt. Er sendet nie selbst; Verwerfen fragt nach dem Grund.",
+		Try:     "Ändern Sie die Antwort und senden Sie sie: Der Verlauf zeigt sie als geändert. Oder verwerfen Sie ohne Grund: Der Dialog öffnet sich mit dem Fehler am Feld wieder.",
+		Rules:   []string{"GS-34", "GS-44", "GS-52", "GS-76", "KA-01", "KA-02", "KA-03", "KA-04"},
+		Blocks:  []block{{"blocks/detail", "Section, Dialog"}, {"mark", "Text"}, {"deadline", "Deadline"}, {"blocks/assistant", "Level, German"}},
+		Link:    pathConcept + "#5-seitentypen",
+		Note:    "Bearbeiten in der Seite gilt hier nur für die Arbeit selbst, die Antwort. Die Inseln mit dem Zusammenhang lesen nur."},
 }
 
 var overviewText = pattern{ID: "Übersicht", Name: "Referenz der Gestaltung",
