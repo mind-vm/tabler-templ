@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **`mcpapp`** (new): tabler-templ pages as [MCP Apps](https://modelcontextprotocol.io/docs/extensions/apps)
+  (formerly MCP-UI, stable spec 2026-01-26). `Document`/`Page` is the UI resource with Tabler and a small bridge
+  script (JSON-RPC over postMessage: `ui/initialize`, tool input and result, theme, size); `Tool`, `Target`,
+  `Prompt` and `Result` say what elements do (`tools/call`, `ui/message`; links go through `ui/open-link`);
+  `ToolMeta`, `AppToolMeta`, `ResultMeta` and `ResourceMeta` are the `_meta` an MCP SDK needs. No MCP SDK
+  dependency.
+- **`examples/mcpapp`:** an order list as an MCP App, with a host simulation in the demo at `/mcpapp`.
+
 ## v0.24.0
 
 - **`blocks/detail`:** `TypedConfirm` is a typed confirmation in a dialog, for an action that cannot be undone

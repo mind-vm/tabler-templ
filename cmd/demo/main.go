@@ -17,6 +17,7 @@ import (
 	"github.com/mind-vm/tabler-templ/compress"
 	"github.com/mind-vm/tabler-templ/examples/copilot"
 	"github.com/mind-vm/tabler-templ/examples/crud"
+	mcpappdemo "github.com/mind-vm/tabler-templ/examples/mcpapp"
 	"github.com/mind-vm/tabler-templ/examples/reference"
 
 	"github.com/mind-vm/tabler-templ/versions"
@@ -98,6 +99,7 @@ func handler() http.Handler {
 	enterpriseRoutes(mux)
 	crud.Register(mux)
 	copilot.Register(mux)
+	mcpappdemo.Register(mux)
 	reference.Register(mux)
 	motionRoutes(mux)
 	soundRoutes(mux)
