@@ -15,6 +15,10 @@
   `Details` is an optional second line of a row for long texts, closed and open after an error in it (GS-56,
   Gestaltung v0.7).
 - **`examples/reference`:** concept copy at Gestaltung v0.7; B-05 shows a long text per position.
+- **`themes`:** links and the focus ring meet WCAG AA in every theme (GS-07): `SignalCSS` draws the focus ring in
+  the primary colour in full (Tabler: 50 % over the ground), and `Theme.Accent`/`AccentDark` give links and the
+  ring a darker tone where the primary colour is too light. Amber, Emerald, Rose and Sunset take their 700/800
+  shade for links; their buttons and areas stay as they were.
 
 ## v0.19.0
 

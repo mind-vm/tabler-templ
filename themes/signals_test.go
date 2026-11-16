@@ -99,3 +99,45 @@ func TestGS07_ValuesOfTheConcept(t *testing.T) {
 		}
 	}
 }
+
+func hexOf(rgb string) string {
+	var r, g, b int
+	fmt.Sscanf(rgb, "%d, %d, %d", &r, &g, &b)
+	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
+}
+
+// GS-07: links are text (4.5:1) and the focus ring of fields a line (3:1), in every theme, in light and dark
+// mode. Both take the theme's Accent, else its primary colour (SignalCSS draws the ring in full).
+func TestGS07_LinksAndFocusRing(t *testing.T) {
+	assert.Contains(t, SignalCSS(), "--tblr-focus-ring-opacity:1;--tblr-focus-ring-opacity-dark:1")
+	for _, th := range All {
+		if th.Primary == "" {
+			continue // a Tabler colour (Settings.Primary), checked by Tabler
+		}
+		light := th.Primary
+		if th.Accent != "" {
+			light = th.Accent
+		}
+		l := hexOf(rgbOf(light))
+		// Dark mode: AccentDark, else Tabler's dark link, the dark primary colour with 40 % white.
+		var d string
+		if th.AccentDark != "" {
+			d = hexOf(rgbOf(th.AccentDark))
+		} else {
+			pd := th.PrimaryDark
+			if pd == "" {
+				pd = th.Primary
+			}
+			c := mix("#FFFFFF", hexOf(rgbOf(pd)), 0.4)
+			d = fmt.Sprintf("#%02X%02X%02X", int(c[0]+0.5), int(c[1]+0.5), int(c[2]+0.5))
+		}
+		if th.Mode != "dark" {
+			for _, bg := range LightBackgrounds {
+				assert.GreaterOrEqual(t, Contrast(l, bg), 4.5, "%s: link %s on %s", th.Label, l, bg)
+			}
+		}
+		for _, bg := range DarkBackgrounds {
+			assert.GreaterOrEqual(t, Contrast(d, bg), 4.5, "%s dark: link %s on %s", th.Label, d, bg)
+		}
+	}
+}

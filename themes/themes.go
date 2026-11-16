@@ -66,6 +66,10 @@ type Theme struct {
 	// Primary is the accent color for light mode and PrimaryDark for dark mode (default Primary), any CSS
 	// color, when Settings.Primary has no Tabler color for it. PrimaryFg is the text on it.
 	Primary, PrimaryDark, PrimaryFg string
+	// Accent is the primary colour's tone for links and the focus ring when Primary is too light for them
+	// (text needs 4.5:1, a line 3:1; GS-07 of the design concept), e.g. the 700 shade; AccentDark the same in
+	// dark mode. Empty Accent: Primary; empty AccentDark: Tabler's dark link (primary with 40 % white).
+	Accent, AccentDark string
 	// Grays is a gray palette (shades 50 to 950) when Settings.Base has none for it.
 	Grays []string
 	Font  *Font // the body font, instead of Settings.Font
@@ -128,6 +132,17 @@ func (t Theme) CSS() string {
 		}
 		if t.PrimaryFg != "" {
 			fmt.Fprintf(&b, "--tblr-primary-fg:%s;", t.PrimaryFg)
+		}
+		b.WriteString("}")
+	}
+	if t.Accent != "" {
+		dark := t.AccentDark
+		if dark == "" { // Tabler's own dark link: the primary colour lightened with 40 % white
+			dark = "color-mix(in oklab, var(--tblr-white) 40%, var(--tblr-primary))"
+		}
+		fmt.Fprintf(&b, "%s:not([data-bs-theme-primary]){--tblr-link-color:light-dark(%[2]s,%[3]s);--tblr-link-hover-color:light-dark(%[2]s,%[3]s);--tblr-focus-ring-color:light-dark(%[2]s,%[3]s);", sel, t.Accent, dark)
+		if rgb := rgbOf(t.Accent); rgb != "" {
+			fmt.Fprintf(&b, "--tblr-link-color-rgb:%s;", rgb)
 		}
 		b.WriteString("}")
 	}
@@ -197,21 +212,21 @@ var (
 		Settings: theme.Settings{Primary: theme.Inverted, Base: theme.Stone, Font: theme.Serif, Radius: theme.Radius0}}
 
 	Rose = Theme{Name: "rose", Label: "Rose", Description: "Rose on zinc, set in Inter.",
-		Settings: theme.Settings{Base: theme.Zinc}, Primary: Tailwind("rose", 600), PrimaryDark: Tailwind("rose", 500), Font: ptr(Inter)}
+		Settings: theme.Settings{Base: theme.Zinc}, Primary: Tailwind("rose", 600), PrimaryDark: Tailwind("rose", 500), Accent: Tailwind("rose", 700), Font: ptr(Inter)}
 	Violet = Theme{Name: "violet", Label: "Violet", Description: "Violet on mauve, set in Geist, with round corners.",
 		Settings: theme.Settings{Radius: theme.Radius15}, Primary: Tailwind("violet", 600), PrimaryDark: Tailwind("violet", 500),
 		Grays: TailwindGrays("mauve"), Font: ptr(Geist), Mono: ptr(GeistMono)}
 	Amber = Theme{Name: "amber", Label: "Amber", Description: "Amber with dark text on warm gray, set in Nunito.",
 		Settings: theme.Settings{Base: theme.Stone, Radius: theme.Radius15}, Primary: Tailwind("amber", 500), PrimaryDark: Tailwind("amber", 400),
-		PrimaryFg: Tailwind("amber", 950), Font: ptr(Nunito)}
+		PrimaryFg: Tailwind("amber", 950), Accent: Tailwind("amber", 800), Font: ptr(Nunito)}
 	Emerald = Theme{Name: "emerald", Label: "Emerald", Description: "Emerald on olive gray, set in DM Sans.",
-		Primary: Tailwind("emerald", 600), PrimaryDark: Tailwind("emerald", 500), Grays: TailwindGrays("olive"), Font: ptr(DMSans)}
+		Primary: Tailwind("emerald", 600), PrimaryDark: Tailwind("emerald", 500), Accent: Tailwind("emerald", 700), Grays: TailwindGrays("olive"), Font: ptr(DMSans)}
 	Graphite = Theme{Name: "graphite", Label: "Graphite", Description: "Monochrome with Geist and Geist Mono, small corners.",
 		Settings: theme.Settings{Base: theme.Neutral, Radius: theme.Radius05}, Primary: Tailwind("neutral", 900), PrimaryDark: Tailwind("neutral", 50),
 		PrimaryFg: "light-dark(var(--tblr-light), var(--tblr-dark))", Font: ptr(Geist), Mono: ptr(GeistMono)}
 	Sunset = Theme{Name: "sunset", Label: "Sunset", Description: "Orange on taupe, set in Outfit, with the roundest corners.",
 		Settings: theme.Settings{Radius: theme.Radius2}, Primary: Tailwind("orange", 600), PrimaryDark: Tailwind("orange", 500),
-		Grays: TailwindGrays("taupe"), Font: ptr(Outfit)}
+		Accent: Tailwind("orange", 700), Grays: TailwindGrays("taupe"), Font: ptr(Outfit)}
 	Midnight = Theme{Name: "midnight", Label: "Midnight", Description: "Dark by default: indigo on blue-gray, set in Manrope.",
 		Mode: "dark", Settings: theme.Settings{Base: theme.Slate}, Primary: Tailwind("indigo", 600), PrimaryDark: Tailwind("indigo", 400),
 		Font: ptr(Manrope), Mono: ptr(JetBrainsMono)}

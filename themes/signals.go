@@ -89,11 +89,13 @@ func rgbTriplet(hex string) string {
 }
 
 // SignalCSS sets the signal colours and makes Tabler's coloured text use their dark tones: pills
-// (bg-*-lt), statuses, text-*, alerts, filled badges and buttons. It applies in every theme; load it after
+// (bg-*-lt), statuses, text-*, alerts, filled badges and buttons. The focus ring of fields takes the
+// primary colour in full, so it reaches 3:1 in every theme. It applies in every theme; load it after
 // Tabler and the theme.
 func SignalCSS() string {
 	var b strings.Builder
-	b.WriteString(":root{")
+	// The focus ring is a line (3:1): the primary colour in full, not at Tabler's 50 % over the ground.
+	b.WriteString(":root{--tblr-focus-ring-opacity:1;--tblr-focus-ring-opacity-dark:1;")
 	for _, s := range Signals {
 		fmt.Fprintf(&b, "--kit-signal-%s:%s;--kit-signal-%s-text:%s;", s.Name, s.Dot, s.Name, s.Text)
 		for _, c := range s.Classes {
