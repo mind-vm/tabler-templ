@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.24.0
+
+- **`blocks/detail`:** `TypedConfirm` is a typed confirmation in a dialog, for an action that cannot be undone
+  (close a month, end a contract, delete for good; GS-44, GSO-26): the field with „Zur Bestätigung „…“ tippen“
+  and its error, and with `Script` the form's submit buttons stay disabled until the word matches. The server
+  checks with `TypedMatches` (case and spaces do not matter) and `TypedError` (asked by Buchhalter). New texts
+  `kit.Messages.TypeToConfirm` and `TypedMismatch`. The reference (B-07) uses it, and its browser check types the name.
+- **No inline event handlers:** `csp_test.go` fails on `onclick=`, `onsubmit=` … in the packages and examples; the
+  README says to use `data-kit-confirm` instead of `return confirm(…)`, which a Content-Security-Policy blocks and
+  `hx-boost` passes over (found by Buchhalter).
+- **`themes`:** the README and the docs of `Fixed` and `ApplyShell` say to keep the fixed theme in one variable, and
+  that `Apply…` set the theme's base, which an app that set only the theme's attribute did not have (Vergabe).
+- The gaps for a partial navigation in `blocks/shell` (option b of GSO-49) are kept in issue #90; nothing is planned.
+
 ## v0.23.0
 
 - **`cmd/static`:** cuts the filled icons' webfont down too, to the used icons that have a filled variant

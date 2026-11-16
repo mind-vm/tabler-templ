@@ -1,0 +1,60 @@
+package detail
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/mind-vm/tabler-templ/form"
+	"github.com/mind-vm/tabler-templ/kit"
+)
+
+// TypedConfirmProps is a typed confirmation in a dialog: for an action that cannot be undone and has
+// consequences (close a month, end a contract, delete for good), the user types a word or a name first
+// (GS-44 of the design concept „Gestaltung“, GSO-26).
+type TypedConfirmProps struct {
+	ID     string // of the field; required
+	Name   string // of the field, default "confirm"
+	Expect string // what to type, e.g. the customer's name or "ABSCHLIESSEN"
+	// Label above the field, default kit.T(ctx).TypeToConfirm with Expect.
+	Label string
+	Value string // the value typed, after an error (Script restores it from the dialog's state too)
+	// Error under the field; TypedError gives the usual one.
+	Error string
+}
+
+// TypedConfirm is the field of a typed confirmation, inside the dialog's form before its red button.
+// With Script the form's submit buttons stay disabled until the field matches (case and spaces do not
+// matter); the server checks with TypedMatches all the same.
+//
+//	@detail.Dialog(detail.DialogProps{ID: "dialog-delete", Title: "Delete customer", Error: st.Error("dialog-delete")}) {
+//		<form method="post" action="/customers/1/delete">
+//			<p>The customer and its offers are deleted. This cannot be undone.</p>
+//			@detail.TypedConfirm(detail.TypedConfirmProps{ID: "delete-name", Expect: c.Name, Error: fieldErr})
+//			<div><button class="btn btn-danger">Delete for good</button></div>
+//		</form>
+//	}
+templ TypedConfirm(p TypedConfirmProps) {
+	@form.Field(form.FieldProps{Label: typedLabel(ctx, p), For: p.ID, Required: true, Error: p.Error}) {
+		@form.Input(form.InputProps{ID: p.ID, Name: kit.Or(p.Name, "confirm"), Value: p.Value, Required: true, Invalid: p.Error != "", Autocomplete: "off",
+			Attributes: templ.Attributes{"data-kit-typed": p.Expect, "spellcheck": "false", "autocapitalize": "off"}})
+	}
+}
+
+func typedLabel(ctx context.Context, p TypedConfirmProps) string {
+	if p.Label != "" {
+		return p.Label
+	}
+	return fmt.Sprintf(kit.T(ctx).TypeToConfirm, p.Expect)
+}
+
+// TypedMatches reports whether typed is expect, ignoring case and spaces at the ends and between words.
+func TypedMatches(typed, expect string) bool {
+	norm := func(s string) string { return strings.Join(strings.Fields(s), " ") }
+	return expect != "" && strings.EqualFold(norm(typed), norm(expect))
+}
+
+// TypedError is the error for a field that does not match: kit.T(ctx).TypedMismatch with expect.
+func TypedError(ctx context.Context, expect string) string {
+	return fmt.Sprintf(kit.T(ctx).TypedMismatch, expect)
+}

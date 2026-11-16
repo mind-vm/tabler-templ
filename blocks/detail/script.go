@@ -117,4 +117,8 @@ open(d.firstElementChild||d)}
 var state=window[cfg.stateVar];if(state)restore(state);else{try{var o=sessionStorage.getItem("kitDialogOpen");sessionStorage.removeItem("kitDialogOpen");var od=o&&document.getElementById(o);if(od&&bs)bs.Modal.getOrCreateInstance(od).show()}catch(_){}}
 document.addEventListener("click",function(e){var b=e.target.closest?e.target.closest("["+cfg.valuesAttribute+"][data-bs-target],["+cfg.actionAttribute+"][data-bs-target]"):null;if(!b)return;var d=document.querySelector(b.getAttribute("data-bs-target"));var f=d&&d.querySelector("form");if(!f)return;
 var vals={};try{vals=JSON.parse(b.getAttribute(cfg.valuesAttribute)||"{}")||{}}catch(_){return}var err=d.querySelector(".kit-dialog-error");if(err)err.remove();
-Object.keys(vals).forEach(function(n){var fld=f.elements.namedItem(n);if(fld&&fld.tagName)fld.value=vals[n]===null||vals[n]===undefined?"":String(vals[n])});var act=b.getAttribute(cfg.actionAttribute);if(act&&/^\/(?![\/\\])/.test(act))f.setAttribute("action",act)},true);`
+Object.keys(vals).forEach(function(n){var fld=f.elements.namedItem(n);if(fld&&fld.tagName)fld.value=vals[n]===null||vals[n]===undefined?"":String(vals[n])});var act=b.getAttribute(cfg.actionAttribute);if(act&&/^\/(?![\/\\])/.test(act))f.setAttribute("action",act)},true);
+function norm(v){return String(v||"").trim().replace(/\s+/g," ").toLowerCase()}
+function typed(){document.querySelectorAll("input[data-kit-typed]").forEach(function(i){var f=i.form;if(!f)return;var ok=norm(i.value)===norm(i.getAttribute("data-kit-typed"));
+Array.from(f.elements).forEach(function(b){if(b.type==="submit"&&(b.tagName==="BUTTON"||b.tagName==="INPUT"))b.disabled=!ok})})}
+document.addEventListener("input",function(e){if(e.target.matches&&e.target.matches("input[data-kit-typed]"))typed()});typed();`

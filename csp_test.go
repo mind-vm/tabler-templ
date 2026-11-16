@@ -120,3 +120,43 @@ func TestNonceSource(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+var inlineHandler = regexp.MustCompile(`\son[a-z]+\s*=\s*["'{]`)
+
+// TestNoInlineHandlers checks the packages and examples (not the demo): no onclick=, onsubmit= …, which a
+// Content-Security-Policy blocks and hx-boost skips. A question before a form is sent is data-kit-confirm
+// (rowedit.Script), a typed confirmation detail.TypedConfirm (found by Buchhalter: return confirm(…) in
+// onsubmit was passed over).
+func TestNoInlineHandlers(t *testing.T) {
+	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			switch path {
+			case ".git", "cmd/demo", "docs", "node_modules", "scripts":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !(strings.HasSuffix(path, ".templ") || strings.HasSuffix(path, ".html")) {
+			return nil
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		for i, line := range strings.Split(string(b), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "//") {
+				continue
+			}
+			if inlineHandler.MatchString(line) {
+				t.Errorf("%s:%d: inline event handler, use a script with a nonce (or data-kit-confirm): %s", path, i+1, strings.TrimSpace(line))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

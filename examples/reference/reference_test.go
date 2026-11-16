@@ -7,13 +7,13 @@ package reference
 import (
 	"bytes"
 	"io"
-	"os/exec"
 	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"testing"
@@ -650,10 +650,11 @@ func TestGS44_TypedConfirmation(t *testing.T) {
 	cu, _ := c.app.store.Customer(customerToDelete)
 	got, body, _ := c.post(pathStates+"/kunde-loeschen", url.Values{"confirm": {"ja"}})
 	assert.Equal(t, http.StatusUnprocessableEntity, got)
-	assert.Contains(t, body, "Bitte tippen Sie den Namen genau so: "+cu.Name)
+	assert.Contains(t, body, "Bitte genau so tippen: "+cu.Name)
+	assert.Contains(t, body, `data-kit-typed="`+cu.Name+`"`, "the block detail.TypedConfirm")
 	_, ok := c.app.store.Customer(customerToDelete)
 	assert.True(t, ok, "nothing deleted")
-	_, body, _ = c.post(pathStates+"/kunde-loeschen", url.Values{"confirm": {cu.Name}})
+	_, body, _ = c.post(pathStates+"/kunde-loeschen", url.Values{"confirm": {"  " + strings.ToUpper(cu.Name) + " "}})
 	assert.Contains(t, body, "Kunde "+cu.Name+" endgültig gelöscht.")
 	_, ok = c.app.store.Customer(customerToDelete)
 	assert.False(t, ok)

@@ -45,6 +45,16 @@ const shots = [
   ["b06-anlegen", "/kunden/neu"],
   ["b07-zustaende", "/zustaende?meldung=1", async (p) => { await p.waitForSelector("[data-ref-load]:not([aria-busy])"); }],
   ["b07-grund", "/zustaende", async (p) => { await p.click('[data-bs-target="#dialog-zuruecknehmen"]'); await p.waitForSelector("#dialog-zuruecknehmen.show"); await p.waitForTimeout(300); }],
+  // GS-44: the red button stays disabled until the name is typed (detail.TypedConfirm); case and spaces do not matter.
+  ["b07-getippt", "/zustaende", async (p) => {
+    await p.click('[data-bs-target="#dialog-loeschen"]'); await p.waitForSelector("#dialog-loeschen.show");
+    const red = p.locator("#dialog-loeschen .modal-footer .btn-danger");
+    if (!(await red.isDisabled())) throw new Error("b07-getippt: the red button is enabled before typing");
+    const name = await p.getAttribute("#loeschen-name", "data-kit-typed");
+    await p.fill("#loeschen-name", "  " + name.toUpperCase() + " ");
+    if (await red.isDisabled()) throw new Error("b07-getippt: the red button stays disabled after typing the name");
+    await p.waitForTimeout(300);
+  }],
   ["b07-fehlerseite", "/gibt-es-nicht", null, 404],
   ["b08-marke", "/marke"],
   ["b09-assistent", "/assistent"],

@@ -55,6 +55,9 @@ type Messages struct {
 	TakePhoto  string
 	NoFile     string
 	DropHere   string
+	// Typed confirmation (detail.TypedConfirm): the label and the error, fmt with the word to type.
+	TypeToConfirm string // "To confirm, type “%s”"
+	TypedMismatch string // "Please type exactly: %s"
 	// Package mark: text from outside and internal notes.
 	MarkExternal string
 	MarkInternal string
@@ -91,6 +94,7 @@ var (
 		RowsHint: "Each row is saved on its own.", SaveRow: "Save row", DeleteRow: "Delete row", AddRow: "Add",
 		MarkExternal: "from outside", MarkInternal: "internal, never sent",
 		ChooseFile: "Choose file", TakePhoto: "Take photo", NoFile: "No file chosen", DropHere: "Drop to upload",
+		TypeToConfirm: "To confirm, type “%s”", TypedMismatch: "Please type exactly: %s",
 		DeadlineLeft: "%s left", DeadlineOverdue: "overdue by %s", Minutes: "%d min", Hours: "%d h", Days: "%d days", DateTime: "2006-01-02 15:04",
 		Create: "Create", NoEntries: "No entries.",
 		SignIn: "Sign in", Username: "User name", Password: "Password", Remember: "Stay signed in",
@@ -106,6 +110,7 @@ var (
 		RowsHint: "Jede Zeile wird für sich gespeichert.", SaveRow: "Zeile speichern", DeleteRow: "Zeile löschen", AddRow: "Hinzufügen",
 		MarkExternal: "von außen", MarkInternal: "intern, nie gesendet",
 		ChooseFile: "Datei wählen", TakePhoto: "Foto aufnehmen", NoFile: "Keine Datei gewählt", DropHere: "Zum Hochladen loslassen",
+		TypeToConfirm: "Zur Bestätigung „%s“ tippen", TypedMismatch: "Bitte genau so tippen: %s",
 		DeadlineLeft: "noch %s", DeadlineOverdue: "überfällig seit %s", Minutes: "%d Min.", Hours: "%d Std.", Days: "%d Tage", DaysSince: "%d Tagen", DateTime: "02.01.2006, 15:04 Uhr",
 		Create: "Anlegen", NoEntries: "Keine Einträge.",
 		SignIn: "Anmelden", Username: "Benutzername", Password: "Passwort", Remember: "Angemeldet bleiben",
