@@ -5,6 +5,9 @@
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
   the cache, the icon subset with a test (`cmd/static -check`), and only the active theme's fonts, which the theme
   picker now adds when it switches (it linked the fonts of all themes before). Concept copy at Gestaltung v0.12.
+- **`blocks/rowedit`:** `ListProps.Mobile` ("sm", "md", "lg") turns every row into a card below that breakpoint:
+  each field with its label above it (`rowedit.Cell`), Save and Delete at the bottom, Details foldable, the new
+  row a card at the end (GS-56, Gestaltung v0.13). B-05 shows it; the concept copy is at v0.13.
 - **`cmd/static`** also writes the filled icons' webfont; **`static.WithFilledIcons`** loads it from the bundle
   instead of cdn.Base.
 - **`themes`:** `Styles()` is the CSS of all themes as one of the kit's sheets; `Head()` without arguments renders
