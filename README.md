@@ -656,8 +656,8 @@ no script, nothing to license. The props carry the names of `chart.Props` (`svg.
   `chart.Pie`, `chart.Donut` (`Hollow`) and `chart.RadialBar` (one ring with its value in the middle, or
   several; `StartAngle`/`EndAngle` for a half gauge or Tabler's radial). `Sparkline` drops axes and grid.
 - **Look:** Tabler's chart palette and colors as CSS variables, so themes and dark mode apply; axis and value
-  labels are HTML over a stretched SVG, so the text keeps its size at any width (every other category label
-  goes on narrow charts); round charts keep their aspect ratio. The chart's CSS (about 2 kB) is rendered
+  labels are HTML over a stretched SVG, so the text keeps its size at any width (on narrow charts up to 4 long
+  category labels wrap onto two lines, of more every other one goes); round charts keep their aspect ratio. The chart's CSS (about 2 kB) is rendered
   once per page through `internal/csp` (nonce, or the kit's CSS file with `static`).
 - **Reading:** a tooltip per bar, slice and ring, and one per category with all its values (`<title>`, no
   script). The chart is one image for screen readers (`role="img"`, `Label`); `Table` adds the data as a
