@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **`static`:** the order of `New`'s options no longer matters. With `WithFilledIcons` before `WithKitCSS`, the
+  bundle was loaded before it knew about `kit/kit.css`: the stylesheet was missing, its address had no version and
+  answered 404, while the inline CSS was already off (found by Vergabe).
+
 ## v0.22.0
 
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
