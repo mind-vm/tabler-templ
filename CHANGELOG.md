@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **`blocks/rowedit`:** with an empty list (only the new row) the add button stays in its row; the dialog script
+  of `blocks/detail` no longer turns it into a footer.
+
 ## v0.19.0
 
 - **`blocks/listpage`:** `Contains` also ignores German umlauts: ä, ö, ü and ß match ae, oe, ue and ss both ways
