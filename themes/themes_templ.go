@@ -159,7 +159,8 @@ func Script() templ.Component {
 
 // Fixed is the theme for an app whose users do not switch themes: Apply and its siblings then link only
 // this theme's fonts, not those of all themes, and leave out Script (the panel's saved choice). Its CSS
-// is this theme's alone, or with static.WithKitCSS the sheet of all themes in kit/kit.css.
+// is this theme's alone, or with static.WithKitCSS the sheet of all themes in kit/kit.css. It returns a
+// copy: keep it where the app keeps its theme (var look = themes.Graphite.Fixed()).
 func (t Theme) Fixed() Theme {
 	t.fixed = true
 	return t
@@ -201,7 +202,7 @@ func fixedHead(t Theme) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.NewAttributeExpression(f.URL()).ResolveURL(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 91, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 92, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -259,7 +260,9 @@ func (t Theme) ApplyAuth(p *auth.PageProps) {
 	p.Head = t.head(p.Head)
 }
 
-// ApplyShell gives an app page (blocks/shell) the theme, like Apply.
+// ApplyShell gives an app page (blocks/shell) the theme, like Apply. Its settings go on <html> as
+// data-bs-theme-* attributes, Tabler's defaults (base Neutral …) left out: a theme with a base of its own
+// shows that gray where an app set only the theme's attribute before.
 func (t Theme) ApplyShell(p *shell.Props) {
 	p.Appearance = merge(t.Settings, p.Appearance)
 	if p.Theme == "" {

@@ -1,12 +1,16 @@
 package reference
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mind-vm/tabler-templ/blocks/detail"
+	"github.com/mind-vm/tabler-templ/kit"
 )
 
 // The data of the reference app lives in memory (GS-75: sample data without a recognisable trade). Today
@@ -287,8 +291,8 @@ func (s *Store) DeleteCustomer(no, typed string) (Customer, error) {
 	if c == nil {
 		return Customer{}, ErrNotFound
 	}
-	if strings.TrimSpace(typed) != c.Name {
-		return *c, FieldErrors{"confirm": "Bitte tippen Sie den Namen genau so: " + c.Name}
+	if !detail.TypedMatches(typed, c.Name) {
+		return *c, FieldErrors{"confirm": detail.TypedError(kit.WithMessages(context.Background(), kit.German), c.Name)}
 	}
 	s.customers = slices.DeleteFunc(s.customers, func(x *Customer) bool { return x.No == no })
 	s.offers = slices.DeleteFunc(s.offers, func(o *Offer) bool { return o.Customer == no })

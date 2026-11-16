@@ -257,7 +257,7 @@ props; what differs per app goes into slots (`templ.Component` props) or the chi
 |---|---|
 | `blocks/shell` | `Page`: the HTML document with sidebar, sticky header (sidebar buttons, breadcrumbs, actions), page header (heading, extra, subtitle, actions, `Tabs`), flash message and content; `Compact` tightens the spacing for pages dense with data; `Header`, `Breadcrumbs`, `PageHeader`, `Styles` for own frames |
 | `blocks/listpage` | `New(r, Config, filters…)` reads search, filters and page from the URL; `Paginate` cuts out a page (25 rows); `Card` = `Search` (search field, filter selects, Reset) + children + `Footer` ("1–25 of 80" and page numbers) |
-| `blocks/detail` | `Section` (card with title, extra and at most one action), `Actions`, `EditButton`, `Fields`/`Field`; `Dialog` (a section's edit dialog: context line, error, `Section` hint, `Large` for lists) and `Script(ScriptConfig)`: hidden fields in its forms, footer with Cancel, focus, reopening with error and values after a failed save, reopening a large dialog after saving a row, values from the opening button; `window.kitDialog.open/matchForm` |
+| `blocks/detail` | `Section` (card with title, extra and at most one action), `Actions`, `EditButton`, `Fields`/`Field`; `Dialog` (a section's edit dialog: context line, error, `Section` hint, `Large` for lists) and `Script(ScriptConfig)`: hidden fields in its forms, footer with Cancel, focus, reopening with error and values after a failed save, reopening a large dialog after saving a row, values from the opening button; `window.kitDialog.open/matchForm`. `TypedConfirm` (a typed confirmation before an action that cannot be undone: the dialog's submit buttons stay disabled until the word matches) with `TypedMatches` and `TypedError` for the server |
 | `blocks/create` | `Form` (post form of a create page) and `Footer` (hint, Cancel back to the list, primary Create button): creating is a page of its own, not a dialog |
 | `blocks/history` | `Timeline([]Entry)`: when, who, what and the changed fields, newest first; the app phrases the text |
 | `blocks/signin` | `Page` (centered sign-in page without sidebar: brand, heading, intro, flash, footer), `Password` (user name and password with the browser's autocomplete names, error, "stay signed in", hidden fields) and `Picker` (accounts to choose, e.g. for demos); credentials and sessions stay in the app |
@@ -407,7 +407,10 @@ templ Layout(r *http.Request) {
 
 Every `<script>` and `<style>` the packages render carries templ's nonce, set with `templ.WithNonce` (e.g. in
 a middleware that also sends the header). Without a nonce they render as before. The packages use no inline
-event handlers (`onclick=` …), so scripts need no `'unsafe-inline'`:
+event handlers (`onclick=` …), so scripts need no `'unsafe-inline'`. Apps should not either: a question before a
+form is sent is `data-kit-confirm="…"` on the form or button (`rowedit.Script`), not `onsubmit="return confirm(…)"`,
+which the policy blocks and htmx's `hx-boost` passes over; a typed confirmation is `detail.TypedConfirm`.
+`csp_test.go` fails on an inline handler in the packages and examples.
 
 ```go
 nonce := newNonce() // random, new per response
@@ -463,6 +466,12 @@ props := layout.PageProps{Title: "Orders", Head: head(), …}
 themes.Rose.Apply(&props)                 // the look, its CSS and fonts; ApplyShell, ApplyAuth, ApplyMarketing for the others
 themes.Rose.Fixed().ApplyShell(&shellProps) // users do not switch: only Rose's fonts and CSS, no panel script
 ```
+
+`Fixed()` returns a copy, so apply it once where the app keeps its theme (`var look = themes.Graphite.Fixed()`) and
+use `look.ApplyShell`, `look.ApplyAuth` … everywhere. The `Apply…` methods put the theme's Tabler settings on
+`<html>` as `data-bs-theme-*` attributes, leaving out Tabler's defaults (base Neutral, primary Blue, radius 1). An
+app that set only the theme's attribute before gets the other settings too when it moves to `ApplyShell`: a theme
+with its own base (Amber: Stone) then shows that gray where it did not.
 
 `themes.Section()` adds the themes to `layout.ThemeSettings`, so users can pick one; the choice is saved in
 the browser and applied before the page paints. Their own accent color, base, font or radius still wins

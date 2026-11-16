@@ -312,9 +312,7 @@ templ statesView(readOnly, demo bool, withdrawable Offer, deletable Customer, st
 			<form method="post" action={ templ.URL(pathStates + "/kunde-loeschen") } data-form="kunde-loeschen" novalidate>
 				<p>Der Kunde und seine Angebote werden gelöscht. Das lässt sich nicht rückgängig machen.</p>
 				{{ err := st.field(dialogDelete, "confirm") }}
-				@form.Field(form.FieldProps{Label: "Zur Bestätigung den Namen tippen: " + deletable.Name, For: "loeschen-name", Required: true, Error: err}) {
-					@form.Input(form.InputProps{ID: "loeschen-name", Name: "confirm", Value: st.value(dialogDelete, "confirm", ""), Invalid: err != "", Autocomplete: "off"})
-				}
+				@detail.TypedConfirm(detail.TypedConfirmProps{ID: "loeschen-name", Expect: deletable.Name, Value: st.value(dialogDelete, "confirm", ""), Error: err})
 				<div>
 					@button.Button(button.Props{Variant: button.VariantDanger, Icon: "ti-trash"}) {
 						Endgültig löschen
