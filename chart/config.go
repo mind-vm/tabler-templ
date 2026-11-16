@@ -247,6 +247,10 @@ func (p Props) option(f map[string]string) config {
 	case p.Categories != nil:
 		x["data"] = p.Categories
 	}
+	if t == Scatter && !p.Datetime && p.Categories == nil && numericX(p.Series) {
+		// Points at their x value: a category axis would read x as an index.
+		x["type"], x["scale"] = "value", true
+	}
 	if p.YFormatter != "" {
 		f["yAxis.0.axisLabel.formatter"] = string(p.YFormatter)
 	}
@@ -650,6 +654,22 @@ func timeline(p Props, x, y obj, f map[string]string) []obj {
 	y["type"] = "time"
 	y["splitLine"].(obj)["show"] = true
 	return out
+}
+
+// numericX reports whether every point has a number as its x, so the x axis is a value axis.
+func numericX(series []Serie) bool {
+	n := 0
+	for _, s := range series {
+		for _, pt := range s.Points {
+			switch pt.X.(type) {
+			case float64, float32, int, int64, int32, uint, uint64, uint32:
+				n++
+			default:
+				return false
+			}
+		}
+	}
+	return n > 0
 }
 
 func bubble(p Props, x obj) []obj {
