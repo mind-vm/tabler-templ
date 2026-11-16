@@ -63,7 +63,7 @@ func (c *client) post(path string, form url.Values) (int, string, string) {
 var pages = map[string]int{
 	Home: 200, pathFrame: 200, pathStart: 200, pathCustomers: 200, pathCustomers + "?q=muehl": 200, pathCustomers + "?q=Zeppelin": 200,
 	customerURL("K-1001"): 200, customerURL("K-1014"): 200, pathOffers: 200, offerURL("A-2026-001"): 200, offerURL("A-2026-002"): 200,
-	pathConcept: 200, pathConceptAssistant: 200, pathRequests: 200, requestURL("R-2026-001"): 200, requestURL("R-2026-003"): 200,
+	pathConcept: 200, pathConceptAssistant: 200, pathExternal: 200, pathExternalSignIn: 200, pathExternalSignUp: 200, pathRequests: 200, requestURL("R-2026-001"): 200, requestURL("R-2026-003"): 200,
 	pathNew: 200, pathStates: 200, pathStates + "?meldung=1": 200, pathBrand: 200, pathAssistant: 200,
 	Home + "/gibt-es-nicht": 404, pathStates + "/keine-rechte": 403, pathStates + "/fehler": 500,
 }
@@ -737,4 +737,28 @@ func TestB10_DiscardNeedsAReason(t *testing.T) {
 	_, body, _ = c.post(requestURL("R-2026-002")+"/verwerfen", url.Values{"reason": {"Erst intern klären"}})
 	assert.Contains(t, body, "Vorschlag verworfen; nichts wurde gesendet.")
 	assert.Contains(t, body, "Vorschlag verworfen: Erst intern klären")
+}
+
+// GS-16: externals get the same frame with a short sidebar and no panel; signed out, „Anmelden“ is the main
+// action at the right of the header and „Registrieren“ stands plain beside it.
+func TestGS16_ExternalArea(t *testing.T) {
+	c := newClient(t)
+	_, body := c.get(pathExternal)
+	head := body[strings.Index(body, `class="kit-shell-header`):]
+	head = head[:strings.Index(head, "</header>")]
+	assert.Regexp(t, `class="btn btn-ghost-secondary"[^>]*>Registrieren`, head)
+	assert.Regexp(t, `class="btn btn-primary"[^>]*>.*Anmelden`, head)
+	assert.Less(t, strings.Index(head, "Registrieren"), strings.Index(head, "Anmelden"), "the main action at the right")
+	assert.NotContains(t, body, `id="kit-sidepanel"`, "no panel for externals")
+	assert.LessOrEqual(t, strings.Count(body, `class="kit-sidebar-link`), 3+1, "a short sidebar (plus the way back to the reference)")
+	got, _ := c.get(pathExternalOffers)
+	assert.Equal(t, http.StatusOK, got)
+	_, body, path := c.post(pathExternalSignIn, nil)
+	assert.Equal(t, pathExternal, path)
+	assert.Contains(t, body, "Angemeldet als Erika Beispiel.")
+	assert.Contains(t, body, "Meine Angebote")
+	assert.Contains(t, body, "Abmelden")
+	_, body = c.get(pathExternalOffers)
+	assert.Contains(t, body, "A-2026-002")
+	assert.NotContains(t, body, "A-2026-001", "drafts stay internal")
 }

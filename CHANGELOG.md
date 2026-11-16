@@ -10,6 +10,8 @@
 - **`examples/reference`:** B-10 „Vorschlag prüfen“, a work page in three columns where an AI drafts the reply to a
   customer's request and the person changes and sends it or discards it with a reason (GS-34, GS-44; Assistent
   KA-01 to KA-04); requests are a list under „Erledigen“.
+- **`examples/reference`:** B-11 „Öffentlich und Externe“, a customer area with the same frame, a short sidebar and
+  no panel; signed out „Anmelden“ and „Registrieren“ in the header (GS-16).
 - **`blocks/detail`:** in a very narrow island (under 260 px) label and value of `Fields` stand one above the other.
 
 ## v0.20.0
