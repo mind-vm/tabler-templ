@@ -87,6 +87,7 @@ const css = `.kit-section{container-type:inline-size}
 .kit-dialog-footer{justify-content:flex-end;gap:.5rem}
 .kit-dialog-footer>*{margin:0}
 .kit-dialog-hint{margin-right:auto!important;font-size:.8125rem;color:var(--tblr-secondary)}
+@media (max-width:575.98px){.kit-dialog-hint{flex-basis:100%;margin-bottom:.25rem!important}}
 form.kit-dialog-invalid{outline:2px solid rgba(var(--tblr-danger-rgb),.25);outline-offset:-2px;border-radius:var(--tblr-border-radius)}`
 
 // script is the body of function(cfg){…}. Tabler's script opens and closes the modals: window.tabler since

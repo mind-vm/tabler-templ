@@ -160,7 +160,10 @@ func Dialog(p DialogProps) templ.Component {
 
 type ListProps struct {
 	// Columns is the CSS grid-template-columns of every row, e.g. "8rem minmax(12rem,1fr) 6rem 3rem".
-	// The last column holds the Actions.
+	// The last column holds the Actions. Give the columns fixed widths (rem), with at most one minmax(…,1fr)
+	// for the text: the list is as wide as its columns need (max-content), so plain fr columns grow with
+	// the fields' natural width, the row gets wider than the dialog, and columns pass under the actions,
+	// which stay at the right.
 	Columns    string
 	Class      string
 	Attributes templ.Attributes
@@ -223,7 +226,7 @@ func List(p ListProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS("--kit-rowedit-columns:" + p.Columns))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 80, Col: 112}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 83, Col: 112}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -340,7 +343,7 @@ func Row(p RowProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.NewAttributeExpression(templ.URL(p.Action)).ResolveURL(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 109, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 112, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -376,7 +379,7 @@ func Row(p RowProps) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templruntime.NewAttributeExpression(p.Kind).Resolve(ctx)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 112, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 115, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 				if templ_7745c5c3_Err != nil {
@@ -559,7 +562,7 @@ func Add(p AddProps) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(kit.Or(p.Text, kit.T(ctx).AddRow))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 162, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 165, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -657,7 +660,7 @@ func Details(p DetailsProps) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(p.Summary)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 179, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 182, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -708,7 +711,7 @@ func Total(label, value string) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 190, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 193, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -721,7 +724,7 @@ func Total(label, value string) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 191, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 194, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -773,7 +776,7 @@ func Locked(reason string) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(reason)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 201, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `blocks/rowedit/rowedit.templ`, Line: 204, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
