@@ -118,7 +118,8 @@ templ Row(p RowProps) {
 }
 
 // Actions is the last cell of a row: Save and Delete, or Add in the new row. Save comes first, so Enter
-// in a field saves the row.
+// in a field saves the row. Delete is optional, e.g. for records that must never be deleted. The cell stays
+// at the right when the row scrolls sideways.
 templ Actions() {
 	<div class="kit-rowedit-actions">
 		{ children... }
@@ -215,15 +216,15 @@ templ Styles() {
 const css = `.kit-rowedit-hint{margin-bottom:.75rem;font-size:.875rem;color:var(--tblr-secondary)}
 .kit-rowedit-scroll{max-width:100%;overflow-x:auto}
 .kit-rowedit{min-width:max-content;background:var(--tblr-bg-surface);border:var(--tblr-border-width) solid var(--tblr-border-color);border-radius:var(--tblr-border-radius-lg)}
-.kit-rowedit-row{display:grid;grid-template-columns:var(--kit-rowedit-columns);gap:.5rem;align-items:center;margin:0;padding:.5rem .75rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color-translucent)}
+.kit-rowedit-row{display:grid;grid-template-columns:var(--kit-rowedit-columns);gap:.5rem;align-items:center;margin:0;padding:.5rem .75rem;border-bottom:var(--tblr-border-width) solid var(--tblr-border-color-translucent);background:var(--tblr-bg-surface)}
 .kit-rowedit-row:last-child{border-bottom:0}
 .kit-rowedit-head{padding-top:.625rem;padding-bottom:.625rem;font-size:.75rem;font-weight:500;color:var(--tblr-secondary);background:var(--tblr-bg-surface-secondary)}
 .kit-rowedit-new{background:var(--tblr-bg-surface-secondary);border-top:var(--tblr-border-width) dashed var(--tblr-border-color)}
-.kit-rowedit-changed{background:rgba(var(--tblr-warning-rgb),.08)}
+.kit-rowedit-changed{background:color-mix(in srgb,var(--tblr-warning) 8%,var(--tblr-bg-surface))}
 .kit-rowedit :is(.form-control,.form-select){min-height:2.125rem;padding-top:.25rem;padding-bottom:.25rem;font-size:.875rem}
 .kit-rowedit-num{text-align:right;font-variant-numeric:tabular-nums}
 .kit-rowedit .form-control.kit-rowedit-num{text-align:right}
-.kit-rowedit-actions{display:flex;gap:.25rem;justify-content:flex-end}
+.kit-rowedit-actions{position:sticky;right:0;z-index:1;display:flex;gap:.25rem;justify-content:flex-end;align-self:stretch;align-items:center;margin:-.5rem -.75rem -.5rem 0;padding:.5rem .75rem .5rem .5rem;background:inherit}
 .kit-rowedit-total{display:flex;justify-content:flex-end;gap:1.5rem;margin-top:.75rem;padding:0 .75rem;font-weight:600}
 .kit-rowedit-locked{display:inline-flex;align-items:center;gap:.375rem;font-size:.8125rem;color:var(--tblr-secondary)}
 @media (min-width:992px){.kit-rowedit-dialog .modal-dialog.modal-fullscreen{width:95vw;max-width:95vw;height:92vh;margin:4vh auto}.kit-rowedit-dialog .modal-fullscreen .modal-content{border-radius:var(--tblr-border-radius-lg)}}

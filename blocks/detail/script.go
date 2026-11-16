@@ -26,6 +26,10 @@ type ScriptConfig struct {
 	// ValuesAttribute on a button that opens a shared dialog (data-bs-target) carries the values to put
 	// into its form first, as JSON. Default "data-kit-values".
 	ValuesAttribute string
+	// ActionAttribute on such a button sets the action of the dialog's form first, e.g. the row's own URL
+	// (/items/42/payment) for one dialog shared by the rows of a table. Only a path on the same site
+	// ("/…") is taken. Default "data-kit-action".
+	ActionAttribute string
 }
 
 func (c ScriptConfig) withDefaults(ctx context.Context) map[string]string {
@@ -37,6 +41,7 @@ func (c ScriptConfig) withDefaults(ctx context.Context) map[string]string {
 		"formAttribute":   kit.Or(c.FormAttribute, "data-form"),
 		"stateVar":        kit.Or(c.StateVar, "kitDialogState"),
 		"valuesAttribute": kit.Or(c.ValuesAttribute, "data-kit-values"),
+		"actionAttribute": kit.Or(c.ActionAttribute, "data-kit-action"),
 		"cancel":          m.Cancel,
 		"sectionHint":     m.SectionHint,
 	}
@@ -108,6 +113,6 @@ if(f){Object.keys(vals).forEach(function(n){if(n.charAt(0)==="_")return;var fld=
 els.forEach(function(e,i){if(e.type==="checkbox"||e.type==="radio")e.checked=list.indexOf(e.value)>=0;else if(e.type!=="file"&&e.type!=="password")e.value=(els.length>1?list[i]:list[0])||""})});if(z.error)f.classList.add("kit-dialog-invalid")}
 open(d.firstElementChild||d)}
 var state=window[cfg.stateVar];if(state)restore(state);else{try{var o=sessionStorage.getItem("kitDialogOpen");sessionStorage.removeItem("kitDialogOpen");var od=o&&document.getElementById(o);if(od&&bs)bs.Modal.getOrCreateInstance(od).show()}catch(_){}}
-document.addEventListener("click",function(e){var b=e.target.closest?e.target.closest("["+cfg.valuesAttribute+"][data-bs-target]"):null;if(!b)return;var d=document.querySelector(b.getAttribute("data-bs-target"));var f=d&&d.querySelector("form");if(!f)return;
-var vals={};try{vals=JSON.parse(b.getAttribute(cfg.valuesAttribute))||{}}catch(_){return}var err=d.querySelector(".kit-dialog-error");if(err)err.remove();
-Object.keys(vals).forEach(function(n){var fld=f.elements.namedItem(n);if(fld&&fld.tagName)fld.value=vals[n]===null||vals[n]===undefined?"":String(vals[n])})},true);`
+document.addEventListener("click",function(e){var b=e.target.closest?e.target.closest("["+cfg.valuesAttribute+"][data-bs-target],["+cfg.actionAttribute+"][data-bs-target]"):null;if(!b)return;var d=document.querySelector(b.getAttribute("data-bs-target"));var f=d&&d.querySelector("form");if(!f)return;
+var vals={};try{vals=JSON.parse(b.getAttribute(cfg.valuesAttribute)||"{}")||{}}catch(_){return}var err=d.querySelector(".kit-dialog-error");if(err)err.remove();
+Object.keys(vals).forEach(function(n){var fld=f.elements.namedItem(n);if(fld&&fld.tagName)fld.value=vals[n]===null||vals[n]===undefined?"":String(vals[n])});var act=b.getAttribute(cfg.actionAttribute);if(act&&/^\/(?![\/\\])/.test(act))f.setAttribute("action",act)},true);`

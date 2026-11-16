@@ -7,6 +7,11 @@
 - **`blocks/detail`:** after a failed save, several fields of one name get their own values back, in order (they all
   got the first). `StateScript`, `State` and `StateValues` render the state of a failed save for the dialog script,
   so apps no longer write their own `window.kitDialogState`. `cmd/new` and the reference app use it.
+- **`blocks/detail`:** `data-kit-action` on a button that opens a shared dialog sets the form's action (a path on
+  the same site), e.g. one dialog for the rows of a table (`ScriptConfig.ActionAttribute`).
+- **`blocks/shell`:** with a sidebar, `Brand` stands next to the menu button below lg, where the sidebar is hidden
+  (GS-10).
+- **`blocks/rowedit`:** the actions stay at the right while a row scrolls sideways (GS-56); Delete is optional.
 
 ## v0.19.0
 

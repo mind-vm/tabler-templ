@@ -53,7 +53,8 @@ type Props struct {
 	Sidebar   templ.Component
 	SidebarID string // default "sidebar"
 	Collapsed bool   // the sidebar's desktop state, for its toggle button (sidebar.Collapsed(r))
-	// Brand stands in the header when there is no sidebar.
+	// Brand stands in the header when there is no sidebar, and below lg next to the menu button when there
+	// is one (the sidebar, which shows the brand, is hidden there).
 	Brand templ.Component
 
 	Breadcrumbs   []Crumb
@@ -141,11 +142,17 @@ templ Page(p Props) {
 	</html>
 }
 
-// Header is the sticky bar at the top: sidebar buttons and breadcrumbs, or the brand without a sidebar.
+// Header is the sticky bar at the top: sidebar buttons and breadcrumbs, or the brand without a sidebar. With
+// a sidebar the brand stands next to the menu button below lg, where the sidebar is hidden.
 templ Header(p Props) {
 	<header class="kit-shell-header d-print-none">
 		if p.Sidebar != nil {
 			@sidebar.Trigger(sidebar.TriggerProps{Target: kit.Or(p.SidebarID, "sidebar"), Collapsed: p.Collapsed})
+			if p.Brand != nil {
+				<div class="kit-shell-brand d-lg-none">
+					@p.Brand
+				</div>
+			}
 		} else if p.Brand != nil {
 			@p.Brand
 		}
@@ -238,6 +245,7 @@ const css = `.kit-skip-link{position:absolute;left:.5rem;top:-3rem;z-index:1100;
 :is(a,button,summary,[tabindex]:not([tabindex="-1"]),.form-check-input):focus-visible{outline:3px solid var(--tblr-primary);outline-offset:2px}
 .kit-shell-header{position:sticky;top:0;z-index:1020;display:flex;flex-wrap:nowrap;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 2rem;background:var(--kit-shell-header-bg,var(--tblr-body-bg));border-bottom:var(--tblr-border-width) solid var(--tblr-border-color)}
 .kit-shell-breadcrumbs{min-width:0}
+.kit-shell-brand{flex:0 0 auto;display:flex;align-items:center}
 .kit-shell-header .breadcrumb{flex-wrap:nowrap;margin:0}
 .kit-shell-header .breadcrumb-item{white-space:nowrap}
 .kit-shell-header .breadcrumb-item.active{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:var(--tblr-body-color)}

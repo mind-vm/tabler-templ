@@ -38,3 +38,13 @@ func TestGS43_RestoreKeepsEachValue(t *testing.T) {
 	assert.Contains(t, h, "els.forEach(function(e,i)")
 	assert.Contains(t, h, "(els.length>1?list[i]:list[0])")
 }
+
+// A button shared by the rows of a table sets the dialog form's action, only to a path on the same site.
+func TestDialogActionAttribute(t *testing.T) {
+	h := render(t, context.Background(), detail.Script(detail.ScriptConfig{}))
+	assert.Contains(t, h, `"actionAttribute":"data-kit-action"`)
+	assert.Contains(t, h, `f.setAttribute("action",act)`)
+	assert.Contains(t, h, `/^\/(?![\/\\])/.test(act)`)
+	h = render(t, context.Background(), detail.Script(detail.ScriptConfig{ActionAttribute: "data-action"}))
+	assert.Contains(t, h, `"actionAttribute":"data-action"`)
+}

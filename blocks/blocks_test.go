@@ -233,6 +233,14 @@ func TestShellSkipLinkAndNotice(t *testing.T) {
 	assert.NotContains(t, h[strings.Index(h, "Demo-Instanz")-400:strings.Index(h, "Demo-Instanz")], "alert-dismissible")
 }
 
+// GS-10: the brand stands in the header on small screens, also with a sidebar (hidden there).
+func TestShellBrandWithSidebarOnPhones(t *testing.T) {
+	h := markup(t, context.Background(), shell.Page(shell.Props{Title: "x", Sidebar: templ.Raw(`<aside id="sidebar"></aside>`), Brand: templ.Raw(`<a class="brand">Acme</a>`)}))
+	assert.Contains(t, h, `<div class="kit-shell-brand d-lg-none"><a class="brand">Acme</a></div>`)
+	h = markup(t, context.Background(), shell.Page(shell.Props{Title: "x", Sidebar: templ.Raw(`<aside id="sidebar"></aside>`)}))
+	assert.NotContains(t, h, "kit-shell-brand")
+}
+
 // GS-60: the message after an action offers the next step as a link.
 func TestGS60_ShellFlashWithNextStep(t *testing.T) {
 	ctx := context.Background()
