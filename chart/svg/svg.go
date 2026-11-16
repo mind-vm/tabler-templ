@@ -110,8 +110,11 @@ type Props struct {
 	StrokeDash  []float64
 	// YMin and YMax fix the value axis; by default it runs over the data (bars and areas from zero) to
 	// round numbers.
-	YMin, YMax   *float64
-	YFormatter   chart.Formatter // Percent and SuffixK append "%" and "K" to the formatted number
+	YMin, YMax *float64
+	YFormatter chart.Formatter // Percent and SuffixK append "%" and "K" to the formatted number
+	// Unit is the values' unit, e.g. "€", written after the number on the value axis, in tooltips,
+	// labels and the table ("1.250 €"); ignored with Percent and on a radial bar (percentages).
+	Unit         string
 	AnnotationsY []chart.Annotation
 	// Format writes the numbers of axes, labels, tooltips and table; default English.
 	Format Format
@@ -131,7 +134,7 @@ func FromChart(c chart.Props) Props {
 		Size: c.Size, Series: c.Series, Categories: c.Categories, Stacked: c.Stacked, Horizontal: c.Horizontal || c.Funnel,
 		Sparkline: c.Sparkline, Legend: c.Legend, DataLabels: c.DataLabels, ShowMarkers: c.ShowMarkers, HideGrid: c.HideGrid,
 		Color: c.Color, Colors: c.Colors, StrokeCurve: c.StrokeCurve, StrokeWidth: c.StrokeWidth, StrokeDash: c.StrokeDash,
-		YMax: c.YMax, YFormatter: c.YFormatter, AnnotationsY: c.AnnotationsY}
+		YMax: c.YMax, YFormatter: c.YFormatter, Unit: c.Unit, AnnotationsY: c.AnnotationsY}
 }
 
 // Supported tells whether Chart draws charts of type t.
@@ -180,9 +183,12 @@ func (p Props) format(v float64) string {
 	s := p.plain(v)
 	switch p.YFormatter {
 	case chart.Percent:
-		s += "%"
+		return s + "%"
 	case chart.SuffixK:
 		s += "K"
+	}
+	if u := strings.TrimSpace(p.Unit); u != "" && s != "" {
+		s += " " + u
 	}
 	return s
 }
