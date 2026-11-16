@@ -93,6 +93,11 @@ The routes carry the `/crud` prefix of the demo; to mount the components elsewhe
 `routes.go`. The tests check every component's handlers and contract (`htmx.CheckRoutes`) and that no
 template holds a URL as a string literal.
 
+**MCP App demo (`/mcpapp`).** `examples/mcpapp` is an order list as an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps)
+(formerly MCP-UI): a tool of an MCP server returns tabler-templ HTML, and the host (Claude, ChatGPT, VS Code …)
+shows it beside the conversation. The page plays the host, loads the resource into a sandboxed iframe with its CSP
+and logs the protocol. See [MCP Apps](#mcp-apps).
+
 `scripts/screenshots.sh` takes the screenshots listed in `docs/screenshots/pages.txt` (`--all`: every rebuilt
 page) with Playwright (the only place that
 uses Node; set `CHROMIUM` to use an installed Chromium). `scripts/screenshots/compare.mjs` puts a rebuilt page
@@ -492,6 +497,41 @@ ctx = kit.WithMessages(r.Context(), kit.German) // or your own kit.Messages{…}
 
 There are no translation files in the kit. An app with several languages picks the `Messages` for the
 request's language (and translates its own texts with whatever it uses, e.g. go-i18n).
+
+## MCP Apps
+
+Package `mcpapp` renders a page as the UI resource of an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps):
+an MCP tool declares a `ui://` resource, and the host shows it in a sandboxed iframe in the conversation. The
+page is rendered on the server as always; in the sandbox there is no request to the app (no htmx), so the
+elements say what they do and a small script in the document (the bridge) asks the host:
+
+```go
+// resources/read "ui://orders/list": a shell; the host may cache it
+html, _ := mcpapp.Page(ctx, mcpapp.Props{Title: "Orders"}, shell()) // shell holds <div { mcpapp.Result()... }>
+// → {uri, mimeType: mcpapp.MIMEType, text: html, _meta: mcpapp.ResourceMeta{}.Meta()}
+
+// tools/list: list_orders shows the resource; complete_order is only for the view's buttons
+// _meta: mcpapp.ToolMeta("ui://orders/list")   and   _meta: mcpapp.AppToolMeta()
+
+// tools/call: text for the model, HTML for the view
+table, _ := mcpapp.Render(ctx, orderTable(orders))
+// → {content: [{type: "text", text: summary}], _meta: mcpapp.ResultMeta(table)}
+```
+
+```templ
+<button class="btn" { mcpapp.Tool("complete_order", map[string]any{"id": o.ID}, mcpapp.Target("#order-"+o.ID, true))... }>Done</button>
+<form { mcpapp.Tool("find_orders", nil, mcpapp.Target("#orders", false))... }>…</form>
+<button class="btn" { mcpapp.Prompt("Draft a reminder for each overdue order.")... }>Draft reminders</button>
+<a href="https://example.com">opens through the host</a>
+```
+
+- `Tool` calls a tool (`tools/call`) on click or submit; the HTML in the result's `_meta` goes into `Target`
+  (inside or in place). Forms are sent by the bridge, also in a sandbox without `allow-forms`.
+- `Prompt` writes into the conversation (`ui/message`); links open through the host (`ui/open-link`).
+- The view takes the host's light or dark theme; with `Props.HostStyles` also its colors, font and radius.
+  It reports its height, so the host sizes the frame.
+- `ResourceMeta` declares the origin of `cdn.Base` (jsDelivr) in the resource's CSP; anything else the page
+  loads must be declared there too. The package needs no MCP SDK: it gives the strings and `_meta` maps.
 
 ## Serve Tabler yourself
 

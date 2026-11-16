@@ -1,0 +1,164 @@
+package mcpapp
+
+import (
+	"context"
+	_ "embed"
+	"fmt"
+	"io"
+
+	"github.com/mind-vm/tabler-templ/assets"
+	"github.com/mind-vm/tabler-templ/icon"
+	"github.com/mind-vm/tabler-templ/internal/csp"
+	"github.com/mind-vm/tabler-templ/mcpapp"
+)
+
+// shell is the resource: the card with a spinner where the tool's table goes. The host may cache it, so
+// it holds no data.
+templ shell() {
+	<div class="card">
+		<div { mcpapp.Result()... }>
+			<div class="card-body text-center text-secondary py-5">
+				<div class="spinner-border spinner-border-sm me-2" role="status"></div>
+				Loading orders…
+			</div>
+		</div>
+	</div>
+}
+
+// table is list_orders' result: search, the orders and a question for the model.
+templ table(query string, os []Order) {
+	<div class="card-header">
+		<h3 class="card-title">Orders</h3>
+		<div class="card-actions">
+			<form class="d-flex gap-2" { mcpapp.Tool("find_orders", nil, mcpapp.Target("#orders", false))... }>
+				<input class="form-control form-control-sm" type="search" name="query" value={ query } placeholder="Search…" aria-label="Search orders"/>
+				<button class="btn btn-sm" type="submit">Search</button>
+			</form>
+		</div>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-vcenter card-table">
+			<thead>
+				<tr><th>Order</th><th>Customer</th><th class="text-end">Amount</th><th>Due</th><th></th></tr>
+			</thead>
+			<tbody id="orders">
+				@rows(os)
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer d-flex flex-wrap gap-2 align-items-center">
+		<button class="btn btn-primary btn-sm" type="button" { mcpapp.Prompt("Write a short reminder e-mail for each overdue order.")... }>
+			@icon.Icon("ti-mail")
+			Draft reminders
+		</button>
+		<a class="btn btn-ghost-secondary btn-sm" href="https://tabler.io">Tabler</a>
+	</div>
+}
+
+templ rows(os []Order) {
+	for _, o := range os {
+		@row(o)
+	}
+	if len(os) == 0 {
+		<tr><td colspan="5" class="text-secondary text-center py-4">No orders found.</td></tr>
+	}
+}
+
+// row is one order; complete_order answers with it and the button swaps it in place.
+templ row(o Order) {
+	<tr id={ "order-" + o.ID }>
+		<td class="text-secondary text-nowrap">{ o.ID }</td>
+		<td>
+			<div>{ o.Customer }</div>
+			<div class="text-secondary small">{ o.Item }</div>
+		</td>
+		<td class="text-end text-nowrap">{ fmt.Sprintf("%d €", o.Amount) }</td>
+		<td>
+			{ o.Due }
+			if o.Overdue {
+				<span class="badge bg-red-lt ms-1">overdue</span>
+			}
+		</td>
+		<td class="text-end">
+			if o.Done {
+				<span class="badge bg-green-lt">done</span>
+			} else {
+				<button class="btn btn-sm" type="button" { mcpapp.Tool("complete_order", map[string]any{"id": o.ID}, mcpapp.Target("#order-"+o.ID, true))... }>
+					@icon.Icon("ti-check")
+					Done
+				</button>
+			}
+		</td>
+	</tr>
+}
+
+//go:embed host.js
+var hostJS string
+
+// hostPage plays the host: a conversation with the view in a sandboxed iframe and the protocol's log.
+templ hostPage() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>MCP App – host simulation</title>
+			@assets.Head()
+			@icon.Styles()
+		</head>
+		<body>
+			<div class="page">
+				<div class="page-wrapper">
+					<div class="page-body">
+						<div class="container-xl">
+							<div class="row g-3">
+								<div class="col-lg-7">
+									<div class="card">
+										<div class="card-header">
+											<h3 class="card-title">Conversation</h3>
+											<div class="card-actions d-flex gap-2">
+												<div class="btn-group" role="group" aria-label="Host theme">
+													<button class="btn btn-sm active" type="button" data-theme="light">Light</button>
+													<button class="btn btn-sm" type="button" data-theme="dark">Dark</button>
+												</div>
+												<button class="btn btn-sm" type="button" id="host-styles" aria-pressed="false">Host styles</button>
+											</div>
+										</div>
+										<div class="card-body">
+											<p class="text-secondary">
+												This page plays the host (Claude, ChatGPT …). It asks the tool <code>list_orders</code>, loads its
+												UI resource into a sandboxed iframe with the resource's CSP and answers the view's requests.
+											</p>
+											<div class="chat-bubbles" id="chat">
+												<div class="chat-bubble chat-bubble-me ms-auto" style="max-width:24rem">Show me the open orders.</div>
+											</div>
+											<div class="my-3 border rounded" id="frame-box">
+												<iframe id="view" title="Orders (MCP App)" sandbox="allow-scripts" style="display:block;width:100%;height:120px;border:0"></iframe>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-5">
+									<div class="card">
+										<div class="card-header"><h3 class="card-title">Protocol</h3></div>
+										<div class="card-body p-0">
+											<ol class="list-group list-group-flush small font-monospace" id="log" style="max-height:80vh;overflow:auto"></ol>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@script(hostJS)
+		</body>
+	</html>
+}
+
+func script(js string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, csp.Open(ctx, "script")+js+"</script>")
+		return err
+	})
+}
