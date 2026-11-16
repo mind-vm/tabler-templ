@@ -7,9 +7,12 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/mind-vm/tabler-templ/blocks/layout"
 	"github.com/mind-vm/tabler-templ/blocks/marketing"
+	"github.com/mind-vm/tabler-templ/internal/csp"
 	"github.com/mind-vm/tabler-templ/theme"
 )
 
@@ -82,4 +85,13 @@ func TestApplyMarketing(t *testing.T) {
 	if p.HTMLAttributes[Attribute] != "graphite" || p.Appearance.Base != theme.Neutral || p.Appearance.Radius != theme.Radius2 || p.Head == nil {
 		t.Errorf("%+v", p)
 	}
+}
+
+// Head without arguments renders the CSS of all themes as a sheet, so static.WithKitCSS can put it into the
+// bundle instead of every page.
+func TestStylesIsASheet(t *testing.T) {
+	var b strings.Builder
+	require.NoError(t, Styles().Render(templ.InitializeContext(context.Background()), &b))
+	assert.Contains(t, b.String(), `[data-bs-theme-pack="graphite"]`)
+	assert.Contains(t, csp.All(), `[data-bs-theme-pack="graphite"]`)
 }

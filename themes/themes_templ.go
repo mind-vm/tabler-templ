@@ -41,7 +41,8 @@ func Head(ts ...Theme) templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		if len(ts) == 0 {
+		all := len(ts) == 0
+		if all {
 			ts = All
 		}
 		seen := map[string]bool{}
@@ -57,7 +58,7 @@ func Head(ts ...Theme) templ.Component {
 					var templ_7745c5c3_Var2 string
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression(f.URL()).ResolveURL(ctx)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 30, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `themes/themes.templ`, Line: 31, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 					if templ_7745c5c3_Err != nil {
@@ -75,7 +76,12 @@ func Head(ts ...Theme) templ.Component {
 			}
 			css.WriteString(t.CSS())
 		}
-		if css.Len() > 0 {
+		if all {
+			templ_7745c5c3_Err = Styles().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if css.Len() > 0 {
 			templ_7745c5c3_Err = csp.Style(css.String()).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -88,6 +94,18 @@ func Head(ts ...Theme) templ.Component {
 		return nil
 	})
 }
+
+// Styles is the CSS of all themes as one of the kit's sheets: inline once per page, or in the bundle's
+// kit/kit.css with static.WithKitCSS, so pages do not carry it. Head without arguments renders it.
+func Styles() templ.Component { return allSheet }
+
+var allSheet = csp.SheetFunc("themes/all", func() string {
+	var b strings.Builder
+	for _, t := range All {
+		b.WriteString(t.CSS())
+	}
+	return b.String()
+})
 
 // Script restores the theme saved by the panel (localStorage tabler-theme-pack, or ?theme-pack=), the way
 // Tabler's theme script restores its own settings. Head includes it.

@@ -4,7 +4,11 @@
 
 - **`examples/reference`:** shows how static files are served (GS-09, Gestaltung GSO-48): versioned paths that stay in
   the cache, the icon subset with a test (`cmd/static -check`), and only the active theme's fonts, which the theme
-  picker now adds when it switches (it linked the fonts of all themes before).
+  picker now adds when it switches (it linked the fonts of all themes before). Concept copy at Gestaltung v0.12.
+- **`cmd/static`** also writes the filled icons' webfont; **`static.WithFilledIcons`** loads it from the bundle
+  instead of cdn.Base.
+- **`themes`:** `Styles()` is the CSS of all themes as one of the kit's sheets; `Head()` without arguments renders
+  it, so `static.WithKitCSS` puts it into `kit/kit.css` instead of every page (as already for `SignalStyles`).
 
 ## v0.21.0
 
