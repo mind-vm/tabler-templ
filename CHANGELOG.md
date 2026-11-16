@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.21.0
 
 - **`deadline`** (new): a deadline as a traffic light whose word is the time left, „noch 58 Min.“, „überfällig
   seit 20 Std.“ (GS-52 of the design concept); `kit.Messages` gets the words and units and `DateTime`.
