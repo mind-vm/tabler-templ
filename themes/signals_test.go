@@ -141,3 +141,13 @@ func TestGS07_LinksAndFocusRing(t *testing.T) {
 		}
 	}
 }
+
+// Fields take 16 px on touch screens and below 1200 px, so iOS does not zoom in on focus (issue #9); a
+// desktop with a mouse keeps Tabler's sizes, and zooming stays allowed.
+func TestTouchFields16px(t *testing.T) {
+	css := SignalCSS()
+	assert.Contains(t, css, "@media (max-width:1199.98px),(pointer:coarse){:is(input:not([type=checkbox],")
+	assert.Contains(t, css, ",select,textarea){font-size:max(16px,1rem)}")
+	assert.Contains(t, css, ".form-control-sm,.form-select-sm{min-height:36px}}")
+	assert.NotContains(t, css, "maximum-scale")
+}

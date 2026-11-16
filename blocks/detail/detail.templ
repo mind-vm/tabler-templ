@@ -57,7 +57,8 @@ templ Section(p SectionProps) {
 	}
 }
 
-// Actions groups several actions in a section head.
+// Actions groups several actions in a section head. They wrap instead of widening the page; in a narrow
+// section (480 px and less) they move below the title.
 templ Actions() {
 	<div class="kit-section-actions">
 		{ children... }
