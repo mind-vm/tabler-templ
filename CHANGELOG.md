@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **`deadline`** (new): a deadline as a traffic light whose word is the time left, „noch 58 Min.“, „überfällig
+  seit 20 Std.“ (GS-52 of the design concept); `kit.Messages` gets the words and units and `DateTime`.
+- **`examples/reference`:** offers are due at 12:00 and show their deadline (B-02, B-03, B-05); the offers list
+  becomes cards below 768 px with `table.Props.Mobile` (GS-54); `scripts/screenshots/reference.mjs` also checks
+  1366 and 1280 px (GS-14).
+
 ## v0.20.0
 
 - **`blocks/rowedit`:** with an empty list (only the new row) the add button stays in its row; the dialog script

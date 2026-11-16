@@ -110,6 +110,14 @@ func Date(t time.Time) string {
 	return t.Format("02.01.2006")
 }
 
+// DateTime is „TT.MM.JJJJ, HH:MM Uhr“, for deadlines with legal effect (GS-73).
+func DateTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("02.01.2006, 15:04 Uhr")
+}
+
 // Period is „01.04.2026 – 31.03.2028“.
 func Period(from, to time.Time) string { return Date(from) + " – " + Date(to) }
 

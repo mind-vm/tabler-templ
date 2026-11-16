@@ -2,6 +2,7 @@ package reference
 
 import (
 	"github.com/mind-vm/tabler-templ/blocks/create"
+	"github.com/mind-vm/tabler-templ/deadline"
 	"github.com/mind-vm/tabler-templ/blocks/detail"
 	"github.com/mind-vm/tabler-templ/blocks/listpage"
 	"github.com/mind-vm/tabler-templ/blocks/rowedit"
@@ -87,33 +88,46 @@ templ offersView(l *listpage.List, rows []Offer, names map[string]string) {
 		if l.Total == 0 {
 			@emptyList(l, "Angebote", "Noch keine Angebote", "Angebote entstehen auf der Seite eines Kunden.", "", "")
 		} else {
-			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Nowrap: true, Class: "ref-table"}) {
+			// GS-54: this table becomes cards below 768 px (Mobile "md", each cell names its column); the customers
+			// scroll in their island instead.
+			@table.Table(table.Props{Card: true, VCenter: true, Responsive: true, Nowrap: true, Mobile: "md", Class: "ref-table"}) {
 				<thead>
 					<tr>
 						<th>Titel</th>
 						<th>Kunde</th>
 						<th>Nummer</th>
 						<th>Stand</th>
-						<th>Abgabe bis</th>
+						<th>Abgabe</th>
 						<th class="text-end">Summe</th>
 					</tr>
 				</thead>
 				<tbody>
 					for _, o := range rows {
 						<tr>
-							<td><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
-							<td><a href={ templ.URL(customerURL(o.Customer)) }>{ names[o.Customer] }</a></td>
-							<td class="mono">{ o.No }</td>
-							<td>
+							<td data-label="Titel"><a href={ templ.URL(offerURL(o.No)) }>{ o.Title }</a></td>
+							<td data-label="Kunde"><a href={ templ.URL(customerURL(o.Customer)) }>{ names[o.Customer] }</a></td>
+							<td data-label="Nummer" class="mono">{ o.No }</td>
+							<td data-label="Stand">
 								@offerPill(o.Status)
 							</td>
-							<td class="ref-num">{ Date(o.Due) }</td>
-							<td class="text-end ref-num">{ Euro(o.Total()) }</td>
+							<td data-label="Abgabe">
+								@due(o)
+							</td>
+							<td data-label="Summe" class="text-end ref-num">{ Euro(o.Total()) }</td>
 						</tr>
 					}
 				</tbody>
 			}
 		}
+	}
+}
+
+// due: an open offer's deadline as a traffic light with the time left (GS-52), else the date.
+templ due(o Offer) {
+	if o.Status == OfferDraft {
+		@deadline.Deadline(deadline.Props{Due: o.Due, Now: Now, Soon: burningWithin})
+	} else {
+		<span class="ref-num">{ Date(o.Due) }</span>
 	}
 }
 
@@ -367,7 +381,7 @@ templ offerView(o Offer, c Customer, canEdit bool, st dialogState) {
 						<div class="d-flex flex-wrap align-items-center gap-2">
 							@icon.Icon("ti-arrow-right")
 							<strong>Als Nächstes:</strong>
-							<span>Positionen prüfen und das Angebot bis { Date(o.Due) } abgeben.</span>
+							<span>Positionen prüfen und das Angebot bis { DateTime(o.Due) } abgeben.</span>
 						</div>
 					}
 				}
@@ -380,7 +394,15 @@ templ offerView(o Offer, c Customer, canEdit bool, st dialogState) {
 						<dt>Kunde</dt>
 						<dd><a href={ templ.URL(customerURL(c.No)) }>{ c.Name }</a></dd>
 						@fieldOf("Titel", o.Title)
-						@fieldOf("Abgabe bis", Date(o.Due))
+						<dt>Abgabe bis</dt>
+						<dd>
+							{ DateTime(o.Due) }
+							if o.Status == OfferDraft {
+								<div>
+									@deadline.Deadline(deadline.Props{Due: o.Due, Now: Now, Soon: burningWithin})
+								</div>
+							}
+						</dd>
 						@fieldOf("Gültig bis", Date(o.Valid))
 						@fieldOf("Ansprechpartner", c.Contact.Name)
 						@fieldOf("Abgegeben am", Date(o.Submitted))
