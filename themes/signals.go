@@ -90,8 +90,8 @@ func rgbTriplet(hex string) string {
 
 // SignalCSS sets the signal colours and makes Tabler's coloured text use their dark tones: pills
 // (bg-*-lt), statuses, text-*, alerts, filled badges and buttons. The focus ring of fields takes the
-// primary colour in full, so it reaches 3:1 in every theme. It applies in every theme; load it after
-// Tabler and the theme.
+// primary colour in full, so it reaches 3:1 in every theme. On touch screens and below 1200 px fields
+// take 16 px. It applies in every theme; load it after Tabler and the theme.
 func SignalCSS() string {
 	var b strings.Builder
 	// The focus ring is a line (3:1): the primary colour in full, not at Tabler's 50 % over the ground.
@@ -138,8 +138,16 @@ func SignalCSS() string {
 		fmt.Fprintf(&b, "%s{--tblr-btn-color:#fff;--tblr-btn-bg:var(--kit-signal-%[2]s-text);--tblr-btn-border-color:var(--kit-signal-%[2]s-text);--tblr-btn-hover-color:#fff;--tblr-btn-hover-bg:color-mix(in oklab,var(--kit-signal-%[2]s-text) 85%%,#000);--tblr-btn-hover-border-color:color-mix(in oklab,var(--kit-signal-%[2]s-text) 85%%,#000);--tblr-btn-active-bg:color-mix(in oklab,var(--kit-signal-%[2]s-text) 75%%,#000)}", strings.Join(btn, ","), s.Name)
 		fmt.Fprintf(&b, "%s{--tblr-btn-color:%s;--tblr-btn-hover-color:#fff;--tblr-btn-hover-bg:var(--kit-signal-%s-text);--tblr-btn-hover-border-color:var(--kit-signal-%s-text)}", strings.Join(outline, ","), t, s.Name, s.Name)
 	}
+	b.WriteString(touchFields)
 	return b.String()
 }
+
+// touchFields gives fields 16 px on touch screens and below 1200 px: iOS Safari zooms in on a field
+// below 16 px when it gets focus, and the page stays zoomed. :is() lifts the selector to (0,1,1), so it
+// beats .form-control-sm. Desktop with a mouse keeps Tabler's sizes; zooming stays allowed.
+const touchFields = `@media (max-width:1199.98px),(pointer:coarse){` +
+	`:is(input:not([type=checkbox],[type=radio],[type=range],[type=button],[type=submit],[type=reset],[type=image],[type=color],[type=hidden]),select,textarea){font-size:max(16px,1rem)}` +
+	`.form-control-sm,.form-select-sm{min-height:36px}}`
 
 var signalSheet = csp.SheetFunc("themes/signals", SignalCSS)
 
