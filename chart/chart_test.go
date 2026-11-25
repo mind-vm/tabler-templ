@@ -170,3 +170,41 @@ func TestUnit(t *testing.T) {
 		t.Errorf("formatters = %v", f)
 	}
 }
+
+// Format goes to the script as data (the separators and decimals); without it there is none and the
+// script writes numbers as ECharts does.
+func TestFormat(t *testing.T) {
+	bars := []Serie{{Name: "a", Data: []float64{95187.26}}}
+	if n, ok := whole(t, Props{ID: "en", Series: bars, Unit: "€"})["number"]; ok {
+		t.Errorf("number without Format: %v", n)
+	}
+	n, _ := whole(t, Props{ID: "de", Series: bars, Format: German})["number"].(map[string]any)
+	if n["decimals"] != 2.0 || n["decimal"] != "," || n["group"] != "." {
+		t.Errorf("number = %v", n)
+	}
+	raw := whole(t, RawProps(Props{ID: "r", Format: Number(0, ",", " ")}, Gauge(GaugeOptions{Value: 58}), nil))
+	if n, _ := raw["number"].(map[string]any); n["decimals"] != 0.0 || n["group"] != " " {
+		t.Errorf("raw number = %v", raw["number"])
+	}
+	if out := render(t, Chart(Props{ID: "x", Series: bars, Format: German})); !strings.Contains(out, "function localize(o, n)") {
+		t.Error("the script does not localize")
+	}
+}
+
+func TestFormatWrites(t *testing.T) {
+	for _, c := range []struct {
+		f    Format
+		in   float64
+		want string
+	}{
+		{German, 95187.26, "95.187,26"}, {German, 100000, "100.000"}, {English, 95187.26, "95,187.26"},
+		{Format{}, 1234.5, "1,234.5"}, {Number(1, "", ""), 1234.56, "1234.6"}, {German, -0.001, "0"},
+	} {
+		if got := c.f.Format(c.in); got != c.want {
+			t.Errorf("%+v %v: got %q, want %q", c.f, c.in, got, c.want)
+		}
+	}
+	if !(Format{}).IsZero() || German.IsZero() {
+		t.Error("IsZero")
+	}
+}

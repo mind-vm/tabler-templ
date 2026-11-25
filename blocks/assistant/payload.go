@@ -212,8 +212,9 @@ func unit(s string) string {
 // svgProps draws a chart block's props with package chart/svg: the data as a hidden table as well, and
 // the numbers in the request's format.
 func svgProps(c chart.Props, o ChartOptions) svg.Props {
+	c.Format = o.Format
 	p := svg.FromChart(c)
-	p.Format, p.Table = o.Format, true
+	p.Table = true
 	if c.Funnel {
 		p.Legend = false
 	}

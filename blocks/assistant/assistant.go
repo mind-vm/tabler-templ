@@ -34,7 +34,6 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/mind-vm/tabler-templ/chart"
-	"github.com/mind-vm/tabler-templ/chart/svg"
 )
 
 // Slots of a turn, where Stream.Send puts a fragment.
@@ -321,8 +320,9 @@ type ChartOptions struct {
 	// needs no chart library. The variants the SVG charts do not have (radar, scatter, bubble, heatmap)
 	// are shown as a table of their data; composite, funnel and sparkline are drawn.
 	SVG bool
-	// Format writes the numbers of SVG charts, e.g. svg.German; default English.
-	Format svg.Format
+	// Format writes the numbers of the charts, ECharts and SVG alike, e.g. chart.German (svg.German is
+	// the same value); default English.
+	Format chart.Format
 }
 
 type chartOptionsKey struct{}

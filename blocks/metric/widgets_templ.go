@@ -179,7 +179,7 @@ type GaugeProps struct {
 	Remaining    string // after the remainder, default "remaining"
 	Color        string // a Tabler color; default the body color
 	// SVG draws the gauge on the server (package chart/svg) instead of with ECharts, so the page needs
-	// no chart library. Format writes its percentage then, e.g. svg.German.
+	// no chart library. Format writes its percentage, e.g. svg.German (with ECharts too).
 	SVG    bool
 	Format svg.Format
 }
@@ -219,7 +219,7 @@ func gaugeChart(p GaugeProps) chart.Props {
 	}
 	return chart.RawProps(chart.Props{
 		ID: "gauge-" + p.ID, Label: p.Title + ": " + strconv.FormatFloat(p.Value, 'f', -1, 64) + "%", Class: "mx-auto",
-		Attributes: templ.Attributes{"style": "width: 10rem; max-width: 100%"},
+		Attributes: templ.Attributes{"style": "width: 10rem; max-width: 100%"}, Format: p.Format,
 	}, chart.Gauge(chart.GaugeOptions{
 		Value: p.Value, Label: p.Label, Color: color, Track: "var(--tblr-border-color)", Width: 10, Radius: "95%",
 		LabelSize: 12, ValueSize: 24, ValueWeight: 500, StartAngle: 90, EndAngle: -270,

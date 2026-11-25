@@ -22,6 +22,8 @@ type config struct {
 	Group      string            `json:"group,omitempty"`
 	Brush      *brush            `json:"brush,omitempty"`
 	Unit       *unit             `json:"unit,omitempty"`
+	// Number is Props.Format, for the script to write the numbers with; nil writes them as ECharts does.
+	Number *Format `json:"number,omitempty"`
 }
 
 // unit is a unit the script writes after the numbers at Paths (formatters, or none yet).
@@ -158,12 +160,22 @@ func (p Props) build() config {
 		f[k] = v
 	}
 	if p.raw != nil {
-		return config{Option: p.raw, Formatters: f, Group: p.Group}
+		return config{Option: p.raw, Formatters: f, Group: p.Group, Number: p.number()}
 	}
 	c := p.option(f)
+	c.Number = p.number()
 	c.Unit = p.unit(c.Option)
 	merge(c.Option, p.Options)
 	return c
+}
+
+// number is Format for the script, nil for the default.
+func (p Props) number() *Format {
+	if p.Format.IsZero() {
+		return nil
+	}
+	f := p.Format
+	return &f
 }
 
 // unit says where the script writes Unit: the value axes, the tooltip and the data labels.

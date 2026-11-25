@@ -115,6 +115,7 @@ templ tableBlock(p map[string]any) {
 templ chartBlock(b Block) {
 	{{ o := ChartOptionsFrom(ctx) }}
 	{{ props := ChartProps(b.ChartID, b.Payload) }}
+	{{ props.Format = o.Format }}
 	if o.SVG && !svg.Supported(props.Type) {
 		// The SVG charts have no radar, scatter, bubble or heatmap: the data as a table, the numbers intact.
 		@tableBlock(chartTable(b.Payload))

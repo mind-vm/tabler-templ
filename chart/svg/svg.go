@@ -41,41 +41,19 @@ const (
 	MaxCategories = 400
 )
 
-// Format writes a number, e.g. for a German page "1.234,5".
-type Format func(float64) string
+// Format writes a number, e.g. for a German page "1.234,5": it is chart.Format, so the same value
+// formats the ECharts charts of package chart too (chart.Props.Format).
+type Format = chart.Format
 
 // Number formats with up to maxDecimals decimals (trailing zeros dropped), decimal as the decimal
 // separator and group between groups of three digits ("" for none).
 func Number(maxDecimals int, decimal, group string) Format {
-	return func(v float64) string {
-		if math.IsNaN(v) || math.IsInf(v, 0) {
-			return ""
-		}
-		s := strconv.FormatFloat(v, 'f', max(maxDecimals, 0), 64)
-		if strings.Contains(s, ".") {
-			s = strings.TrimRight(strings.TrimRight(s, "0"), ".")
-		}
-		neg := strings.HasPrefix(s, "-")
-		s = strings.TrimPrefix(s, "-")
-		whole, frac, _ := strings.Cut(s, ".")
-		if group != "" {
-			for i := len(whole) - 3; i > 0; i -= 3 {
-				whole = whole[:i] + group + whole[i:]
-			}
-		}
-		if frac != "" {
-			whole += decimal + frac
-		}
-		if neg && strings.Trim(whole, "0"+decimal+group) != "" {
-			whole = "-" + whole
-		}
-		return whole
-	}
+	return chart.Number(maxDecimals, decimal, group)
 }
 
 var (
-	English = Number(2, ".", ",") // 12,400.5
-	German  = Number(2, ",", ".") // 12.400,5
+	English = chart.English // 12,400.5
+	German  = chart.German  // 12.400,5
 )
 
 // Props describe a chart. The fields shared with chart.Props mean the same.
@@ -116,7 +94,8 @@ type Props struct {
 	// labels and the table ("1.250 €"); ignored with Percent and on a radial bar (percentages).
 	Unit         string
 	AnnotationsY []chart.Annotation
-	// Format writes the numbers of axes, labels, tooltips and table; default English.
+	// Format writes the numbers of axes, labels, tooltips and table: English (default), German or
+	// Number(…); the same value as chart.Props.Format.
 	Format Format
 	// Table adds the data as a table that only screen readers see.
 	Table bool
@@ -134,7 +113,7 @@ func FromChart(c chart.Props) Props {
 		Size: c.Size, Series: c.Series, Categories: c.Categories, Stacked: c.Stacked, Horizontal: c.Horizontal || c.Funnel,
 		Sparkline: c.Sparkline, Legend: c.Legend, DataLabels: c.DataLabels, ShowMarkers: c.ShowMarkers, HideGrid: c.HideGrid,
 		Color: c.Color, Colors: c.Colors, StrokeCurve: c.StrokeCurve, StrokeWidth: c.StrokeWidth, StrokeDash: c.StrokeDash,
-		YMax: c.YMax, YFormatter: c.YFormatter, Unit: c.Unit, AnnotationsY: c.AnnotationsY}
+		YMax: c.YMax, YFormatter: c.YFormatter, Unit: c.Unit, AnnotationsY: c.AnnotationsY, Format: c.Format}
 }
 
 // Supported tells whether Chart draws charts of type t.
@@ -173,10 +152,7 @@ func (p Props) height() float64 {
 
 // plain is v in Format, without YFormatter's suffix.
 func (p Props) plain(v float64) string {
-	if p.Format == nil {
-		return English(v)
-	}
-	return p.Format(v)
+	return p.Format.Format(v)
 }
 
 func (p Props) format(v float64) string {
