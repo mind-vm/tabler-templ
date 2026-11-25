@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"html"
 	"math"
+	"strings"
 	"time"
+	"unicode"
 )
 
 // build turns Props into an Apache ECharts option. Colors stay CSS (var(), color-mix()); the chart
@@ -19,6 +21,13 @@ type config struct {
 	Formatters map[string]string `json:"formatters,omitempty"`
 	Group      string            `json:"group,omitempty"`
 	Brush      *brush            `json:"brush,omitempty"`
+	Unit       *unit             `json:"unit,omitempty"`
+}
+
+// unit is a unit the script writes after the numbers at Paths (formatters, or none yet).
+type unit struct {
+	Text  string   `json:"text"`
+	Paths []string `json:"paths"`
 }
 
 type brush struct {
@@ -152,8 +161,61 @@ func (p Props) build() config {
 		return config{Option: p.raw, Formatters: f, Group: p.Group}
 	}
 	c := p.option(f)
+	c.Unit = p.unit(c.Option)
 	merge(c.Option, p.Options)
 	return c
+}
+
+// unit says where the script writes Unit: the value axes, the tooltip and the data labels.
+func (p Props) unit(o obj) *unit {
+	text := cleanUnit(p.Unit)
+	if text == "" || p.YFormatter == Percent {
+		return nil
+	}
+	t := p.typ()
+	switch t {
+	case RadialBar, Heatmap, RangeBar, BoxPlot, Candlestick, Bubble:
+		return nil // percentages, colors, times or several values per point
+	}
+	u := &unit{Text: text}
+	if tt, _ := o["tooltip"].(obj); tt != nil && tt["show"] != false {
+		u.Paths = append(u.Paths, "tooltip.valueFormatter")
+	}
+	for _, a := range []string{"xAxis", "yAxis"} {
+		axes, _ := o[a].([]obj)
+		for i, ax := range axes {
+			if ax["type"] == "value" && ax["show"] != false {
+				u.Paths = append(u.Paths, fmt.Sprintf("%s.%d.axisLabel.formatter", a, i))
+			}
+		}
+	}
+	if p.DataLabels && !p.Funnel {
+		switch t {
+		case Bar, Line, Area, Scatter:
+			for i := range p.Series {
+				u.Paths = append(u.Paths, fmt.Sprintf("series.%d.label.formatter", i))
+			}
+		}
+	}
+	if u.Paths == nil {
+		return nil
+	}
+	return u
+}
+
+// cleanUnit keeps a unit short plain text: no markup or template characters (tooltips are HTML, and
+// ECharts reads {…} in labels), no control characters, at most 12 characters.
+func cleanUnit(s string) string {
+	var b []rune
+	for _, r := range strings.TrimSpace(s) {
+		if unicode.IsControl(r) || strings.ContainsRune("<>&\"'`{}\\", r) {
+			continue
+		}
+		if b = append(b, r); len(b) == 12 {
+			break
+		}
+	}
+	return strings.TrimSpace(string(b))
 }
 
 func (p Props) option(f map[string]string) config {
