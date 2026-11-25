@@ -11,6 +11,7 @@ import (
 
 	"github.com/a-h/templ"
 
+	"github.com/mind-vm/tabler-templ/chart"
 	"github.com/mind-vm/tabler-templ/chart/svg"
 )
 
@@ -347,9 +348,23 @@ func TestChartHorizontalAndUnit(t *testing.T) {
 		t.Errorf("no unit in %s", out)
 	}
 
-	// SVG: the same chart, the numbers in German with the unit.
-	ctx := WithChartOptions(context.Background(), ChartOptions{SVG: true, Format: svg.German})
+	if strings.Contains(out, "&#34;number&#34;") {
+		t.Errorf("a number format without ChartOptions.Format: %s", out)
+	}
+
+	// ECharts in German: the format goes to the chart script as data.
+	ctx := WithChartOptions(context.Background(), ChartOptions{Format: chart.German})
 	out, err := Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t, `{"variant":"bar","horizontal":true,"unit":"€",`+costs+`}`)}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `&#34;number&#34;:{&#34;decimals&#34;:2,&#34;decimal&#34;:&#34;,&#34;,&#34;group&#34;:&#34;.&#34;}`) {
+		t.Errorf("no German number format in %s", out)
+	}
+
+	// SVG: the same chart, the numbers in German with the unit.
+	ctx = WithChartOptions(context.Background(), ChartOptions{SVG: true, Format: svg.German})
+	out, err = Fragment(ctx, BlockView(Block{Type: "chart", ChartID: "c", Payload: payload(t, `{"variant":"bar","horizontal":true,"unit":"€",`+costs+`}`)}))
 	if err != nil {
 		t.Fatal(err)
 	}

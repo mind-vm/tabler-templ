@@ -185,7 +185,7 @@ in front compresses already.
 | `carousel` | `Carousel(Props, []Slide)`: captions, controls, line/dot/thumbnail/vertical indicators, fade, interval |
 | `theme`, `themes` | Tabler's theme settings as typed values (`theme.Settings`: accent color, base, font, radius); 13 ready-made themes (`themes.Rose` …) with `Apply`, `Head`, `Section` for the settings panel, and your own via `themes.Theme` |
 | `vectormap` | Tabler's vector map: `Map` (world and other maps, values, selected regions, markers, lines, legend, zoom), `Library` |
-| `chart` | Apache ECharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, horizontal bars, funnel, two y-axes, a value unit (`Unit`), annotations, brush, synced groups, legend toggles; options built in Go, any ECharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
+| `chart` | Apache ECharts the Tabler way: `Chart` (line, area, bar, pie, donut, radial bar, radar, polar area, heatmap, treemap, timeline, box plot, bubble, scatter, candlestick; sparkline, stacked, horizontal bars, funnel, two y-axes, a value unit (`Unit`), German or other number formats (`Format`), annotations, brush, synced groups, legend toggles; options built in Go, any ECharts option on top), `Radial` (one percentage), `Library`, `Toggle` |
 | `chart/svg` | Simple charts drawn as SVG on the server, without a chart library or JavaScript: `Chart` (bar vertical, horizontal or stacked, line straight, smooth or stepped, area, mixed columns and lines, pie, donut, radial bar and gauge; axes, grid, legend, value labels, target lines, tooltips as `<title>`, a hidden data table), `FromChart` (from `chart.Props`), `Number`/`German`/`English` (number formats), `Supported`; see [SVG charts](#svg-charts-without-javascript) |
 | `chat` | `Chat`, `Message` (author, time, avatar, own messages), `Bubble` |
 | `hovergallery` | `Gallery(Props, []Image)`: indicators, aspect ratio |
@@ -664,7 +664,12 @@ no script, nothing to license. The props carry the names of `chart.Props` (`svg.
   visually hidden table.
 - **Numbers:** `Format` writes axes, labels, tooltips and table: `svg.English` (12,400.5, default),
   `svg.German` (12.400,5) or `svg.Number(decimals, decimal, group)`; `YFormatter` appends `%` or `K`, and
-  `Unit` the values' unit (`95.187,26 €`, also in the table; not with `chart.Percent`).
+  `Unit` the values' unit (`95.187,26 €`, also in the table; not with `chart.Percent`). `svg.Format` is
+  `chart.Format`, so the same value goes into `chart.Props.Format` (`chart.German`, `chart.Number(…)`) and
+  `svg.FromChart` keeps it: the ECharts charts then write their value axes, tooltips, data labels, the
+  `thousands`/`suffix-k`/`percent` formatters, pie and gauge percentages and the unit in it too
+  (`95.187,26 €`, `100.000 €`); without it they write ECharts' English numbers as before. Dates and month
+  names on an ECharts time axis stay ECharts' English.
 - **Limits:** at most `svg.MaxSeries` (12) series and `svg.MaxCategories` (400) categories; more are left
   out. No radar, polar area, scatter, bubble, heatmap, treemap, timeline, box plot or candlestick, no
   `Serie.Points`, no zoom, brush, second y axis or x annotations (`svg.Supported` tells). A bar chart of 7
@@ -672,7 +677,8 @@ no script, nothing to license. The props carry the names of `chart.Props` (`svg.
 - **Switches in the blocks** (default: `chart` with ECharts): `metric.GaugeProps{SVG: true, Format: …}`;
   `assistant.WithChartOptions(ctx, assistant.ChartOptions{SVG: true, Format: svg.German})` draws the chart
   blocks of the request as SVG, with the data table, and shows radar, scatter, bubble and heatmap blocks
-  as a table of their data. A chart block's payload may carry `"unit": "€"` (`chart.Props.Unit`, written
+  as a table of their data; `Format` alone (`ChartOptions{Format: chart.German}`) writes the numbers of
+  the ECharts chart blocks in German. A chart block's payload may carry `"unit": "€"` (`chart.Props.Unit`, written
   after every value) and, for bars, `"horizontal": true`, which reads better with long category names.
 
 Demo at `/charts-svg`.

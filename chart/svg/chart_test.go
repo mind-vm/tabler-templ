@@ -98,7 +98,7 @@ func TestNumber(t *testing.T) {
 		{English, 12400.5, "12,400.5"}, {German, 12400.5, "12.400,5"}, {German, -1234567.126, "-1.234.567,13"},
 		{English, 0.1 + 0.2, "0.3"}, {English, -0.001, "0"}, {Number(0, ",", " "), 999999.6, "1 000 000"}, {English, 100, "100"},
 	} {
-		if got := c.f(c.in); got != c.want {
+		if got := c.f.Format(c.in); got != c.want {
 			t.Errorf("%v: got %q, want %q", c.in, got, c.want)
 		}
 	}
@@ -133,8 +133,8 @@ func TestLimits(t *testing.T) {
 }
 
 func TestFromChartAndSupported(t *testing.T) {
-	p := FromChart(chart.Props{ID: "x", Type: chart.Bar, Funnel: true, Legend: true, Series: two})
-	if !p.Horizontal || !p.Legend || p.ID != "x" || len(p.Series) != 2 {
+	p := FromChart(chart.Props{ID: "x", Type: chart.Bar, Funnel: true, Legend: true, Series: two, Format: chart.German})
+	if !p.Horizontal || !p.Legend || p.ID != "x" || len(p.Series) != 2 || p.Format != German {
 		t.Errorf("FromChart: %+v", p)
 	}
 	if !Supported(chart.Donut) || Supported(chart.Heatmap) {
