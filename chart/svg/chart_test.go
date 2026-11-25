@@ -141,3 +141,31 @@ func TestFromChartAndSupported(t *testing.T) {
 		t.Error("Supported")
 	}
 }
+
+// A few long category names wrap on a narrow chart instead of losing every other one (#58).
+func TestFewLongLabelsKept(t *testing.T) {
+	names := []string{"Mayer Dosch", "Korbinian Taubert", "A. Stöckner GmbH"}
+	p := Props{Label: "Umsatz", Categories: names, Series: []chart.Serie{{Name: "Umsatz", Data: []float64{12, 30, 8}}}}
+	v := p.view()
+	if len(v.XTicks) != len(names) {
+		t.Fatalf("%d labels, want %d", len(v.XTicks), len(names))
+	}
+	for i, x := range v.XTicks {
+		if x.Text != names[i] || x.Alt || x.Width <= 0 {
+			t.Errorf("label %d: %+v", i, x)
+		}
+	}
+	html := strings.Replace(render(t, Chart(p)), "<style>"+CSS+"</style>", "", 1)
+	if strings.Contains(html, "chart-svg-alt") || strings.Count(html, "chart-svg-wrap") != len(names) {
+		t.Error("a label is hidden on narrow charts")
+	}
+	// Many categories still drop every other label.
+	many := make([]string, 12)
+	for i := range many {
+		many[i] = "Category " + string(rune('A'+i))
+	}
+	v = Props{Categories: many, Series: []chart.Serie{{Name: "n", Data: make([]float64, 12)}}}.view()
+	if !v.XTicks[1].Alt || v.XTicks[1].Width != 0 {
+		t.Errorf("many labels: %+v", v.XTicks[1])
+	}
+}

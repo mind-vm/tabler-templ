@@ -256,9 +256,10 @@ func value(s chart.Serie, i int) float64 {
 // The view is what the template draws, all positions computed.
 
 type tick struct {
-	Pos  float64 // percent along the axis
-	Text string
-	Alt  bool // hidden on narrow charts
+	Pos   float64 // percent along the axis
+	Text  string
+	Alt   bool    // hidden on narrow charts
+	Width float64 // percent of the plot a label may wrap within on narrow charts; 0: it does not wrap
 }
 
 type shape struct {
@@ -491,11 +492,17 @@ func (p Props) cartesianView() view {
 			target := max(2, min(24, 72/(catWidth+2)))
 			step = (n + target - 1) / target
 		}
-		// Every other label is dropped on a narrow chart (below 24rem) when the labels would not fit there.
-		crowded := (n+step-1)/step*(catWidth+2) > 36
+		// The labels would not fit on a narrow chart (below 24rem): a few wrap onto two lines within
+		// their band there, of many every other one is dropped.
+		shown := (n + step - 1) / step
+		crowded := shown*(catWidth+2) > 36
+		wrap := 0.0
+		if crowded && shown <= 4 && !p.Horizontal {
+			crowded, wrap = false, band*float64(step)
+		}
 		k := 0
 		for j := 0; j < n; j += step {
-			t := tick{Pos: center(j), Text: cat(j), Alt: crowded && k%2 == 1}
+			t := tick{Pos: center(j), Text: cat(j), Alt: crowded && k%2 == 1, Width: wrap}
 			k++
 			if p.Horizontal {
 				v.YTicks = append(v.YTicks, t)
@@ -522,7 +529,11 @@ func (p Props) cartesianView() view {
 		if p.DataLabels && p.Horizontal {
 			right = max(right, width+1)
 		}
-		v.Inset = fmt.Sprintf("left:calc(%dch + .5rem);right:%dch;top:%srem;bottom:1.5rem", left, right, num(top))
+		bottom := 1.5
+		if wrap > 0 {
+			bottom = 2
+		}
+		v.Inset = fmt.Sprintf("left:calc(%dch + .5rem);right:%dch;top:%srem;bottom:%srem", left, right, num(top), num(bottom))
 	} else {
 		v.Inset = "inset:0"
 	}

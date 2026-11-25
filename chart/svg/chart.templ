@@ -31,7 +31,8 @@ const CSS = `.chart-svg-box{position:relative;height:var(--chart-svg-h);font-siz
 	`.chart-svg-round text{text-anchor:middle;fill:var(--tblr-body-color)}` +
 	`.chart-svg-big{font-size:16px;font-weight:600}.chart-svg-name{font-size:7px;fill:var(--tblr-secondary)!important}` +
 	`.chart-svg-pl{font-size:6px;font-weight:600;fill:#fff!important}` +
-	`@container (max-width:24rem){.chart-svg-alt{display:none}}`
+	`@container (max-width:24rem){.chart-svg-alt{display:none}` +
+	`.chart-svg-wrap{width:max-content;white-space:normal;overflow-wrap:anywhere;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}`
 
 var styles = csp.Sheet("chart/svg", CSS)
 
@@ -46,6 +47,14 @@ func (p Props) label() string {
 
 func pos(axis string, t tick) string {
 	return fmt.Sprintf("%s:%s%%", axis, num(t.Pos))
+}
+
+// xpos places a category label; one that may wrap gets its band as its widest.
+func xpos(t tick) string {
+	if t.Width > 0 {
+		return pos("left", t) + fmt.Sprintf(";max-width:%s%%", num(t.Width))
+	}
+	return pos("left", t)
 }
 
 // Chart is a chart drawn as SVG on the server.
@@ -79,7 +88,7 @@ templ Chart(p Props) {
 						<span class="chart-svg-y" style={ templ.SafeCSS(pos("top", t)) }>{ t.Text }</span>
 					}
 					for _, t := range v.XTicks {
-						<span class={ kit.Classes("chart-svg-x", kit.If(t.Alt, "chart-svg-alt")) } style={ templ.SafeCSS(pos("left", t)) }>{ t.Text }</span>
+						<span class={ kit.Classes("chart-svg-x", kit.If(t.Alt, "chart-svg-alt"), kit.If(t.Width > 0, "chart-svg-wrap")) } style={ templ.SafeCSS(xpos(t)) }>{ t.Text }</span>
 					}
 					for _, l := range v.Labels {
 						<span class={ l.Class } style={ templ.SafeCSS(l.Style) }>{ l.Text }</span>
