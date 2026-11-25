@@ -17,8 +17,8 @@
 // tabler-templ's components included: their .go files (without generated ones), .templ files and
 // embedded .html and .js files. -dir adds directories of other files (templates, scripts), -keep icons
 // that are only put together at run time ("ti-" + name). Run it again after using a new icon; -check
-// fails when a used icon is missing from the subset, e.g. in CI or a test; it needs no network. -icons=all
-// keeps the whole webfonts. Downloads come from jsDelivr.
+// fails when a used icon is missing from the subset or a font is broken, e.g. in CI or a test; it needs no
+// network. -icons=all keeps the whole webfonts. Downloads come from jsDelivr.
 package main
 
 import (
@@ -41,6 +41,9 @@ var (
 	iconsURL = "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@" + versions.Icons + "/"
 )
 
+// iconsFont is the icon font next to static.IconsCSS.
+const iconsFont = "icons/fonts/tabler-icons.woff2"
+
 // stylesheets are the names -css takes: Tabler's stylesheets that assets.Props switches on.
 var stylesheets = []string{"tabler", "tabler-flags", "tabler-payments", "tabler-socials", "tabler-marketing",
 	"tabler-themes", "tabler-vendors"}
@@ -52,7 +55,7 @@ func main() {
 	icons := flag.String("icons", "used", `"used": only the icons the packages use; "all": the whole webfont`)
 	dirs := flag.String("dir", "", "more directories to scan for ti-… classes, comma-separated (templates, scripts)")
 	keep := flag.String("keep", "", "icons to keep in any case, comma-separated, e.g. ti-user,ti-star")
-	check := flag.Bool("check", false, "fetch nothing; fail when a used icon is missing from <out>")
+	check := flag.Bool("check", false, "fetch nothing; fail when a used icon is missing from <out> or a font there is broken")
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "usage: static [flags] [packages]")
 		flag.PrintDefaults()
@@ -106,7 +109,17 @@ func run(out string, css []string, rtl bool, icons string, pkgs, dirs, keep []st
 		if missing := missingIcons(used, knownIcons(), glyphs(string(b))); len(missing) > 0 {
 			return fmt.Errorf("used but not in %s, run cmd/static again: %s", out, strings.Join(missing, " "))
 		}
+		f, err := os.ReadFile(filepath.Join(out, iconsFont))
+		if err != nil {
+			return err
+		}
+		if err := checkFont(f, nil, nil); err != nil {
+			return fmt.Errorf("%s: %w, run cmd/static again", iconsFont, err)
+		}
 		if f, err := os.ReadFile(filepath.Join(out, static.FilledIcons)); err == nil {
+			if err := checkFont(f, nil, nil); err != nil {
+				return fmt.Errorf("%s: %w, run cmd/static again", static.FilledIcons, err)
+			}
 			missing, err := missingFilled(used, f)
 			if err != nil {
 				return err
@@ -169,7 +182,7 @@ func run(out string, css []string, rtl bool, icons string, pkgs, dirs, keep []st
 	if err := write(filepath.Join(out, static.IconsCSS), cssB); err != nil {
 		return err
 	}
-	if err := write(filepath.Join(out, "icons/fonts/tabler-icons.woff2"), fontB); err != nil {
+	if err := write(filepath.Join(out, iconsFont), fontB); err != nil {
 		return err
 	}
 	fmt.Printf("Tabler %s and %d icons (%s font, %s CSS) in %s\n", versions.Tabler, n, kb(len(fontB)), kb(len(cssB)), out)

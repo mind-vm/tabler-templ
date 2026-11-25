@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -207,5 +208,76 @@ func TestKnownIcons(t *testing.T) {
 	}
 	if _, ok := k["ti-not-an-icon"]; ok {
 		t.Error("a word is an icon")
+	}
+}
+
+// testdata/map-icons.* are the 53 ti-map… icons of the webfont, cut out by cmd/static. Each number of
+// them makes a font that checkFont accepts, 31 too: those up to ti-map-pin-off and .notdef are 32 glyphs
+// (#33).
+func TestSubsetSizes(t *testing.T) {
+	css, err := os.ReadFile("testdata/map-icons.min.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	woff2, err := os.ReadFile("testdata/map-icons.woff2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for n := range glyphs(string(css)) {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	if len(names) != 53 || names[30] != "ti-map-pin-off" {
+		t.Fatalf("%d icons, 31st %s", len(names), names[30])
+	}
+	for n := 1; n <= len(names); n++ {
+		used := map[string]bool{}
+		for _, name := range names[:n] {
+			used[name] = true
+		}
+		_, f, _, err := subset(string(css), woff2, used)
+		if err != nil {
+			t.Errorf("%d icons: %v", n, err)
+			continue
+		}
+		if err := checkFont(f, nil, nil); err != nil {
+			t.Errorf("%d icons: %v", n, err)
+		}
+	}
+}
+
+// checkFont finds the bounding boxes that the woff2 writer breaks with 32 glyphs. When this test fails,
+// the writer is fixed and writeSubset need not add a glyph.
+func TestCheckFont(t *testing.T) {
+	woff2, err := os.ReadFile("testdata/map-icons.woff2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := parse(t, woff2)
+	ids := make([]uint16, 32)
+	for i := range ids {
+		ids[i] = uint16(i)
+	}
+	s, err := f.Subset(ids, font.SubsetOptions{Tables: font.KeepMinTables})
+	if err != nil {
+		t.Fatal(err)
+	}
+	broken, err := s.WriteWOFF2()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := checkFont(broken, nil, nil); err == nil {
+		t.Error("broken font passes")
+	}
+	good, err := writeSubset(f, ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := checkFont(good, nil, nil); err != nil {
+		t.Error(err)
+	}
+	if err := checkFont([]byte("wOF2"), nil, nil); err == nil {
+		t.Error("no font passes")
 	}
 }
